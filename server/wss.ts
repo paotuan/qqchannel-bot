@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws'
 import type { WebSocket } from 'ws'
 import type { ILoginReq, IMessage } from '../interface/common'
+import { connectQQChannel } from './botclient'
 
 const wss = new WebSocketServer({ port: 4174 })
 
@@ -10,7 +11,7 @@ wss.on('connection', (ws) => {
       const body = JSON.parse(rawData) as IMessage<unknown>
       if (body.cmd === 'bot/login') {
         const req = body.data as ILoginReq
-        console.log(req.appid, req.token)
+        connectQQChannel(req)
         sendServerMessage(ws, { cmd: body.cmd, success: true, data: null })
       }
     } catch (e) {
