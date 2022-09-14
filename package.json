@@ -12,7 +12,9 @@
     "@dice-roller/rpg-dice-roller": "^5.1.0",
     "dotenv": "^16.0.2",
     "qq-guild-bot": "^2.9.5",
-    "vue": "^3.2.37"
+    "vue": "^3.2.37",
+    "ws": "^8.8.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^18.7.17",

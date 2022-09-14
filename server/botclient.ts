@@ -6,7 +6,7 @@ dotenv.config()
 const botConfig = {
   appID: process.env.BOT_APPID as string, // 申请机器人时获取到的机器人 BotAppID
   token: process.env.BOT_TOKEN as string, // 申请机器人时获取到的机器人 BotToken
-  intents: [AvailableIntentsEventsEnum.GUILD_MESSAGES], // 事件订阅,用于开启可接收的消息类型
+  intents: [AvailableIntentsEventsEnum.PUBLIC_GUILD_MESSAGES], // 事件订阅,用于开启可接收的消息类型
   sandbox: false, // 沙箱支持，可选，默认false. v2.7.0+
 }
 
@@ -32,8 +32,4 @@ ws.on(AvailableIntentsEventsEnum.PUBLIC_GUILD_MESSAGES, (data) => {
   } catch (e) {
     // 表达式不合法，无视之
   }
-})
-
-ws.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, data => {
-  console.log(data.msg)
 })
