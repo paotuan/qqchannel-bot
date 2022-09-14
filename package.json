@@ -6,7 +6,7 @@
     "dev:admin": "vite",
     "build:admin": "vue-tsc --noEmit && vite build",
     "preview:admin": "vite preview",
-    "dev:bot": "npx nodemon server/index.ts"
+    "dev:bot": "npx nodemon --watch server server/index.ts"
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.1.0",
