@@ -12,6 +12,7 @@
     "@dice-roller/rpg-dice-roller": "^5.1.0",
     "daisyui": "^2.27.0",
     "dotenv": "^16.0.2",
+    "mitt": "^3.0.0",
     "qq-guild-bot": "^2.9.5",
     "vue": "^3.2.37",
     "ws": "^8.8.1",

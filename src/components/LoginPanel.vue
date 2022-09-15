@@ -15,13 +15,13 @@
 </template>
 <script setup lang="ts">
 import { loginForm, loginState } from '../store/bot'
-import { sendMessage } from '../store/ws'
+import ws from '../store/ws'
 
 const connect = () => {
   if (!loginForm.appid || !loginForm.token) {
     return
   }
   loginState.value = 'LOADING'
-  sendMessage({ cmd: 'bot/login', data: loginForm })
+  ws.send({ cmd: 'bot/login', data: loginForm })
 }
 </script>
