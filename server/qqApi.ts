@@ -1,6 +1,6 @@
 import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
 import wss from './wss'
-import type { IBotInfoResp, ILoginReq } from '../interface/common'
+import type {IBotInfoResp, IChannelListResp, ILoginReq} from '../interface/common'
 import { EventEmitter } from 'events'
 
 interface IConnection {
@@ -15,18 +15,21 @@ const connection: IConnection = { appid: null, token: null, client: null, ws: nu
 const qqBotEmitter = new EventEmitter()
 
 // 监听登录事件，建立与 qq 机器人服务器的连接
-wss.on('bot/login', (ws, data) => {
+wss.on('bot/login',  async (ws, data) => {
   const loginReq = data as ILoginReq
   connectQQChannel(loginReq)
   wss.send(ws, { cmd: 'bot/login', success: true, data: null })
   // 顺便获取机器人自己与频道的信息
-  getBotInfo().then(botInfo => {
-    console.log('[GetBotInfo]', botInfo)
-    if (botInfo && loginReq.appid === connection.appid) {
-      connection.botInfo = botInfo
-      wss.send(ws, { cmd: 'bot/info', success: true, data: botInfo })
-    }
-  })
+  const botInfo = await getBotInfo()
+  console.log('[GetBotInfo]', botInfo)
+  if (botInfo && loginReq.appid === connection.appid) {
+    connection.botInfo = botInfo
+    wss.send(ws, { cmd: 'bot/info', success: true, data: botInfo })
+    // 获取子频道列表
+    const channels = await getChannelInfo(botInfo.guildId)
+    wss.send(ws, { cmd: 'channel/list', success: !!channels, data: channels })
+    // todo 获取频道成员列表
+  }
 })
 
 function connectQQChannel(params: ILoginReq) {
@@ -76,6 +79,16 @@ async function getBotInfo(): Promise<IBotInfoResp | null> {
       guildId: guildResp.data[0].id,
       guildName: guildResp.data[0].name
     }
+  } catch (e) {
+    console.log(e)
+    return null
+  }
+}
+
+async function getChannelInfo(guildId: string): Promise<IChannelListResp | null> {
+  try {
+    const { data } = await connection.client!.channelApi.channels(guildId)
+    return data.filter(channel => channel.type === 0).map(channel => ({ id: channel.id, name: channel.name }))
   } catch (e) {
     console.log(e)
     return null

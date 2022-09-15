@@ -22,5 +22,4 @@ ws.on('bot/login', message => {
 
 ws.on('bot/info', message => {
   botInfo.value = message.data as IBotInfoResp
-  console.log(message.data)
 })

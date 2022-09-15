@@ -1,6 +1,7 @@
 export type Command =
   | 'bot/login'
   | 'bot/info'
+  | 'channel/list'
 
 export interface IMessage<T> {
   cmd: Command
@@ -20,3 +21,10 @@ export interface IBotInfoResp {
   guildId: string
   guildName: string
 }
+
+export interface IChannel {
+  id: string
+  name: string
+}
+
+export type IChannelListResp = IChannel[]

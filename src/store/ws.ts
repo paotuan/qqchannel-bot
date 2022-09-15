@@ -11,6 +11,7 @@ ws.onopen = () => {
 ws.onmessage = (data) => {
   try {
     const resp = JSON.parse(data.data) as IMessage<unknown>
+    console.log(resp.cmd, resp)
     wsEmitter.emit(resp.cmd, resp)
   } catch (e) {
     console.error('Error while parsing server msg', e)
