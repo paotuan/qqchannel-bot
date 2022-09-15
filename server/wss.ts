@@ -1,19 +1,16 @@
 import { WebSocketServer } from 'ws'
 import type { WebSocket } from 'ws'
-import type { ILoginReq, IMessage } from '../interface/common'
-import { connectQQChannel } from './botclient'
+import type { IMessage, Command } from '../interface/common'
+import { EventEmitter } from 'events'
 
 const wss = new WebSocketServer({ port: 4174 })
+const wssEmitter = new EventEmitter()
 
 wss.on('connection', (ws) => {
   ws.on('message', (rawData: string) => {
     try {
       const body = JSON.parse(rawData) as IMessage<unknown>
-      if (body.cmd === 'bot/login') {
-        const req = body.data as ILoginReq
-        connectQQChannel(req)
-        sendServerMessage(ws, { cmd: body.cmd, success: true, data: null })
-      }
+      wssEmitter.emit(body.cmd, ws, body.data)
     } catch (e) {
       console.log('Error while handling message', e)
     }
@@ -22,12 +19,19 @@ wss.on('connection', (ws) => {
 
 console.log('websocket server started')
 
-export function sendServerMessage<T>(ws: WebSocket | null, message: IMessage<T>) {
-  if (ws) {
-    ws.send(JSON.stringify(message))
-  } else {
-    wss.clients.forEach(ws => {
+export default {
+  // 监听客户端事件
+  on(cmd: Command, handler: (ws: WebSocket, data: unknown) => void) {
+    wssEmitter.on(cmd, handler)
+  },
+  // 向客户端发消息
+  send<T>(ws: WebSocket | null, message: IMessage<T>) {
+    if (ws) {
       ws.send(JSON.stringify(message))
-    })
+    } else {
+      wss.clients.forEach(ws => {
+        ws.send(JSON.stringify(message))
+      })
+    }
   }
 }

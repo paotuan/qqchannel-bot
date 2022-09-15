@@ -1,6 +1,6 @@
 export type Command =
   | 'bot/login'
-  | 'ooooo'
+  | 'bot/info'
 
 export interface IMessage<T> {
   cmd: Command
@@ -15,4 +15,12 @@ export interface IService {
 export interface ILoginReq {
   appid: string
   token: string
+}
+
+export interface IBotInfoResp {
+  id: string
+  username: string
+  avatar: string
+  guildId: string
+  guildName: string
 }
