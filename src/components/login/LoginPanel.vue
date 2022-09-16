@@ -4,24 +4,25 @@
       <label class="label">
         <span class="label-text">请输入机器人 APPID</span>
       </label>
-      <input v-model="loginForm.appid" type="password" placeholder="Type here" class="input input-bordered w-full max-w-xs shadow-lg" />
+      <input v-model="bot.appid" type="password" placeholder="Type here" class="input input-bordered w-full max-w-xs shadow-lg" />
       <label class="label">
         <span class="label-text">请输入机器人 TOKEN</span>
       </label>
-      <input v-model="loginForm.token" type="password" placeholder="Type here" class="input input-bordered w-full max-w-xs shadow-lg" />
-      <button class="btn btn-primary mt-8 shadow-lg" :class="{ loading: loginState === 'LOADING' }" @click="connect">连接！</button>
+      <input v-model="bot.token" type="password" placeholder="Type here" class="input input-bordered w-full max-w-xs shadow-lg" />
+      <button class="btn btn-primary mt-8 shadow-lg" :class="{ loading: bot.loginState === 'LOADING' }" @click="connect">连接！</button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { loginForm, loginState } from '../../store/bot'
-import ws from '../../store/ws'
+import { useBotStore } from '../../store/bot'
+import ws from '../../api/ws'
 
+const bot = useBotStore()
 const connect = () => {
-  if (!loginForm.appid || !loginForm.token) {
+  if (!bot.appid || !bot.token) {
     return
   }
-  loginState.value = 'LOADING'
-  ws.send({ cmd: 'bot/login', data: loginForm })
+  bot.loginState = 'LOADING'
+  ws.send({ cmd: 'bot/login', data: { appid: bot.appid, token: bot.token } })
 }
 </script>

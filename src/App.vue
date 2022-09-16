@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import LoginPanel from './components/login/LoginPanel.vue'
 import BotInfo from './components/nav/BotInfo.vue'
-import { loginState } from './store/bot'
-import { selectedChannel } from './store/channel'
+import { useBotStore } from './store/bot'
+import { useChannelStore } from './store/channel'
 import ChannelSelect from './components/login/ChannelSelect.vue'
+
+const bot = useBotStore()
+const channel = useChannelStore()
 </script>
 <template>
   <div class="navbar bg-base-100 shadow-lg">
@@ -15,10 +18,10 @@ import ChannelSelect from './components/login/ChannelSelect.vue'
     </div>
   </div>
   <div>
-    <template v-if="loginState !== 'LOGIN'">
+    <template v-if="bot.loginState !== 'LOGIN'">
       <login-panel class="mt-40" />
     </template>
-    <template v-else-if="!selectedChannel">
+    <template v-else-if="!channel.selected">
       <channel-select />
     </template>
   </div>
