@@ -7,6 +7,7 @@ const config = {
 
 wss.on('channel/listen', (ws, data) => {
   const { channelId } = data as IListenToChannelReq
+  console.log('[Common] channel/listen', data)
   config.listenToChannelId = channelId
 })
 

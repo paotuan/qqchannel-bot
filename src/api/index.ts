@@ -1,7 +1,8 @@
 import ws from './ws'
-import { IBotInfoResp, IChannel } from '../../interface/common'
+import { IBotInfoResp, IChannel, ILog } from '../../interface/common'
 import { useBotStore } from '../store/bot'
 import { useChannelStore } from '../store/channel'
+import { useLogStore } from '../store/log'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -21,4 +22,9 @@ ws.on('channel/list', data => {
   const channel = useChannelStore()
   channel.list = data.data as IChannel[] | null
   channel.initGetListSuccess = data.success!
+})
+
+ws.on('log/push', data => {
+  const log = useLogStore()
+  log.addLogs(data.data as ILog[])
 })

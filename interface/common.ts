@@ -3,6 +3,7 @@ export type Command =
   | 'bot/info'
   | 'channel/list'
   | 'channel/listen'
+  | 'log/push'
 
 export interface IMessage<T> {
   cmd: Command
@@ -33,3 +34,16 @@ export type IChannelListResp = IChannel[]
 export interface IListenToChannelReq {
   channelId: string
 }
+
+export type MessageType = 'text' | 'image'
+
+export interface ILog {
+  msgId: string
+  msgType: MessageType
+  userId: string
+  username: string
+  content: string
+  timestamp: string
+}
+
+export type ILogPushResp = ILog[]
