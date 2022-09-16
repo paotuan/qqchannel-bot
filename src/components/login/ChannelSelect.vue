@@ -15,7 +15,7 @@
           </label>
         </div>
         <button class="btn btn-primary w-full mt-8 shadow-lg" :disabled="!checkedId"
-                @click="channel.selected = checkedId">开始使用！
+                @click="channel.listenTo(checkedId)">开始使用！
         </button>
       </div>
     </template>

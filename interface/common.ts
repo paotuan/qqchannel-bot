@@ -2,6 +2,7 @@ export type Command =
   | 'bot/login'
   | 'bot/info'
   | 'channel/list'
+  | 'channel/listen'
 
 export interface IMessage<T> {
   cmd: Command
@@ -28,3 +29,7 @@ export interface IChannel {
 }
 
 export type IChannelListResp = IChannel[]
+
+export interface IListenToChannelReq {
+  channelId: string
+}
