@@ -19,12 +19,16 @@
     <keep-alive>
       <note-panel v-if="ui.activeTab === 'note'" />
     </keep-alive>
+    <keep-alive>
+      <card-panel v-if="ui.activeTab === 'card'" />
+    </keep-alive>
   </div>
 </template>
 <script setup lang="ts">
 import { useUIStore } from '../../store/ui'
 import LogPanel from './LogPanel.vue'
 import NotePanel from './NotePanel.vue'
+import CardPanel from './CardPanel/CardPanel.vue'
 
 const ui = useUIStore()
 </script>

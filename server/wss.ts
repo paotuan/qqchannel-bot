@@ -15,6 +15,8 @@ wss.on('connection', (ws) => {
       console.log('Error while handling message', e)
     }
   })
+  // 连接后推送服务端人物卡列表
+  wssEmitter.emit('card/list', ws)
 })
 
 console.log('websocket server started')

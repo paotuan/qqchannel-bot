@@ -13,6 +13,7 @@
     "@heroicons/vue": "^2.0.11",
     "daisyui": "^2.27.0",
     "dotenv": "^16.0.2",
+    "glob": "^8.0.3",
     "mitt": "^3.0.0",
     "pinia": "^2.0.22",
     "qq-guild-bot": "^2.9.5",
@@ -22,6 +23,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/glob": "^8.0.0",
     "@types/node": "^18.7.17",
     "@types/sortablejs": "^1.13.0",
     "@types/ws": "^8.5.3",

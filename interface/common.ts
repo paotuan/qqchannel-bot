@@ -8,6 +8,8 @@ export type Command =
   | 'note/sync'
   | 'note/fetch'
   | 'note/delete'
+  | 'card/list'
+  | 'card/import'
 
 export interface IMessage<T> {
   cmd: Command
@@ -83,3 +85,40 @@ export interface INoteDeleteReq {
   id: string
 }
 // endregion note
+
+// region card
+export interface ICard {
+  version: number // 1
+  basic: {
+    name: string
+    job: string
+    age: number
+    gender: string
+    hp: number
+    san: number
+    luck: number
+    mp: number
+  },
+  props: {
+    '力量': number
+    '体质': number
+    '体型': number
+    '敏捷': number
+    '外貌': number
+    '智力': number
+    '意志': number
+    '教育': number
+  },
+  skills: { [key: string]: number },
+  meta: {
+    skillGrowth: { [key: string]: boolean }
+  }
+}
+
+export interface ICardImportReq {
+  card: ICard
+}
+
+export type ICardImportResp = ICardImportReq
+
+export type ICardListResp = ICard[]
