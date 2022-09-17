@@ -16,11 +16,15 @@
     <keep-alive>
       <log-panel v-if="ui.activeTab === 'log'" />
     </keep-alive>
+    <keep-alive>
+      <note-panel v-if="ui.activeTab === 'note'" />
+    </keep-alive>
   </div>
 </template>
 <script setup lang="ts">
 import { useUIStore } from '../../store/ui'
 import LogPanel from './LogPanel.vue'
+import NotePanel from './NotePanel.vue'
 
 const ui = useUIStore()
 </script>

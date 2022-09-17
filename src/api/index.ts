@@ -1,8 +1,9 @@
 import ws from './ws'
-import { IBotInfoResp, IChannel, ILog } from '../../interface/common'
+import { IBotInfoResp, IChannel, ILog, INoteFetchResp, INoteSendResp, INoteSyncResp } from '../../interface/common'
 import { useBotStore } from '../store/bot'
 import { useChannelStore } from '../store/channel'
 import { useLogStore } from '../store/log'
+import { useNoteStore } from '../store/note'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -27,4 +28,42 @@ ws.on('channel/list', data => {
 ws.on('log/push', data => {
   const log = useLogStore()
   log.addLogs(data.data as ILog[])
+})
+
+ws.on('note/send', data => {
+  if (data.success) {
+    // 请求成功保存数据
+    const res = data.data as INoteSendResp
+    const note = useNoteStore()
+    note.ids = res.allNoteIds
+    note.msgMap[res.note.msgId] = res.note
+    note.lastSyncTime = Date.now()
+    note.clearText()
+  } else {
+    console.error('[Note]', data.data)
+    // todo toast
+  }
+})
+
+ws.on('note/sync', data => {
+  if (data.success) {
+    const res = data.data as INoteSyncResp
+    const note = useNoteStore()
+    note.ids = res.allNoteIds
+    note.lastSyncTime = Date.now()
+    note.fetchNotesIfNeed()
+  } else {
+    console.error('[Note]', data.data)
+    // todo toast
+  }
+})
+
+ws.on('note/fetch', data => {
+  if (data.success) {
+    const res = data.data as INoteFetchResp
+    const store = useNoteStore()
+    res.forEach(note => {
+      store.msgMap[note.msgId] = note
+    })
+  }
 })

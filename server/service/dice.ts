@@ -1,17 +1,18 @@
 import qqApi from '../qqApi'
-import { AvailableIntentsEventsEnum } from 'qq-guild-bot'
+import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import config from './common'
 import wss from '../wss'
 import { ILogPushResp } from '../../interface/common'
 
 qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
+  const msg = data.msg as IMessage
   // 无视未监听的频道消息
-  const channel = data.msg.channel_id
+  const channel = msg.channel_id
   if (channel !== config.listenToChannelId) return
 
   // 无视非文本消息
-  const content = data.msg.content?.trim()
+  const content = msg.content?.trim()
   if (!content) return
 
   // 提取出指令体，无视非指令消息
@@ -26,8 +27,8 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
   }
   if (!fullExp) return
 
-  const msg_id = data.msg.id
-  const nickname = data.msg.member.nick
+  const msg_id = msg.id
+  const nickname = msg.member.nick
 
   try {
     const [exp, desc = ''] = fullExp.split(/\s+/, 1) // 第一个元素是 at消息体，无视之
