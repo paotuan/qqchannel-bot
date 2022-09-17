@@ -4,7 +4,7 @@
       <label class="label">
         <span class="label-text">请输入机器人 APPID</span>
       </label>
-      <input v-model="bot.appid" type="password" placeholder="Type here" class="input input-bordered w-full max-w-xs shadow-lg" />
+      <input v-model="bot.appid" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs shadow-lg" />
       <label class="label">
         <span class="label-text">请输入机器人 TOKEN</span>
       </label>

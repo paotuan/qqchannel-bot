@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2 flex flex-col" style="height: calc(100vh - 4rem)">
+  <div class="p-4 flex flex-col gap-4" style="height: calc(100vh - 4rem)">
     <template v-if="ui.statusAlertVisible">
       <div class="alert alert-success shadow-lg flex-none">
         <div>

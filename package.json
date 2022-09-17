@@ -10,17 +10,20 @@
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.1.0",
+    "@heroicons/vue": "^2.0.11",
     "daisyui": "^2.27.0",
     "dotenv": "^16.0.2",
     "mitt": "^3.0.0",
     "pinia": "^2.0.22",
     "qq-guild-bot": "^2.9.5",
+    "sortablejs": "^1.15.0",
     "vue": "^3.2.37",
     "ws": "^8.8.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^18.7.17",
+    "@types/sortablejs": "^1.13.0",
     "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
