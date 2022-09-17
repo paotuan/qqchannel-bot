@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { INote, INoteFetchReq, INoteSendReq } from '../../interface/common'
+import type { INote, INoteDeleteReq, INoteFetchReq, INoteSendReq } from '../../interface/common'
 import ws from '../api/ws'
 
 export const useNoteStore = defineStore('note', {
@@ -27,6 +27,13 @@ export const useNoteStore = defineStore('note', {
       const needToFetchIds = this.ids.filter(id => !this.msgMap[id])
       if (needToFetchIds.length > 0) {
         ws.send<INoteFetchReq>({ cmd: 'note/fetch', data: { allNoteIds: needToFetchIds } })
+      }
+    },
+    delete(note: INote) {
+      const index = this.ids.indexOf(note.msgId)
+      if (index >= 0) {
+        this.ids.splice(index, 1)
+        ws.send<INoteDeleteReq>({ cmd: 'note/delete', data: { id: note.msgId } })
       }
     }
   }

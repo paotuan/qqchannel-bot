@@ -8,7 +8,7 @@ import type {
   INoteSyncResp,
   IListenToChannelReq,
   ILogPushResp,
-  INoteFetchReq, INoteFetchResp, INote
+  INoteFetchReq, INoteFetchResp, INote, INoteDeleteReq
 } from '../../interface/common'
 
 // 保留该频道的最后一条消息，用于尽可能发被动消息，不消耗配额
@@ -124,5 +124,17 @@ wss.on('note/fetch', async (ws, data) => {
   } catch (e: any) {
     console.log('[Note] 获取失败', e)
     wss.send<string>(ws, { cmd: 'note/fetch', success: false, data: `Note 获取失败 ${e?.code || ''}` })
+  }
+})
+
+// 取消精华消息
+wss.on('note/delete', async (ws, data) => {
+  const { id } = data as INoteDeleteReq
+  const channel = config.listenToChannelId
+  try {
+    await qqApi.client.pinsMessageApi.deletePinsMessage(channel, id)
+    console.log('[Note] 取消精华成功')
+  } catch (e) {
+    console.log('[Note] 取消精华失败', e)
   }
 })

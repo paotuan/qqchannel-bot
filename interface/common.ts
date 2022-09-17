@@ -78,3 +78,8 @@ export interface INoteSyncResp {
 
 export type INoteFetchReq = INoteSyncResp
 export type INoteFetchResp = INote[]
+
+export interface INoteDeleteReq {
+  id: string
+}
+// endregion note

@@ -17,7 +17,9 @@
       <div v-for="note in noteStore.notes" :key="note.msgId" class="card w-full bg-base-100 border border-base-300 hover:shadow-lg">
         <figure v-if="note.msgType === 'image'"><img :src="`https://${note.content}`" referrerpolicy="no-referrer" /></figure>
         <div v-if="note.msgType === 'text'" class="p-4">{{ note.content }}</div>
-        <button class="btn btn-circle btn-xs btn-ghost absolute top-2 right-2 text-error"><XCircleIcon class="w-4 h-4" /></button>
+        <button class="btn btn-circle btn-xs btn-ghost absolute top-2 right-2 text-error" @click="noteStore.delete(note)">
+          <XCircleIcon class="w-4 h-4" />
+        </button>
       </div>
     </div>
   </div>
