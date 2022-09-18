@@ -16,16 +16,16 @@
     <div class="mt-4 flex gap-12">
       <div class="flex flex-col gap-2">
         <h3 class="font-bold">人物卡列表：</h3>
-        <div v-for="cardWp in cardStore.displayCardList" :key="cardWp.card.basic.name" class="flex gap-2">
+        <div v-for="card in cardStore.displayCardList" :key="card.basic.name" class="flex gap-2">
           <button class="btn w-40 gap-2 justify-start flex-nowrap"
-                  :class="cardStore.selectedCard === cardWp ? 'btn-secondary' : 'btn-ghost border border-base-300'"
-                  :title="cardWp.card.basic.name"
-                  @click="cardStore.selectCard(cardWp)">
+                  :class="cardStore.selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
+                  :title="card.basic.name"
+                  @click="cardStore.selectCard(card)">
             <DocumentTextIcon class="w-6 h-6 flex-none"/>
-            <span class="truncate">{{ cardWp.card.basic.name }}{{ cardWp.edited ? ' *' : '' }}</span>
-            <CheckCircleIcon v-show="cardStore.selectedCard === cardWp" class="w-6 h-6 ml-auto flex-none" />
+            <span class="truncate">{{ card.basic.name }}{{ cardStore.isEdited(card) ? ' *' : '' }}</span>
+            <CheckCircleIcon v-show="cardStore.selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
           </button>
-          <user-selector :user-id="cardWp.userId || null" @select="cardWp.userId = $event?.id || undefined" />
+          <user-selector :user-id="cardStore.linkedUserOf(card) || null" @select="cardStore.linkUser(card, $event?.id)" />
         </div>
       </div>
       <div class="flex-grow">

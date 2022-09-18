@@ -12,7 +12,7 @@
           <span class="text-sm">是</span>
           <text-input v-model="card.basic.job" placeholder="职业" class="input input-bordered input-xs w-20"/>
         </span>
-      <button class="btn btn-xs btn-primary" :disabled="!cardStore.selectedCard.edited"
+      <button class="btn btn-xs btn-primary" :disabled="!cardStore.isEdited(card)"
               @click="cardStore.requestSaveCard(card)">保存修改
       </button>
       <button class="btn btn-xs btn-error" @click="deleteCard">删除人物卡</button>
@@ -119,7 +119,7 @@ import NumberInput from './NumberInput.vue'
 import type { ICard } from '../../../../interface/common'
 
 const cardStore = useCardStore()
-const card = computed(() => cardStore.selectedCard?.card)
+const card = computed(() => cardStore.selectedCard)
 
 // 分三栏显示，技能值越高越前面
 // 缓存一下选择卡片时的技能值顺序，避免编辑过程中实时数值改变导致排序跳动

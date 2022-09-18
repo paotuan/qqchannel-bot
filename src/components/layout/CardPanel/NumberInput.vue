@@ -9,7 +9,7 @@ const input = ref<HTMLInputElement>()
 const cardStore = useCardStore()
 const onInput = (e: any) => {
   if (cardStore.selectedCard) {
-    cardStore.selectedCard.edited = true
+    cardStore.markCardEdited(cardStore.selectedCard)
   }
   let num = parseInt(e.target.value.trim(), 10)
   if (isNaN(num)) num = 0

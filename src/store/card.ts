@@ -3,14 +3,10 @@ import type { ICard, ICardDeleteReq, ICardImportReq } from '../../interface/comm
 import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 
-interface ICardWrapper {
-  card: ICard
-  edited: boolean
-  userId?: string // 关联到的 user
-}
-
 export const useCardStore = defineStore('card', () => {
-  const cardMap = reactive<Record<string, ICardWrapper>>({})
+  const cardMap = reactive<Record<string, ICard>>({})
+  const cardEditedMap = reactive<Record<string, boolean>>({}) // 标识卡片是否有编辑未保存
+  const cardLinkMap = reactive<Record<string, string>>({}) // 卡片名 -> 用户 id
   const selectedCardId = ref('')
   const showAllCards = ref(true)
 
@@ -18,10 +14,10 @@ export const useCardStore = defineStore('card', () => {
   const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : null)
   const allCards = computed(() => Object.values(cardMap))
   // 已存在的人物卡文件名
-  const existNames = computed(() => allCards.value.map(wrapper => wrapper.card.basic.name))
-  const linkedUsers = computed(() => allCards.value.map(wrapper => wrapper.userId).filter(id => !!id))
+  const existNames = computed(() => allCards.value.map(card => card.basic.name))
+  const linkedUsers = computed(() => Object.values(cardLinkMap))
   // 当前应该展示的人物卡列表
-  const displayCardList = computed(() => showAllCards.value ? allCards.value : allCards.value.filter(card => !!card.userId))
+  const displayCardList = computed(() => showAllCards.value ? allCards.value : allCards.value.filter(card => !!cardLinkMap[card.basic.name]))
 
   // 导入文本
   const importText = (name: string, rawText: string) => {
@@ -37,8 +33,9 @@ export const useCardStore = defineStore('card', () => {
   // 新增或更新人物卡（请求成功后调用）
   const addOrUpdateCards = (cards: ICard[]) => {
     cards.forEach(card => {
-      const existCard = cardMap[card.basic.name]
-      cardMap[card.basic.name] = { card, edited: false, userId: existCard?.userId }
+      const cardName = card.basic.name
+      cardMap[cardName] = card
+      cardEditedMap[cardName] = false
     })
   }
 
@@ -48,24 +45,43 @@ export const useCardStore = defineStore('card', () => {
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     // 不管后端删除有没有成功，前端直接删除吧
     delete cardMap[cardName]
+    delete cardEditedMap[cardName]
+    delete cardLinkMap[cardName]
     selectedCardId.value = ''
   }
 
   // 选择某张人物卡
-  const selectCard = (cardWrapper: ICardWrapper) => selectedCardId.value = cardWrapper.card.basic.name
+  const selectCard = (card: ICard) => selectedCardId.value = card.basic.name
 
   // 标记某个技能成长
-  const markSkillGrowth = (cardWrapper: ICardWrapper, skill: string) => {
-    const card = cardWrapper.card
+  const markSkillGrowth = (card: ICard, skill: string) => {
     card.meta.skillGrowth[skill] = !card.meta.skillGrowth[skill]
-    cardWrapper.edited = true
+    markCardEdited(card)
+  }
+
+  // 标记某张卡片被编辑
+  const markCardEdited = (card: ICard) => {
+    cardEditedMap[card.basic.name] = true
+  }
+
+  // 人物卡是否有编辑未保存
+  const isEdited = (card: ICard) => !!cardEditedMap[card.basic.name]
+
+  // 关联玩家相关
+  const linkedUserOf = (card: ICard) => cardLinkMap[card.basic.name]
+  const linkUser = (card: ICard, userId: string | null | undefined) => {
+    if (userId) {
+      cardLinkMap[card.basic.name] = userId
+    } else {
+      delete cardLinkMap[card.basic.name]
+    }
   }
 
   // 切换显示/隐藏未关联玩家的人物卡
   const toggleShowAllCards = () => {
     showAllCards.value = !showAllCards.value
     // 判断当前选择的人物卡是否要被隐藏
-    if (!showAllCards.value && !selectedCard.value?.userId) {
+    if (!showAllCards.value && selectedCard.value && !linkedUserOf(selectedCard.value)) {
       selectedCardId.value = ''
     }
   }
@@ -80,9 +96,13 @@ export const useCardStore = defineStore('card', () => {
     addOrUpdateCards,
     selectCard,
     markSkillGrowth,
+    markCardEdited,
     requestSaveCard,
     deleteCard,
-    toggleShowAllCards
+    toggleShowAllCards,
+    isEdited,
+    linkedUserOf,
+    linkUser
   }
 })
 

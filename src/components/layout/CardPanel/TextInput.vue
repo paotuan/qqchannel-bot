@@ -7,7 +7,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>()
 const cardStore = useCardStore()
 const onInput = (e: any) => {
   if (cardStore.selectedCard) {
-    cardStore.selectedCard.edited = true
+    cardStore.markCardEdited(cardStore.selectedCard)
   }
   emit('update:modelValue', e.target.value.trim())
 }
