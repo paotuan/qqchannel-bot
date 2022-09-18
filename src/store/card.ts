@@ -19,6 +19,8 @@ export const useCardStore = defineStore('card', () => {
   // 当前应该展示的人物卡列表
   const displayCardList = computed(() => showAllCards.value ? allCards.value : allCards.value.filter(card => !!cardLinkMap[card.basic.name]))
 
+  const of = (cardName: string) => cardMap[cardName]
+
   // 导入文本
   const importText = (name: string, rawText: string) => {
     const card = _importText(name, rawText)
@@ -54,8 +56,8 @@ export const useCardStore = defineStore('card', () => {
   const selectCard = (card: ICard) => selectedCardId.value = card.basic.name
 
   // 标记某个技能成长
-  const markSkillGrowth = (card: ICard, skill: string) => {
-    card.meta.skillGrowth[skill] = !card.meta.skillGrowth[skill]
+  const markSkillGrowth = (card: ICard, skill: string, value?: boolean) => {
+    card.meta.skillGrowth[skill] = typeof value === 'boolean' ? value : !card.meta.skillGrowth[skill]
     markCardEdited(card)
   }
 
@@ -95,6 +97,7 @@ export const useCardStore = defineStore('card', () => {
     displayCardList,
     existNames,
     linkedUsers,
+    of,
     importText,
     addOrUpdateCards,
     selectCard,

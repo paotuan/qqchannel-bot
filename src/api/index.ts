@@ -1,7 +1,7 @@
 import ws from './ws'
 import {
   IBotInfoResp, ICard,
-  ICardImportResp,
+  ICardImportResp, ICardTestResp,
   IChannel,
   ILog,
   INoteFetchResp,
@@ -96,4 +96,15 @@ ws.on('card/import', data => {
 ws.on('card/list', data => {
   const cardStore = useCardStore()
   cardStore.addOrUpdateCards(data.data as ICard[])
+})
+
+ws.on('card/test', data => {
+  const res = data.data as ICardTestResp
+  if (res.success) {
+    const cardStore = useCardStore()
+    const card = cardStore.of(res.cardName)
+    // 只有 skill 能成长，要判断下成功的是不是 skill
+    if (!card || !card.skills[res.propOrSkill]) return
+    cardStore.markSkillGrowth(card, res.propOrSkill, true)
+  }
 })

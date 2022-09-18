@@ -13,6 +13,7 @@ export type Command =
   | 'card/import'
   | 'card/delete'
   | 'card/link'
+  | 'card/test'
 
 export interface IMessage<T> {
   cmd: Command
@@ -145,4 +146,10 @@ export interface ICardLinkReq {
 }
 
 export type ICardLinkResp = ICardLinkReq
+
+export interface ICardTestResp {
+  cardName: string
+  propOrSkill: string
+  success: boolean
+}
 // endregion card

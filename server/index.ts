@@ -1,7 +1,7 @@
 import './wss'
 import './qqApi'
 import './service/common'
-import './service/dice'
 import './service/log'
 import './service/note'
 import './service/card'
+import './service/dice'
