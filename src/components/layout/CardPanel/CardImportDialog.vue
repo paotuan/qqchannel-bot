@@ -28,8 +28,17 @@
         <textarea v-model="textareaContent" class="mt-4 textarea textarea-bordered w-full h-60"
                   placeholder="请输入属性，使用冒号和空格分隔，冒号周围不要带空格。例如：力量:37 体质:60 体格:65 敏捷:73 外貌:75 妙手:10 侦查:25 潜行:20 ……"/>
       </div>
+      <!-- excel 导入 -->
+      <div v-if="tab === 'excel'" class="mt-4">
+        <input ref="fileChooser" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+               @change="handleFile"/>
+        <div class="mt-4">当前支持的人物卡模版：COC七版人物卡v1.6.0 <a class="link" href="https://paotuan.github.io/static/cocv7.xlsx"
+                                                       target="_blank">点击下载</a></div>
+      </div>
+      <!-- 提交 -->
       <div class="modal-action items-center">
-        <div v-show="nameExist" class="text-sm bg-warning text-warning-content px-2 py-0.5 rounded flex items-center gap-0.5">
+        <div v-show="nameExist"
+             class="text-sm bg-warning text-warning-content px-2 py-0.5 rounded flex items-center gap-0.5">
           <ExclamationCircleIcon class="w-4 h-4"/>
           存在同名人物卡，导入后将覆盖旧的人物卡
         </div>
@@ -41,7 +50,9 @@
 <script setup lang="ts">
 import { PlusCircleIcon, DocumentTextIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
-import { useCardStore } from '../../../store/card'
+import * as XLSX from 'xlsx'
+import { parseCoCXlsx, useCardStore } from '../../../store/card'
+import type { ICard } from '../../../../interface/common'
 
 const tab = ref<'text' | 'excel'>('text')
 const closeBtn = ref<HTMLElement>()
@@ -49,11 +60,15 @@ const closeModal = () => closeBtn.value?.click() // 这种 modal 没双向绑定
 
 const textName = ref('')
 const textareaContent = ref('')
+const xlsxCard = ref<ICard | null>(null)
+const fileChooser = ref()
 
 const cardStore = useCardStore()
 const nameExist = computed(() => {
   if (tab.value === 'text') {
     return cardStore.existNames.includes(textName.value)
+  } else if (tab.value === 'excel' && xlsxCard.value) {
+    return cardStore.existNames.includes(xlsxCard.value.basic.name)
   } else {
     return false
   }
@@ -67,7 +82,31 @@ const submit = () => {
     closeModal()
     textName.value = ''
     textareaContent.value = ''
+  } else if (tab.value === 'excel') {
+    if (!xlsxCard.value) return
+    cardStore.importCard(xlsxCard.value)
+    closeModal()
+    xlsxCard.value = null
+    ;(fileChooser.value as HTMLInputElement).value = ''
   }
+}
+
+const handleFile = (e: Event) => {
+  const files = (e.target as HTMLInputElement).files, f = files![0]
+  const reader = new FileReader()
+  // todo 输入框取消的情况
+  reader.onload = (e) => {
+    try {
+      const data = new Uint8Array(e.target!.result as ArrayBuffer)
+      const workbook = XLSX.read(data, { type: 'array' })
+      const sheet = workbook.Sheets[workbook.SheetNames[0]]
+      xlsxCard.value = parseCoCXlsx(sheet)
+    } catch (e) {
+      console.log(e)
+      // todo alert
+    }
+  }
+  reader.readAsArrayBuffer(f)
 }
 </script>
 

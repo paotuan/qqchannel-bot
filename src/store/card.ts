@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { ICard, ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
 import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
+import XLSX from 'xlsx'
 
 export const useCardStore = defineStore('card', () => {
   const cardMap = reactive<Record<string, ICard>>({})
@@ -21,9 +22,13 @@ export const useCardStore = defineStore('card', () => {
 
   const of = (cardName: string) => cardMap[cardName]
 
-  // 导入文本
+  // 导入文本 todo 废弃
   const importText = (name: string, rawText: string) => {
     const card = _importText(name, rawText)
+    ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
+  }
+
+  const importCard = (card: ICard) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
   }
 
@@ -99,6 +104,7 @@ export const useCardStore = defineStore('card', () => {
     linkedUsers,
     of,
     importText,
+    importCard,
     addOrUpdateCards,
     selectCard,
     markSkillGrowth,
@@ -205,4 +211,46 @@ function _importText(name: string, rawText: string): ICard {
     }
   })
   return card
+}
+
+export function parseCoCXlsx(sheet: XLSX.WorkSheet) {
+  const user = getCardProto()
+  // read basic info
+  user.basic = {
+    name: sheet['D3'].v,
+    job: sheet['D5'].v,
+    age: sheet['D6'].v,
+    gender: sheet['L6'].v,
+    hp: sheet['F10'].v,
+    san: sheet['N10'].v,
+    luck: sheet['V10'].v,
+    mp: (sheet['AD10'] || sheet['AF10']).v
+  }
+  // read props
+  user.props = {
+    '力量': sheet['S3'].v,
+    '体质': sheet['S5'].v,
+    '体型': sheet['S7'].v,
+    '敏捷': sheet['Y3'].v,
+    '外貌': sheet['Y5'].v,
+    '智力': sheet['Y7'].v,
+    '意志': sheet['AE3'].v,
+    '教育': sheet['AE5'].v,
+  }
+  // read first column
+  const E_LINES = [19, 20, 21, 33, 34, 35, 36, 37, 38, 43, 44, 45]
+  for (let i = 15; i <= 46; i++) {
+    const name = sheet[(E_LINES.includes(i) ? 'E' : 'C') + i]
+    if (!name) continue // 自选技能，玩家没选的情况
+    user.skills[_unifiedKey(name.v)] = sheet['P' + i].v
+  }
+  // read second column
+  const Y_LINES = [26, 30, 31, 32, 36, 40]
+  for (let i = 15; i <= 40; i++) {
+    const name = sheet[(Y_LINES.includes(i) ? 'Y' : 'W') + i]
+    if (!name) continue // 自选技能，玩家没选的情况
+    user.skills[_unifiedKey(name.v)] = sheet['AJ' + i].v
+  }
+
+  return user
 }
