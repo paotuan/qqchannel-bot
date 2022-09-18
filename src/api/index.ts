@@ -81,7 +81,7 @@ ws.on('card/import', data => {
   if (data.success) {
     const { card } = data.data as ICardImportResp
     const cardStore = useCardStore()
-    cardStore.addCards([card])
+    cardStore.addOrUpdateCards([card])
   } else {
     // todo toast
   }
@@ -89,5 +89,5 @@ ws.on('card/import', data => {
 
 ws.on('card/list', data => {
   const cardStore = useCardStore()
-  cardStore.addCards(data.data as ICard[])
+  cardStore.addOrUpdateCards(data.data as ICard[])
 })

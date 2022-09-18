@@ -12,6 +12,10 @@
           <span class="text-sm">是</span>
           <text-input v-model="card.basic.job" placeholder="职业" class="input input-bordered input-xs w-20"/>
         </span>
+      <button class="btn btn-xs btn-primary" :disabled="!cardStore.selectedCard.edited"
+              @click="cardStore.requestSaveCard(card)">保存修改
+      </button>
+      <button class="btn btn-xs btn-error" @click="deleteCard">删除人物卡</button>
     </div>
     <div class="flex gap-2">
       <div style="flex: 1 1 0">
@@ -87,7 +91,8 @@
             <template v-for="(skill, j) in sublist">
               <template v-if="skill">
                 <td :key="`name-${j}`" :class="{ highlight: !!card.meta.skillGrowth[skill] }">
-                  <button class="btn btn-xs btn-ghost font-medium" @click="cardStore.markSkillGrowth(cardStore.selectedCard, skill)">
+                  <button class="btn btn-xs btn-ghost font-medium"
+                          @click="cardStore.markSkillGrowth(cardStore.selectedCard, skill)">
                     {{ skill }}
                   </button>
                 </td>
@@ -116,7 +121,6 @@ import type { ICard } from '../../../../interface/common'
 const cardStore = useCardStore()
 const card = computed(() => cardStore.selectedCard?.card)
 
-
 // 分三栏显示，技能值越高越前面
 // 缓存一下选择卡片时的技能值顺序，避免编辑过程中实时数值改变导致排序跳动
 const originCard = ref<ICard | undefined>()
@@ -136,6 +140,14 @@ const skills = computed(() => {
   const length = Math.ceil(skillList.length / 3)
   return new Array(length).fill(0).map((_, i) => [skillList[i * 3], skillList[i * 3 + 1], skillList[i * 3 + 2]])
 })
+
+// 删除人物卡二次确认
+const deleteCard = () => {
+  if (!card.value) return
+  if (window.confirm('确定要删除这张人物卡吗？')) {
+    cardStore.deleteCard(card.value)
+  }
+}
 </script>
 <style scoped>
 .table-compact :where(td) {

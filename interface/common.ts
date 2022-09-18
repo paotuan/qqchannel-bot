@@ -10,6 +10,7 @@ export type Command =
   | 'note/delete'
   | 'card/list'
   | 'card/import'
+  | 'card/delete'
 
 export interface IMessage<T> {
   cmd: Command
@@ -122,3 +123,8 @@ export interface ICardImportReq {
 export type ICardImportResp = ICardImportReq
 
 export type ICardListResp = ICard[]
+
+export interface ICardDeleteReq {
+  cardName: string
+}
+// endregion card

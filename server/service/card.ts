@@ -1,5 +1,5 @@
 import wss from '../wss'
-import type { ICard, ICardImportReq, ICardImportResp, ICardListResp } from '../../interface/common'
+import type { ICard, ICardDeleteReq, ICardImportReq, ICardImportResp, ICardListResp } from '../../interface/common'
 import * as fs from 'fs'
 import * as glob from 'glob'
 
@@ -47,5 +47,19 @@ wss.on('card/import', (ws, data) => {
   } catch (e) {
     console.log('[Card] 保存人物卡失败', e)
     wss.send<ICardImportResp>(ws, { cmd: 'card/import', success: false, data: { card } })
+  }
+})
+
+wss.on('card/delete', (ws, data) => {
+  const { cardName } = data as ICardDeleteReq
+  console.log('[Card] 删除人物卡', cardName)
+  try {
+    if (!fs.existsSync(dir)) {
+      return
+    }
+    fs.unlinkSync(`${dir}/${cardName}.json`)
+    console.log('[Card] 删除人物卡成功')
+  } catch (e) {
+    console.log('[Card] 删除人物卡失败', e)
   }
 })

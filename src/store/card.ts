@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { ICard, ICardImportReq } from '../../interface/common'
+import type { ICard, ICardDeleteReq, ICardImportReq } from '../../interface/common'
 import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 
@@ -29,11 +29,26 @@ export const useCardStore = defineStore('card', () => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
   }
 
-  // 新增或更新人物卡
-  const addCards = (cards: ICard[]) => {
+  // 请求保存卡片（其实后端和导入的逻辑是一样的）
+  const requestSaveCard = (card: ICard) => {
+    ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
+  }
+
+  // 新增或更新人物卡（请求成功后调用）
+  const addOrUpdateCards = (cards: ICard[]) => {
     cards.forEach(card => {
-      cardMap[card.basic.name] = { card, edited: false } // todo 考虑编辑场景，不能清除和玩家的关联关系
+      const existCard = cardMap[card.basic.name]
+      cardMap[card.basic.name] = { card, edited: false, userId: existCard?.userId }
     })
+  }
+
+  // 删除人物卡
+  const deleteCard = (card: ICard) => {
+    const cardName = card.basic.name
+    ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
+    // 不管后端删除有没有成功，前端直接删除吧
+    delete cardMap[cardName]
+    selectedCardId.value = ''
   }
 
   // 选择某张人物卡
@@ -46,6 +61,15 @@ export const useCardStore = defineStore('card', () => {
     cardWrapper.edited = true
   }
 
+  // 切换显示/隐藏未关联玩家的人物卡
+  const toggleShowAllCards = () => {
+    showAllCards.value = !showAllCards.value
+    // 判断当前选择的人物卡是否要被隐藏
+    if (!showAllCards.value && !selectedCard.value?.userId) {
+      selectedCardId.value = ''
+    }
+  }
+
   return {
     selectedCard,
     showAllCards,
@@ -53,9 +77,12 @@ export const useCardStore = defineStore('card', () => {
     existNames,
     linkedUsers,
     importText,
-    addCards,
+    addOrUpdateCards,
     selectCard,
-    markSkillGrowth
+    markSkillGrowth,
+    requestSaveCard,
+    deleteCard,
+    toggleShowAllCards
   }
 })
 

@@ -2,7 +2,7 @@
   <div class="flex-grow card bg-base-100 shadow-lg p-4 overflow-y-auto">
     <div class="flex gap-4">
       <card-import-dialog/>
-      <button class="btn btn-ghost gap-2" @click="cardStore.showAllCards = !cardStore.showAllCards">
+      <button class="btn btn-ghost gap-2" @click="cardStore.toggleShowAllCards()">
         <template v-if="cardStore.showAllCards">
           <EyeSlashIcon class="w-6 h-6"/>
           隐藏未关联玩家的人物卡
