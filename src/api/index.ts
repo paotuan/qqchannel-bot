@@ -37,7 +37,7 @@ ws.on('channel/list', data => {
 
 ws.on('user/list', data => {
   const user = useUserStore()
-  user.list = (data.data || []) as IUser[]
+  user.setUsers((data.data || []) as IUser[])
 })
 
 ws.on('log/push', data => {

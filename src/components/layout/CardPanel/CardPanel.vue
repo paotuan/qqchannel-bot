@@ -17,14 +17,15 @@
       <div class="flex flex-col gap-2">
         <h3 class="font-bold">人物卡列表：</h3>
         <div v-for="cardWp in cardStore.displayCardList" :key="cardWp.card.basic.name" class="flex gap-2">
-          <button class="btn w-40 gap-2 justify-start"
+          <button class="btn w-40 gap-2 justify-start flex-nowrap"
                   :class="cardStore.selectedCard === cardWp ? 'btn-secondary' : 'btn-ghost border border-base-300'"
+                  :title="cardWp.card.basic.name"
                   @click="cardStore.selectCard(cardWp)">
             <DocumentTextIcon class="w-6 h-6 flex-none"/>
-            <span>{{ cardWp.card.basic.name }}{{ cardWp.edited ? ' *' : '' }}</span>
-            <CheckCircleIcon v-show="cardStore.selectedCard === cardWp" class="w-6 h-6 ml-auto" />
+            <span class="truncate">{{ cardWp.card.basic.name }}{{ cardWp.edited ? ' *' : '' }}</span>
+            <CheckCircleIcon v-show="cardStore.selectedCard === cardWp" class="w-6 h-6 ml-auto flex-none" />
           </button>
-          <button class="select select-bordered items-center w-40">未关联玩家</button>
+          <user-selector :user-id="cardWp.userId || null" @select="cardWp.userId = $event?.id || undefined" />
         </div>
       </div>
       <div class="flex-grow">
@@ -38,7 +39,7 @@ import CardImportDialog from './CardImportDialog.vue'
 import { EyeSlashIcon, EyeIcon, DocumentTextIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../../store/card'
 import CardDisplay from './CardDisplay.vue'
+import UserSelector from './UserSelector.vue'
 
 const cardStore = useCardStore()
-
 </script>
