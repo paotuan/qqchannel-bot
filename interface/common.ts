@@ -3,6 +3,7 @@ export type Command =
   | 'bot/info'
   | 'channel/list'
   | 'channel/listen'
+  | 'user/list'
   | 'log/push'
   | 'note/send'
   | 'note/sync'
@@ -44,6 +45,15 @@ export type IChannelListResp = IChannel[]
 export interface IListenToChannelReq {
   channelId: string
 }
+
+export interface IUser {
+  id: string
+  nick: string
+  avatar: string
+  bot: boolean
+}
+
+export type IUserListResp = IUser[]
 // endregion channel
 
 // region log

@@ -6,13 +6,14 @@ import {
   ILog,
   INoteFetchResp,
   INoteSendResp,
-  INoteSyncResp
+  INoteSyncResp, IUser
 } from '../../interface/common'
 import { useBotStore } from '../store/bot'
 import { useChannelStore } from '../store/channel'
 import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
 import { useCardStore } from '../store/card'
+import { useUserStore } from '../store/user'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -32,6 +33,11 @@ ws.on('channel/list', data => {
   const channel = useChannelStore()
   channel.list = data.data as IChannel[] | null
   channel.initGetListSuccess = data.success!
+})
+
+ws.on('user/list', data => {
+  const user = useUserStore()
+  user.list = (data.data || []) as IUser[]
 })
 
 ws.on('log/push', data => {

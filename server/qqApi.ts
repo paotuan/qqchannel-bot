@@ -1,6 +1,6 @@
 import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
 import wss from './wss'
-import type { IBotInfoResp, IChannelListResp, ILoginReq } from '../interface/common'
+import type { IBotInfoResp, IChannelListResp, ILoginReq, IUserListResp } from '../interface/common'
 import { EventEmitter } from 'events'
 
 interface IConnection {
@@ -28,7 +28,9 @@ wss.on('bot/login', async (ws, data) => {
     // 获取子频道列表
     const channels = await getChannelInfo(botInfo.guildId)
     wss.send<IChannelListResp | null>(ws, { cmd: 'channel/list', success: !!channels, data: channels })
-    // todo 获取频道成员列表
+    // 获取频道成员列表
+    const users = await getUserList(botInfo.guildId)
+    wss.send<IUserListResp | null>(ws, { cmd: 'user/list', success: !!users, data: users })
   }
 })
 
@@ -89,6 +91,17 @@ async function getChannelInfo(guildId: string): Promise<IChannelListResp | null>
   try {
     const { data } = await connection.client!.channelApi.channels(guildId)
     return data.filter(channel => channel.type === 0).map(channel => ({ id: channel.id, name: channel.name }))
+  } catch (e) {
+    console.log(e)
+    return null
+  }
+}
+
+// 获取频道用户信息
+async function getUserList(guildId: string): Promise<IUserListResp | null> {
+  try {
+    const { data } = await connection.client!.guildApi.guildMembers(guildId, { limit: 1000, after: '0' })
+    return data.map(item => ({ id: item.user.id, nick: item.nick, avatar: item.user.avatar, bot: item.user.bot }))
   } catch (e) {
     console.log(e)
     return null
