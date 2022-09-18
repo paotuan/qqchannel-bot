@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { ICard, ICardDeleteReq, ICardImportReq } from '../../interface/common'
+import type { ICard, ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
 import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 
@@ -70,10 +70,13 @@ export const useCardStore = defineStore('card', () => {
   // 关联玩家相关
   const linkedUserOf = (card: ICard) => cardLinkMap[card.basic.name]
   const linkUser = (card: ICard, userId: string | null | undefined) => {
+    const cardName = card.basic.name
+    ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
+    // todo 目前直接在本地改了，后续如果考虑到关联玩家还有其他的入口，则需要增加服务端推送，这里放到回包时再改状态
     if (userId) {
-      cardLinkMap[card.basic.name] = userId
+      cardLinkMap[cardName] = userId
     } else {
-      delete cardLinkMap[card.basic.name]
+      delete cardLinkMap[cardName]
     }
   }
 
