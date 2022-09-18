@@ -28,7 +28,6 @@
         </div>
       </div>
       <div class="flex-grow">
-        <h3 class="font-bold">&nbsp;</h3>
         <card-display />
       </div>
     </div>

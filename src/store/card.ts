@@ -14,26 +14,49 @@ export const useCardStore = defineStore('card', () => {
   const selectedCardId = ref('')
   const showAllCards = ref(true)
 
+  // 当前选中的人物卡
   const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : null)
   const allCards = computed(() => Object.values(cardMap))
+  // 已存在的人物卡文件名
   const existNames = computed(() => allCards.value.map(wrapper => wrapper.card.basic.name))
   const linkedUsers = computed(() => allCards.value.map(wrapper => wrapper.userId).filter(id => !!id))
+  // 当前应该展示的人物卡列表
   const displayCardList = computed(() => showAllCards.value ? allCards.value : allCards.value.filter(card => !!card.userId))
 
+  // 导入文本
   const importText = (name: string, rawText: string) => {
     const card = _importText(name, rawText)
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
   }
 
+  // 新增或更新人物卡
   const addCards = (cards: ICard[]) => {
     cards.forEach(card => {
       cardMap[card.basic.name] = { card, edited: false } // todo 考虑编辑场景，不能清除和玩家的关联关系
     })
   }
 
+  // 选择某张人物卡
   const selectCard = (cardWrapper: ICardWrapper) => selectedCardId.value = cardWrapper.card.basic.name
 
-  return { selectedCard, showAllCards, displayCardList, existNames, linkedUsers, importText, addCards, selectCard }
+  // 标记某个技能成长
+  const markSkillGrowth = (cardWrapper: ICardWrapper, skill: string) => {
+    const card = cardWrapper.card
+    card.meta.skillGrowth[skill] = !card.meta.skillGrowth[skill]
+    cardWrapper.edited = true
+  }
+
+  return {
+    selectedCard,
+    showAllCards,
+    displayCardList,
+    existNames,
+    linkedUsers,
+    importText,
+    addCards,
+    selectCard,
+    markSkillGrowth
+  }
 })
 
 function getCardProto(): ICard {
@@ -78,6 +101,8 @@ function _unifiedKey(key: string) {
     unifiedKey = '母语'
   } else if (unifiedKey === '侦查') {
     unifiedKey = '侦察'
+  } else if (unifiedKey === '体格') {
+    unifiedKey = '体型'
   }
   return unifiedKey
 }
