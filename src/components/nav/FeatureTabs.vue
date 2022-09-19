@@ -1,5 +1,5 @@
 <template>
-  <div class="tabs">
+  <div class="tabs font-bold">
     <a v-for="tab in tabs" :key="tab.value" class="tab"
        :class="{ 'tab-active': tab.value === ui.activeTab }" @click="ui.activeTab = tab.value">{{ tab.name }}</a>
   </div>

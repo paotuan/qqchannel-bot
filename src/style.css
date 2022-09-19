@@ -3,14 +3,11 @@
 @tailwind utilities;
 
 :root {
+  @apply bg-base-200;
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 24px;
   font-weight: 400;
-
-  /*color-scheme: light dark;*/
-  /*color: rgba(255, 255, 255, 0.87);*/
-  background-color: hsl(var(--b2));
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -20,4 +17,12 @@
 
 body {
   min-width: 1280px;
+}
+
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300;
 }

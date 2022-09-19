@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-grow flex flex-row gap-4">
+  <div class="flex-grow flex flex-row gap-4 overflow-hidden">
     <div ref="sortableRef" class="card bg-base-100 shadow-lg px-8 py-4 overflow-y-auto" style="flex: 3 0 0">
       <div v-for="log in logStore.logs" :key="log.msgId" class="group w-full flex items-center gap-2 leading-loose">
         <Bars3Icon class="w-4 h-4 cursor-move invisible group-hover:visible flex-none sortable-handle"/>

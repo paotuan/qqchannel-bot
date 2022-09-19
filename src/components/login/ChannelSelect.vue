@@ -1,14 +1,14 @@
 <template>
-  <div class="mt-40">
+  <div class="mt-40 flex items-center justify-center">
     <template v-if="!channel.initGetListSuccess">
       <div>请求失败，请刷新页面重试</div>
     </template>
     <template v-else-if="channel.list">
-      <div class="mx-auto max-w-sm">
-        <div class="label-text mb-4">请选择机器人工作的子频道</div>
-        <div class="grid grid-cols-2 gap-2">
+      <div class="card bg-base-100 px-12 py-8 shadow-lg">
+        <div class="label-text mb-4 font-bold">请选择机器人工作的子频道</div>
+        <div class="grid grid-cols-2 gap-2 w-96">
           <label v-for="channel in channel.list" :key="channel.id"
-                 class="label cursor-pointer shadow-lg p-2 rounded-xl bg-base-100">
+                 class="label cursor-pointer p-2 rounded-xl border border-base-300">
             <span class="label-text">{{ channel.name }}</span>
             <input type="radio" name="login_channel-select-radio" class="radio radio-primary"
                    :checked="checkedId === channel.id" @click="checkedId = channel.id"/>
