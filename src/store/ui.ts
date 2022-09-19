@@ -8,7 +8,8 @@ export const useUIStore = defineStore('ui', {
   state: () => ({
     activeTab: 'log' as Tabs,
     statusAlertVisible: true,
-    toasts: [] as { id: number, type: ToastType, msg: string }[]
+    toasts: [] as { id: number, type: ToastType, msg: string }[],
+    theme: localStorage.getItem('theme') || 'lemonade'
   }),
   actions: {
     toast(type: ToastType, msg: string) {
@@ -20,6 +21,11 @@ export const useUIStore = defineStore('ui', {
           this.toasts.splice(index, 1)
         }
       }, 5000)
+    },
+    setTheme(theme: string) {
+      this.theme = theme
+      document.documentElement.dataset.theme = theme
+      localStorage.setItem('theme', theme)
     }
   }
 })

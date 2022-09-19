@@ -7,6 +7,7 @@ import ChannelSelect from './components/login/ChannelSelect.vue'
 import MainLayout from './components/layout/MainLayout.vue'
 import FeatureTabs from './components/nav/FeatureTabs.vue'
 import { ToastType, useUIStore } from './store/ui'
+import ThemePicker from './components/nav/ThemePicker.vue'
 
 const bot = useBotStore()
 const channel = useChannelStore()
@@ -36,6 +37,7 @@ const toastClass = (type: ToastType) => {
     </div>
     <div class="navbar-end">
       <bot-info />
+      <theme-picker />
     </div>
   </div>
   <div>
