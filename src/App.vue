@@ -8,6 +8,8 @@ import MainLayout from './components/layout/MainLayout.vue'
 import FeatureTabs from './components/nav/FeatureTabs.vue'
 import { ToastType, useUIStore } from './store/ui'
 import ThemePicker from './components/nav/ThemePicker.vue'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
+import { Toast } from './utils'
 
 const bot = useBotStore()
 const channel = useChannelStore()
@@ -26,11 +28,30 @@ const toastClass = (type: ToastType) => {
     return 'alert-error'
   }
 }
+
+const clearCache = () => {
+  const allKeys = []
+  const length = localStorage.length
+  for (let i = 0; i < length; i++) {
+    const key = localStorage.key(i)
+    if (key && (['appid', 'token', 'theme'].includes(key) || key.startsWith('log-'))) {
+      allKeys.push(key)
+    }
+  }
+  allKeys.forEach(key => localStorage.removeItem(key))
+  Toast.success('清除缓存成功！')
+}
 </script>
 <template>
   <div class="navbar bg-base-100 shadow-lg">
     <div class="navbar-start">
-      <a class="btn btn-ghost normal-case text-xl">🎲 QQ 频道机器人</a>
+      <div class="dropdown">
+        <label tabindex="0" class="btn btn-ghost normal-case text-xl">🎲 QQ 频道机器人</label>
+        <ul tabindex="0" class="menu dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-40">
+          <li><a @click="clearCache">清除缓存</a></li>
+          <li><a href="https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt?&u=9c5a3d56039547c5a9f887f7c5f54557" target="_blank">使用帮助<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a></li>
+        </ul>
+      </div>
     </div>
     <div class="navbar-center">
       <feature-tabs />
