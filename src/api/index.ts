@@ -14,6 +14,7 @@ import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
 import { useCardStore } from '../store/card'
 import { useUserStore } from '../store/user'
+import { Toast } from '../utils'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -56,7 +57,7 @@ ws.on('note/send', data => {
     note.clearText()
   } else {
     console.error('[Note]', data.data)
-    // todo toast
+    Toast.error('发送失败！')
   }
 })
 
@@ -69,7 +70,7 @@ ws.on('note/sync', data => {
     note.fetchNotesIfNeed()
   } else {
     console.error('[Note]', data.data)
-    // todo toast
+    Toast.error('同步失败！')
   }
 })
 
@@ -88,8 +89,9 @@ ws.on('card/import', data => {
     const { card } = data.data as ICardImportResp
     const cardStore = useCardStore()
     cardStore.addOrUpdateCards([card])
+    Toast.success('人物卡导入成功！')
   } else {
-    // todo toast
+    Toast.error('人物卡导入失败！')
   }
 })
 

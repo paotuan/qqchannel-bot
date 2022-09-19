@@ -51,8 +51,9 @@
 import { PlusCircleIcon, DocumentTextIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 import * as XLSX from 'xlsx'
-import { parseCoCXlsx, useCardStore } from '../../../store/card'
+import { parseCoCXlsx, parseText, useCardStore } from '../../../store/card'
 import type { ICard } from '../../../../interface/common'
+import { Toast } from '../../../utils'
 
 const tab = ref<'text' | 'excel'>('text')
 const closeBtn = ref<HTMLElement>()
@@ -76,8 +77,9 @@ const nameExist = computed(() => {
 
 const submit = () => {
   if (tab.value === 'text') {
-    if (!textName.value) return
-    cardStore.importText(textName.value, textareaContent.value)
+    if (!textName.value || !textareaContent.value) return
+    const card = parseText(textName.value, textareaContent.value)
+    cardStore.importCard(card)
     // manual close and clear
     closeModal()
     textName.value = ''
@@ -103,7 +105,7 @@ const handleFile = (e: Event) => {
       xlsxCard.value = parseCoCXlsx(sheet)
     } catch (e) {
       console.log(e)
-      // todo alert
+      Toast.error('文件解析失败！')
     }
   }
   reader.readAsArrayBuffer(f)

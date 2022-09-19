@@ -22,12 +22,6 @@ export const useCardStore = defineStore('card', () => {
 
   const of = (cardName: string) => cardMap[cardName]
 
-  // 导入文本 todo 废弃
-  const importText = (name: string, rawText: string) => {
-    const card = _importText(name, rawText)
-    ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
-  }
-
   const importCard = (card: ICard) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
   }
@@ -103,7 +97,6 @@ export const useCardStore = defineStore('card', () => {
     existNames,
     linkedUsers,
     of,
-    importText,
     importCard,
     addOrUpdateCards,
     selectCard,
@@ -166,7 +159,7 @@ function _unifiedKey(key: string) {
   return unifiedKey
 }
 
-function _importText(name: string, rawText: string): ICard {
+export function parseText(name: string, rawText: string): ICard {
   const card = getCardProto()
   card.basic.name = name.trim()
   rawText.trim().split(/\s+/).forEach(kv => {

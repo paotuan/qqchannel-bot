@@ -6,9 +6,25 @@ import { useChannelStore } from './store/channel'
 import ChannelSelect from './components/login/ChannelSelect.vue'
 import MainLayout from './components/layout/MainLayout.vue'
 import FeatureTabs from './components/nav/FeatureTabs.vue'
+import { ToastType, useUIStore } from './store/ui'
 
 const bot = useBotStore()
 const channel = useChannelStore()
+const ui = useUIStore()
+
+const toastClass = (type: ToastType) => {
+  switch (type) {
+  case 'success':
+    return 'alert-success'
+  case 'info':
+    return 'alert-info'
+  case 'warning':
+    return 'alert-warning'
+  case 'error':
+  default:
+    return 'alert-error'
+  }
+}
 </script>
 <template>
   <div class="navbar bg-base-100 shadow-lg">
@@ -32,5 +48,12 @@ const channel = useChannelStore()
     <template v-else>
       <main-layout />
     </template>
+  </div>
+  <div class="toast toast-start">
+    <div v-for="toast in ui.toasts" :key="toast.id" class="alert" :class="toastClass(toast.type)">
+      <div>
+        <span>{{ toast.msg }}</span>
+      </div>
+    </div>
   </div>
 </template>
