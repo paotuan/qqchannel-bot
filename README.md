@@ -1,16 +1,39 @@
-# Vue 3 + TypeScript + Vite
+# 🎲 QQ 频道跑团机器人
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+基于 [QQ 频道官方机器人 API](https://bot.q.qq.com/wiki/#%E7%AE%80%E4%BB%8B) 的跑团工具。可以方便快捷地为你的 QQ 频道加入骰子，并提供多种实用的跑团后台管理功能。
 
-## Recommended IDE Setup
+相比于传统的非官方 QQ 群机器人，QQ 频道有官方 API，接口更为稳定。同时配套功能更加丰富，搭建更加容易。
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+相比于我们之前搭建的[独立跑团平台](https://github.com/paotuan/paotuan)，QQ 频道机器人允许你直接在 QQ 内部和朋友一起跑团，使用更方便。
 
-## Type Support For `.vue` Imports in TS
+## 使用方式
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's Take Over mode by following these steps:
+todo 待完善快速上手视频及文字帮助文档
 
-1. Run `Extensions: Show Built-in Extensions` from VS Code's command palette, look for `TypeScript and JavaScript Language Features`, then right click and select `Disable (Workspace)`. By default, Take Over mode will enable itself if the default TypeScript extension is disabled.
-2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
+### 一键使用
+如果你不了解代码，或只是想用最简单的方式用起来，可以直接下载二进制包，本地运行。
 
-You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+// 待完善
+
+### 服务器部署
+如果你希望机器人 24 小时不间断运行，你就需要把它部署到服务器上。（或者 24 小时从不关机的本地运行也可以）
+
+// 待完善
+
+### 本地开发
+require Node >= 14.18
+
+```bash
+yarn install
+```
+
+## 功能展示
+- 无缝集成 QQ，支持各种常用骰子规则
+- 自动记录跑团 Log，支持多种格式导出
+- 发布和管理重要笔记，置顶跑团关键线索
+- 导入文本/Excel 人物卡，在线编辑和托管，人物卡关联频道用户
+- 骰子根据人物卡自动判断成功等级，记录技能成长
+- 多种主题一键切换
+
+
+任何意见建议，欢迎 issue，pr 或加群 115699014 讨论
