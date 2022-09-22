@@ -6,11 +6,23 @@ import wss from '../wss'
 import type { ICardTestResp, ILogPushResp } from '../../interface/common'
 import { cardStore } from './card'
 
+// 缓存最近5分钟的消息 todo 后面独立出去
+interface IMessageCache {
+  id: string
+  timestamp: number
+  text?: string // 文本消息才有
+  skill?: string | null // 文本消息是否包含技能或属性。第一次使用时解析（undefined: 未解析，null：解析了但是为空）
+}
+
+const _recentMessages: IMessageCache[] = []
+
 qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
   const msg = data.msg as IMessage
   // 无视未监听的频道消息
   const channel = msg.channel_id
   if (channel !== config.listenToChannelId) return
+
+  // 最近消息缓存
 
   // 无视非文本消息
   const content = msg.content?.trim()
@@ -69,6 +81,14 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
   } catch (e) {
     // 表达式不合法，无视之
   }
+})
+
+qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data: any) => {
+  console.log(data) // 似乎没有暴露类型定义
+  // 无视未监听的频道消息
+  const channel = data.msg.channel_id
+  if (channel !== config.listenToChannelId) return
+
 })
 
 // 提取指令为 [骰子表达式, 描述]

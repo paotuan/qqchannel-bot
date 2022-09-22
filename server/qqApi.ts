@@ -54,7 +54,7 @@ function connectQQChannel(params: ILoginReq) {
   const botConfig = {
     appID: params.appid, // 申请机器人时获取到的机器人 BotAppID
     token: params.token, // 申请机器人时获取到的机器人 BotToken
-    intents: [AvailableIntentsEventsEnum.GUILD_MESSAGES], // 事件订阅,用于开启可接收的消息类型
+    intents: [AvailableIntentsEventsEnum.GUILD_MESSAGES, AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS], // 事件订阅,用于开启可接收的消息类型
     sandbox: false, // 沙箱支持，可选，默认false. v2.7.0+
   }
   connection.client = createOpenAPI(botConfig)
@@ -64,6 +64,10 @@ function connectQQChannel(params: ILoginReq) {
 
   ws.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data) => {
     qqBotEmitter.emit(AvailableIntentsEventsEnum.GUILD_MESSAGES, data)
+  })
+
+  ws.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data) => {
+    qqBotEmitter.emit(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, data)
   })
 
   console.log('successful connect to qq server')
