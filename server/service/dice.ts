@@ -32,7 +32,7 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
   const nickname = msg.member.nick
 
   try {
-    const [exp, desc = ''] = fullExp.split(/\s+/)
+    const [exp, desc = ''] = parseFullExp(fullExp)
     console.log(fullExp, exp, desc)
     const roll = new DiceRoll(exp)
     // 判断成功等级
@@ -70,6 +70,26 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
     // 表达式不合法，无视之
   }
 })
+
+// 提取指令为 [骰子表达式, 描述]
+function parseFullExp(fullExp: string): [string, string] {
+  // sc 简写
+  if (fullExp === 'sc' || fullExp === 'SC') {
+    return ['d%', 'sc']
+  }
+  const index = fullExp.search(/[\p{Unified_Ideograph}\s]/u) // 按第一个中文或空格分割
+  const [exp, desc = ''] = index < 0 ? [fullExp] : [fullExp.slice(0, index), fullExp.slice(index)]
+  // 兼容一些其他指令
+  if (exp === 'd' || exp === 'r' || exp === 'rd') {
+    return ['d%', desc] // 默认骰，目前写死是 d100
+  } else if (exp === 'ra') {
+    return ['d%', desc] // coc 技能骰
+  } else if (exp.startsWith('r')) {
+    return [exp.slice(1), desc] // rd100 => d100
+  } else {
+    return [exp, desc]
+  }
+}
 
 function decideResult(sender: string, desc: string, roll: number) {
   let skill = desc.trim()
