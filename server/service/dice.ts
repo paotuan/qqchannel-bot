@@ -11,10 +11,26 @@ interface IMessageCache {
   id: string
   timestamp: number
   text?: string // 文本消息才有
-  skill?: string | null // 文本消息是否包含技能或属性。第一次使用时解析（undefined: 未解析，null：解析了但是为空）
+  instruction?: string | null // 文本消息是否包含指令。第一次使用时解析（undefined: 未解析，null：解析了但是为空）
 }
 
-const _recentMessages: IMessageCache[] = []
+let _recentMessages: IMessageCache[] = []
+
+// 获取最近消息
+function getRecentMessages() {
+  // 过滤掉超过5分钟的消息
+  const lastExpiredMsgIndex = (() => {
+    const now = Date.now()
+    for (let i = 0; i < _recentMessages.length; i++) {
+      if (now - _recentMessages[i].timestamp <= 5 * 60 * 1000 - 2000) {
+        return i
+      }
+    }
+    return _recentMessages.length
+  })()
+  _recentMessages = _recentMessages.slice(lastExpiredMsgIndex)
+  return _recentMessages
+}
 
 qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
   const msg = data.msg as IMessage
@@ -23,6 +39,11 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
   if (channel !== config.listenToChannelId) return
 
   // 最近消息缓存
+  _recentMessages.push({
+    id: msg.id,
+    timestamp: new Date(msg.timestamp).getTime(),
+    text: msg.content?.trim()
+  })
 
   // 无视非文本消息
   const content = msg.content?.trim()
@@ -39,16 +60,47 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
     fullExp = content.substring(1)
   }
   if (!fullExp) return
+  // 投骰
+  tryRollDice(fullExp, msg.author.id, msg.member.nick, msg.id)
+})
 
-  const msg_id = msg.id
-  const nickname = msg.member.nick
+qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data: any) => {
+  // console.log(data) // 似乎没有暴露类型定义
+  // 无视未监听的频道消息
+  const channel = data.msg.channel_id
+  if (channel !== config.listenToChannelId) return
+  // 无视取消表情
+  if (data.eventType === 'MESSAGE_REACTION_REMOVE') return
+  // 找到表情对应的消息
+  const msgId = data.msg.target.id as string
+  const msgCache = getRecentMessages()
+  const sourceMsg = msgCache.find(msg => msg.id === msgId)
+  if (!sourceMsg || !sourceMsg.text) return // 消息过期了或不是文本消息，无视
+  if (typeof sourceMsg.instruction === 'undefined') {
+    sourceMsg.instruction = detectInstruction(sourceMsg.text) // 第一次解析
+  }
+  if (!sourceMsg.instruction) return // 不存在指令
+  // 可以发消息，找到发消息人对应的昵称
+  const userId = data.msg.user_id as string
+  const user = qqApi.userList.find(user => user.id === userId)
+  const nickname = user?.nick || userId
+  tryRollDice(`d% ${sourceMsg.instruction}`, userId, nickname, sourceMsg.id)
+})
 
+/**
+ * 投骰
+ * @param fullExp 指令表达式
+ * @param userId 用户 id
+ * @param nickname 用户昵称
+ * @param msgId 被动消息 id
+ */
+function tryRollDice(fullExp: string, userId: string, nickname: string, msgId: string) {
   try {
     const [exp, desc = ''] = parseFullExp(fullExp)
     console.log(fullExp, exp, desc)
     const roll = new DiceRoll(exp)
     // 判断成功等级
-    const result = decideResult(msg.author.id, desc, roll.total)
+    const result = decideResult(userId, desc, roll.total)
     if (result?.resultDesc?.endsWith('成功')) {
       // 成功的技能检定返回客户端。这么判断有点丑陋不过先这样吧
       // todo 推送给同一个子频道的端
@@ -60,7 +112,7 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
     }
     // 返回结果
     const reply = `${nickname} 🎲 ${desc} ${roll.output} ${result?.resultDesc || ''}`
-    qqApi.client.messageApi.postMessage(channel, { content: reply, msg_id }).then((res) => {
+    qqApi.client.messageApi.postMessage(config.listenToChannelId, { content: reply, msg_id: msgId }).then((res) => {
       console.log('[Dice] 发送成功 ' + reply)
       // 自己发的消息要记录 log
       wss.send<ILogPushResp>(null, {
@@ -81,15 +133,7 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
   } catch (e) {
     // 表达式不合法，无视之
   }
-})
-
-qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data: any) => {
-  console.log(data) // 似乎没有暴露类型定义
-  // 无视未监听的频道消息
-  const channel = data.msg.channel_id
-  if (channel !== config.listenToChannelId) return
-
-})
+}
 
 // 提取指令为 [骰子表达式, 描述]
 function parseFullExp(fullExp: string): [string, string] {
@@ -151,4 +195,16 @@ function decideResult(sender: string, desc: string, roll: number) {
   }
   // extra. 如果技能成功了，返回成功的技能名字，用来给前端自动高亮
   return { resultDesc, skill, cardName }
+}
+
+const instRegex = new RegExp('(力量|体质|体型|敏捷|外貌|智力|灵感|意志|教育|理智|幸运|会计|人类学|估价|考古学|魅惑|攀爬|计算机|信用|克苏鲁神话|乔装|闪避|驾驶|电气维修|电子学|话术|格斗|射击|急救|历史|恐吓|跳跃|母语|法律|图书馆|聆听|锁匠|机械维修|医学|博物学|领航|神秘学|重型机械|说服|精神分析|心理学|骑术|妙手|侦查|侦察|潜行|游泳|投掷|追踪|sc|SC)', 'g')
+
+// 判断文本中有没有包含指令
+function detectInstruction(text: string) {
+  const skillMatch = text.match(instRegex)
+  if (!skillMatch) return null
+  const skill = skillMatch[0]
+  const difficultyMatch = text.match(/(困难|极难|极限)/)
+  const difficulty = difficultyMatch ? difficultyMatch[0] : ''
+  return difficulty + skill
 }

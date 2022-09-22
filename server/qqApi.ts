@@ -1,6 +1,6 @@
 import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
 import wss from './wss'
-import type { IBotInfoResp, IChannelListResp, ILoginReq, IUserListResp } from '../interface/common'
+import type { IBotInfoResp, IChannelListResp, ILoginReq, IUser, IUserListResp } from '../interface/common'
 import { EventEmitter } from 'events'
 
 interface IConnection {
@@ -13,6 +13,7 @@ interface IConnection {
 
 const connection: IConnection = { appid: null, token: null, client: null, ws: null, botInfo: null }
 const qqBotEmitter = new EventEmitter()
+const store = { userList: [] as IUser[] }
 
 // 监听登录事件，建立与 qq 机器人服务器的连接
 wss.on('bot/login', async (ws, data) => {
@@ -30,6 +31,7 @@ wss.on('bot/login', async (ws, data) => {
     wss.send<IChannelListResp | null>(ws, { cmd: 'channel/list', success: !!channels, data: channels })
     // 获取频道成员列表
     const users = await getUserList(botInfo.guildId)
+    if (users) store.userList = users
     wss.send<IUserListResp | null>(ws, { cmd: 'user/list', success: !!users, data: users })
   }
 })
@@ -122,6 +124,9 @@ const qqApi = {
   },
   get botInfo() {
     return connection.botInfo
+  },
+  get userList() {
+    return store.userList
   }
 }
 

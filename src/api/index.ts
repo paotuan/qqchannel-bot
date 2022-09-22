@@ -89,9 +89,9 @@ ws.on('card/import', data => {
     const { card } = data.data as ICardImportResp
     const cardStore = useCardStore()
     cardStore.addOrUpdateCards([card])
-    Toast.success('人物卡导入成功！')
+    Toast.success('人物卡保存成功！')
   } else {
-    Toast.error('人物卡导入失败！')
+    Toast.error('人物卡保存失败！')
   }
 })
 
