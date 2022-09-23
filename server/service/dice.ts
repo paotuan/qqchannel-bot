@@ -3,7 +3,7 @@ import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import config from './common'
 import wss from '../wss'
-import type { ICardTestResp, ILogPushResp } from '../../interface/common'
+import type { ICard, ICardTestResp, ILogPushResp } from '../../interface/common'
 import { cardStore } from './card'
 
 // 缓存最近5分钟的消息 todo 后面独立出去
@@ -178,9 +178,7 @@ function decideResult(sender: string, desc: string, roll: number) {
     const isEx = skill.indexOf('极难') >= 0 || skill.indexOf('极限') >= 0
     skill = skill.replace(/(困难|极难|极限)/g, '')
     if (skill === '侦查') skill = '侦察' // 人物卡模版里的是后者
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    let target = card.props[skill] || card.skills[skill]
+    let target = card.props[skill as keyof ICard['props']] || card.skills[skill]
     if (!target) return null // 没有技能。技能值为 0 应该也不可能
     // 3. 判断大成功大失败
     if (roll === 1) {

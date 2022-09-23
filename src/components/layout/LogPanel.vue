@@ -59,12 +59,13 @@ const tooltip = computed(() => {
 
 const sortableRef = ref(null)
 onMounted(() => {
-  Sortable.create(sortableRef.value, {
+  Sortable.create(sortableRef.value!, {
     handle: '.sortable-handle',
     ghostClass: 'bg-base-200',
-    onEnd: ({ newIndex, oldIndex }: { newIndex: number, oldIndex: number }) => {
-      const movingLog = logStore.logs.splice(oldIndex, 1)[0]
-      logStore.logs.splice(newIndex, 0, movingLog)
+    onEnd: (event) => {
+      const { newIndex, oldIndex } = event
+      const movingLog = logStore.logs.splice(oldIndex!, 1)[0]
+      logStore.logs.splice(newIndex!, 0, movingLog)
     }
   })
 })

@@ -139,7 +139,7 @@ function getCardProto(): ICard {
   }
 }
 
-const PROP_KEYS = Object.keys(getCardProto().props)
+const PROP_KEYS = Object.keys(getCardProto().props) as Array<keyof ICard['props']>
 
 function _unifiedKey(key: string) {
   let unifiedKey = key
@@ -193,10 +193,8 @@ export function parseText(name: string, rawText: string): ICard {
       break
     default:
       // 2. props
-      if (PROP_KEYS.includes(unifiedKey)) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        card.props[unifiedKey] = num
+      if ((PROP_KEYS as string[]).includes(unifiedKey)) {
+        card.props[unifiedKey as keyof ICard['props']] = num
       } else {
         // 3. any skills
         card.skills[unifiedKey] = num

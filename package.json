@@ -3,10 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev:admin": "vite",
-    "build:admin": "vue-tsc --noEmit && vite build",
-    "preview:admin": "vite preview",
-    "dev:bot": "npx nodemon --watch server server/index.ts"
+    "dev:client": "vite",
+    "build:client": "vue-tsc --noEmit && vite build",
+    "preview:client": "vite preview",
+    "dev:server": "npx nodemon --watch server server/index.ts",
+    "build:server": "tsc -p ./server"
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.1.0",
@@ -31,6 +32,7 @@
     "@typescript-eslint/parser": "^5.37.0",
     "@vitejs/plugin-vue": "^3.1.0",
     "autoprefixer": "^10.4.10",
+    "cssnano": "^5.1.13",
     "eslint": "8.22.0",
     "eslint-plugin-vue": "^9.4.0",
     "nodemon": "^2.0.19",
