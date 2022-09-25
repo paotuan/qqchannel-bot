@@ -7,13 +7,16 @@
     "build:client": "vue-tsc --noEmit && vite build",
     "preview:client": "vite preview",
     "dev:server": "npx nodemon --watch server server/index.ts",
-    "build:server": "tsc -p ./server"
+    "build:server": "tsc -p ./server",
+    "build": "npm run build:client && npm run build:server",
+    "preview": "cross-env NODE_ENV=production node distsvr/server/index.js"
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.1.0",
     "@heroicons/vue": "^2.0.11",
     "daisyui": "^2.27.0",
     "dotenv": "^16.0.2",
+    "express": "^4.18.1",
     "glob": "^8.0.3",
     "mitt": "^3.0.0",
     "pinia": "^2.0.22",
@@ -24,6 +27,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/express": "^4.17.14",
     "@types/glob": "^8.0.0",
     "@types/node": "^18.7.17",
     "@types/sortablejs": "^1.13.0",
@@ -32,6 +36,7 @@
     "@typescript-eslint/parser": "^5.37.0",
     "@vitejs/plugin-vue": "^3.1.0",
     "autoprefixer": "^10.4.10",
+    "cross-env": "^7.0.3",
     "cssnano": "^5.1.13",
     "eslint": "8.22.0",
     "eslint-plugin-vue": "^9.4.0",
