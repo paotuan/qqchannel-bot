@@ -18,13 +18,22 @@ todo 待完善快速上手视频及文字帮助文档
 ### 服务器部署
 如果你希望机器人 24 小时不间断运行，你就需要把它部署到服务器上。（或者 24 小时从不关机的本地运行也可以）
 
-// 待完善
+```bash
+yarn global add pm2
+yarn install
+yarn run build
+yarn run start # 使用 pm2 后台执行
+# yarn run preview # 使用 node 执行
+```
+启动后需登录一次网页端挂上机器人和对应子频道，网页端默认端口号 4175
 
 ### 本地开发
 require Node >= 14.18
 
 ```bash
 yarn install
+yarn run dev:server
+yarn run dev:client
 ```
 
 ## 功能展示

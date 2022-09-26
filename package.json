@@ -9,7 +9,9 @@
     "dev:server": "npx nodemon --watch server server/index.ts",
     "build:server": "tsc -p ./server",
     "build": "npm run build:client && npm run build:server",
-    "preview": "cross-env NODE_ENV=production node distsvr/server/index.js"
+    "preview": "cross-env NODE_ENV=production node distsvr/server/index.js",
+    "start": "cross-env NODE_ENV=production pm2 start distsvr/server/index.js --name qqchannel-bot",
+    "stop": "pm2 stop qqchannel-bot"
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.1.0",
