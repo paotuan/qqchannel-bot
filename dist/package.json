@@ -1,0 +1,22 @@
+{
+  "name": "dist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bundle.js",
+  "scripts": {
+    "bundle": "pkg . --compress GZip"
+  },
+  "bin": "bundle.js",
+  "pkg": {
+    "assets": "client/**/*",
+    "targets": [
+      "node14-win-x64"
+    ],
+    "outputPath": "bin"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}

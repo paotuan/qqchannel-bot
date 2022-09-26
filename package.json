@@ -7,18 +7,11 @@
     "build:client": "vue-tsc --noEmit && vite build",
     "preview:client": "vite preview",
     "dev:server": "npx nodemon --watch server server/index.ts",
-    "build:server": "tsc -p ./server",
+    "build:server": "ncc build ./server/index.ts -o dist/server",
     "build": "npm run build:client && npm run build:server",
-    "preview": "cross-env NODE_ENV=production node distsvr/server/index.js",
-    "start": "cross-env NODE_ENV=production pm2 start distsvr/server/index.js --name qqchannel-bot",
-    "stop": "pm2 stop qqchannel-bot",
-    "bundle": "pkg ."
-  },
-  "bin": "bundle.js",
-  "pkg": {
-    "assets": "dist/**/*",
-    "targets": [ "node14-win-x64" ],
-    "outputPath": "bin"
+    "preview": "node dist/bundle.js",
+    "start": "pm2 start dist/bundle.js --name qqchannel-bot",
+    "stop": "pm2 stop qqchannel-bot"
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.1.0",
@@ -43,9 +36,9 @@
     "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
+    "@vercel/ncc": "^0.34.0",
     "@vitejs/plugin-vue": "^3.1.0",
     "autoprefixer": "^10.4.10",
-    "cross-env": "^7.0.3",
     "cssnano": "^5.1.13",
     "eslint": "8.22.0",
     "eslint-plugin-vue": "^9.4.0",
