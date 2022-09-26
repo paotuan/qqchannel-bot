@@ -11,7 +11,14 @@
     "build": "npm run build:client && npm run build:server",
     "preview": "cross-env NODE_ENV=production node distsvr/server/index.js",
     "start": "cross-env NODE_ENV=production pm2 start distsvr/server/index.js --name qqchannel-bot",
-    "stop": "pm2 stop qqchannel-bot"
+    "stop": "pm2 stop qqchannel-bot",
+    "bundle": "pkg ."
+  },
+  "bin": "bundle.js",
+  "pkg": {
+    "assets": "dist/**/*",
+    "targets": [ "node14-win-x64" ],
+    "outputPath": "bin"
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.1.0",
