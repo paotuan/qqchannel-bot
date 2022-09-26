@@ -60,6 +60,9 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
     fullExp = content.substring(1)
   }
   if (!fullExp) return
+  // 转义 转义得放在 at 消息和 emoji 之类的后面
+  fullExp = unescapeHTML(fullExp)
+
   // 投骰
   tryRollDice(fullExp, msg.author.id, msg.member.nick, msg.id)
 })
@@ -144,15 +147,36 @@ function parseFullExp(fullExp: string): [string, string] {
   const index = fullExp.search(/[\p{Unified_Ideograph}\s]/u) // 按第一个中文或空格分割
   const [exp, desc = ''] = index < 0 ? [fullExp] : [fullExp.slice(0, index), fullExp.slice(index)]
   // 兼容一些其他指令
+  // 默认骰，目前写死是 d100
   if (exp === 'd' || exp === 'r' || exp === 'rd') {
-    return ['d%', desc] // 默认骰，目前写死是 d100
-  } else if (exp === 'ra') {
-    return ['d%', desc] // coc 技能骰
-  } else if (exp.startsWith('r')) {
-    return [exp.slice(1), desc] // rd100 => d100
-  } else {
-    return [exp, desc]
+    return ['d%', desc]
   }
+  // coc 技能骰
+  if (exp === 'ra') {
+    return ['d%', desc]
+  }
+
+  // rb 奖励骰、rd 惩罚骰
+  const rbrpMatch = exp.match(/^r([bp])\s*(\d+)?$/)
+  if (rbrpMatch) {
+    const type = rbrpMatch[1] === 'b' ? 'l' : 'h'
+    const count = parseInt(rbrpMatch[2] || '1', 10) // 默认一个奖励/惩罚骰
+    return [`${count + 1}d%k${type}1`, desc]
+  }
+
+  // ww3a9: 3d10, >=9 则重投，计算骰子 >=8 的个数
+  const wwMatch = exp.match(/^ww\s*(\d+)\s*a?\s*(\d+)*$/)
+  if (wwMatch) {
+    const diceCount = parseInt(wwMatch[1], 10)
+    const explodeCount = parseInt(wwMatch[2] || '10', 10) // 默认达到 10 重投
+    return [`${diceCount}d10!>=${explodeCount}>=8`, desc]
+  }
+
+  // rd100 => d100
+  if (exp.startsWith('r')) {
+    return [exp.slice(1), desc]
+  }
+  return [exp, desc]
 }
 
 function decideResult(sender: string, desc: string, roll: number) {
@@ -205,4 +229,15 @@ function detectInstruction(text: string) {
   const difficultyMatch = text.match(/(困难|极难|极限)/)
   const difficulty = difficultyMatch ? difficultyMatch[0] : ''
   return difficulty + skill
+}
+
+// https://www.zhangxinxu.com/wordpress/2021/01/dom-api-html-encode-decode/
+function unescapeHTML(str: string) {
+  return str.replace(/&lt;|&gt;|&amp;/g, function (matches) {
+    return ({
+      '&lt;': '<',
+      '&gt;': '>',
+      '&amp;': '&'
+    })[matches] || ''
+  })
 }
