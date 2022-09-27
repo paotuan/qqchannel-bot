@@ -82,7 +82,7 @@ async function getBotInfo(): Promise<IBotInfoResp | null> {
     const [infoResp, guildResp] = await Promise.all([meApi.me(), meApi.meGuilds({ limit: 1 })])
     return {
       id: infoResp.data.id,
-      username: infoResp.data.username,
+      username: infoResp.data.username.replace(/-测试中$/, ''),
       avatar: infoResp.data.avatar,
       guildId: guildResp.data[0].id,
       guildName: guildResp.data[0].name
