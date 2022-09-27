@@ -50,6 +50,7 @@ const clearCache = () => {
         <ul tabindex="0" class="menu dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-40">
           <li><a @click="clearCache">清除缓存</a></li>
           <li><a href="https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt?&u=9c5a3d56039547c5a9f887f7c5f54557" target="_blank">使用帮助<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a></li>
+          <li><a href="https://pd.qq.com/s/fjp30g" target="_blank">官方频道<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a></li>
         </ul>
       </div>
     </div>

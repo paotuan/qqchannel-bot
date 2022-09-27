@@ -13,7 +13,9 @@ todo 待完善快速上手视频及文字帮助文档
 ### 一键使用
 如果你不了解代码，或只是想用最简单的方式用起来，可以直接下载二进制包，本地运行。
 
-// 待完善
+进入 [releases 页面](https://github.com/paotuan/qqchannel-bot/releases)，选择对应操作系统（win/mac）的最新版本下载即可。
+
+如遇网络问题，可尝试使用 [Github Proxy](https://ghproxy.com/) 加速下载。
 
 ### 服务器部署
 如果你希望机器人 24 小时不间断运行，你就需要把它部署到服务器上。（或者 24 小时从不关机的本地运行也可以）
@@ -22,8 +24,13 @@ todo 待完善快速上手视频及文字帮助文档
 yarn global add pm2
 yarn install
 yarn run build
-yarn run start # 使用 pm2 后台执行
-# yarn run preview # 使用 node 执行
+```
+构建产物会生成在 dist 目录下，如需前后端分离部署，各自部署 server 和 client 文件夹即可。（网页端需修改下服务器地址，后续暴露配置）
+
+如需单体部署，则继续执行：
+```bash
+cd dist && yarn install
+cd .. && yarn run start # 使用 pm2 后台执行
 ```
 启动后需登录一次网页端挂上机器人和对应子频道，网页端默认端口号 4175
 
@@ -45,4 +52,4 @@ yarn run dev:client
 - 多种主题一键切换
 
 
-任何意见建议，欢迎 issue，pr 或加群 115699014 讨论
+任何意见建议，欢迎 issue，pr 或加群 115699014 讨论。早期开发中，代码结构可能改动较大，敬请谅解。
