@@ -72,7 +72,7 @@ function connectQQChannel(params: ILoginReq) {
     qqBotEmitter.emit(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, data)
   })
 
-  console.log('successful connect to qq server')
+  console.log('连接 QQ 服务器成功')
 }
 
 // 获取机器人和频道信息，由于是私域机器人，只需考虑一个频道即可

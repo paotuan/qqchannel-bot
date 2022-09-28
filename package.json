@@ -1,7 +1,7 @@
 {
   "name": "qqchannel-bot-admin",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "scripts": {
     "dev:client": "vite",
     "build:client": "vue-tsc --noEmit && vite build",

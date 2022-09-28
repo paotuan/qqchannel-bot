@@ -1,11 +1,18 @@
-// process.env.NODE_ENV = 'production'
+process
+  .on('unhandledRejection', (reason, p) => {
+    console.warn('Promise 错误', reason, p)
+  })
+  .on('uncaughtException', err => {
+    console.error('系统错误', err)
+    // process.exit(1)
+  })
+
 require('./server/index')
 
 const express = require('express')
 const path = require('path')
 const server = express()
 const staticPath = path.resolve(__dirname, './client')
-// console.log(__dirname, staticPath)
 server.use(express.static(staticPath))
 server.listen(4175)
-console.log('后台已启动，请访问 http://localhost:4175')
+console.log('管理后台已启动，请使用浏览器访问 http://localhost:4175 登录机器人')

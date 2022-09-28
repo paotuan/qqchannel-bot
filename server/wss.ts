@@ -3,7 +3,8 @@ import type { WebSocket } from 'ws'
 import type { IMessage, Command } from '../interface/common'
 import { EventEmitter } from 'events'
 
-const wss = new WebSocketServer({ port: 4174 })
+const WSS_PORT = 4174
+const wss = new WebSocketServer({ port: WSS_PORT })
 const wssEmitter = new EventEmitter()
 
 wss.on('connection', (ws) => {
@@ -19,7 +20,7 @@ wss.on('connection', (ws) => {
   wssEmitter.emit('card/list', ws)
 })
 
-console.log('websocket server started')
+console.log('WebSocket 已启动，端口号 ' + WSS_PORT)
 
 export default {
   // 监听客户端事件

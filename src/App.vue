@@ -10,6 +10,7 @@ import { ToastType, useUIStore } from './store/ui'
 import ThemePicker from './components/nav/ThemePicker.vue'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { Toast } from './utils'
+import { VERSION_NAME } from '../interface/version'
 
 const bot = useBotStore()
 const channel = useChannelStore()
@@ -41,6 +42,20 @@ const clearCache = () => {
   allKeys.forEach(key => localStorage.removeItem(key))
   Toast.success('清除缓存成功！')
 }
+
+const checkUpdate = async () => {
+  try {
+    const resp = await fetch('https://api.github.com/repos/paotuan/qqchannel-bot/releases/latest')
+    const data = await resp.json()
+    if (!data.tag_name || data.tag_name === VERSION_NAME) {
+      Toast.success('已是最新版本！')
+    } else {
+      Toast.success(`发现新版本 ${data.tag_name}！`)
+    }
+  } catch (e) {
+    console.warn(e)
+  }
+}
 </script>
 <template>
   <div class="navbar bg-base-100 shadow-lg">
@@ -48,6 +63,7 @@ const clearCache = () => {
       <div class="dropdown">
         <label tabindex="0" class="btn btn-ghost normal-case text-xl">🎲 QQ 频道机器人</label>
         <ul tabindex="0" class="menu dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-40">
+          <li><a @click="checkUpdate">版本：{{ VERSION_NAME }}</a></li>
           <li><a @click="clearCache">清除缓存</a></li>
           <li><a href="https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt?&u=9c5a3d56039547c5a9f887f7c5f54557" target="_blank">使用帮助<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a></li>
           <li><a href="https://pd.qq.com/s/fjp30g" target="_blank">官方频道<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a></li>
