@@ -8,7 +8,9 @@
 
 ## 使用方式
 
-todo 待完善快速上手视频及文字帮助文档
+[【bilibili】功能演示](https://www.bilibili.com/video/BV1hY4y1N7Ko/)
+
+[【腾讯文档】QQ 频道跑团机器人使用指南](https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt)
 
 ### 一键使用
 如果你不了解代码，或只是想用最简单的方式用起来，可以直接下载二进制包，本地运行。
