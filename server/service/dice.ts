@@ -57,7 +57,7 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
     fullExp = content.replace(`<@!${botUserId}> `, '').trim()
   } else if (content.startsWith('.') || content.startsWith('。')) {
     // 指令消息
-    fullExp = content.substring(1)
+    fullExp = content.substring(1).trim()
   }
   if (!fullExp) return
   // 转义 转义得放在 at 消息和 emoji 之类的后面
@@ -100,7 +100,7 @@ qqApi.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data: any) => {
 function tryRollDice(fullExp: string, userId: string, nickname: string, msgId: string) {
   try {
     const [exp, desc = ''] = parseFullExp(fullExp)
-    console.log(fullExp, exp, desc)
+    console.log('[Dice] 原始指令：', fullExp, '解析指令：', exp, '描述：', desc)
     const roll = new DiceRoll(exp)
     // 判断成功等级
     const result = decideResult(userId, desc, roll.total)
@@ -165,16 +165,16 @@ function parseFullExp(fullExp: string): [string, string] {
   }
 
   // ww3a9: 3d10, >=9 则重投，计算骰子 >=8 的个数
-  const wwMatch = exp.match(/^ww\s*(\d+)\s*a?\s*(\d+)*$/)
+  const wwMatch = exp.match(/^w{1,2}\s*(\d+)\s*a?\s*(\d+)*$/)
   if (wwMatch) {
     const diceCount = parseInt(wwMatch[1], 10)
     const explodeCount = parseInt(wwMatch[2] || '10', 10) // 默认达到 10 重投
     return [`${diceCount}d10!>=${explodeCount}>=8`, desc]
   }
 
-  // rd100 => d100
+  // 'rd100' / 'r d100' => d100s
   if (exp.startsWith('r')) {
-    return [exp.slice(1), desc]
+    return [exp.slice(1).trim(), desc]
   }
   return [exp, desc]
 }

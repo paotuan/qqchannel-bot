@@ -35,7 +35,7 @@ const clearCache = () => {
   const length = localStorage.length
   for (let i = 0; i < length; i++) {
     const key = localStorage.key(i)
-    if (key && (['appid', 'token', 'theme'].includes(key) || key.startsWith('log-'))) {
+    if (key && key.startsWith('log-')) {
       allKeys.push(key)
     }
   }
