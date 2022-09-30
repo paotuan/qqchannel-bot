@@ -34,6 +34,12 @@ export interface IBotInfoResp {
   guildId: string
   guildName: string
 }
+
+export interface IBotInfoRespV2 {
+  id: string
+  username: string
+  avatar: string
+}
 // endregion bot
 
 // region channel
