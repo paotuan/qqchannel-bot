@@ -12,6 +12,8 @@
 
 [【腾讯文档】QQ 频道跑团机器人使用指南](https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt)
 
+[【bilibili】搭建流程](https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt)
+
 ### 一键使用
 如果你不了解代码，或只是想用最简单的方式用起来，可以直接下载二进制包，本地运行。
 
