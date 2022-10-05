@@ -1,17 +1,18 @@
 import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
 import type { IBotInfoRespV2 } from '../../../interface/common'
-import { Guild } from './guild'
+import { GuildManager } from './guild'
 
 /**
  * A bot connection to QQ
  */
-class QApi {
+export class QApi {
   readonly appid: string
   readonly token: string
-  readonly botInfoPromise: Promise<IBotInfoRespV2 | null>
-  private readonly qqClient: ReturnType<typeof createOpenAPI>
-  private readonly qqWs: ReturnType<typeof createWebsocket>
-  private readonly guilds: Guild[] = [] // 机器人所在频道信息。根据 QQ 的规范，不同机器人不能共享数据，且机器人权限可能不同。因此即使多个机器人加入了相同的频道，也应将它们的信息分开存储
+  readonly qqClient: ReturnType<typeof createOpenAPI>
+  readonly qqWs: ReturnType<typeof createWebsocket>
+  readonly guilds: GuildManager
+
+  botInfo: IBotInfoRespV2 | null = null
 
   constructor(appid: string, token: string) {
     this.appid = appid
@@ -21,48 +22,35 @@ class QApi {
       appID: appid,
       token: token,
       intents: [
+        AvailableIntentsEventsEnum.GUILDS,
+        AvailableIntentsEventsEnum.GUILD_MEMBERS,
         AvailableIntentsEventsEnum.GUILD_MESSAGES,
-        AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS
+        AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS,
+        AvailableIntentsEventsEnum.DIRECT_MESSAGE
       ],
       sandbox: false,
     }
     this.qqClient = createOpenAPI(botConfig)
     this.qqWs = createWebsocket(botConfig)
-
-    // todo 监听 intent
-    // this.qqWs.on('')
-
+    // todo token 错误场景
     console.log('连接 QQ 服务器成功')
 
     // 获取 bot 基本信息
-    this.botInfoPromise = this._botInfoPromise()
-    // 获取 bot 所在频道信息
-    this.fetchGuilds()
+    this.fetchBotInfo()
+    // 初始化 bot 所在频道信息
+    this.guilds = new GuildManager(this)
   }
 
-  private _botInfoPromise(): Promise<IBotInfoRespV2 | null> {
-    return new Promise(resolve => {
-      this.qqClient.meApi.me().then(resp => {
-        resolve({
-          id: resp.data.id,
-          username: resp.data.username.replace(/-测试中$/, ''),
-          avatar: resp.data.avatar,
-        })
-      }).catch(e => {
-        console.error('获取机器人信息失败', e)
-        resolve(null)
-      })
+  private fetchBotInfo() {
+    this.qqClient.meApi.me().then(resp => {
+      this.botInfo = {
+        id: resp.data.id,
+        username: resp.data.username.replace(/-测试中$/, ''),
+        avatar: resp.data.avatar,
+      }
+    }).catch(e => {
+      console.error('获取机器人信息失败', e)
     })
-  }
-
-  async fetchGuilds() {
-    this.guilds.length = 0
-    try {
-      const resp = await this.qqClient.meApi.meGuilds({ limit: 1 }) // 先只拉一个
-      this.guilds.push(...resp.data.map(info => new Guild(info.id, info.name)))
-    } catch (e) {
-      console.error('获取频道信息失败', e)
-    }
   }
 
   disconnect() {
@@ -71,7 +59,13 @@ class QApi {
 }
 
 export class QApiManager {
+  static readonly Instance = new QApiManager()
+
   private readonly apis: Record<string, QApi> = {}
+
+  private constructor() {
+    // singleton
+  }
 
   // 登录 qq 机器人，建立与 qq 服务器的 ws
   login(appid: string, token: string) {
@@ -90,7 +84,7 @@ export class QApiManager {
   }
 
   // 获取对应 appid 的机器人 api
-  api(appid: string) {
+  find(appid: string) {
     return this.apis[appid]
   }
 }
