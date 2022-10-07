@@ -1,5 +1,6 @@
 import type { QApi } from './index'
 import { AvailableIntentsEventsEnum, IChannel, IMember } from 'qq-guild-bot'
+import { makeAutoObservable } from 'mobx'
 
 export class Guild {
   readonly id: string
@@ -7,7 +8,16 @@ export class Guild {
   channelsMap: Record<string, Channel> = {}
   usersMap: Record<string, User> = {}
 
+  get allChannels() {
+    return Object.values(this.channelsMap)
+  }
+
+  get allUsers() {
+    return Object.values(this.usersMap)
+  }
+
   constructor(api: QApi, id: string, name: string) {
+    makeAutoObservable(this, { id: false })
     this.id = id
     this.name = name
     this.fetchChannels(api)
@@ -21,7 +31,7 @@ export class Guild {
       const channels = data
         .filter(channel => channel.type === Channel.TYPE_TEXT)
         .map(channel => new Channel(channel.id, this.id, channel.name))
-      channels.forEach(chan => this.channelsMap[chan.id] = chan)
+      this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
     } catch (e) {
       console.error('获取子频道信息失败', e)
     }
@@ -82,6 +92,7 @@ export class Channel {
   name: string
 
   constructor(id: string, guildId: string, name: string) {
+    makeAutoObservable(this, { id: false, guildId: false })
     this.id = id
     this.guildId = guildId
     this.name = name
@@ -98,6 +109,7 @@ export class User {
   deleted = false // user 退出不能删除，只标记为 delete，因为其他地方可能还需要 user 的相关信息
 
   constructor(member: IMember) {
+    makeAutoObservable(this, { id: false, guildId: false })
     this.id = member.user.id
     this.guildId = member.guild_id
     this.nick = member.nick
@@ -111,7 +123,12 @@ export class GuildManager {
   readonly api: QApi
   guildsMap: Record<string, Guild> = {}
 
+  get all() {
+    return Object.values(this.guildsMap)
+  }
+
   constructor(api: QApi) {
+    makeAutoObservable(this, { api: false })
     this.api = api
     this.fetchGuilds().then(() => {
       this.initEventListeners()

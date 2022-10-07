@@ -1,6 +1,7 @@
 import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
 import type { IBotInfoRespV2 } from '../../../interface/common'
 import { GuildManager } from './guild'
+import { makeAutoObservable } from 'mobx'
 
 /**
  * A bot connection to QQ
@@ -15,6 +16,13 @@ export class QApi {
   botInfo: IBotInfoRespV2 | null = null
 
   constructor(appid: string, token: string) {
+    makeAutoObservable(this, {
+      appid: false,
+      token: false,
+      qqClient: false,
+      qqWs: false
+    })
+
     this.appid = appid
     this.token = token
 
@@ -63,8 +71,9 @@ export class QApiManager {
 
   private readonly apis: Record<string, QApi> = {}
 
+  // singleton
   private constructor() {
-    // singleton
+    makeAutoObservable(this)
   }
 
   // 登录 qq 机器人，建立与 qq 服务器的 ws
@@ -73,7 +82,6 @@ export class QApiManager {
     if (oldApi) {
       if (oldApi.token === token) {
         console.log('已存在相同的 QQ 服务器连接，可直接复用')
-        // todo 重连更新频道信息
         return // 无需重连
       } else {
         console.log('检测到相同 APPID 但不同 Token 的连接，重新连接...')

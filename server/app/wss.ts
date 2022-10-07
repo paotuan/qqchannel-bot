@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws'
 import type { IMessage } from '../../interface/common'
 import { WsClient } from './wsclient'
+import { dispatch } from './dispatcher'
 
 /**
  * The server is a singleton websocket server
@@ -27,7 +28,7 @@ export class Wss {
   }
 
   handleClientRequest(client: WsClient, request: IMessage<unknown>) {
-    // todo
+    dispatch(client, this, request)
   }
 
   removeClient(client: WsClient) {
