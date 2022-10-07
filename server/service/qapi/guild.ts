@@ -5,8 +5,8 @@ import { makeAutoObservable } from 'mobx'
 export class Guild {
   readonly id: string
   name: string
-  channelsMap: Record<string, Channel> = {}
-  usersMap: Record<string, User> = {}
+  private channelsMap: Record<string, Channel> = {}
+  private usersMap: Record<string, User> = {}
 
   get allChannels() {
     return Object.values(this.channelsMap)
@@ -121,7 +121,7 @@ export class User {
 
 export class GuildManager {
   readonly api: QApi
-  guildsMap: Record<string, Guild> = {}
+  private guildsMap: Record<string, Guild> = {}
 
   get all() {
     return Object.values(this.guildsMap)
@@ -133,6 +133,10 @@ export class GuildManager {
     this.fetchGuilds().then(() => {
       this.initEventListeners()
     })
+  }
+
+  find(guildId: string) {
+    return this.guildsMap[guildId]
   }
 
   async fetchGuilds() {

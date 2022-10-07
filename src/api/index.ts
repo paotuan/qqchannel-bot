@@ -1,6 +1,6 @@
 import ws from './ws'
 import {
-  IBotInfoResp, ICard,
+  IBotInfo, ICard,
   ICardImportResp, ICardTestResp,
   IChannel,
   ILog,
@@ -27,7 +27,7 @@ ws.on('bot/login', message => {
 
 ws.on('bot/info', message => {
   const bot = useBotStore()
-  bot.info = message.data as IBotInfoResp
+  bot.info = message.data as IBotInfo
 })
 
 ws.on('channel/list', data => {

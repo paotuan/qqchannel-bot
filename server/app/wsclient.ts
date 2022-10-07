@@ -40,8 +40,12 @@ export class WsClient {
       this.disposeAllEffects()
       server.removeClient(this)
     })
+  }
 
-    // todo send bot info
+  // 监听某个子频道
+  listenTo(channelId: string, guildId: string) {
+    this.listenToChannelId = channelId
+    this.listenToGuildId = guildId
   }
 
   // 发送给网页

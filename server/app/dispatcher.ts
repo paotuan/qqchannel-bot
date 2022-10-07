@@ -1,6 +1,13 @@
 import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
-import { ILoginReq, IMessage } from '../../interface/common'
+import type {
+  IBotInfoRespV2,
+  IChannel,
+  IChannelListResp,
+  IListenToChannelReq,
+  ILoginReq,
+  IMessage, IUser, IUserListResp
+} from '../../interface/common'
 import { QApiManager } from '../service/qapi'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -8,6 +15,8 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'bot/login':
     handleLogin(client, request.data as ILoginReq)
     break
+  case 'channel/listen':
+    handleListenToChannel(client, request.data as IListenToChannelReq)
   }
 }
 
@@ -22,15 +31,39 @@ function handleLogin(client: WsClient, data: ILoginReq) {
   client.autorun(ws => {
     const qApi = QApiManager.Instance.find(ws.appid)
     if (qApi?.botInfo) {
-      ws.send({ cmd: 'bot/info', success: true, data: qApi.botInfo })
+      ws.send<IBotInfoRespV2>({ cmd: 'bot/info', success: true, data: qApi.botInfo })
     }
   })
   // watch guild & channel info
   client.autorun(ws => {
     const qApi = QApiManager.Instance.find(ws.appid)
     if (qApi) {
-      const channels = qApi.guilds.all.map(guild => guild.allChannels).flat() // todo 按 guilds 分组
-      ws.send({ cmd: 'channel/list', success: true, data: channels.map(channel => ({ id: channel.id, name: channel.name })) })
+      const channels: IChannel[] = qApi.guilds.all.map(guild => guild.allChannels.map(channel => ({
+        id: channel.id, name: channel.name, guildId: channel.guildId, guildName: guild.name
+      }))).flat()
+      ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
+    }
+  })
+}
+
+function handleListenToChannel(client: WsClient, data: IListenToChannelReq) {
+  client.listenTo(data.channelId, data.guildId)
+  // watch user list
+  client.autorun(ws => {
+    const qApi = QApiManager.Instance.find(ws.appid)
+    if (qApi) {
+      const guild = qApi.guilds.find(ws.listenToGuildId)
+      if (guild) {
+        const users: IUser[] = guild.allUsers.map(user => ({
+          id: user.id,
+          nick: user.nick,
+          username: user.username,
+          avatar: user.avatar,
+          bot: user.bot,
+          deleted: user.deleted
+        }))
+        ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
+      }
     }
   })
 }

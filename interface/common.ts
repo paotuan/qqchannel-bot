@@ -22,6 +22,12 @@ export interface IMessage<T> {
 }
 
 // region bot
+export interface IBotInfo {
+  id: string
+  username: string
+  avatar: string
+}
+
 export interface ILoginReq {
   appid: string
   token: string
@@ -35,30 +41,31 @@ export interface IBotInfoResp {
   guildName: string
 }
 
-export interface IBotInfoRespV2 {
-  id: string
-  username: string
-  avatar: string
-}
+export type IBotInfoRespV2 = IBotInfo
 // endregion bot
 
 // region channel
 export interface IChannel {
   id: string
   name: string
+  guildId: string
+  guildName: string
 }
 
 export type IChannelListResp = IChannel[]
 
 export interface IListenToChannelReq {
   channelId: string
+  guildId: string
 }
 
 export interface IUser {
   id: string
   nick: string
+  username: string
   avatar: string
   bot: boolean
+  deleted: boolean
 }
 
 export type IUserListResp = IUser[]

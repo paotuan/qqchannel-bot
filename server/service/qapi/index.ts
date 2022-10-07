@@ -1,5 +1,5 @@
 import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
-import type { IBotInfoRespV2 } from '../../../interface/common'
+import type { IBotInfo } from '../../../interface/common'
 import { GuildManager } from './guild'
 import { makeAutoObservable } from 'mobx'
 
@@ -13,7 +13,7 @@ export class QApi {
   readonly qqWs: ReturnType<typeof createWebsocket>
   readonly guilds: GuildManager
 
-  botInfo: IBotInfoRespV2 | null = null
+  botInfo: IBotInfo | null = null
 
   constructor(appid: string, token: string) {
     makeAutoObservable(this, {

@@ -1,4 +1,4 @@
-import type { IChannel, ILog } from '../../interface/common'
+import type { IChannel, ILog, IListenToChannelReq } from '../../interface/common'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { useLogStore } from './log'
@@ -14,10 +14,10 @@ export const useChannelStore = defineStore('channel', {
     selected: ''
   }),
   actions: {
-    listenTo(channelId: string) {
-      this.selected = channelId
-      initChannelRelatedStorage(channelId)
-      ws.send({ cmd: 'channel/listen', data: { channelId } })
+    listenTo(channel: IChannel) {
+      this.selected = channel.id
+      initChannelRelatedStorage(channel.id)
+      ws.send<IListenToChannelReq>({ cmd: 'channel/listen', data: { channelId: channel.id, guildId: channel.guildId } })
     }
   }
 })

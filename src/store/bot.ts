@@ -1,4 +1,4 @@
-import type { IBotInfoResp } from '../../interface/common'
+import type { IBotInfo } from '../../interface/common'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 
@@ -9,7 +9,7 @@ export const useBotStore = defineStore('bot', {
     appid: localStorage.getItem('appid') || '',
     token: localStorage.getItem('token') || '',
     loginState: 'NOT_LOGIN' as LoginState,
-    info: null as IBotInfoResp | null
+    info: null as IBotInfo | null
   }),
   actions: {
     connect() {
