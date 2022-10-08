@@ -90,6 +90,21 @@ export class CardManager {
       console.log('[Card] 删除人物卡失败', e)
     }
   }
+
+  linkCard(client: WsClient, req: ICardLinkReq) {
+    const { cardName, userId } = req
+    const channel = client.listenToChannelId
+    console.log('[Card] 关联人物卡', req)
+    const linkMap = this.channelLinkMap[channel]
+    if (userId) {
+      linkMap[userId] = cardName
+    } else {
+      const user2delete = Object.keys(linkMap).find(userId => linkMap[userId] === cardName)
+      if (user2delete) {
+        delete linkMap[user2delete]
+      }
+    }
+  }
 }
 
 export const cardStore = {

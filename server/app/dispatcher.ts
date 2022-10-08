@@ -1,7 +1,7 @@
 import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
 import type {
-  IBotInfoResp, ICardDeleteReq, ICardImportReq,
+  IBotInfoResp, ICardDeleteReq, ICardImportReq, ICardLinkReq,
   IChannel,
   IChannelListResp,
   IListenToChannelReq,
@@ -34,6 +34,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'card/delete':
     handleCardDelete(client, server, request.data as ICardDeleteReq)
+    break
+  case 'card/link':
+    handleCardLink(client, server, request.data as ICardLinkReq)
     break
   }
 }
@@ -124,4 +127,9 @@ function handleCardImport(client: WsClient, server: Wss, data: ICardImportReq) {
 
 function handleCardDelete(client: WsClient, server: Wss, data: ICardDeleteReq) {
   server.cards.deleteCard(client, data)
+}
+
+function handleCardLink(client: WsClient, server: Wss, data: ICardLinkReq) {
+  if (!client.listenToChannelId) return
+  server.cards.linkCard(client, data)
 }
