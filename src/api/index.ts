@@ -1,7 +1,7 @@
 import ws from './ws'
 import {
   IBotInfo, ICard,
-  ICardImportResp, ICardTestResp,
+  ICardTestResp,
   IChannel,
   ILog,
   INoteFetchResp,
@@ -86,9 +86,9 @@ ws.on('note/fetch', data => {
 
 ws.on('card/import', data => {
   if (data.success) {
-    const { card } = data.data as ICardImportResp
-    const cardStore = useCardStore()
-    cardStore.addOrUpdateCards([card])
+    // const { card } = data.data as ICardImportResp
+    // const cardStore = useCardStore()
+    // cardStore.addOrUpdateCards([card])
     Toast.success('人物卡保存成功！')
   } else {
     Toast.error('人物卡保存失败！')

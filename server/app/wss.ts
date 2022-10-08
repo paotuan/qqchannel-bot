@@ -4,6 +4,7 @@ import { WsClient } from './wsclient'
 import { dispatch } from './dispatcher'
 import { QApiManager } from '../service/qapi'
 import { makeAutoObservable } from 'mobx'
+import { CardManager } from '../service/card'
 
 /**
  * The server is a singleton websocket server
@@ -12,11 +13,13 @@ export class Wss {
   private readonly server: WebSocketServer
   private readonly clients: WsClient[] = []
   readonly qApis: QApiManager
+  readonly cards: CardManager
 
   constructor(port = 4174) {
     makeAutoObservable<this, 'server'>(this, { server: false, qApis: false })
     this.server = new WebSocketServer({ port })
     this.qApis = new QApiManager(this)
+    this.cards = new CardManager(this)
     console.log('WebSocket 服务已启动，端口号 ' + port)
 
     this.server.on('close', () => {

@@ -1,7 +1,7 @@
 import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
 import type {
-  IBotInfoResp,
+  IBotInfoResp, ICardDeleteReq, ICardImportReq,
   IChannel,
   IChannelListResp,
   IListenToChannelReq,
@@ -28,6 +28,12 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'note/delete':
     handleDeleteNote(client, server, request.data as INoteDeleteReq)
+    break
+  case 'card/import':
+    handleCardImport(client, server, request.data as ICardImportReq)
+    break
+  case 'card/delete':
+    handleCardDelete(client, server, request.data as ICardDeleteReq)
     break
   }
 }
@@ -110,4 +116,12 @@ function handleDeleteNote(client: WsClient, server: Wss, data: INoteDeleteReq) {
   if (qApi) {
     qApi.notes.deleteNote(client, data)
   }
+}
+
+function handleCardImport(client: WsClient, server: Wss, data: ICardImportReq) {
+  server.cards.importCard(client, data)
+}
+
+function handleCardDelete(client: WsClient, server: Wss, data: ICardDeleteReq) {
+  server.cards.deleteCard(client, data)
 }

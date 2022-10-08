@@ -10,8 +10,8 @@ export type Command =
   | 'note/fetch' // req/res
   | 'note/delete' // req
   | 'card/list' // res
-  | 'card/import'
-  | 'card/delete'
+  | 'card/import' // req/res
+  | 'card/delete' // req
   | 'card/link'  // req/res
   | 'card/test' // res
 
@@ -137,7 +137,7 @@ export interface ICardImportReq {
   card: ICard
 }
 
-export type ICardImportResp = ICardImportReq
+// export type ICardImportResp = ICardImportReq
 
 export type ICardListResp = ICard[]
 

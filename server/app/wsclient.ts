@@ -1,6 +1,6 @@
 import type { WebSocket } from 'ws'
 import type { Wss } from './wss'
-import type { IMessage } from '../../interface/common'
+import type { IMessage, ICardListResp } from '../../interface/common'
 import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
 
 /**
@@ -40,6 +40,12 @@ export class WsClient {
       console.error('客户端因发生错误而关闭', e)
       this.disposeAllEffects()
       server.removeClient(this)
+    })
+
+    // watch 人物卡相关数据
+    this.autorun(ws => {
+      const cardList = server.cards.cardList
+      server.sendToClient<ICardListResp>(ws, { cmd: 'card/list', success: true, data: cardList })
     })
   }
 
