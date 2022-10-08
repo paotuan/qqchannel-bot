@@ -4,6 +4,8 @@ import { GuildManager } from './guild'
 import { makeAutoObservable } from 'mobx'
 import type { Wss } from '../../app/wss'
 import { LogManager } from './log'
+import { EventEmitter } from 'events'
+import { NoteManager } from './note'
 
 /**
  * A bot connection to QQ
@@ -12,20 +14,23 @@ export class QApi {
   readonly appid: string
   readonly token: string
   readonly qqClient: ReturnType<typeof createOpenAPI>
-  readonly qqWs: ReturnType<typeof createWebsocket>
+  private readonly qqWs: ReturnType<typeof createWebsocket>
   readonly wss: Wss
   readonly guilds: GuildManager
   readonly logs: LogManager
+  readonly notes: NoteManager
+  private readonly eventEmitter = new EventEmitter()
 
   botInfo: IBotInfo | null = null
 
   constructor(appid: string, token: string, wss: Wss) {
-    makeAutoObservable(this, {
+    makeAutoObservable<this, 'qqWs' | 'eventEmitter'>(this, {
       appid: false,
       token: false,
       qqClient: false,
       qqWs: false,
-      wss: false
+      wss: false,
+      eventEmitter: false
     })
 
     this.appid = appid
@@ -46,6 +51,9 @@ export class QApi {
     }
     this.qqClient = createOpenAPI(botConfig)
     this.qqWs = createWebsocket(botConfig)
+    botConfig.intents.forEach(intent => {
+      this.qqWs.on(intent, data => this.eventEmitter.emit(intent, data))
+    })
     // todo token 错误场景
     console.log('连接 QQ 服务器成功')
 
@@ -55,6 +63,8 @@ export class QApi {
     this.guilds = new GuildManager(this)
     // 初始化 log 记录
     this.logs = new LogManager(this)
+    // 初始化重要笔记
+    this.notes = new NoteManager(this)
   }
 
   private fetchBotInfo() {
@@ -71,6 +81,10 @@ export class QApi {
 
   disconnect() {
     this.qqWs.disconnect()
+  }
+
+  on(intent: AvailableIntentsEventsEnum, listener: (data: unknown) => void) {
+    this.eventEmitter.on(intent, listener)
   }
 }
 

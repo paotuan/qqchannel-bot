@@ -66,7 +66,7 @@ ws.on('note/sync', data => {
     const res = data.data as INoteSyncResp
     const note = useNoteStore()
     note.ids = res.allNoteIds
-    note.lastSyncTime = Date.now()
+    note.lastSyncTime = Date.now() // todo 放到 fetch 返回时
     note.fetchNotesIfNeed()
   } else {
     console.error('[Note]', data.data)

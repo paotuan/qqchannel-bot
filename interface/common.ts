@@ -5,15 +5,15 @@ export type Command =
   | 'channel/listen' // req
   | 'user/list' // res
   | 'log/push' // res
-  | 'note/send'
-  | 'note/sync'
-  | 'note/fetch'
-  | 'note/delete'
-  | 'card/list'
+  | 'note/send' // req/res
+  | 'note/sync' // req/res
+  | 'note/fetch' // req/res
+  | 'note/delete' // req
+  | 'card/list' // res
   | 'card/import'
   | 'card/delete'
-  | 'card/link'
-  | 'card/test'
+  | 'card/link'  // req/res
+  | 'card/test' // res
 
 export interface IMessage<T> {
   cmd: Command
@@ -32,14 +32,6 @@ export interface ILoginReq {
   appid: string
   token: string
 }
-
-// export interface IBotInfoResp {
-//   id: string
-//   username: string
-//   avatar: string
-//   guildId: string
-//   guildName: string
-// }
 
 export type IBotInfoResp = IBotInfo
 // endregion bot

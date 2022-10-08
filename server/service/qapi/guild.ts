@@ -210,7 +210,7 @@ export class GuildManager {
   }
 
   private initEventListeners() {
-    this.api.qqWs.on(AvailableIntentsEventsEnum.GUILDS, (data: any) => {
+    this.api.on(AvailableIntentsEventsEnum.GUILDS, (data: any) => {
       switch (data.eventType) {
       case 'GUILD_CREATE':
         this.addGuild(data.msg)
@@ -235,7 +235,7 @@ export class GuildManager {
         break
       }
     })
-    this.api.qqWs.on(AvailableIntentsEventsEnum.GUILD_MEMBERS, (data: any) => {
+    this.api.on(AvailableIntentsEventsEnum.GUILD_MEMBERS, (data: any) => {
       switch (data.eventType) {
       case 'GUILD_MEMBER_ADD':
         this.addUser(data.msg)

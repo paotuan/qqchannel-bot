@@ -6,7 +6,7 @@ import type {
   IChannelListResp,
   IListenToChannelReq,
   ILoginReq,
-  IMessage, IUser, IUserListResp
+  IMessage, INoteDeleteReq, INoteFetchReq, INoteSendReq, IUser, IUserListResp
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -16,6 +16,18 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'channel/listen':
     handleListenToChannel(client, server, request.data as IListenToChannelReq)
+    break
+  case 'note/send':
+    handleSendNote(client, server, request.data as INoteSendReq)
+    break
+  case 'note/sync':
+    handleSyncNotes(client, server)
+    break
+  case 'note/fetch':
+    handleFetchNotes(client, server, request.data as INoteFetchReq)
+    break
+  case 'note/delete':
+    handleDeleteNote(client, server, request.data as INoteDeleteReq)
     break
   }
 }
@@ -66,4 +78,36 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       }
     }
   })
+}
+
+function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
+  if (!client.listenToChannelId) return
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    qApi.notes.sendNote(client, data)
+  }
+}
+
+function handleSyncNotes(client: WsClient, server: Wss) {
+  if (!client.listenToChannelId) return
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    qApi.notes.syncNotes(client)
+  }
+}
+
+function handleFetchNotes(client: WsClient, server: Wss, data: INoteFetchReq) {
+  if (!client.listenToChannelId) return
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    qApi.notes.fetchNotes(client, data)
+  }
+}
+
+function handleDeleteNote(client: WsClient, server: Wss, data: INoteDeleteReq) {
+  if (!client.listenToChannelId) return
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    qApi.notes.deleteNote(client, data)
+  }
 }

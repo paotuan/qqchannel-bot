@@ -1,7 +1,7 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
-import type { ILogPushResp } from '../../../interface/common'
+import type { ILogPushResp, ILog } from '../../../interface/common'
 
 export class LogManager {
   private readonly api: QApi
@@ -13,7 +13,7 @@ export class LogManager {
     this.initListeners()
   }
 
-  handleLogPush(msg: IMessage) {
+  private handleLogPush(msg: IMessage) {
     // 无视非文本消息 TODO 后面可以支持图片消息
     const content = msg.content?.trim()
     if (!content) return
@@ -25,22 +25,26 @@ export class LogManager {
     }
 
     // 发送给客户端
-    this.wss.sendToChannel<ILogPushResp>(msg.channel_id, {
+    this.pushToClients(msg.channel_id, {
+      msgId: msg.id,
+      msgType: 'text',
+      userId: msg.author.id,
+      username: msg.author.username,
+      content: content,
+      timestamp: msg.timestamp
+    })
+  }
+
+  pushToClients(channelId: string, ...logs: ILog[]) {
+    this.wss.sendToChannel<ILogPushResp>(channelId, {
       cmd: 'log/push',
       success: true,
-      data: [{
-        msgId: msg.id,
-        msgType: 'text',
-        userId: msg.author.id,
-        username: msg.author.username,
-        content: content,
-        timestamp: msg.timestamp
-      }]
+      data: logs
     })
   }
 
   private initListeners() {
-    this.api.qqWs.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
+    this.api.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
       if (this.filtered(data.msg.channel_id)) return
       console.log(`[Log][GUILD_MESSAGES][${data.eventType}]`, data.msg)
       switch (data.eventType) {
