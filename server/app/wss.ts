@@ -2,6 +2,8 @@ import { WebSocketServer } from 'ws'
 import type { IMessage } from '../../interface/common'
 import { WsClient } from './wsclient'
 import { dispatch } from './dispatcher'
+import { QApiManager } from '../service/qapi'
+import { makeAutoObservable } from 'mobx'
 
 /**
  * The server is a singleton websocket server
@@ -9,9 +11,12 @@ import { dispatch } from './dispatcher'
 export class Wss {
   private readonly server: WebSocketServer
   private readonly clients: WsClient[] = []
+  readonly qApis: QApiManager
 
   constructor(port = 4174) {
+    makeAutoObservable<this, 'server'>(this, { server: false, qApis: false })
     this.server = new WebSocketServer({ port })
+    this.qApis = new QApiManager(this)
     console.log('WebSocket 服务已启动，端口号 ' + port)
 
     this.server.on('close', () => {
@@ -36,6 +41,11 @@ export class Wss {
     if (index >= 0) {
       this.clients.splice(index, 1)
     }
+  }
+
+  // 当前正在监听的子频道 id 列表
+  get listeningChannels() {
+    return this.clients.map(client => client.listenToChannelId).filter(id => !!id)
   }
 
   // 发消息给某个 client

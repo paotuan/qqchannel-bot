@@ -42,7 +42,7 @@ export class Guild {
     try {
       const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 1000, after: '0' })
       const users = data.map(item => new User(item))
-      users.forEach(user => this.usersMap[user.id] = user)
+      this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
     } catch (e) {
       console.error('获取频道用户信息失败', e)
     }
@@ -120,7 +120,7 @@ export class User {
 }
 
 export class GuildManager {
-  readonly api: QApi
+  private readonly api: QApi
   private guildsMap: Record<string, Guild> = {}
 
   get all() {
@@ -128,7 +128,7 @@ export class GuildManager {
   }
 
   constructor(api: QApi) {
-    makeAutoObservable(this, { api: false })
+    makeAutoObservable<this, 'api'>(this, { api: false })
     this.api = api
     this.fetchGuilds().then(() => {
       this.initEventListeners()
@@ -144,7 +144,7 @@ export class GuildManager {
     try {
       const resp = await this.api.qqClient.meApi.meGuilds({ limit: 1 }) // 先只拉一个
       const guilds = resp.data.map(info => new Guild(this.api, info.id, info.name))
-      guilds.forEach(guild => this.guildsMap[guild.id] = guild)
+      this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
     } catch (e) {
       console.error('获取频道信息失败', e)
     }

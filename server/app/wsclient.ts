@@ -1,7 +1,7 @@
 import type { WebSocket } from 'ws'
 import type { Wss } from './wss'
 import type { IMessage } from '../../interface/common'
-import { autorun, IReactionDisposer } from 'mobx'
+import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
 
 /**
  * 一个 client 对应一个打开的网页
@@ -18,6 +18,7 @@ export class WsClient {
   private readonly disposers: IReactionDisposer[] = []
 
   constructor(ws: WebSocket, server: Wss) {
+    makeAutoObservable<this, 'ws'>(this, { ws: false })
     this.ws = ws
     ws.on('message', (rawData: string) => {
       try {

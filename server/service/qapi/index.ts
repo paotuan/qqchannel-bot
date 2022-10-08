@@ -2,6 +2,8 @@ import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-g
 import type { IBotInfo } from '../../../interface/common'
 import { GuildManager } from './guild'
 import { makeAutoObservable } from 'mobx'
+import type { Wss } from '../../app/wss'
+import { LogManager } from './log'
 
 /**
  * A bot connection to QQ
@@ -11,20 +13,24 @@ export class QApi {
   readonly token: string
   readonly qqClient: ReturnType<typeof createOpenAPI>
   readonly qqWs: ReturnType<typeof createWebsocket>
+  readonly wss: Wss
   readonly guilds: GuildManager
+  readonly logs: LogManager
 
   botInfo: IBotInfo | null = null
 
-  constructor(appid: string, token: string) {
+  constructor(appid: string, token: string, wss: Wss) {
     makeAutoObservable(this, {
       appid: false,
       token: false,
       qqClient: false,
-      qqWs: false
+      qqWs: false,
+      wss: false
     })
 
     this.appid = appid
     this.token = token
+    this.wss = wss
 
     const botConfig = {
       appID: appid,
@@ -47,6 +53,8 @@ export class QApi {
     this.fetchBotInfo()
     // 初始化 bot 所在频道信息
     this.guilds = new GuildManager(this)
+    // 初始化 log 记录
+    this.logs = new LogManager(this)
   }
 
   private fetchBotInfo() {
@@ -67,13 +75,13 @@ export class QApi {
 }
 
 export class QApiManager {
-  static readonly Instance = new QApiManager()
-
+  private readonly wss: Wss
   private readonly apis: Record<string, QApi> = {}
 
   // singleton
-  private constructor() {
-    makeAutoObservable(this)
+  constructor(wss: Wss) {
+    makeAutoObservable<this, 'wss'>(this, { wss: false })
+    this.wss = wss
   }
 
   // 登录 qq 机器人，建立与 qq 服务器的 ws
@@ -88,7 +96,7 @@ export class QApiManager {
         oldApi.disconnect()
       }
     }
-    this.apis[appid] = new QApi(appid, token)
+    this.apis[appid] = new QApi(appid, token, this.wss)
   }
 
   // 获取对应 appid 的机器人 api

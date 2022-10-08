@@ -1,10 +1,10 @@
 export type Command =
-  | 'bot/login'
-  | 'bot/info'
-  | 'channel/list'
-  | 'channel/listen'
-  | 'user/list'
-  | 'log/push'
+  | 'bot/login' // req/res
+  | 'bot/info'  // res
+  | 'channel/list' // res
+  | 'channel/listen' // req
+  | 'user/list' // res
+  | 'log/push' // res
   | 'note/send'
   | 'note/sync'
   | 'note/fetch'
@@ -33,15 +33,15 @@ export interface ILoginReq {
   token: string
 }
 
-export interface IBotInfoResp {
-  id: string
-  username: string
-  avatar: string
-  guildId: string
-  guildName: string
-}
+// export interface IBotInfoResp {
+//   id: string
+//   username: string
+//   avatar: string
+//   guildId: string
+//   guildName: string
+// }
 
-export type IBotInfoRespV2 = IBotInfo
+export type IBotInfoResp = IBotInfo
 // endregion bot
 
 // region channel

@@ -11,7 +11,7 @@
                  class="label cursor-pointer p-2 rounded-xl border border-base-300">
             <span class="label-text">{{ channel.name }}</span>
             <input type="radio" name="login_channel-select-radio" class="radio radio-primary"
-                   :checked="checkedChannel.id === channel.id" @click="checkedChannel = channel"/>
+                   :checked="checkedChannelId === channel.id" @click="checkedChannel = channel"/>
           </label>
         </div>
         <button class="btn btn-primary w-full mt-8 shadow-lg" :disabled="!checkedChannel"
@@ -23,9 +23,10 @@
 </template>
 <script setup lang="ts">
 import { useChannelStore } from '../../store/channel'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { IChannel } from '../../../interface/common'
 
 const channelStore = useChannelStore()
 const checkedChannel = ref<IChannel | null>(null)
+const checkedChannelId = computed(() => checkedChannel.value?.id || null)
 </script>
