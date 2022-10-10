@@ -64,6 +64,53 @@ export class DiceManager {
   }
 
   /**
+   * 处理私信
+   */
+  private handleDirectMessage(msg: IMessage) {
+    try {
+      // 无视非文本消息
+      const content = msg.content?.trim()
+      if (!content) throw 'unknown message'
+
+      // 提取出指令体，无视非指令消息
+      let fullExp = '' // .d100 困难侦察
+      if (content.startsWith('.') || content.startsWith('。')) {
+        // 指令消息
+        fullExp = content.substring(1).trim()
+      }
+      if (!fullExp) throw 'unknown message'
+      // 转义 转义得放在 at 消息和 emoji 之类的后面
+      fullExp = unescapeHTML(fullExp)
+
+      // 投骰
+      const reply = this.tryRollDice(fullExp, {
+        userId: msg.author.id,
+        nickname: msg.author.username
+      })
+      if (reply) {
+        this.api.qqClient.directMessageApi.postDirectMessage(msg.guild_id, { content: reply, msg_id: msg.id })
+          .then(() => {
+            console.log('[Dice] 发送成功 ' + reply)
+          })
+          .catch((err: any) => {
+            console.error('[Dice] 消息发送失败', err)
+          })
+      }
+    } catch (e) {
+      // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
+      const selfNick = this.api.botInfo?.username || ''
+      const reply = `${selfNick}在的说`
+      this.api.qqClient.directMessageApi.postDirectMessage(msg.guild_id, { content: reply, msg_id: msg.id })
+        .then(() => {
+          console.log('[Dice] 发送成功 ' + reply)
+        })
+        .catch((err: any) => {
+          console.error('[Dice] 消息发送失败', err)
+        })
+    }
+  }
+
+  /**
    * 处理表情表态快速投骰
    */
   private async handleGuildReactions(eventId: string, reaction: any) {
@@ -87,9 +134,12 @@ export class DiceManager {
   /**
    * 投骰
    * @param fullExp 指令表达式
-   * @param msg 原始消息
+   * @param userId 投骰用户的 id
+   * @param nickname 投骰用户的昵称，选填
+   * @param guildId 投骰所在的频道，选填。如没有昵称，则会根据频道取用户列表中的昵称
+   * @param channelId 投骰所在的子频道，选填。若存在子频道说明不是私信场景，会去判断人物卡数值
    */
-  private tryRollDice(fullExp: string, { userId, nickname, channelId, guildId }: { userId: string, nickname?: string, channelId: string, guildId?: string }) {
+  private tryRollDice(fullExp: string, { userId, nickname, channelId, guildId }: { userId: string, nickname?: string, channelId?: string, guildId?: string }) {
     // 如果没传 nickname 但传了 guildId，就根据 guild 的 user 列表去取 username
     if (!nickname && guildId) {
       const user = this.api.guilds.find(guildId)?.findUser(userId)
@@ -102,10 +152,10 @@ export class DiceManager {
       console.log('[Dice] 原始指令：', fullExp, '解析指令：', exp, '描述：', desc)
       const roll = new DiceRoll(exp)
       // 判断成功等级
-      const result = this.decideResult(channelId, userId, desc, roll.total)
+      const result = channelId ? this.decideResult(channelId, userId, desc, roll.total) : undefined
       if (result?.resultDesc?.endsWith('成功')) {
         // 成功的技能检定返回客户端。这么判断有点丑陋不过先这样吧
-        this.wss.sendToChannel<ICardTestResp>(channelId, {
+        this.wss.sendToChannel<ICardTestResp>(channelId!, {
           cmd: 'card/test',
           success: true,
           data: { cardName: result!.cardName, success: true, propOrSkill: result!.skill }
@@ -191,6 +241,15 @@ export class DiceManager {
       switch (data.eventType) {
       case 'MESSAGE_REACTION_ADD':
         this.handleGuildReactions(data.eventId, data.msg)
+        break
+      default:
+        break
+      }
+    })
+    this.api.on(AvailableIntentsEventsEnum.DIRECT_MESSAGE, (data: any) => {
+      switch (data.eventType) {
+      case 'DIRECT_MESSAGE_CREATE':
+        this.handleDirectMessage(data.msg as IMessage)
         break
       default:
         break
