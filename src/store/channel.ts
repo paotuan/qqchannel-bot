@@ -13,11 +13,15 @@ export const useChannelStore = defineStore('channel', {
     // 用户当前选择的 channelId
     selected: ''
   }),
+  getters: {
+    selectedChannel: state => state.list?.find(channel => channel.id === state.selected)
+  },
   actions: {
     listenTo(channel: IChannel) {
       this.selected = channel.id
       initChannelRelatedStorage(channel.id)
       ws.send<IListenToChannelReq>({ cmd: 'channel/listen', data: { channelId: channel.id, guildId: channel.guildId } })
+      document.title = `${channel.name} - QQ 频道机器人`
     }
   }
 })
