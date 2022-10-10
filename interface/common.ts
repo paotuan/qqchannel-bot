@@ -106,7 +106,7 @@ export interface INoteDeleteReq {
 
 // region card
 export interface ICard {
-  version: number // 1
+  version: number // 2
   basic: {
     name: string
     job: string
@@ -129,7 +129,8 @@ export interface ICard {
   },
   skills: { [key: string]: number },
   meta: {
-    skillGrowth: { [key: string]: boolean }
+    skillGrowth: { [key: string]: boolean },
+    lastModified: number // ms
   }
 }
 
@@ -150,7 +151,7 @@ export interface ICardLinkReq {
   userId: string | null | undefined
 }
 
-export type ICardLinkResp = ICardLinkReq
+export type ICardLinkResp = ICardLinkReq[]
 
 export interface ICardTestResp {
   cardName: string

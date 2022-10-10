@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { ICard, ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
+import type { ICard, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp } from '../../interface/common'
 import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 import XLSX from 'xlsx'
@@ -31,12 +31,28 @@ export const useCardStore = defineStore('card', () => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
   }
 
-  // 新增或更新人物卡（请求成功后调用）
-  const addOrUpdateCards = (cards: ICard[]) => {
+  // 全量更新人物卡
+  const updateCards = (cards: ICard[]) => {
+    // 1. 不存在的 card 本地要删掉
+    const newExistNames = cards.map(card => card.basic.name)
+    const name2delete = existNames.value.filter(name => !newExistNames.includes(name))
+    name2delete.forEach(cardName => {
+      delete cardMap[cardName]
+      delete cardEditedMap[cardName]
+      delete cardLinkMap[cardName]
+      if (selectedCardId.value === cardName) {
+        selectedCardId.value = ''
+      }
+    })
+    // 2. 存在的 card 根据条件更新
     cards.forEach(card => {
       const cardName = card.basic.name
-      cardMap[cardName] = card
-      cardEditedMap[cardName] = false
+      const oldCard = cardMap[cardName]
+      // 本地没这张卡片，或服务端的卡片修改时间更新，才覆盖，否则以本地的为准
+      if (!oldCard || oldCard.meta.lastModified <= card.meta.lastModified) {
+        cardMap[cardName] = card
+        cardEditedMap[cardName] = false
+      }
     })
   }
 
@@ -62,6 +78,7 @@ export const useCardStore = defineStore('card', () => {
 
   // 标记某张卡片被编辑
   const markCardEdited = (card: ICard) => {
+    card.meta.lastModified = Date.now()
     cardEditedMap[card.basic.name] = true
   }
 
@@ -70,15 +87,17 @@ export const useCardStore = defineStore('card', () => {
 
   // 关联玩家相关
   const linkedUserOf = (card: ICard) => cardLinkMap[card.basic.name]
-  const linkUser = (card: ICard, userId: string | null | undefined) => {
+  const requestLinkUser = (card: ICard, userId: string | null | undefined) => {
     const cardName = card.basic.name
     ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
-    // todo 目前直接在本地改了，后续如果考虑到关联玩家还有其他的入口，则需要增加服务端推送，这里放到回包时再改状态
-    if (userId) {
-      cardLinkMap[cardName] = userId
-    } else {
-      delete cardLinkMap[cardName]
-    }
+  }
+  const linkUser = (res: ICardLinkResp) => {
+    Object.keys(cardLinkMap).forEach(key => delete cardLinkMap[key])
+    res.forEach(({ cardName, userId }) => {
+      if (userId) {
+        cardLinkMap[cardName] = userId
+      }
+    })
   }
 
   // 切换显示/隐藏未关联玩家的人物卡
@@ -98,7 +117,7 @@ export const useCardStore = defineStore('card', () => {
     linkedUsers,
     of,
     importCard,
-    addOrUpdateCards,
+    updateCards,
     selectCard,
     markSkillGrowth,
     markCardEdited,
@@ -107,13 +126,14 @@ export const useCardStore = defineStore('card', () => {
     toggleShowAllCards,
     isEdited,
     linkedUserOf,
+    requestLinkUser,
     linkUser
   }
 })
 
 function getCardProto(): ICard {
   return {
-    version: 1,
+    version: 2,
     basic: {
       name: '',
       job: '学生',
@@ -135,7 +155,10 @@ function getCardProto(): ICard {
       '教育': 0
     },
     skills: {},
-    meta: { skillGrowth: {} }
+    meta: {
+      skillGrowth: {},
+      lastModified: Date.now()
+    }
   }
 }
 

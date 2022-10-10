@@ -1,6 +1,6 @@
 import ws from './ws'
 import {
-  IBotInfo, ICard,
+  IBotInfo, ICard, ICardLinkResp,
   ICardTestResp,
   IChannel,
   ILog,
@@ -66,7 +66,6 @@ ws.on('note/sync', data => {
     const res = data.data as INoteSyncResp
     const note = useNoteStore()
     note.ids = res.allNoteIds
-    note.lastSyncTime = Date.now() // todo 放到 fetch 返回时
     note.fetchNotesIfNeed()
   } else {
     console.error('[Note]', data.data)
@@ -81,14 +80,12 @@ ws.on('note/fetch', data => {
     res.forEach(note => {
       store.msgMap[note.msgId] = note
     })
+    store.lastSyncTime = Date.now()
   }
 })
 
 ws.on('card/import', data => {
   if (data.success) {
-    // const { card } = data.data as ICardImportResp
-    // const cardStore = useCardStore()
-    // cardStore.addOrUpdateCards([card])
     Toast.success('人物卡保存成功！')
   } else {
     Toast.error('人物卡保存失败！')
@@ -97,7 +94,12 @@ ws.on('card/import', data => {
 
 ws.on('card/list', data => {
   const cardStore = useCardStore()
-  cardStore.addOrUpdateCards(data.data as ICard[])
+  cardStore.updateCards(data.data as ICard[])
+})
+
+ws.on('card/link', data => {
+  const cardStore = useCardStore()
+  cardStore.linkUser(data.data as ICardLinkResp)
 })
 
 ws.on('card/test', data => {

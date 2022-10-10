@@ -95,7 +95,7 @@ export class NoteManager {
       const requests = req.allNoteIds.map(msgId => this.api.qqClient.messageApi.message(channel, msgId))
       const resps = await Promise.all(requests)
       console.log('[Note] 获取成功', req.allNoteIds)
-      this.api.wss.sendToChannel<INoteFetchResp>(channel, {
+      this.api.wss.sendToClient<INoteFetchResp>(client, {
         cmd: 'note/fetch',
         success: true,
         data: resps.map((resp, i) => {

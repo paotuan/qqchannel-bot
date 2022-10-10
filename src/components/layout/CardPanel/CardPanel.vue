@@ -25,7 +25,7 @@
             <span class="truncate">{{ card.basic.name }}{{ cardStore.isEdited(card) ? ' *' : '' }}</span>
             <CheckCircleIcon v-show="cardStore.selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
           </button>
-          <user-selector :user-id="cardStore.linkedUserOf(card) || null" @select="cardStore.linkUser(card, $event?.id)" />
+          <user-selector :user-id="cardStore.linkedUserOf(card) || null" @select="cardStore.requestLinkUser(card, $event?.id)" />
         </div>
       </div>
       <div class="flex-grow">

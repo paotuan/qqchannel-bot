@@ -1,7 +1,7 @@
 import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
 import type {
-  IBotInfoResp, ICardDeleteReq, ICardImportReq, ICardLinkReq,
+  IBotInfoResp, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp,
   IChannel,
   IChannelListResp,
   IListenToChannelReq,
@@ -85,6 +85,17 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
         }))
         ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
       }
+    }
+  })
+  // watch card link info
+  client.autorun(ws => {
+    const channel = ws.listenToChannelId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
+    if (channel) {
+      const linkMap = server.cards.getLinkMap(channel)
+      const data: ICardLinkResp = Object.entries(linkMap).map(([userId, cardName]) => ({ userId, cardName }))
+      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data })
+    } else {
+      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
     }
   })
 }
