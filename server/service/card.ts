@@ -71,7 +71,6 @@ export class CardManager {
       fs.unlinkSync(`${dir}/${cardName}.json`)
       delete this.cardMap[cardName]
       // 删除所有这张卡片的关联关系
-      // deleteCardLink(cardName) todo & 看下 autorun 跑几次
       Object.values(this.channelLinkMap).forEach(linkMap => {
         const user2delete = Object.keys(linkMap).find(uid => linkMap[uid] === cardName)
         if (user2delete) {
@@ -104,6 +103,13 @@ export class CardManager {
       this.channelLinkMap[channelId] = {}
     }
     return this.channelLinkMap[channelId]
+  }
+
+  // 根据子频道和用户 id，获取该用户关联的人物卡
+  getCard(channelId: string, userId: string) {
+    const linkMap = this.getLinkMap(channelId)
+    const cardName = linkMap[userId]
+    return cardName ? this.cardMap[cardName] : null
   }
 }
 

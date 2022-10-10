@@ -31,6 +31,7 @@ export class Wss {
     })
 
     this.server.on('connection', ws => {
+      console.log('已接入新的客户端')
       this.clients.push(new WsClient(ws, this))
     })
   }

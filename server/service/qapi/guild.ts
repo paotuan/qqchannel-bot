@@ -83,6 +83,10 @@ export class Guild {
       user.deleted = true
     }
   }
+
+  findUser(id: string) {
+    return this.usersMap[id]
+  }
 }
 
 export class Channel {

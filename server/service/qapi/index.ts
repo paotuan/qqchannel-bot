@@ -6,6 +6,7 @@ import type { Wss } from '../../app/wss'
 import { LogManager } from './log'
 import { EventEmitter } from 'events'
 import { NoteManager } from './note'
+import { DiceManager } from './dice'
 
 /**
  * A bot connection to QQ
@@ -19,6 +20,7 @@ export class QApi {
   readonly guilds: GuildManager
   readonly logs: LogManager
   readonly notes: NoteManager
+  readonly dice: DiceManager
   private readonly eventEmitter = new EventEmitter()
 
   botInfo: IBotInfo | null = null
@@ -65,6 +67,8 @@ export class QApi {
     this.logs = new LogManager(this)
     // 初始化重要笔记
     this.notes = new NoteManager(this)
+    // 初始化骰子
+    this.dice = new DiceManager(this)
   }
 
   private fetchBotInfo() {
