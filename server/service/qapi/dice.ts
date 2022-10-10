@@ -3,14 +3,30 @@ import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage, MessageToCreate } from 'qq-guild-bot'
 import type { ICard, ICardTestResp } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
+import * as LRUCache from 'lru-cache'
+
+interface IMessageCache {
+  text?: string
+  instruction?: string | null // 文本消息是否包含指令。第一次使用时解析（undefined: 未解析，null：解析了但是为空）
+}
 
 export class DiceManager {
   private readonly api: QApi
   private get wss() { return this.api.wss }
+  private readonly msgCache: LRUCache<string, IMessageCache>
 
   constructor(api: QApi) {
     makeAutoObservable<this, 'api' | 'wss'>(this, { api: false, wss: false })
     this.api = api
+    this.msgCache = new LRUCache({
+      max: 50,
+      fetchMethod: async key => {
+        const [channelId, msgId] = key.split('-')
+        const { data } = await this.api.qqClient.messageApi.message(channelId, msgId)
+        const text = data.message.content?.trim()
+        return { text, instruction: text ? undefined : null } as IMessageCache // 非文本消息就直接记录为 null 了
+      }
+    })
     this.initListeners()
   }
 
@@ -56,12 +72,13 @@ export class DiceManager {
     const msgId = reaction.target.id as string
     const userId = reaction.user_id as string
     // 获取原始消息
-    const { data } = await this.api.qqClient.messageApi.message(channelId, msgId)
-    const content = data.message.content?.trim()
-    if (!content) return
-    const instr = detectInstruction(content)
-    if (!instr) return
-    const reply = this.tryRollDice(`d% ${instr}`, { userId, channelId, guildId })
+    const cacheMsg = await this.msgCache.fetch(`${channelId}-${msgId}`)
+    if (!cacheMsg || cacheMsg.instruction === null) return
+    if (typeof cacheMsg.instruction === 'undefined') {
+      cacheMsg.instruction = detectInstruction(cacheMsg.text || '')
+    }
+    if (!cacheMsg.instruction) return
+    const reply = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId, guildId })
     if (reply) {
       this.sendDiceMessage(channelId, { content: reply, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
     }
