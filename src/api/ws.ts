@@ -1,11 +1,12 @@
 import mitt from 'mitt'
 import type { IMessage, Command } from '../../interface/common'
+import { useUIStore } from '../store/ui'
 
 const ws = new WebSocket('ws://localhost:4174')
 const wsEmitter = mitt()
 
 ws.onopen = () => {
-  console.log('successful connected to server')
+  console.log('已连接到服务端')
 }
 
 ws.onmessage = (data) => {
@@ -16,6 +17,16 @@ ws.onmessage = (data) => {
   } catch (e) {
     console.error('Error while parsing server msg', e)
   }
+}
+
+ws.onclose = () => {
+  useUIStore().connectionStatus = false
+  console.log('连接已关闭')
+}
+
+ws.onerror = (data) => {
+  useUIStore().connectionStatus = false
+  console.error('连接已被异常关闭', data)
 }
 
 export default {

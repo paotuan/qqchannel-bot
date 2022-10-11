@@ -7,6 +7,7 @@ let toastId = 0
 export const useUIStore = defineStore('ui', {
   state: () => ({
     activeTab: 'log' as Tabs,
+    connectionStatus: true, // 连接状态
     statusAlertVisible: true,
     toasts: [] as { id: number, type: ToastType, msg: string }[],
     theme: localStorage.getItem('theme') || 'lemonade'
