@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { INote, INoteDeleteReq, INoteFetchReq, INoteSendReq } from '../../interface/common'
 import ws from '../api/ws'
+import { gtagEvent } from '../utils'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
@@ -16,12 +17,14 @@ export const useNoteStore = defineStore('note', {
     sendText() {
       if (!this.textContent) return
       ws.send<INoteSendReq>({ cmd: 'note/send', data: { msgType: 'text', content: this.textContent } })
+      gtagEvent('note/send')
     },
     clearText() {
       this.textContent = ''
     },
     sync() {
       ws.send({ cmd: 'note/sync', data: '' })
+      gtagEvent('note/sync')
     },
     fetchNotesIfNeed() {
       const needToFetchIds = this.ids.filter(id => !this.msgMap[id])
@@ -34,6 +37,7 @@ export const useNoteStore = defineStore('note', {
       if (index >= 0) {
         this.ids.splice(index, 1)
         ws.send<INoteDeleteReq>({ cmd: 'note/delete', data: { id: note.msgId } })
+        gtagEvent('note/delete')
       }
     }
   }

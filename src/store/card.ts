@@ -3,6 +3,7 @@ import type { ICard, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp
 import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 import XLSX from 'xlsx'
+import { gtagEvent } from '../utils'
 
 export const useCardStore = defineStore('card', () => {
   const cardMap = reactive<Record<string, ICard>>({})
@@ -24,6 +25,7 @@ export const useCardStore = defineStore('card', () => {
 
   const importCard = (card: ICard) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
+    gtagEvent('card/import')
   }
 
   // 请求保存卡片（其实后端和导入的逻辑是一样的）
@@ -60,6 +62,7 @@ export const useCardStore = defineStore('card', () => {
   const deleteCard = (card: ICard) => {
     const cardName = card.basic.name
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
+    gtagEvent('card/delete')
     // 不管后端删除有没有成功，前端直接删除吧
     delete cardMap[cardName]
     delete cardEditedMap[cardName]
@@ -90,6 +93,7 @@ export const useCardStore = defineStore('card', () => {
   const requestLinkUser = (card: ICard, userId: string | null | undefined) => {
     const cardName = card.basic.name
     ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
+    gtagEvent('card/link')
   }
   const linkUser = (res: ICardLinkResp) => {
     Object.keys(cardLinkMap).forEach(key => delete cardLinkMap[key])

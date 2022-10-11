@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { ILog } from '../../interface/common'
 import { useUserStore } from './user'
+import { gtagEvent } from '../utils'
 
 export const useLogStore = defineStore('log', {
   state: () => ({
@@ -20,6 +21,7 @@ export const useLogStore = defineStore('log', {
       this.logs.length = 0
     },
     export(type: number) {
+      gtagEvent('log/export', { type: ['', 'text', 'html', 'json'][type] })
       switch (type) {
       case 1:
         exportText(this.logs)
@@ -60,7 +62,7 @@ ${PATTLE.map((colors, i) => `.chat-user-${i} { background: ${colors[0]}; border-
 function exportHTML(logs: ILog[]) {
   const userStore = useUserStore()
   const userIds: string[] = []
-  let lastUser = '' // 上一个说话人，用于合并会话
+  let lastUser = ''   // 上一个说话人，用于合并会话
   let listHtml = ''   // 最终结果
   logs.forEach(log => {
     const user = userStore.nickOf(log.userId) || log.username || log.userId
@@ -91,7 +93,7 @@ function exportHTML(logs: ILog[]) {
 // 导出字符串
 function exportText(logs: ILog[]) {
   const userStore = useUserStore()
-  let lastUser = ''      // 上一个说话人，用于合并会话
+  let lastUser = '' // 上一个说话人，用于合并会话
   let result = ''   // 最终结果
   logs.forEach(log => {
     const user = userStore.nickOf(log.userId) || log.username || log.userId

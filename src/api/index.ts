@@ -14,7 +14,7 @@ import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
 import { useCardStore } from '../store/card'
 import { useUserStore } from '../store/user'
-import { Toast } from '../utils'
+import { gtagEvent, Toast } from '../utils'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -28,6 +28,7 @@ ws.on('bot/login', message => {
 ws.on('bot/info', message => {
   const bot = useBotStore()
   bot.info = message.data as IBotInfo
+  gtagEvent('bot/info', { name: bot.info.username })
 })
 
 ws.on('channel/list', data => {
