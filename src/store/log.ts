@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { ILog } from '../../interface/common'
+import { useUserStore } from './user'
 
 export const useLogStore = defineStore('log', {
   state: () => ({
@@ -57,11 +58,12 @@ ${PATTLE.map((colors, i) => `.chat-user-${i} { background: ${colors[0]}; border-
 
 // 导出 HTML
 function exportHTML(logs: ILog[]) {
+  const userStore = useUserStore()
   const userIds: string[] = []
   let lastUser = '' // 上一个说话人，用于合并会话
   let listHtml = ''   // 最终结果
   logs.forEach(log => {
-    const user = log.username || log.userId
+    const user = userStore.nickOf(log.userId) || log.username || log.userId
     if (user !== lastUser) {
       // 上一段结尾
       if (listHtml !== '') listHtml += '</div>'
@@ -88,10 +90,11 @@ function exportHTML(logs: ILog[]) {
 
 // 导出字符串
 function exportText(logs: ILog[]) {
+  const userStore = useUserStore()
   let lastUser = ''      // 上一个说话人，用于合并会话
   let result = ''   // 最终结果
   logs.forEach(log => {
-    const user = log.username || log.userId
+    const user = userStore.nickOf(log.userId) || log.username || log.userId
     if (user !== lastUser) {
       result += `${user} ${formatTime(log.timestamp)}\n`
     }
@@ -103,7 +106,9 @@ function exportText(logs: ILog[]) {
 
 // 导出 json
 function exportJson(logs: ILog[]) {
-  download('json', JSON.stringify(logs))
+  const userStore = useUserStore()
+  const logWithNick = logs.map(log => ({ ...log, username: userStore.nickOf(log.userId) || log.username || log.userId }))
+  download('json', JSON.stringify(logWithNick))
 }
 
 // 将字符串作为文件下载

@@ -3,7 +3,7 @@
     <div ref="sortableRef" class="card bg-base-100 shadow-lg px-8 py-4 overflow-y-auto" style="flex: 3 0 0">
       <div v-for="log in logStore.logs" :key="log.msgId" class="group w-full flex items-center gap-2 leading-loose">
         <Bars3Icon class="w-4 h-4 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
-        <span class="font-bold flex-none" :title="log.userId">{{ log.username }}</span>
+        <span class="font-bold flex-none" :title="log.userId">{{ nickOf(log) }}</span>
         <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
         <XMarkIcon class="w-4 h-4 cursor-pointer invisible group-hover:visible text-error justify-self-end flex-none"
                    @click="logStore.removeLog(log)"/>
@@ -34,8 +34,12 @@ import { useLogStore } from '../../store/log'
 import { computed, onMounted, ref } from 'vue'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 import Sortable from 'sortablejs'
+import { useUserStore } from '../../store/user'
+import type { ILog } from '../../../interface/common'
 
 const logStore = useLogStore()
+const userStore = useUserStore()
+const nickOf = (log: ILog) => userStore.nickOf(log.userId) || log.username || log.userId
 
 const hoverMenuIndex = ref(0)
 const onMouseEnter = (index: number) => hoverMenuIndex.value = index

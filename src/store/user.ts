@@ -11,11 +11,20 @@ export const useUserStore = defineStore('user', {
   actions: {
     setUsers(list: IUser[]) {
       list.forEach(user => {
+        // 机器人去除测试中尾缀
+        if (user.bot) {
+          user.nick = user.nick.replace(/-测试中$/, '')
+          user.username = user.username.replace(/-测试中$/, '')
+        }
         this.map[user.id] = user
       })
     },
     of(id: string) {
       return this.map[id]
+    },
+    nickOf(id: string) {
+      const user = this.of(id)
+      return user ? user.nick || user.username : ''
     }
   }
 })
