@@ -112,11 +112,11 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useCardStore } from '../../../store/card'
+import { useCardStore } from '../../store/card'
 import { computed, ref, watch } from 'vue'
 import TextInput from './TextInput.vue'
 import NumberInput from './NumberInput.vue'
-import type { ICard } from '../../../../interface/common'
+import type { ICard } from '../../../interface/common'
 
 const cardStore = useCardStore()
 const card = computed(() => cardStore.selectedCard)

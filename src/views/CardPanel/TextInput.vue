@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCardStore } from '../../../store/card'
+import { useCardStore } from '../../store/card'
 
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>()

@@ -25,7 +25,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useNoteStore } from '../../store/note'
+import { useNoteStore } from '../store/note'
 import { XCircleIcon } from '@heroicons/vue/24/outline'
 import { computed } from 'vue'
 

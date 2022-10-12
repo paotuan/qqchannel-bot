@@ -30,12 +30,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useLogStore } from '../../store/log'
+import { useLogStore } from '../store/log'
 import { computed, onMounted, ref } from 'vue'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 import Sortable from 'sortablejs'
-import { useUserStore } from '../../store/user'
-import type { ILog } from '../../../interface/common'
+import { useUserStore } from '../store/user'
+import type { ILog } from '../../interface/common'
 
 const logStore = useLogStore()
 const userStore = useUserStore()

@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import CardImportDialog from './CardImportDialog.vue'
 import { EyeSlashIcon, EyeIcon, DocumentTextIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
-import { useCardStore } from '../../../store/card'
+import { useCardStore } from '../../store/card'
 import CardDisplay from './CardDisplay.vue'
 import UserSelector from './UserSelector.vue'
 

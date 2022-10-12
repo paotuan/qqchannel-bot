@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCardStore } from '../../../store/card'
+import { useCardStore } from '../../store/card'
 import { ref } from 'vue'
 
 const props = defineProps<{ modelValue: number }>()

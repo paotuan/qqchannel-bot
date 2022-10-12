@@ -39,12 +39,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useUserStore } from '../../../store/user'
+import { useUserStore } from '../../store/user'
 import { NoSymbolIcon } from '@heroicons/vue/24/outline'
-import type { IUser } from '../../../../interface/common'
+import type { IUser } from '../../../interface/common'
 import { computed } from 'vue'
-import { useCardStore } from '../../../store/card'
-import { useBotStore } from '../../../store/bot'
+import { useCardStore } from '../../store/card'
+import { useBotStore } from '../../store/bot'
 
 const props = defineProps<{ userId: string | null }>()
 const emit = defineEmits<{ (e: 'select', value: IUser | null): void }>()

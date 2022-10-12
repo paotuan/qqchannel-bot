@@ -51,9 +51,9 @@
 import { PlusCircleIcon, DocumentTextIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 import * as XLSX from 'xlsx'
-import { parseCoCXlsx, parseText, useCardStore } from '../../../store/card'
-import type { ICard } from '../../../../interface/common'
-import { Toast } from '../../../utils'
+import { parseCoCXlsx, parseText, useCardStore } from '../../store/card'
+import type { ICard } from '../../../interface/common'
+import { Toast } from '../../utils'
 
 const tab = ref<'text' | 'excel'>('text')
 const closeBtn = ref<HTMLElement>()
