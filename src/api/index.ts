@@ -68,6 +68,7 @@ ws.on('note/sync', data => {
     const note = useNoteStore()
     note.ids = res.allNoteIds
     note.fetchNotesIfNeed()
+    note.lastSyncTime = Date.now()
   } else {
     console.error('[Note]', data.data)
     Toast.error('同步失败！')
@@ -81,7 +82,6 @@ ws.on('note/fetch', data => {
     res.forEach(note => {
       store.msgMap[note.msgId] = note
     })
-    store.lastSyncTime = Date.now()
   }
 })
 
