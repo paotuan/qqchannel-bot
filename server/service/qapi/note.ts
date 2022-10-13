@@ -72,7 +72,7 @@ export class NoteManager {
         data: { note: { ...req, msgId }, allNoteIds: data.message_ids }
       })
     } catch (e: any) {
-      console.log('[Note] 发送失败', e)
+      console.error('[Note] 发送失败', e)
       this.api.wss.sendToClient<string>(client, { cmd: 'note/send', success: false, data: `发送失败 ${e?.code || ''}` })
     }
   }
@@ -84,7 +84,7 @@ export class NoteManager {
       console.log('[Note] 同步成功')
       this.api.wss.sendToClient<INoteSyncResp>(client, { cmd: 'note/sync', success: true, data: { allNoteIds: data.message_ids } })
     } catch (e: any) {
-      console.log('[Note] 同步失败', e)
+      console.error('[Note] 同步失败', e)
       this.api.wss.sendToClient<string>(client, { cmd: 'note/sync', success: false, data: `同步失败 ${e?.code || ''}` })
     }
   }
@@ -117,7 +117,7 @@ export class NoteManager {
         })
       })
     } catch (e: any) {
-      console.log('[Note] 获取失败', e)
+      console.error('[Note] 获取失败', e)
       this.api.wss.sendToClient<string>(client, { cmd: 'note/fetch', success: false, data: `Note 获取失败 ${e?.code || ''}` })
     }
   }
@@ -128,7 +128,7 @@ export class NoteManager {
       await this.api.qqClient.pinsMessageApi.deletePinsMessage(channel, req.id)
       console.log('[Note] 取消精华成功')
     } catch (e) {
-      console.log('[Note] 取消精华失败', e)
+      console.error('[Note] 取消精华失败', e)
     }
   }
 }

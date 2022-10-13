@@ -28,7 +28,7 @@ ws.on('bot/login', message => {
 ws.on('bot/info', message => {
   const bot = useBotStore()
   bot.info = message.data as IBotInfo
-  gtagEvent('bot/info', { name: bot.info.username })
+  gtagEvent('bot/info', { bot_name: bot.info.username }, false)
 })
 
 ws.on('channel/list', data => {

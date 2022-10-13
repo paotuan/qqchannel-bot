@@ -1,7 +1,7 @@
 import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
 import type { IBotInfo } from '../../../interface/common'
 import { GuildManager } from './guild'
-import { makeAutoObservable } from 'mobx'
+import { action, makeAutoObservable } from 'mobx'
 import type { Wss } from '../../app/wss'
 import { LogManager } from './log'
 import { EventEmitter } from 'events'
@@ -72,13 +72,15 @@ export class QApi {
   }
 
   private fetchBotInfo() {
-    this.qqClient.meApi.me().then(resp => {
-      this.botInfo = {
-        id: resp.data.id,
-        username: resp.data.username.replace(/-测试中$/, ''),
-        avatar: resp.data.avatar,
+    this.qqClient.meApi.me().then(action(
+      resp => {
+        this.botInfo = {
+          id: resp.data.id,
+          username: resp.data.username.replace(/-测试中$/, ''),
+          avatar: resp.data.avatar,
+        }
       }
-    }).catch(e => {
+    )).catch(e => {
       console.error('获取机器人信息失败', e)
     })
   }

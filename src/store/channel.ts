@@ -23,7 +23,7 @@ export const useChannelStore = defineStore('channel', {
       initChannelRelatedStorage(channel.id)
       ws.send<IListenToChannelReq>({ cmd: 'channel/listen', data: { channelId: channel.id, guildId: channel.guildId } })
       document.title = `${channel.name} - QQ 频道机器人`
-      gtagEvent('channel/listen', channel, false)
+      gtagEvent('channel/listen')
     }
   }
 })

@@ -29,7 +29,7 @@ export class LogManager {
       msgId: msg.id,
       msgType: 'text',
       userId: msg.author.id,
-      username: msg.author.username,
+      username: msg.member.nick || msg.author.username,
       content: content,
       timestamp: msg.timestamp
     })
@@ -46,7 +46,7 @@ export class LogManager {
   private initListeners() {
     this.api.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, (data: any) => {
       if (this.filtered(data.msg.channel_id)) return
-      console.log(`[Log][GUILD_MESSAGES][${data.eventType}]`, data.msg)
+      // console.log(`[Log][GUILD_MESSAGES][${data.eventType}]`, data.msg)
       switch (data.eventType) {
       case 'MESSAGE_CREATE':
         this.handleLogPush(data.msg as IMessage)

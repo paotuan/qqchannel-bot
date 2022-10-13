@@ -42,6 +42,7 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
 }
 
 function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
+  console.log('机器人登录：', data.appid)
   // 1. 记录 appid
   client.appid = data.appid
   // 2. 连接 qq 服务器
@@ -68,6 +69,7 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
 }
 
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
+  console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
   // watch user list
   client.autorun(ws => {

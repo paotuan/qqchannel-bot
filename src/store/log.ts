@@ -21,7 +21,7 @@ export const useLogStore = defineStore('log', {
       this.logs.length = 0
     },
     export(type: number) {
-      gtagEvent('log/export', { type: ['', 'text', 'html', 'json'][type] })
+      gtagEvent('log/export', { log_type: ['', 'text', 'html', 'json'][type] })
       switch (type) {
       case 1:
         exportText(this.logs)

@@ -38,7 +38,7 @@ export class CardManager {
         }
       })
     } catch (e) {
-      console.log('[Card] 人物卡列表失败', e)
+      console.error('[Card] 人物卡列表失败', e)
     }
   }
 
@@ -55,7 +55,7 @@ export class CardManager {
       console.log('[Card] 保存人物卡成功')
       this.wss.sendToChannel<null>(client.listenToChannelId, { cmd: 'card/import', success: true, data: null })
     } catch (e) {
-      console.log('[Card] 保存人物卡失败', e)
+      console.error('[Card] 保存人物卡失败', e)
       this.wss.sendToClient<string>(client, { cmd: 'card/import', success: false, data: '' })
     }
   }
@@ -79,7 +79,7 @@ export class CardManager {
       })
       console.log('[Card] 删除人物卡成功')
     } catch (e) {
-      console.log('[Card] 删除人物卡失败', e)
+      console.error('[Card] 删除人物卡失败', e)
     }
   }
 

@@ -9,6 +9,11 @@ export const Toast = {
 }
 
 export function gtagEvent(eventName: string, params: Record<string, any> = {}, globalParams = true) {
-  const realParams = globalParams ? { ...params, channel: useChannelStore().selected } : params
-  gtag('event', eventName, realParams)
+  if (globalParams) {
+    const channelInfo = useChannelStore().selectedChannel
+    const realParams = channelInfo ? { ...params, channel_name: channelInfo.name, guildName: channelInfo.guildName } : params
+    gtag('event', eventName, realParams)
+  } else {
+    gtag('event', eventName, params)
+  }
 }

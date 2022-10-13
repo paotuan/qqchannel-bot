@@ -17,7 +17,7 @@ export const useBotStore = defineStore('bot', {
       if (!this.appid || !this.token) return
       this.loginState = 'LOADING'
       ws.send({ cmd: 'bot/login', data: { appid: this.appid, token: this.token } })
-      gtagEvent('bot/login')
+      gtagEvent('bot/login', {}, false)
     }
   }
 })

@@ -1,3 +1,5 @@
 import { Wss } from './app/wss'
+import { VERSION_NAME } from '../interface/version'
 
-const server = new Wss()
+console.log('QQ 频道跑团机器人 - 版本：', VERSION_NAME)
+new Wss()

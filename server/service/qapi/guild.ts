@@ -1,6 +1,6 @@
 import type { QApi } from './index'
 import { AvailableIntentsEventsEnum, IChannel, IMember } from 'qq-guild-bot'
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 
 export class Guild {
   readonly id: string
@@ -28,10 +28,12 @@ export class Guild {
     this.channelsMap = {}
     try {
       const { data } = await api.qqClient.channelApi.channels(this.id)
-      const channels = data
-        .filter(channel => channel.type === Channel.TYPE_TEXT)
-        .map(channel => new Channel(channel.id, this.id, channel.name))
-      this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
+      runInAction(() => {
+        const channels = data
+          .filter(channel => channel.type === Channel.TYPE_TEXT)
+          .map(channel => new Channel(channel.id, this.id, channel.name))
+        this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
+      })
     } catch (e) {
       console.error('获取子频道信息失败', e)
     }
@@ -41,8 +43,10 @@ export class Guild {
     this.usersMap = {}
     try {
       const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 1000, after: '0' })
-      const users = data.map(item => new User(item))
-      this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
+      runInAction(() => {
+        const users = data.map(item => new User(item))
+        this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
+      })
     } catch (e) {
       console.error('获取频道用户信息失败', e)
     }
@@ -147,8 +151,10 @@ export class GuildManager {
     this.guildsMap = {}
     try {
       const resp = await this.api.qqClient.meApi.meGuilds({ limit: 1 }) // 先只拉一个
-      const guilds = resp.data.map(info => new Guild(this.api, info.id, info.name))
-      this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
+      runInAction(() => {
+        const guilds = resp.data.map(info => new Guild(this.api, info.id, info.name))
+        this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
+      })
     } catch (e) {
       console.error('获取频道信息失败', e)
     }
@@ -215,6 +221,7 @@ export class GuildManager {
 
   private initEventListeners() {
     this.api.on(AvailableIntentsEventsEnum.GUILDS, (data: any) => {
+      console.log(`[QApi][频道事件][${data.eventType}]`, data.msg)
       switch (data.eventType) {
       case 'GUILD_CREATE':
         this.addGuild(data.msg)
@@ -235,11 +242,11 @@ export class GuildManager {
         this.deleteChannel(data.msg)
         break
       default:
-        console.warn(`unknown eventType ${data.eventType} in GUILDS events`)
         break
       }
     })
     this.api.on(AvailableIntentsEventsEnum.GUILD_MEMBERS, (data: any) => {
+      console.log(`[QApi][频道成员事件][${data.eventType}]`, data.msg)
       switch (data.eventType) {
       case 'GUILD_MEMBER_ADD':
         this.addUser(data.msg)
@@ -251,7 +258,6 @@ export class GuildManager {
         this.deleteUser(data.msg)
         break
       default:
-        console.warn(`unknown eventType ${data.eventType} in GUILD_MEMBERS events`)
         break
       }
     })

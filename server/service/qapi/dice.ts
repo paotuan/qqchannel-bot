@@ -221,7 +221,7 @@ export class DiceManager {
         timestamp: res.data.timestamp
       })
     }).catch((err) => {
-      console.error(err)
+      console.error('[Dice] 发送失败', err)
     })
   }
 
@@ -238,6 +238,7 @@ export class DiceManager {
     })
     this.api.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data: any) => {
       if (this.filtered(data.msg.channel_id)) return
+      console.log(`[QApi][表情表态事件][${data.eventType}]`)
       switch (data.eventType) {
       case 'MESSAGE_REACTION_ADD':
         this.handleGuildReactions(data.eventId, data.msg)
@@ -247,6 +248,7 @@ export class DiceManager {
       }
     })
     this.api.on(AvailableIntentsEventsEnum.DIRECT_MESSAGE, (data: any) => {
+      console.log(`[QApi][私信事件][${data.eventType}]`)
       switch (data.eventType) {
       case 'DIRECT_MESSAGE_CREATE':
         this.handleDirectMessage(data.msg as IMessage)
