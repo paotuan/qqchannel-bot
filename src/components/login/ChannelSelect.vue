@@ -15,7 +15,7 @@
           </label>
         </div>
         <button class="btn btn-primary w-full mt-8 shadow-lg" :disabled="!checkedChannel"
-                @click="channelStore.listenTo(checkedChannel)">开始使用！
+                @click="listenTo(checkedChannel)">开始使用！
         </button>
       </div>
     </template>
@@ -29,4 +29,6 @@ import type { IChannel } from '../../../interface/common'
 const channelStore = useChannelStore()
 const checkedChannel = ref<IChannel | null>(null)
 const checkedChannelId = computed(() => checkedChannel.value?.id || null)
+
+const listenTo = (channel: IChannel | null) => channelStore.listenTo(channel!)
 </script>
