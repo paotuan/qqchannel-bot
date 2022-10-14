@@ -14,6 +14,7 @@ export class Wss {
   private readonly clients: WsClient[] = []
   readonly qApis: QApiManager
   readonly cards: CardManager
+  private readonly _listeningChannels: string[] = []
 
   constructor(port = 4174) {
     makeAutoObservable<this, 'server'>(this, { server: false, qApis: false })
@@ -47,9 +48,16 @@ export class Wss {
     }
   }
 
+  addListeningChannel(channelId: string) {
+    if (!this._listeningChannels.includes(channelId)) {
+      this._listeningChannels.push(channelId)
+    }
+  }
+
   // 当前正在监听的子频道 id 列表
   get listeningChannels() {
-    return this.clients.map(client => client.listenToChannelId).filter(id => !!id)
+    // return this.clients.map(client => client.listenToChannelId).filter(id => !!id)
+    return this._listeningChannels // 即使关闭了网页也让骰子继续工作
   }
 
   // 发消息给某个 client

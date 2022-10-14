@@ -71,6 +71,7 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
+  server.addListeningChannel(data.channelId)
   // watch user list
   client.autorun(ws => {
     const qApi = server.qApis.find(ws.appid)
