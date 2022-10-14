@@ -87,14 +87,15 @@ export class CardManager {
     const { cardName, userId } = req
     const channel = client.listenToChannelId
     console.log('[Card] 关联人物卡', req)
+    // 如果 cardName 之前关联的别的人，要删掉
     const linkMap = this.getLinkMap(channel)
+    const user2delete = Object.keys(linkMap).find(userId => linkMap[userId] === cardName)
+    if (user2delete) {
+      delete linkMap[user2delete]
+    }
+    // 关联上新的
     if (userId) {
       linkMap[userId] = cardName
-    } else {
-      const user2delete = Object.keys(linkMap).find(userId => linkMap[userId] === cardName)
-      if (user2delete) {
-        delete linkMap[user2delete]
-      }
     }
   }
 

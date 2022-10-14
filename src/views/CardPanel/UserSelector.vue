@@ -50,13 +50,14 @@ const props = defineProps<{ userId: string | null }>()
 const emit = defineEmits<{ (e: 'select', value: IUser | null): void }>()
 
 const userStore = useUserStore()
-const realUsers = userStore.list.filter(u => !u.bot)
-const botUsers = userStore.list.filter(u => u.bot)
+const realUsers = computed(() => userStore.list.filter(u => !u.bot))
+const botUsers = computed(() => userStore.list.filter(u => u.bot))
 const currentUser = computed(() => props.userId ? userStore.of(props.userId) : null)
 
 const cardStore = useCardStore()
 const botStore = useBotStore()
 const isDisabled = (user: IUser) => {
+  if (user.deleted) return true
   if (user.id === botStore.info?.id) return true
   if (user.id === currentUser.value?.id) return false
   return !!cardStore.linkedUsers.includes(user.id)
