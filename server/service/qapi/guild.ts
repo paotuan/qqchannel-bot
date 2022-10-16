@@ -42,7 +42,7 @@ export class Guild {
   async fetchUsers(api: QApi) {
     this.usersMap = {}
     try {
-      const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 1000, after: '0' })
+      const data = await this._fetchUsersInner(api)
       runInAction(() => {
         const users = data.map(item => new User(item))
         this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
@@ -50,6 +50,22 @@ export class Guild {
     } catch (e) {
       console.error('获取频道用户信息失败', e)
     }
+  }
+
+  // 分页获取全部用户列表
+  async _fetchUsersInner(api: QApi) {
+    const allUserList: IMember[] = []
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const lastUserId = allUserList.length === 0 ? '0' : allUserList[allUserList.length - 1].user.id
+      const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 1000, after: lastUserId })
+      console.log('获取用户列表，count = ', data.length)
+      if (data.length === 0) {
+        break
+      }
+      allUserList.push(...data)
+    }
+    return allUserList
   }
 
   addChannel(channel: IChannel) {
