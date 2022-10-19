@@ -2,9 +2,9 @@ import { WebSocketServer } from 'ws'
 import type { IMessage } from '../../interface/common'
 import { WsClient } from './wsclient'
 import { dispatch } from './dispatcher'
-import { QApiManager } from '../service/qapi'
+import { QApiManager } from '../service/QApiManager'
 import { makeAutoObservable } from 'mobx'
-import { CardManager } from '../service/card'
+import { CardManager } from '../service/CardManager'
 
 /**
  * The server is a singleton websocket server
@@ -12,15 +12,13 @@ import { CardManager } from '../service/card'
 export class Wss {
   private readonly server: WebSocketServer
   private readonly clients: WsClient[] = []
-  readonly qApis: QApiManager
-  readonly cards: CardManager
+  readonly qApis = new QApiManager(this)
+  readonly cards = new CardManager(this)
   private readonly _listeningChannels: string[] = []
 
   constructor(port = 4174) {
     makeAutoObservable<this, 'server'>(this, { server: false, qApis: false })
     this.server = new WebSocketServer({ port })
-    this.qApis = new QApiManager(this)
-    this.cards = new CardManager(this)
     console.log('WebSocket 服务已启动，端口号 ' + port)
 
     this.server.on('close', () => {

@@ -1,12 +1,18 @@
 import type { QApi } from './index'
 import { AvailableIntentsEventsEnum, IChannel, IMember } from 'qq-guild-bot'
 import { makeAutoObservable, runInAction } from 'mobx'
+import { Channel } from './channel'
+import { User } from './user'
 
+/**
+ * 频道实例，一个机器人可以被加入多个频道
+ */
 export class Guild {
   readonly id: string
   name: string
   private channelsMap: Record<string, Channel> = {}
   private usersMap: Record<string, User> = {}
+  private readonly api: QApi
 
   get allChannels() {
     return Object.values(this.channelsMap)
@@ -17,7 +23,8 @@ export class Guild {
   }
 
   constructor(api: QApi, id: string, name: string) {
-    makeAutoObservable(this, { id: false })
+    makeAutoObservable<this, 'api'>(this, { id: false, api: false })
+    this.api = api
     this.id = id
     this.name = name
     this.fetchChannels(api)
@@ -31,7 +38,7 @@ export class Guild {
       runInAction(() => {
         const channels = data
           .filter(channel => channel.type === Channel.TYPE_TEXT)
-          .map(channel => new Channel(channel.id, this.id, channel.name))
+          .map(channel => new Channel(this.api, channel.id, this.id, channel.name))
         this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
       })
     } catch (e) {
@@ -44,7 +51,7 @@ export class Guild {
     try {
       const data = await this._fetchUsersInner(api)
       runInAction(() => {
-        const users = data.map(item => new User(item))
+        const users = data.map(item => new User(this.api, item))
         this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
       })
     } catch (e) {
@@ -69,7 +76,7 @@ export class Guild {
   }
 
   addChannel(channel: IChannel) {
-    this.channelsMap[channel.id] = new Channel(channel.id, this.id, channel.name)
+    this.channelsMap[channel.id] = new Channel(this.api, channel.id, this.id, channel.name)
   }
 
   updateChannel(channel: IChannel) {
@@ -84,7 +91,7 @@ export class Guild {
   }
 
   addUser(member: IMember) {
-    const user = new User(member)
+    const user = new User(this.api, member)
     this.usersMap[user.id] = user
   }
 
@@ -107,42 +114,15 @@ export class Guild {
   findUser(id: string) {
     return this.usersMap[id]
   }
-}
 
-export class Channel {
-  static TYPE_TEXT = 0
-  readonly id: string
-  readonly guildId: string
-  name: string
-
-  constructor(id: string, guildId: string, name: string) {
-    makeAutoObservable(this, { id: false, guildId: false })
-    this.id = id
-    this.guildId = guildId
-    this.name = name
+  findChannel(id: string) {
+    return this.channelsMap[id]
   }
 }
 
-export class User {
-  readonly id: string
-  readonly guildId: string
-  nick: string
-  username: string
-  avatar: string
-  readonly bot: boolean
-  deleted = false // user 退出不能删除，只标记为 delete，因为其他地方可能还需要 user 的相关信息
-
-  constructor(member: IMember) {
-    makeAutoObservable(this, { id: false, guildId: false })
-    this.id = member.user.id
-    this.guildId = member.guild_id
-    this.nick = member.nick
-    this.username = member.user.username
-    this.avatar = member.user.avatar
-    this.bot = member.user.bot
-  }
-}
-
+/**
+ * 管理机器人所在的所有频道，维护频道和频道成员的信息
+ */
 export class GuildManager {
   private readonly api: QApi
   private guildsMap: Record<string, Guild> = {}
@@ -161,6 +141,30 @@ export class GuildManager {
 
   find(guildId: string) {
     return this.guildsMap[guildId]
+  }
+
+  findUser(userId: string, guildId?: string) {
+    const guild = guildId ? this.find(guildId) : null
+    if (guild) {
+      return guild.findUser(userId)
+    } else {
+      for (const guild of this.all) {
+        const user = guild.findUser(userId)
+        if (user) return user
+      }
+    }
+  }
+
+  findChannel(channelId: string, guildId?: string) {
+    const guild = guildId ? this.find(guildId) : null
+    if (guild) {
+      return guild.findChannel(channelId)
+    } else {
+      for (const guild of this.all) {
+        const channel = guild.findChannel(channelId)
+        if (channel) return channel
+      }
+    }
   }
 
   async fetchGuilds() {

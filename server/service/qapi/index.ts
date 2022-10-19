@@ -53,9 +53,7 @@ export class QApi {
     }
     this.qqClient = createOpenAPI(botConfig)
     this.qqWs = createWebsocket(botConfig)
-    botConfig.intents.forEach(intent => {
-      this.qqWs.on(intent, data => this.eventEmitter.emit(intent, data))
-    })
+
     // todo token 错误场景
     console.log('连接 QQ 服务器成功')
 
@@ -69,6 +67,11 @@ export class QApi {
     this.notes = new NoteManager(this)
     // 初始化骰子
     this.dice = new DiceManager(this)
+
+    // 初始化监听器 todo 初始化消息缓存
+    botConfig.intents.forEach(intent => {
+      this.qqWs.on(intent, data => this.eventEmitter.emit(intent, data))
+    })
   }
 
   private fetchBotInfo() {
@@ -91,36 +94,5 @@ export class QApi {
 
   on(intent: AvailableIntentsEventsEnum, listener: (data: unknown) => void) {
     this.eventEmitter.on(intent, listener)
-  }
-}
-
-export class QApiManager {
-  private readonly wss: Wss
-  private readonly apis: Record<string, QApi> = {}
-
-  // singleton
-  constructor(wss: Wss) {
-    makeAutoObservable<this, 'wss'>(this, { wss: false })
-    this.wss = wss
-  }
-
-  // 登录 qq 机器人，建立与 qq 服务器的 ws
-  login(appid: string, token: string) {
-    const oldApi = this.apis[appid]
-    if (oldApi) {
-      if (oldApi.token === token) {
-        console.log('已存在相同的 QQ 服务器连接，可直接复用')
-        return // 无需重连
-      } else {
-        console.log('检测到相同 APPID 但不同 Token 的连接，重新连接...')
-        oldApi.disconnect()
-      }
-    }
-    this.apis[appid] = new QApi(appid, token, this.wss)
-  }
-
-  // 获取对应 appid 的机器人 api
-  find(appid: string) {
-    return this.apis[appid]
   }
 }

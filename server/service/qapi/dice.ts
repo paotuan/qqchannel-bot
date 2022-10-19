@@ -1,6 +1,6 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
-import { AvailableIntentsEventsEnum, IMessage, MessageToCreate } from 'qq-guild-bot'
+import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import type { ICard, ICardTestResp } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import * as LRUCache from 'lru-cache'
@@ -59,7 +59,7 @@ export class DiceManager {
       channelId: msg.channel_id
     })
     if (reply) {
-      this.sendDiceMessage(msg.channel_id, { content: reply, msg_id: msg.id })
+      this.api.guilds.findChannel(msg.channel_id, msg.guild_id)?.sendMessage( { content: reply, msg_id: msg.id })
     }
   }
 
@@ -67,6 +67,8 @@ export class DiceManager {
    * 处理私信
    */
   private handleDirectMessage(msg: IMessage) {
+    const userId = msg.author.id
+    const srcGuildId = (msg as any).src_guild_id
     try {
       // 无视非文本消息
       const content = msg.content?.trim()
@@ -88,25 +90,13 @@ export class DiceManager {
         nickname: msg.author.username
       })
       if (reply) {
-        this.api.qqClient.directMessageApi.postDirectMessage(msg.guild_id, { content: reply, msg_id: msg.id })
-          .then(() => {
-            console.log('[Dice] 发送成功 ' + reply)
-          })
-          .catch((err: any) => {
-            console.error('[Dice] 消息发送失败', err)
-          })
+        this.api.guilds.findUser(userId, srcGuildId)?.sendMessage({ content: reply, msg_id: msg.id }, msg.guild_id)
       }
     } catch (e) {
       // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
       const selfNick = this.api.botInfo?.username || ''
       const reply = `${selfNick}在的说`
-      this.api.qqClient.directMessageApi.postDirectMessage(msg.guild_id, { content: reply, msg_id: msg.id })
-        .then(() => {
-          console.log('[Dice] 发送成功 ' + reply)
-        })
-        .catch((err: any) => {
-          console.error('[Dice] 消息发送失败', err)
-        })
+      this.api.guilds.findUser(userId, srcGuildId)?.sendMessage({ content: reply, msg_id: msg.id }, msg.guild_id)
     }
   }
 
@@ -127,7 +117,7 @@ export class DiceManager {
     if (!cacheMsg.instruction) return
     const reply = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId, guildId })
     if (reply) {
-      this.sendDiceMessage(channelId, { content: reply, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
+      this.api.guilds.findChannel(channelId, guildId)?.sendMessage({ content: reply, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
     }
   }
 
@@ -154,17 +144,18 @@ export class DiceManager {
       // 判断成功等级
       const result = channelId ? this.decideResult(channelId, userId, desc, roll.total) : undefined
       if (result?.resultDesc?.endsWith('成功')) {
-        // 成功的技能检定返回客户端。这么判断有点丑陋不过先这样吧
-        this.wss.sendToChannel<ICardTestResp>(channelId!, {
-          cmd: 'card/test',
-          success: true,
-          data: { cardName: result!.cardName, success: true, propOrSkill: result!.skill }
-        })
+        // 成功的技能检定返回客户端。这么判断有点丑陋不过先这样吧 todo 直接改服务端吧，让同步机制同步回去。写文件改成异步
+        // this.wss.sendToChannel<ICardTestResp>(channelId!, {
+        //   cmd: 'card/test',
+        //   success: true,
+        //   data: { cardName: result!.cardName, success: true, propOrSkill: result!.skill }
+        // })
       }
       // 返回结果
       return `${nickname || userId} 🎲 ${desc} ${roll.output} ${result?.resultDesc || ''}`
     } catch (e) {
       // 表达式不合法，无视之
+      console.log('[Dice] 未识别表达式', e)
       return null
     }
   }
@@ -206,23 +197,6 @@ export class DiceManager {
     }
     // extra. 如果技能成功了，返回成功的技能名字，用来给前端自动高亮
     return { resultDesc, skill, cardName: card.basic.name }
-  }
-
-  private sendDiceMessage(channelId: string, msg: MessageToCreate) {
-    this.api.qqClient.messageApi.postMessage(channelId, msg).then((res) => {
-      console.log('[Dice] 发送成功 ' + msg.content)
-      // 自己发的消息要记录 log
-      this.api.logs.pushToClients(channelId, {
-        msgId: res.data.id,
-        msgType: 'text',
-        userId: this.api.botInfo?.id || '',
-        username: this.api.botInfo?.username || '',
-        content: msg.content!,
-        timestamp: res.data.timestamp
-      })
-    }).catch((err) => {
-      console.error('[Dice] 发送失败', err)
-    })
   }
 
   private initListeners() {

@@ -8,6 +8,10 @@ import type { Wss } from '../app/wss'
 const dir = './cards'
 
 type LinkMap = Record<string, string> // userId => cardName
+
+/**
+ * 管理本地人物卡
+ */
 export class CardManager {
   private readonly wss: Wss
   private readonly cardMap: Record<string, ICard> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
