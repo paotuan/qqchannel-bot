@@ -51,7 +51,7 @@ export class Guild {
     try {
       const data = await this._fetchUsersInner(api)
       runInAction(() => {
-        const users = data.map(item => new User(this.api, item))
+        const users = data.map(item => new User(this.api, item, this.id))
         this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
       })
     } catch (e) {
@@ -91,7 +91,7 @@ export class Guild {
   }
 
   addUser(member: IMember) {
-    const user = new User(this.api, member)
+    const user = new User(this.api, member, this.id)
     this.usersMap[user.id] = user
   }
 

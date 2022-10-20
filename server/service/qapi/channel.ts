@@ -22,7 +22,9 @@ export class Channel {
 
   sendMessage(msg: MessageToCreate, recordLog = true) {
     // todo 未来把 note 的逻辑也收过来
+    // console.time('message')
     this.api.qqClient.messageApi.postMessage(this.id, msg).then((res) => {
+      // console.timeEnd('message')
       console.log('[Message] 发送成功 ' + msg.content)
       if (recordLog) {
         this.api.logs.pushToClients(this.id, {

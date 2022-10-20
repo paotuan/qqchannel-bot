@@ -1,9 +1,9 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
-import type { ICard, ICardTestResp } from '../../../interface/common'
-import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import * as LRUCache from 'lru-cache'
+import { PtDiceRoll } from '../dice'
+import type { ICocCardEntry } from '../card/coc'
 
 interface IMessageCache {
   text?: string
@@ -53,13 +53,23 @@ export class DiceManager {
     fullExp = unescapeHTML(fullExp)
 
     // 投骰
-    const reply = this.tryRollDice(fullExp, {
-      userId: msg.author.id,
-      nickname: msg.member.nick || msg.author.username,
-      channelId: msg.channel_id
-    })
+    const reply = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id })
     if (reply) {
-      this.api.guilds.findChannel(msg.channel_id, msg.guild_id)?.sendMessage( { content: reply, msg_id: msg.id })
+      // 拼装结果，并发消息
+      const username = msg.member.nick || msg.author.username || msg.author.id
+      const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
+      if (!channel) return // channel 信息不存在
+      if (reply.roll.hide) { // 处理暗骰
+        const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${reply.roll.description}，猜猜结果是什么`
+        channel.sendMessage({content: channelMsg, msg_id: msg.id})
+        const user = this.api.guilds.findUser(msg.author.id, msg.guild_id)
+        if (!user) return // 用户信息不存在
+        const directMsg = `${username} 🎲 ${reply.roll.description}${reply.resultDesc}`
+        user.sendMessage({ content: directMsg, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
+      } else {
+        const channelMsg = `${username} 🎲 ${reply.roll.description}${reply.resultDesc}`
+        channel.sendMessage({ content: channelMsg, msg_id: msg.id })
+      }
     }
   }
 
@@ -85,12 +95,13 @@ export class DiceManager {
       fullExp = unescapeHTML(fullExp)
 
       // 投骰
-      const reply = this.tryRollDice(fullExp, {
-        userId: msg.author.id,
-        nickname: msg.author.username
-      })
+      const reply = this.tryRollDice(fullExp, { userId: msg.author.id })
       if (reply) {
-        this.api.guilds.findUser(userId, srcGuildId)?.sendMessage({ content: reply, msg_id: msg.id }, msg.guild_id)
+        // 私信就不用考虑是不是暗骰了
+        const user = this.api.guilds.findUser(userId, srcGuildId)
+        if (!user) return // 用户信息不存在
+        const directMsg = `${user.persona} 🎲 ${reply.roll.description}${reply.resultDesc}`
+        user.sendMessage({ content: directMsg, msg_id: msg.id }, msg.guild_id)
       }
     } catch (e) {
       // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
@@ -115,9 +126,14 @@ export class DiceManager {
       cacheMsg.instruction = detectInstruction(cacheMsg.text || '')
     }
     if (!cacheMsg.instruction) return
-    const reply = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId, guildId })
+    const reply = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId })
     if (reply) {
-      this.api.guilds.findChannel(channelId, guildId)?.sendMessage({ content: reply, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
+      // 表情表态也没有暗骰
+      const user = this.api.guilds.findUser(userId, guildId)
+      const channel = this.api.guilds.findChannel(channelId, guildId)
+      if (!channel) return // channel 信息不存在
+      const channelMsg = `${user?.persona || userId} 🎲 ${reply.roll.description}${reply.resultDesc}`
+      channel.sendMessage({ content: channelMsg, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
     }
   }
 
@@ -125,78 +141,48 @@ export class DiceManager {
    * 投骰
    * @param fullExp 指令表达式
    * @param userId 投骰用户的 id
-   * @param nickname 投骰用户的昵称，选填
-   * @param guildId 投骰所在的频道，选填。如没有昵称，则会根据频道取用户列表中的昵称
    * @param channelId 投骰所在的子频道，选填。若存在子频道说明不是私信场景，会去判断人物卡数值
    */
-  private tryRollDice(fullExp: string, { userId, nickname, channelId, guildId }: { userId: string, nickname?: string, channelId?: string, guildId?: string }) {
-    // 如果没传 nickname 但传了 guildId，就根据 guild 的 user 列表去取 username
-    if (!nickname && guildId) {
-      const user = this.api.guilds.find(guildId)?.findUser(userId)
-      if (user) {
-        nickname = user.nick || user.username
-      }
-    }
+  private tryRollDice(fullExp: string, { userId, channelId }: { userId: string, channelId?: string }) {
     try {
-      const [exp, desc = ''] = parseFullExp(fullExp)
-      console.log('[Dice] 原始指令：', fullExp, '解析指令：', exp, '描述：', desc)
-      const roll = new DiceRoll(exp)
-      // 判断成功等级
-      const result = channelId ? this.decideResult(channelId, userId, desc, roll.total) : undefined
-      if (result?.resultDesc?.endsWith('成功')) {
-        // 成功的技能检定返回客户端。这么判断有点丑陋不过先这样吧 todo 直接改服务端吧，让同步机制同步回去。写文件改成异步
-        // this.wss.sendToChannel<ICardTestResp>(channelId!, {
-        //   cmd: 'card/test',
-        //   success: true,
-        //   data: { cardName: result!.cardName, success: true, propOrSkill: result!.skill }
-        // })
-      }
+      // console.time('dice')
+      const roll = new PtDiceRoll(fullExp)
+      // 是否有人物卡
+      const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
+      const cardEntry = cocCard?.getEntry(roll.description)
+      const rollResultStr = roll.rolls.map(dice => {
+        let str = roll.skip ? `${dice.notation} = ${dice.total}` : dice.output // 是否省略中间值
+        if (cardEntry) {
+          const testResult = this.decideResult(cardEntry, dice.total)
+          str += ' ' + testResult.desc
+          if (testResult.success) {
+            // todo 标记技能成长 直接改服务端吧，让同步机制同步回去。写文件改成异步
+          }
+        }
+        return str
+      }).join('\n')
       // 返回结果
-      return `${nickname || userId} 🎲 ${desc} ${roll.output} ${result?.resultDesc || ''}`
+      return { roll, resultDesc: (roll.times === 1 ? ' ' : '\n') + rollResultStr }
     } catch (e) {
       // 表达式不合法，无视之
       console.log('[Dice] 未识别表达式', e)
       return null
+    } finally {
+      // console.timeEnd('dice')
     }
   }
 
-  private decideResult(channel: string, sender: string, desc: string, roll: number) {
-    let skill = desc.trim()
-    let resultDesc = ''
-    // 0. 判断有没有描述
-    if (!skill) return null
-    // 1. 判断有没有人物卡
-    const card = this.wss.cards.getCard(channel, sender)
-    if (!card) return null
-    // 2. 判断有没有对应的技能
-    //   2.1 先判断几个特殊的
-    if (skill === '理智' || skill === 'sc' || skill === 'SC') {
-      resultDesc = roll <= card.basic.san ? `≤ ${card.basic.san} 成功` : `> ${card.basic.san} 失败`
-    } else if (skill === '幸运') {
-      resultDesc = roll <= card.basic.luck ? `≤ ${card.basic.luck} 成功` : `> ${card.basic.luck} 失败`
-    } else if (skill === '灵感') {
-      resultDesc = roll <= card.props['智力'] ? `≤ ${card.props['智力']} 成功` : `> ${card.props['智力']} 失败`
+  // todo 规则自定义
+  private decideResult(cardEntry: ICocCardEntry, roll: number) {
+    if (roll === 1) {
+      return { success: true, desc: '大成功' }
+    } else if (roll > 95) {
+      return { success: false, desc: '大失败' }
+    } else if (roll <= cardEntry.value) {
+      return { success: true, desc: `≤ ${cardEntry.value} 成功` }
     } else {
-      //   2.2 判断难度等级
-      const isHard = skill.indexOf('困难') >= 0
-      const isEx = skill.indexOf('极难') >= 0 || skill.indexOf('极限') >= 0
-      skill = skill.replace(/(困难|极难|极限)/g, '')
-      if (skill === '侦查') skill = '侦察' // 人物卡模版里的是后者
-      let target = card.props[skill as keyof ICard['props']] || card.skills[skill]
-      if (!target) return null // 没有技能。技能值为 0 应该也不可能
-      // 3. 判断大成功大失败
-      if (roll === 1) {
-        resultDesc = '大成功'
-      } else if (roll > 95) {
-        resultDesc = '大失败'
-      } else {
-        // 4. 真实比较
-        target = isEx ? Math.floor(target / 5) : (isHard ? Math.floor(target / 2) : target)
-        resultDesc = roll <= target ? `≤ ${target} 成功` : `> ${target} 失败`
-      }
+      return { success: false, desc: `> ${cardEntry.value} 失败` }
     }
-    // extra. 如果技能成功了，返回成功的技能名字，用来给前端自动高亮
-    return { resultDesc, skill, cardName: card.basic.name }
   }
 
   private initListeners() {
@@ -236,47 +222,6 @@ export class DiceManager {
   private filtered(channelId: string) {
     return !this.wss.listeningChannels.includes(channelId)
   }
-}
-
-// 提取指令为 [骰子表达式, 描述]
-function parseFullExp(fullExp: string): [string, string] {
-  // sc 简写
-  if (fullExp === 'sc' || fullExp === 'SC') {
-    return ['d%', 'sc']
-  }
-  const index = fullExp.search(/[\p{Unified_Ideograph}\s]/u) // 按第一个中文或空格分割
-  const [exp, desc = ''] = index < 0 ? [fullExp] : [fullExp.slice(0, index), fullExp.slice(index)]
-  // 兼容一些其他指令
-  // 默认骰，目前写死是 d100
-  if (exp === 'd' || exp === 'r' || exp === 'rd') {
-    return ['d%', desc]
-  }
-  // coc 技能骰
-  if (exp === 'ra') {
-    return ['d%', desc]
-  }
-
-  // rb 奖励骰、rd 惩罚骰
-  const rbrpMatch = exp.match(/^r([bp])\s*(\d+)?$/)
-  if (rbrpMatch) {
-    const type = rbrpMatch[1] === 'b' ? 'l' : 'h'
-    const count = parseInt(rbrpMatch[2] || '1', 10) // 默认一个奖励/惩罚骰
-    return [`${count + 1}d%k${type}1`, desc]
-  }
-
-  // ww3a9: 3d10, >=9 则重投，计算骰子 >=8 的个数
-  const wwMatch = exp.match(/^w{1,2}\s*(\d+)\s*a?\s*(\d+)*$/)
-  if (wwMatch) {
-    const diceCount = parseInt(wwMatch[1], 10)
-    const explodeCount = parseInt(wwMatch[2] || '10', 10) // 默认达到 10 重投
-    return [`${diceCount}d10!>=${explodeCount}>=8`, desc]
-  }
-
-  // 'rd100' / 'r d100' => d100s
-  if (exp.startsWith('r')) {
-    return [exp.slice(1).trim(), desc]
-  }
-  return [exp, desc]
 }
 
 const instRegex = new RegExp('(力量|体质|体型|敏捷|外貌|智力|灵感|意志|教育|理智|幸运|会计|人类学|估价|考古学|魅惑|攀爬|计算机|信用|克苏鲁神话|乔装|闪避|驾驶|电气维修|电子学|话术|格斗|射击|急救|历史|恐吓|跳跃|母语|法律|图书馆|聆听|锁匠|机械维修|医学|博物学|领航|神秘学|重型机械|说服|精神分析|心理学|骑术|妙手|侦查|侦察|潜行|游泳|投掷|追踪|sc|SC)', 'g')
