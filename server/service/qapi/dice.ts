@@ -94,12 +94,12 @@ export class DiceManager {
 
       // 投骰
       const user = this.api.guilds.findUser(userId, srcGuildId)
-      if (!user) return
+      if (!user) throw 'user not found'
       const res = this.tryRollDice(fullExp, { userId: msg.author.id, username: user.persona })
       if (res) {
         // 私信就不用考虑是不是暗骰了
         user.sendMessage({ content: res.reply, msg_id: msg.id }, msg.guild_id)
-      }
+      } else throw 'unrecognized dice expression'
     } catch (e) {
       // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
       const selfNick = this.api.botInfo?.username || ''
@@ -144,9 +144,19 @@ export class DiceManager {
       // console.time('dice')
       // 是否有人物卡
       const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
-      const roll = PtDiceRoll.fromTemplate(fullExp, () => '')
+      // 根据人物卡获取对应 name 的数值
+      const skillName2entryCache: Record<string, ICocCardEntry | null> = {} // 单次投骰过程中 getEntry 增加缓存，避免连续骰多次调用
+      const getEntry = (key: string) => {
+        if (!cocCard) return null
+        if (typeof skillName2entryCache[key] === 'undefined') {
+          skillName2entryCache[key] = cocCard.getEntry(key)
+        }
+        return skillName2entryCache[key]
+      }
+      // 投骰
+      const roll = PtDiceRoll.fromTemplate(fullExp, (key) => getEntry(key)?.value || '')
       const reply = roll.format(username || userId, {}, (desc, value) => {
-        const cardEntry = cocCard?.getEntry(desc) // todo 单次投骰过程中 getEntry 增加缓存，避免连续骰多次调用
+        const cardEntry = getEntry(desc)
         if (cardEntry) {
           const testResult = this.decideResult(cardEntry, value)
           if (testResult.success) {
@@ -158,9 +168,9 @@ export class DiceManager {
         }
       })
       return { roll, reply }
-    } catch (e) {
+    } catch (e: any) {
       // 表达式不合法，无视之
-      console.log('[Dice] 未识别表达式', e)
+      console.log('[Dice] 未识别表达式', e?.message)
       return null
     } finally {
       // console.timeEnd('dice')

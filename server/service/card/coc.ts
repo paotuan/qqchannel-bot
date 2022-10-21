@@ -52,7 +52,7 @@ export class CocCard {
     if (typeof target !== 'undefined') {
       return { expression, name: skill, difficulty, value: target } as ICocCardEntry
     } else {
-      return undefined
+      return null
     }
   }
 

@@ -96,13 +96,14 @@ export class PtDiceRoll {
   }
 
   format(username: string, { isMedian = false }, decide?: DeciderFunc) {
+    const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
     // isMedian 处理
     if (isMedian) {
       const roll = this.rolls[0] // isMedian 多重投骰只取第一个
-      return `🎲 ${this.skip ? `${roll.notation} = ${roll.total}` : roll.output} ${decide?.(this.description, roll.total) || ''}`
+      return `🎲${descriptionStr} ${this.skip ? `${roll.notation} = ${roll.total}` : roll.output} ${decide?.(this.description, roll.total) || ''}`
     }
     // 正常情况
-    const lines = [`${username} 🎲 ${this.description}`]
+    const lines = [`${username} 🎲${descriptionStr}`]
     // 是否有中间骰
     if (this.hasMedianRolls) {
       const medianLines = this.medianRolls!.map((roll, i) => {
@@ -114,12 +115,12 @@ export class PtDiceRoll {
     const rollLines = this.rolls.map(roll => {
       return `${this.skip ? `${roll.notation} = ${roll.total}` : roll.output} ${decide?.(this.description, roll.total) || ''}`
     })
-    // 有中间骰的情况下，普通骰也增加前缀
-    if (this.hasMedianRolls) {
+    // 有中间骰且没有 skip 的情况下，普通骰也增加前缀，以便与中间骰对应起来
+    if (this.hasMedianRolls && !this.skip) {
       if (rollLines.length === 1) {
-        rollLines[0] = '最后 ' + rollLines[0]
+        rollLines[0] = '最后 🎲 ' + rollLines[0]
       } else {
-        rollLines.unshift('最后')
+        rollLines.unshift('最后 🎲 ')
       }
     }
     // 判断是否是展示在一行
@@ -142,7 +143,7 @@ function parseTemplate(expression: string, get: GetFunc, history: PtDiceRoll[]):
         return historyRoll ? String(historyRoll.firstTotal) : ''
       })
       // 替换变量
-      notation = notation.replace(/\$(\w+)/, (_, key: string) => {
+      notation = notation.replace(/\$([\w\p{Unified_Ideograph}]+)/u, (_, key: string) => {
         return String(get(key) ?? '')
       })
       // 如果是暗骰则不显示，否则返回值
