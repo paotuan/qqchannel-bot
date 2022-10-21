@@ -53,22 +53,20 @@ export class DiceManager {
     fullExp = unescapeHTML(fullExp)
 
     // 投骰
-    const reply = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id })
-    if (reply) {
+    const username = msg.member.nick || msg.author.username || msg.author.id
+    const res = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username })
+    if (res) {
       // 拼装结果，并发消息
-      const username = msg.member.nick || msg.author.username || msg.author.id
       const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
       if (!channel) return // channel 信息不存在
-      if (reply.roll.hide) { // 处理暗骰
-        const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${reply.roll.description}，猜猜结果是什么`
+      if (res.roll.hide) { // 处理暗骰
+        const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${res.roll.description}，猜猜结果是什么`
         channel.sendMessage({content: channelMsg, msg_id: msg.id})
         const user = this.api.guilds.findUser(msg.author.id, msg.guild_id)
         if (!user) return // 用户信息不存在
-        const directMsg = `${username} 🎲 ${reply.roll.description}${reply.resultDesc}`
-        user.sendMessage({ content: directMsg, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
+        user.sendMessage({ content: res.reply, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
       } else {
-        const channelMsg = `${username} 🎲 ${reply.roll.description}${reply.resultDesc}`
-        channel.sendMessage({ content: channelMsg, msg_id: msg.id })
+        channel.sendMessage({ content: res.reply, msg_id: msg.id })
       }
     }
   }
@@ -95,13 +93,12 @@ export class DiceManager {
       fullExp = unescapeHTML(fullExp)
 
       // 投骰
-      const reply = this.tryRollDice(fullExp, { userId: msg.author.id })
-      if (reply) {
+      const user = this.api.guilds.findUser(userId, srcGuildId)
+      if (!user) return
+      const res = this.tryRollDice(fullExp, { userId: msg.author.id, username: user.persona })
+      if (res) {
         // 私信就不用考虑是不是暗骰了
-        const user = this.api.guilds.findUser(userId, srcGuildId)
-        if (!user) return // 用户信息不存在
-        const directMsg = `${user.persona} 🎲 ${reply.roll.description}${reply.resultDesc}`
-        user.sendMessage({ content: directMsg, msg_id: msg.id }, msg.guild_id)
+        user.sendMessage({ content: res.reply, msg_id: msg.id }, msg.guild_id)
       }
     } catch (e) {
       // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
@@ -126,14 +123,12 @@ export class DiceManager {
       cacheMsg.instruction = detectInstruction(cacheMsg.text || '')
     }
     if (!cacheMsg.instruction) return
-    const reply = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId })
-    if (reply) {
+    const user = this.api.guilds.findUser(userId, guildId)
+    const res = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId, username: user?.persona })
+    if (res) {
       // 表情表态也没有暗骰
-      const user = this.api.guilds.findUser(userId, guildId)
       const channel = this.api.guilds.findChannel(channelId, guildId)
-      if (!channel) return // channel 信息不存在
-      const channelMsg = `${user?.persona || userId} 🎲 ${reply.roll.description}${reply.resultDesc}`
-      channel.sendMessage({ content: channelMsg, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
+      channel?.sendMessage({ content: res.reply, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
     }
   }
 
@@ -142,27 +137,27 @@ export class DiceManager {
    * @param fullExp 指令表达式
    * @param userId 投骰用户的 id
    * @param channelId 投骰所在的子频道，选填。若存在子频道说明不是私信场景，会去判断人物卡数值
+   * @param username 用户昵称，用于拼接结果字符串
    */
-  private tryRollDice(fullExp: string, { userId, channelId }: { userId: string, channelId?: string }) {
+  private tryRollDice(fullExp: string, { userId, channelId, username }: { userId: string, channelId?: string, username?: string }) {
     try {
       // console.time('dice')
-      const roll = new PtDiceRoll(fullExp)
       // 是否有人物卡
       const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
-      const cardEntry = cocCard?.getEntry(roll.description)
-      const rollResultStr = roll.rolls.map(dice => {
-        let str = roll.skip ? `${dice.notation} = ${dice.total}` : dice.output // 是否省略中间值
+      const roll = PtDiceRoll.fromTemplate(fullExp, () => '')
+      const reply = roll.format(username || userId, {}, (desc, value) => {
+        const cardEntry = cocCard?.getEntry(desc) // todo 单次投骰过程中 getEntry 增加缓存，避免连续骰多次调用
         if (cardEntry) {
-          const testResult = this.decideResult(cardEntry, dice.total)
-          str += ' ' + testResult.desc
+          const testResult = this.decideResult(cardEntry, value)
           if (testResult.success) {
             // todo 标记技能成长 直接改服务端吧，让同步机制同步回去。写文件改成异步
           }
+          return testResult.desc
+        } else {
+          return ''
         }
-        return str
-      }).join('\n')
-      // 返回结果
-      return { roll, resultDesc: (roll.times === 1 ? ' ' : '\n') + rollResultStr }
+      })
+      return { roll, reply }
     } catch (e) {
       // 表达式不合法，无视之
       console.log('[Dice] 未识别表达式', e)
