@@ -2,10 +2,12 @@ import type { ICard } from '../../../interface/common'
 import { makeAutoObservable } from 'mobx'
 
 type Difficulty = 'normal' | 'hard' | 'ex'
+type EntryType = 'basic' | 'props' | 'skills'
 
 export interface ICocCardEntry {
-  expression: string
-  name: string // basic or prop or skill
+  expression: string // 原始表达式
+  type: EntryType
+  name: string
   difficulty: Difficulty
   value: number
 }
@@ -18,67 +20,105 @@ export class CocCard {
     this.data = data
   }
 
-  // raw, propOrSkill, difficulty, value
   getEntry(expression: string) {
-    const card = this.data
-    let skill = expression
-    let target: number | undefined
-    let difficulty: Difficulty = 'normal'
-    if (skill === '理智' || skill === 'sc' || skill === 'SC') {
-      target = card.basic.san
-    } else if (skill === '幸运') {
-      target = card.basic.luck
-    } else if (skill === '灵感') {
-      target = card.props['智力']
-    } else {
-      // 其他的属性或技能有困难等级
-      if (skill.indexOf('困难') >= 0) {
-        difficulty = 'hard'
-      } else if (skill.indexOf('极难') >= 0 || skill.indexOf('极限') >= 0) {
-        difficulty = 'ex'
-      }
-      skill = skill.replace(/(困难|极难|极限)/g, '')
-      // 通用获取数值
-      target = this.getTargetValue(skill)?.[0]
-      if (typeof target === 'number') {
+    const [skillWithoutDifficulty, difficulty] = parseDifficulty(expression)
+    const target = this.getTargetValue(skillWithoutDifficulty)
+    if (target) {
+      const value = (() => {
         if (difficulty === 'hard') {
-          target = Math.floor(target / 2)
+          return Math.floor(target.value / 2)
         } else if (difficulty === 'ex') {
-          target = Math.floor(target / 5)
+          return Math.floor(target.value / 5)
+        } else {
+          return target.value
         }
-      }
-    }
-    // return
-    if (typeof target !== 'undefined') {
-      return { expression, name: skill, difficulty, value: target } as ICocCardEntry
+      })()
+      return { expression, type: target.type, name: target.name, difficulty, value } as ICocCardEntry
     } else {
       return null
     }
   }
 
-  private getTargetValue(skill: string) {
-    const card = this.data
-    const possibleSkills = skillAliasMap[skill] ?? [skill] // 处理属性别名
+  private getTargetValue(rawSkillName: string) {
+    const card = this.data as any
+    const possibleSkills = skillAliasMap[rawSkillName] ?? [rawSkillName] // 处理属性别名
     for (const skill of possibleSkills) {
-      const target = card.basic[skill as keyof ICard['basic']] || card.props[skill as keyof ICard['props']] || card.skills[skill]
-      if (typeof target === 'number') {
-        return [target, skill] as [number, string] // 返回真实存在的那个别名
+      for (const type of ['basic', 'props', 'skills']) {
+        const target = card[type][skill]
+        if (typeof target === 'number') {
+          return { value: target, name: skill, type } // 返回真实存在的那个别名
+        }
       }
     }
     return undefined
   }
 
-  setEntry(name: string, value: number) {
-    // todo
+  setEntry(rawName: string, value: number) {
+    // 判断是否有现成的 entry
+    const target = this.getTargetValue(rawName)
+    if (target) {
+      if (value === target.value) {
+        return false // 值相等，避免无用的更新
+      } else {
+        const card = this.data as any
+        card[target.type][target.name] = value
+        this.data.meta.lastModified = Date.now()
+        return true
+      }
+    } else {
+      // 没有现成的，认为是 skill
+      this.data.skills[rawName] = value
+      this.data.meta.lastModified = Date.now()
+      return true
+    }
+  }
+
+  markSkillGrowth(skill: string) {
+    if (this.data.meta.skillGrowth[skill]) {
+      return false // 已经标记为成长了，无需额外的更新
+    } else {
+      console.log('[COC] 标记技能成长', skill)
+      this.data.meta.skillGrowth[skill] = true
+      this.data.meta.lastModified = Date.now()
+      // todo 异步保存(保存要不要放在这里？因为可能会有批量操作，不能放这里)
+      return true // 返回有更新
+    }
   }
 }
 
 const skillAlias = [
+  // region 建议不要改
+  ['力量', 'str', 'STR'],
+  ['敏捷', 'dex', 'DEX'],
+  ['意志', 'pow', 'POW'],
+  ['体质', 'con', 'CON'],
+  ['外貌', 'app', 'APP'],
+  ['教育', 'edu', 'EDU'],
+  ['体型', 'siz', 'SIZ', 'size', 'SIZE'],
+  ['智力', '灵感', 'int', 'INT'],
+  ['生命', 'hp', 'HP'],
+  ['理智', 'san', 'sc', 'SC', 'SAN'],
+  ['魔法', 'mp', 'MP'],
+  ['幸运', 'luck', 'luk', 'LUK'],
   ['侦查', '侦察'],
-  ['hp', 'HP'],
-  ['mp', 'MP', '魔法']
+  // endregion
+  ['计算机', '计算机使用', '电脑'],
+  ['信用', '信誉', '信用评级'],
+  ['克苏鲁', '克苏鲁神话'],
+  ['图书馆', '图书馆使用']
 ]
 
 const skillAliasMap: Record<string, string[]> = skillAlias
   .map(line => line.reduce((obj, str) => Object.assign(obj, { [str]: line }), {}))
   .reduce((total, obj) => Object.assign(total, obj), {})
+
+function parseDifficulty(expression: string) {
+  let difficulty: Difficulty = 'normal'
+  if (expression.includes('困难')) {
+    difficulty = 'hard'
+  } else if (expression.includes('极难') || expression.includes('极限')) {
+    difficulty = 'ex'
+  }
+  expression = expression.replace(/(困难|极难|极限)/g, '')
+  return [expression, difficulty]
+}

@@ -155,18 +155,24 @@ export class DiceManager {
       }
       // 投骰
       const roll = PtDiceRoll.fromTemplate(fullExp, (key) => getEntry(key)?.value || '')
+      let cardNeedUpdate = false // 标记是否有技能成长导致人物卡更新。因为投骰过程中可能涉及到多次更新，延后到全部计算完后再写文件保存
       const reply = roll.format(username || userId, {}, (desc, value) => {
         const cardEntry = getEntry(desc)
         if (cardEntry) {
           const testResult = this.decideResult(cardEntry, value)
-          if (testResult.success) {
-            // todo 标记技能成长 直接改服务端吧，让同步机制同步回去。写文件改成异步
+          if (testResult.success && cardEntry.type === 'skills') { // 注意只有技能类型才能成长
+            const updated = cocCard?.markSkillGrowth(cardEntry.name) || false
+            cardNeedUpdate ||= updated // 不能跟上面一句短路，因为 markSkillGrowth 有副作用，必须确保调用到
           }
           return testResult.desc
         } else {
           return ''
         }
       })
+      // 保存人物卡更新
+      if (cocCard && cardNeedUpdate) {
+        this.wss.cards.saveCard(cocCard)
+      }
       return { roll, reply }
     } catch (e: any) {
       // 表达式不合法，无视之

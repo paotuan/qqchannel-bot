@@ -51,22 +51,25 @@ export class CardManager {
     const { card } = req
     const cardName = card.basic.name
     console.log('[Card] 保存人物卡', cardName)
-    try {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir)
-      }
-      fs.writeFileSync(`${dir}/${cardName}.json`, JSON.stringify(card))
-      if (this.cardMap[cardName]) {
-        this.cardMap[cardName].data = card
-      } else {
-        this.cardMap[cardName] = new CocCard(card)
-      }
-      console.log('[Card] 保存人物卡成功')
-      this.wss.sendToChannel<null>(client.listenToChannelId, { cmd: 'card/import', success: true, data: null })
-    } catch (e) {
-      console.error('[Card] 保存人物卡失败', e)
-      this.wss.sendToClient<string>(client, { cmd: 'card/import', success: false, data: '' })
+    if (this.cardMap[cardName]) {
+      this.cardMap[cardName].data = card
+    } else {
+      this.cardMap[cardName] = new CocCard(card)
     }
+    this.saveCard(this.cardMap[cardName])
+    this.wss.sendToChannel<null>(client.listenToChannelId, { cmd: 'card/import', success: true, data: null })
+  }
+
+  saveCard(card: CocCard) {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir)
+    }
+    const cardName = card.data.basic.name
+    fs.writeFile(`${dir}/${cardName}.json`, JSON.stringify(card.data), (e) => {
+      if (e) {
+        console.error('[Card] 人物卡写文件失败', e)
+      }
+    })
   }
 
   deleteCard(client: WsClient, req: ICardDeleteReq) {
