@@ -1,8 +1,50 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { AliasExpressions } from './alias'
+import { ScDiceRoll } from './special/sc'
 
-type GetFunc = (key: string) => string | number
-type DeciderFunc = (desc: string, value: number) => string
+export type GetFunc = (key: string) => string | number
+export type DeciderFunc = (desc: string, value: number) => string
+
+export abstract class BasePtDiceRoll {
+  expression = ''
+  description = ''
+  medianRolls?: PtDiceRoll[]
+
+  get hasMedianRolls() {
+    return this.medianRolls && this.medianRolls.length > 0
+  }
+
+  // fullExp: 去除了 @ . 。 前缀的完整表达式
+  protected constructor(fullExp: string) {
+    // 默认按中文或空格分割出 expression 和 description，子类可实现进一步的解析逻辑
+    // this.parseDescriptions(fullExp)
+  }
+
+  // todo 改成 util 方法
+  parseDescriptions(expression: string) {
+    const index = expression.search(/[\p{Unified_Ideograph}\s]/u) // 按第一个中文或空格分割
+    const [exp, desc = ''] = index < 0 ? [expression] : [expression.slice(0, index), expression.slice(index)]
+    this.expression = exp
+    this.description = desc.trim()
+  }
+
+  // 从模板解析得到 DiceRoll 实例
+  static fromTemplate(expression: string, get: GetFunc) {
+    const medianRolls: PtDiceRoll[] = []
+    const parsed = parseTemplate(expression, get, medianRolls)
+    const roll = this.createDiceRoll(parsed)
+    roll.medianRolls = medianRolls // 保存中间骰结果
+    return roll
+  }
+
+  private static createDiceRoll(expression: string) {
+    if (expression.startsWith('sc')) {
+      return new ScDiceRoll(expression)
+    } else {
+      return new PtDiceRoll(expression)
+    }
+  }
+}
 
 export class PtDiceRoll {
 

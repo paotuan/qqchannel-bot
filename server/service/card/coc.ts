@@ -71,6 +71,8 @@ export class CocCard {
       this.data.meta.lastModified = Date.now()
       return true
     }
+    // todo log
+    // todo 特殊：增加克苏鲁神话要减去理智
   }
 
   markSkillGrowth(skill: string) {
