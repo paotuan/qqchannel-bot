@@ -2,8 +2,10 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import { PtDiceRoll } from '../dice'
+import { BasePtDiceRoll } from '../dice'
 import type { ICocCardEntry } from '../card/coc'
+import type { IDeciderResult } from '../dice/utils'
+import { StandardDiceRoll } from '../dice/standard'
 
 interface IMessageCache {
   text?: string
@@ -59,7 +61,7 @@ export class DiceManager {
       // 拼装结果，并发消息
       const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
       if (!channel) return // channel 信息不存在
-      if (res.roll.hide) { // 处理暗骰
+      if (res.roll instanceof StandardDiceRoll && res.roll.hide) { // 处理暗骰
         const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${res.roll.description}，猜猜结果是什么`
         channel.sendMessage({content: channelMsg, msg_id: msg.id})
         const user = this.api.guilds.findUser(msg.author.id, msg.guild_id)
@@ -154,9 +156,10 @@ export class DiceManager {
         return skillName2entryCache[key]
       }
       // 投骰
-      const roll = PtDiceRoll.fromTemplate(fullExp, (key) => getEntry(key)?.value || '')
+      const roll = BasePtDiceRoll.fromTemplate(fullExp, (key) => getEntry(key)?.value || '')
       let cardNeedUpdate = false // 标记是否有技能成长导致人物卡更新。因为投骰过程中可能涉及到多次更新，延后到全部计算完后再写文件保存
-      const reply = roll.format(username || userId, {}, (desc, value) => {
+      // todo format 方法能否统一？
+      const reply = roll.format(username || userId, (desc, value) => {
         const cardEntry = getEntry(desc)
         if (cardEntry) {
           const testResult = this.decideResult(cardEntry, value)
@@ -164,9 +167,9 @@ export class DiceManager {
             const updated = cocCard?.markSkillGrowth(cardEntry.name) || false
             cardNeedUpdate ||= updated // 不能跟上面一句短路，因为 markSkillGrowth 有副作用，必须确保调用到
           }
-          return testResult.desc
+          return testResult
         } else {
-          return ''
+          return null
         }
       })
       // 保存人物卡更新
@@ -184,15 +187,15 @@ export class DiceManager {
   }
 
   // todo 规则自定义
-  private decideResult(cardEntry: ICocCardEntry, roll: number) {
+  private decideResult(cardEntry: ICocCardEntry, roll: number): IDeciderResult {
     if (roll === 1) {
-      return { success: true, desc: '大成功' }
+      return { success: true, level: 2, desc: '大成功' }
     } else if (roll > 95) {
-      return { success: false, desc: '大失败' }
+      return { success: false, level: -2, desc: '大失败' }
     } else if (roll <= cardEntry.value) {
-      return { success: true, desc: `≤ ${cardEntry.value} 成功` }
+      return { success: true, level: 1, desc: `≤ ${cardEntry.value} 成功` }
     } else {
-      return { success: false, desc: `> ${cardEntry.value} 失败` }
+      return { success: false, level: -1, desc: `> ${cardEntry.value} 失败` }
     }
   }
 

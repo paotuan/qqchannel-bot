@@ -1,8 +1,9 @@
-import { BasePtDiceRoll, DeciderFunc } from '../index'
+import { BasePtDiceRoll } from '../index'
 import { parseDescriptions } from '../utils'
+import type { CocCard } from '../../card/coc'
 
 export class ScDiceRoll extends BasePtDiceRoll {
-  noModify = false
+  private noModify = false
   expression1 = ''
   expression2 = ''
   description = ''
@@ -13,7 +14,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
     super(fullExp)
     const removeSc = fullExp.slice(2).trim()
     const removeFlags = this.parseFlags(removeSc)
-    this.parseDescriptions(removeFlags)
+    this.parseMain(removeFlags)
     this.detectDefaultRoll()
   }
 
@@ -49,7 +50,12 @@ export class ScDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  format(username: string, decide?: DeciderFunc) {
-    // todo 特殊骰子还是依赖人物卡的，光靠 decide 方法不够
+  roll(username: string) {
+    // const san = card.data.basic.san
+    // card.setEntry()
+  }
+
+  applyTo(card: CocCard) {
+    if (this.noModify) return false
   }
 }
