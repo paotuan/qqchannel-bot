@@ -1,14 +1,14 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { AliasExpressions } from '../alias'
-import { IDeciderResult, IDiceRollContext, parseDescriptions } from '../utils'
+import { IDeciderResult, parseDescriptions } from '../utils'
 import { BasePtDiceRoll } from '../index'
-import { CocCard } from '../../card/coc'
+import type { CocCard } from '../../card/coc'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
   times = 1
-  hide = false
-  skip = false
+  hidden = false
+  quiet = false
   expression = ''
   description = ''
   private isAlias = false
@@ -49,7 +49,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const removeFlags = this.parseFlags(removeR).trim()
     this.parseDescriptions(removeFlags)
     this.detectDefaultRoll()
-    console.log('[Dice] 原始指令：', this.rawExpression, '解析指令：', this.expression, '描述：', this.description, '暗骰：', this.hide, '省略：', this.skip, '次数：', this.times)
+    console.log('[Dice] 原始指令：', this.rawExpression, '解析指令：', this.expression, '描述：', this.description, '暗骰：', this.hidden, '省略：', this.quiet, '次数：', this.times)
   }
 
   private parseAlias(expression: string) {
@@ -66,11 +66,11 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   private parseFlags(expression: string) {
-    const match = expression.match(/^(h|q|x\d+|\s)*/) // q - quiet
+    const match = expression.match(/^(h|q|x\d+|\s)*/)
     if (match) {
       const flags = match[0]
-      if (flags.includes('h')) this.hide = true
-      if (flags.includes('q')) this.skip = true
+      if (flags.includes('h')) this.hidden = true
+      if (flags.includes('q')) this.quiet = true
       const timesMatch = flags.match(/x(\d+)/)
       if (timesMatch) {
         const times = parseInt(timesMatch[1], 10)
@@ -102,7 +102,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
     const lines = [`${this.context.username} 🎲${descriptionStr}`]
     // 是否有中间骰
-    if (this.hasMedianRolls && !this.skip) {
+    if (this.hasMedianRolls && !this.quiet) {
       const medianLines = this.medianRolls.map((roll, i) => {
         return `${i === 0 ? '先是' : '然后' } ${roll.output}`
       })
@@ -111,10 +111,10 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     // 普通骰
     const rollLines = this.rolls.map((roll, i) => {
       const decideResult = this.decideResults[i]?.desc || ''
-      return `${this.skip ? `${roll.notation} = ${roll.total}` : roll.output} ${decideResult}`
+      return `${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output} ${decideResult}`
     })
     // 有中间骰且没有 skip 的情况下，普通骰也增加前缀，以便与中间骰对应起来
-    if (this.hasMedianRolls && !this.skip) {
+    if (this.hasMedianRolls && !this.quiet) {
       if (rollLines.length === 1) {
         rollLines[0] = '最后 🎲 ' + rollLines[0]
       } else {

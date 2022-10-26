@@ -63,7 +63,7 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
       const MedianDiceRoll = getMedianDiceRollKlass()
       const dice = new MedianDiceRoll(notation.trim(), context).roll()
       history.push(dice) // median roll 存起来
-      return dice.hide ? '' : String(dice.total)
+      return dice.hidden ? '' : String(dice.total)
     })
     return parseTemplate(expression, context, history)
   }
