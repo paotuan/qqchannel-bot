@@ -1,7 +1,8 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { AliasExpressions } from '../alias'
-import { DeciderFunc, parseDescriptions } from '../utils'
+import { IDeciderResult, IDiceRollContext, parseDescriptions } from '../utils'
 import { BasePtDiceRoll } from '../index'
+import { CocCard } from '../../card/coc'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
@@ -12,21 +13,46 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   description = ''
   private isAlias = false
 
-  rolls: DiceRoll[] = []
+  protected rolls: DiceRoll[] = []
+  protected decideResults: IDeciderResult[] = []
+  // side effects
+  protected skills2growth: string[] = []
 
-  // fullExp: 去除了 @ . 。 前缀的完整表达式
-  constructor(fullExp: string) {
-    super(fullExp)
-    const removeAlias = this.parseAlias(fullExp).trim()
+  override roll() {
+    this.skills2growth.length = 0
+    this.decideResults.length = 0
+    this.parse()
+    this.rolls = new Array(this.times).fill(this.expression).map(exp => new DiceRoll(exp))
+    // 收集副作用
+    const decide = this.decide
+    if (this.get && decide) {
+      // 是否是人物卡某项属性的检定
+      const entry = this.get(this.description)
+      if (entry) {
+        this.decideResults = this.rolls.map(roll => {
+          const decideResult = decide(roll.total, entry)
+          if (decideResult.success) {
+            this.skills2growth.push(entry.name) // 记录人物卡技能成长
+          }
+          return decideResult
+        })
+      }
+    }
+    return this
+  }
+
+  // 解析指令，最终结果存入 this.expression
+  private parse() {
+    const parsedExpression = this.parseTemplate() // median rolls 在这一步 roll 了
+    const removeAlias = this.parseAlias(parsedExpression).trim()
     const removeR = removeAlias.startsWith('r') ? removeAlias.slice(1).trim() : removeAlias
     const removeFlags = this.parseFlags(removeR).trim()
     this.parseDescriptions(removeFlags)
     this.detectDefaultRoll()
-    console.log('[Dice] 原始指令：', fullExp, '解析指令：', this.expression, '描述：', this.description, '暗骰：', this.hide, '省略：', this.skip, '次数：', this.times)
-    this.roll()
+    console.log('[Dice] 原始指令：', this.rawExpression, '解析指令：', this.expression, '描述：', this.description, '暗骰：', this.hide, '省略：', this.skip, '次数：', this.times)
   }
 
-  parseAlias(expression: string) {
+  private parseAlias(expression: string) {
     for (const config of AliasExpressions) {
       config.regexCache ??= new RegExp(`^${config.alias}`)
       const match = expression.match(config.regexCache)
@@ -39,7 +65,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     return expression
   }
 
-  parseFlags(expression: string) {
+  private parseFlags(expression: string) {
     const match = expression.match(/^(h|q|x\d+|\s)*/) // q - quiet
     if (match) {
       const flags = match[0]
@@ -55,7 +81,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     return expression
   }
 
-  parseDescriptions(expression: string) {
+  private parseDescriptions(expression: string) {
     if (this.isAlias) {
       // 如果是 alias dice，则认为 expression 已经由 config 指定，剩下的都是 description
       this.description = expression
@@ -66,33 +92,25 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  detectDefaultRoll(defaultRoll = 'd%') {
+  private detectDefaultRoll(defaultRoll = 'd%') {
     if (this.expression === '' || this.expression === 'd') {
       this.expression = defaultRoll // todo 默认骰
     }
   }
 
-  roll() {
-    this.rolls = new Array(this.times).fill(this.expression).map(exp => new DiceRoll(exp))
-  }
-
-  get firstTotal() {
-    return this.rolls[0].total // 如果单骰（times===1）就是结果。如果多连骰，则取第一个结果
-  }
-
-  format(username: string, decide?: DeciderFunc) {
+  override get output() {
     const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
-    const lines = [`${username} 🎲${descriptionStr}`]
+    const lines = [`${this.context.username} 🎲${descriptionStr}`]
     // 是否有中间骰
-    if (this.hasMedianRolls) {
-      const medianLines = this.medianRolls!.map((roll, i) => {
-        return `${i === 0 ? '先是' : '然后' } ${roll.format(username, decide)}`
+    if (this.hasMedianRolls && !this.skip) {
+      const medianLines = this.medianRolls.map((roll, i) => {
+        return `${i === 0 ? '先是' : '然后' } ${roll.output}`
       })
-      if (!this.skip) lines.push(...medianLines) // skip 了就不拼。注意即使 skip 也要调用 decide 的逻辑，因为这个逻辑会有副作用
+      lines.push(...medianLines)
     }
     // 普通骰
-    const rollLines = this.rolls.map(roll => {
-      const decideResult = decide?.(this.description, roll.total)?.desc || ''
+    const rollLines = this.rolls.map((roll, i) => {
+      const decideResult = this.decideResults[i]?.desc || ''
       return `${this.skip ? `${roll.notation} = ${roll.total}` : roll.output} ${decideResult}`
     })
     // 有中间骰且没有 skip 的情况下，普通骰也增加前缀，以便与中间骰对应起来
@@ -109,5 +127,16 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     } else {
       return [...lines, ...rollLines].join('\n')
     }
+  }
+
+  override applyTo(card: CocCard) {
+    const medianSkills2growth = this.medianRolls.map(medianRoll => medianRoll.skills2growth).flat()
+    const uniqSkills = Array.from(new Set([...medianSkills2growth, ...this.skills2growth]))
+    let needUpdate = false
+    uniqSkills.forEach(skill => {
+      const updated = card.markSkillGrowth(skill)
+      needUpdate ||= updated
+    })
+    return needUpdate
   }
 }

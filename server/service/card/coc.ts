@@ -6,10 +6,11 @@ type EntryType = 'basic' | 'props' | 'skills'
 
 export interface ICocCardEntry {
   expression: string // 原始表达式
-  type: EntryType
-  name: string
-  difficulty: Difficulty
-  value: number
+  type: EntryType // 字段类型
+  name: string // 字段名
+  difficulty: Difficulty // 难度
+  value: number // 该难度下成功的数值
+  baseValue: number // 该字段原始数值（不计难度）
 }
 
 export class CocCard {
@@ -33,7 +34,7 @@ export class CocCard {
           return target.value
         }
       })()
-      return { expression, type: target.type, name: target.name, difficulty, value } as ICocCardEntry
+      return { expression, type: target.type, name: target.name, difficulty, value, baseValue: target.value } as ICocCardEntry
     } else {
       return null
     }
@@ -82,7 +83,6 @@ export class CocCard {
       console.log('[COC] 标记技能成长', skill)
       this.data.meta.skillGrowth[skill] = true
       this.data.meta.lastModified = Date.now()
-      // todo 异步保存(保存要不要放在这里？因为可能会有批量操作，不能放这里)
       return true // 返回有更新
     }
   }

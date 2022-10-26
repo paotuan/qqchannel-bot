@@ -1,18 +1,50 @@
 import { BasePtDiceRoll } from '../index'
-import { parseDescriptions } from '../utils'
+import { IDeciderResult, parseDescriptions } from '../utils'
 import type { CocCard } from '../../card/coc'
+import { DiceRoll } from '@dice-roller/rpg-dice-roller'
+
+const SC_CARD_ENTRY_NAME = 'san' // sc 在人物卡中的字段名
 
 export class ScDiceRoll extends BasePtDiceRoll {
   private noModify = false
-  expression1 = ''
-  expression2 = ''
-  description = ''
+  private expression1 = ''
+  private expression2 = ''
+  private description = ''
+
+  private rollSc?: DiceRoll
+  private rollScResult?: IDeciderResult
+  private rollLoss?: DiceRoll
+
+  private get scLoss() {
+    return this.rollLoss?.total || 0
+  }
 
   // sc1d10/1d100直视伟大的克苏鲁
   // sc! 不修改人物卡
-  constructor(fullExp: string) {
-    super(fullExp)
-    const removeSc = fullExp.slice(2).trim()
+  override roll() {
+    this.parse()
+    // 1. 理智检定
+    this.rollLoss = undefined
+    this.rollScResult = undefined
+    this.rollSc = new DiceRoll('d%')
+    // 2. 理智损失
+    if (this.get && this.decide) {
+      const scEntry = this.get(SC_CARD_ENTRY_NAME)
+      if (scEntry) {
+        this.rollScResult = this.decide(this.rollSc.total, scEntry)
+        if (this.rollScResult.level === -2) {
+          this.rollLoss = new DiceRoll('99')
+        } else {
+          this.rollLoss = new DiceRoll(this.rollScResult.success ? this.expression1 : this.expression2)
+        }
+      }
+    }
+    return this
+  }
+
+  private parse() {
+    const parsedExpression = this.parseTemplate()
+    const removeSc = parsedExpression.slice(2).trim()
     const removeFlags = this.parseFlags(removeSc)
     this.parseMain(removeFlags)
     this.detectDefaultRoll()
@@ -32,7 +64,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
     const firstSplitIndex = expression.indexOf('/')
     if (firstSplitIndex >= 0) {
       this.expression1 = expression.slice(0, firstSplitIndex).trim()
-      exp2andDesc = expression.slice(firstSplitIndex).trim()
+      exp2andDesc = expression.slice(firstSplitIndex + 1).trim()
     }
     // 没有 / 的时候就认为 exp1=exp2 吧
     const [exp, desc] = parseDescriptions(exp2andDesc)
@@ -50,12 +82,25 @@ export class ScDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  roll(username: string) {
-    // const san = card.data.basic.san
-    // card.setEntry()
+  override get output() {
+    const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
+    const scRollValue = this.rollSc!.total
+    const resultDesc = this.rollScResult?.desc ?? '……成功了吗？'
+    let line = `${this.context.username} 🎲${descriptionStr} d% = ${scRollValue} ${resultDesc}`
+    if (!this.rollScResult) return line // 没有人物卡
+    line += `\n${this.context.username} 🎲 理智损失 ${this.rollLoss!.output}`
+    return line
   }
 
-  applyTo(card: CocCard) {
-    if (this.noModify) return false
+  override applyTo(card: CocCard) {
+    if (this.noModify || this.scLoss === 0) return false
+    const oldSan = card.getEntry(SC_CARD_ENTRY_NAME)
+    if (!oldSan) return false
+    const newSan = Math.max(0, oldSan.value - this.scLoss)
+    if (this.scLoss < 0) {
+      console.warn('[Dice] 您试图通过负数回 san，系统将不会校验 san 值小于 99-克苏鲁神话 的限制')
+    }
+    card.setEntry(SC_CARD_ENTRY_NAME, newSan)
+    return true
   }
 }

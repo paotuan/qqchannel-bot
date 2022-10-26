@@ -2,10 +2,10 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import { BasePtDiceRoll } from '../dice'
 import type { ICocCardEntry } from '../card/coc'
 import type { IDeciderResult } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
+import { createDiceRoll } from '../dice/utils'
 
 interface IMessageCache {
   text?: string
@@ -56,19 +56,19 @@ export class DiceManager {
 
     // 投骰
     const username = msg.member.nick || msg.author.username || msg.author.id
-    const res = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username })
-    if (res) {
+    const roll = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username })
+    if (roll) {
       // 拼装结果，并发消息
       const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
       if (!channel) return // channel 信息不存在
-      if (res.roll instanceof StandardDiceRoll && res.roll.hide) { // 处理暗骰
-        const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${res.roll.description}，猜猜结果是什么`
+      if (roll instanceof StandardDiceRoll && roll.hide) { // 处理暗骰
+        const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${roll.description}，猜猜结果是什么`
         channel.sendMessage({content: channelMsg, msg_id: msg.id})
         const user = this.api.guilds.findUser(msg.author.id, msg.guild_id)
         if (!user) return // 用户信息不存在
-        user.sendMessage({ content: res.reply, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
+        user.sendMessage({ content: roll.output, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
       } else {
-        channel.sendMessage({ content: res.reply, msg_id: msg.id })
+        channel.sendMessage({ content: roll.output, msg_id: msg.id })
       }
     }
   }
@@ -97,10 +97,10 @@ export class DiceManager {
       // 投骰
       const user = this.api.guilds.findUser(userId, srcGuildId)
       if (!user) throw 'user not found'
-      const res = this.tryRollDice(fullExp, { userId: msg.author.id, username: user.persona })
-      if (res) {
+      const roll = this.tryRollDice(fullExp, { userId: msg.author.id, username: user.persona })
+      if (roll) {
         // 私信就不用考虑是不是暗骰了
-        user.sendMessage({ content: res.reply, msg_id: msg.id }, msg.guild_id)
+        user.sendMessage({ content: roll.output, msg_id: msg.id }, msg.guild_id)
       } else throw 'unrecognized dice expression'
     } catch (e) {
       // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
@@ -126,11 +126,11 @@ export class DiceManager {
     }
     if (!cacheMsg.instruction) return
     const user = this.api.guilds.findUser(userId, guildId)
-    const res = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId, username: user?.persona })
-    if (res) {
+    const roll = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId, username: user?.persona })
+    if (roll) {
       // 表情表态也没有暗骰
       const channel = this.api.guilds.findChannel(channelId, guildId)
-      channel?.sendMessage({ content: res.reply, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
+      channel?.sendMessage({ content: roll.output, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
     }
   }
 
@@ -146,38 +146,20 @@ export class DiceManager {
       // console.time('dice')
       // 是否有人物卡
       const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
-      // 根据人物卡获取对应 name 的数值
-      const skillName2entryCache: Record<string, ICocCardEntry | null> = {} // 单次投骰过程中 getEntry 增加缓存，避免连续骰多次调用
-      const getEntry = (key: string) => {
-        if (!cocCard) return null
-        if (typeof skillName2entryCache[key] === 'undefined') {
-          skillName2entryCache[key] = cocCard.getEntry(key)
-        }
-        return skillName2entryCache[key]
-      }
       // 投骰
-      const roll = BasePtDiceRoll.fromTemplate(fullExp, (key) => getEntry(key)?.value || '')
-      let cardNeedUpdate = false // 标记是否有技能成长导致人物卡更新。因为投骰过程中可能涉及到多次更新，延后到全部计算完后再写文件保存
-      // todo format 方法能否统一？
-      const reply = roll.format(username || userId, (desc, value) => {
-        const cardEntry = getEntry(desc)
-        if (cardEntry) {
-          const testResult = this.decideResult(cardEntry, value)
-          if (testResult.success && cardEntry.type === 'skills') { // 注意只有技能类型才能成长
-            const updated = cocCard?.markSkillGrowth(cardEntry.name) || false
-            cardNeedUpdate ||= updated // 不能跟上面一句短路，因为 markSkillGrowth 有副作用，必须确保调用到
-          }
-          return testResult
-        } else {
-          return null
-        }
+      const roller = createDiceRoll(fullExp, {
+        username: username || userId,
+        get: (key) => cocCard?.getEntry(key) ?? null,
+        decide: (value, target) => this.decideResult(target, value)
       })
       // 保存人物卡更新
-      if (cocCard && cardNeedUpdate) {
-        this.wss.cards.saveCard(cocCard)
+      if (cocCard) {
+        const cardNeedUpdate = roller.applyTo(cocCard)
+        cardNeedUpdate && this.wss.cards.saveCard(cocCard)
       }
-      return { roll, reply }
+      return roller
     } catch (e: any) {
+      console.error(e)
       // 表达式不合法，无视之
       console.log('[Dice] 未识别表达式', e?.message)
       return null
