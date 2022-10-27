@@ -1,4 +1,4 @@
-import type { ICocCardEntry } from '../card/coc'
+import type { ICocCardEntry, CocCard } from '../card/coc'
 import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
 
@@ -12,16 +12,14 @@ export interface IDeciderResult {
   desc: string
 }
 
-// 根据描述获取人物卡对应的属性、难度和数值
-export type GetFunc = (key: string) => ICocCardEntry | null
 // 根据当前 roll 出的值和目标数值，判断成功等级
 export type DeciderFunc = (value: number, target: ICocCardEntry) => IDeciderResult
 
 export interface IDiceRollContext {
   // channelId: string
   username: string
-  get?: GetFunc,
-  decide?: DeciderFunc
+  card: CocCard | null
+  decide: DeciderFunc
 }
 
 // 按第一个中文或空格分割 表达式 和 描述

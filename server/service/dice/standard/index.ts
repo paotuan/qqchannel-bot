@@ -24,19 +24,16 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     this.parse()
     this.rolls = new Array(this.times).fill(this.expression).map(exp => new DiceRoll(exp))
     // 收集副作用
-    const decide = this.decide
-    if (this.get && decide) {
-      // 是否是人物卡某项属性的检定
-      const entry = this.get(this.description)
-      if (entry) {
-        this.decideResults = this.rolls.map(roll => {
-          const decideResult = decide(roll.total, entry)
-          if (decideResult.success) {
-            this.skills2growth.push(entry.name) // 记录人物卡技能成长
-          }
-          return decideResult
-        })
-      }
+    // 是否是人物卡某项属性的检定
+    const entry = this.get(this.description)
+    if (entry) {
+      this.decideResults = this.rolls.map(roll => {
+        const decideResult = this.decide(roll.total, entry)
+        if (decideResult.success) {
+          this.skills2growth.push(entry.name) // 记录人物卡技能成长
+        }
+        return decideResult
+      })
     }
     return this
   }

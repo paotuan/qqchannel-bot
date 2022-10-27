@@ -8,8 +8,8 @@ export abstract class BasePtDiceRoll {
   protected readonly context: IDiceRollContext
   protected readonly medianRolls: MedianDiceRoll[] = []
 
-  protected get get() {
-    return this.context.get
+  protected get(key: string) {
+    return this.context.card?.getEntry(key) ?? null
   }
 
   protected get decide() {
@@ -47,7 +47,7 @@ const templateRegex = /\[([^[\]]+)\]/
 export function parseTemplate(expression: string, context: IDiceRollContext, history: MedianDiceRoll[]): string {
   if (templateRegex.test(expression)) {
     // 读取人物卡变量方法
-    const get = (key: string) => context.get?.(key)?.value || ''
+    const get = (key: string) => context.card?.getEntry(key)?.value || ''
     // 替换 [xxx]
     expression = expression.replace(templateRegex, (_, notation: string) => {
       // 替换历史骰子

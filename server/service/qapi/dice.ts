@@ -149,7 +149,7 @@ export class DiceManager {
       // 投骰
       const roller = createDiceRoll(fullExp, {
         username: username || userId,
-        get: (key) => cocCard?.getEntry(key) ?? null,
+        card: cocCard,
         decide: (value, target) => this.decideResult(target, value)
       })
       // 保存人物卡更新

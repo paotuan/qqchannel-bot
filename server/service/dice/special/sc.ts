@@ -28,15 +28,13 @@ export class ScDiceRoll extends BasePtDiceRoll {
     this.rollScResult = undefined
     this.rollSc = new DiceRoll('d%')
     // 2. 理智损失
-    if (this.get && this.decide) {
-      const scEntry = this.get(SC_CARD_ENTRY_NAME)
-      if (scEntry) {
-        this.rollScResult = this.decide(this.rollSc.total, scEntry)
-        if (this.rollScResult.level === -2) {
-          this.rollLoss = new DiceRoll('99')
-        } else {
-          this.rollLoss = new DiceRoll(this.rollScResult.success ? this.expression1 : this.expression2)
-        }
+    const scEntry = this.get(SC_CARD_ENTRY_NAME)
+    if (scEntry) {
+      this.rollScResult = this.decide(this.rollSc.total, scEntry)
+      if (this.rollScResult.level === -2) {
+        this.rollLoss = new DiceRoll('99')
+      } else {
+        this.rollLoss = new DiceRoll(this.rollScResult.success ? this.expression1 : this.expression2)
       }
     }
     return this
