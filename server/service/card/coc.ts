@@ -77,6 +77,7 @@ export class CocCard {
   }
 
   markSkillGrowth(skill: string) {
+    // todo 克苏鲁和信用评级不能成长
     if (this.data.meta.skillGrowth[skill]) {
       return false // 已经标记为成长了，无需额外的更新
     } else {
@@ -85,6 +86,18 @@ export class CocCard {
       this.data.meta.lastModified = Date.now()
       return true // 返回有更新
     }
+  }
+
+  cancelSkillGrowth(skill: string) {
+    let updated = false
+    const possibleSkills = skillAliasMap[skill] ?? [skill]
+    possibleSkills.forEach(skill => {
+      if (this.data.meta.skillGrowth[skill]) {
+        delete this.data.meta.skillGrowth[skill]
+        updated = true
+      }
+    })
+    return updated
   }
 }
 
@@ -103,10 +116,10 @@ const skillAlias = [
   ['魔法', 'mp', 'MP'],
   ['幸运', 'luck', 'luk', 'LUK'],
   ['侦查', '侦察'],
-  // endregion
-  ['计算机', '计算机使用', '电脑'],
   ['信用', '信誉', '信用评级'],
   ['克苏鲁', '克苏鲁神话'],
+  // endregion
+  ['计算机', '计算机使用', '电脑'],
   ['图书馆', '图书馆使用']
 ]
 

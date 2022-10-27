@@ -1,6 +1,5 @@
 import { BasePtDiceRoll } from '../index'
 import { IDeciderResult, parseDescriptions } from '../utils'
-import type { CocCard } from '../../card/coc'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 
 const SC_CARD_ENTRY_NAME = 'san' // sc 在人物卡中的字段名
@@ -98,15 +97,15 @@ export class ScDiceRoll extends BasePtDiceRoll {
     return line
   }
 
-  override applyTo(card: CocCard) {
-    if (this.noModify || this.scLoss === 0) return false
+  override applyToCard() {
+    const card = this.context.card
+    if (this.noModify || !card || this.scLoss === 0) return false
     const oldSan = card.getEntry(SC_CARD_ENTRY_NAME)
     if (!oldSan) return false
     const newSan = Math.max(0, oldSan.value - this.scLoss)
     if (this.scLoss < 0) {
       console.warn('[Dice] 您试图通过负数回 san，系统将不会校验 san 值小于 99-克苏鲁神话 的限制')
     }
-    card.setEntry(SC_CARD_ENTRY_NAME, newSan)
-    return true
+    return card.setEntry(SC_CARD_ENTRY_NAME, newSan)
   }
 }

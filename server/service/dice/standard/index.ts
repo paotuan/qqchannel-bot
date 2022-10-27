@@ -2,7 +2,6 @@ import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { AliasExpressions } from '../alias'
 import { IDeciderResult, parseDescriptions } from '../utils'
 import { BasePtDiceRoll } from '../index'
-import type { CocCard } from '../../card/coc'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
@@ -126,7 +125,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  override applyTo(card: CocCard) {
+  override applyToCard() {
+    const card = this.context.card
+    if (!card) return false
     const medianSkills2growth = this.medianRolls.map(medianRoll => medianRoll.skills2growth).flat()
     const uniqSkills = Array.from(new Set([...medianSkills2growth, ...this.skills2growth]))
     let needUpdate = false

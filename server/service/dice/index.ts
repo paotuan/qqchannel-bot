@@ -1,6 +1,5 @@
 import type { IDiceRollContext } from './utils'
 import type { MedianDiceRoll } from './standard/median'
-import type { CocCard } from '../card/coc'
 import { getMedianDiceRollKlass } from './standard/median'
 
 export abstract class BasePtDiceRoll {
@@ -34,7 +33,7 @@ export abstract class BasePtDiceRoll {
   abstract get output(): string
 
   // 应用副作用修改人物卡，返回人物卡是否真正修改了
-  abstract applyTo(card: CocCard): boolean
+  abstract applyToCard(): boolean
 
   // 解析含中括号的表达式模板，返回替换后的表达式，并把中途的骰子结果存入 medianRolls 中
   protected parseTemplate() {

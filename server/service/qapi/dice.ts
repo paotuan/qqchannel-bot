@@ -154,7 +154,7 @@ export class DiceManager {
       })
       // 保存人物卡更新
       if (cocCard) {
-        const cardNeedUpdate = roller.applyTo(cocCard)
+        const cardNeedUpdate = roller.applyToCard()
         cardNeedUpdate && this.wss.cards.saveCard(cocCard)
       }
       return roller

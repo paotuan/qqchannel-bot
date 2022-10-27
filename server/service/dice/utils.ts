@@ -1,6 +1,7 @@
 import type { ICocCardEntry, CocCard } from '../card/coc'
 import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
+import { EnDiceRoll } from './special/en'
 
 // 成功等级：大失败，失败，成功，大成功
 export type SuccessLevel = -2 | -1 | 1 | 2
@@ -33,6 +34,8 @@ export function parseDescriptions(expression: string) {
 export function createDiceRoll(expression: string, context: IDiceRollContext) {
   if (expression.startsWith('sc')) {
     return new ScDiceRoll(expression, context).roll()
+  } else if (expression.startsWith('en')) {
+    return new EnDiceRoll(expression, context).roll()
   } else {
     return new StandardDiceRoll(expression, context).roll()
   }
