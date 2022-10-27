@@ -28,7 +28,15 @@ export class ScDiceRoll extends BasePtDiceRoll {
     this.rollScResult = undefined
     this.rollSc = new DiceRoll('d%')
     // 2. 理智损失
-    const scEntry = this.get(SC_CARD_ENTRY_NAME)
+    let scEntry = this.get(SC_CARD_ENTRY_NAME)
+    if (!scEntry && this.description) {
+      // 如果没有人物卡，但是 description 传的是数字格式，就认为它代表临时的 san 值进入判断
+      const tempSc = Number(this.description)
+      if (!isNaN(tempSc)) {
+        scEntry = { expression: 'san', type: 'props', name: 'san', difficulty: 'normal', value: tempSc, baseValue: tempSc }
+        this.description = ''
+      }
+    }
     if (scEntry) {
       this.rollScResult = this.decide(this.rollSc.total, scEntry)
       if (this.rollScResult.level === -2) {
