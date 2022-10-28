@@ -173,7 +173,7 @@ export class DiceManager {
   private decideResult(cardEntry: ICocCardEntry, roll: number): IDeciderResult {
     if (roll === 1) {
       return { success: true, level: 2, desc: '大成功' }
-    } else if (roll > 95) {
+    } else if ((cardEntry.baseValue < 50 && roll > 95) || (cardEntry.baseValue >= 50 && roll === 100)) {
       return { success: false, level: -2, desc: '大失败' }
     } else if (roll <= cardEntry.value) {
       return { success: true, level: 1, desc: `≤ ${cardEntry.value} 成功` }
