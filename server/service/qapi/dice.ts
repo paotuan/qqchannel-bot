@@ -148,6 +148,7 @@ export class DiceManager {
       const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
       // 投骰
       const roller = createDiceRoll(fullExp, {
+        channelId,
         username: username || userId,
         card: cocCard,
         decide: (value, target) => this.decideResult(target, value)

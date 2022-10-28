@@ -33,7 +33,9 @@ export abstract class BasePtDiceRoll {
   abstract get output(): string
 
   // 应用副作用修改人物卡，返回人物卡是否真正修改了
-  abstract applyToCard(): boolean
+  applyToCard() {
+    return false
+  }
 
   // 解析含中括号的表达式模板，返回替换后的表达式，并把中途的骰子结果存入 medianRolls 中
   protected parseTemplate() {
