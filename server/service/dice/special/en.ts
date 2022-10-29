@@ -22,7 +22,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
 
   get allSkillsCanEn() {
     const cardData = this.context.card?.data
-    return cardData ? Object.keys(cardData.meta.skillGrowth) : []
+    return cardData ? Object.keys(cardData.meta.skillGrowth).filter(name => cardData.meta.skillGrowth[name]) : [] // 过滤掉值为 false 的
   }
 
   override roll(): this {
@@ -64,7 +64,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
       }
       if (!entry) return // 没有人物卡，也没有临时值，就忽略
       const firstRoll = new DiceRoll('d%')
-      const canGrowth = firstRoll.total > Math.min(95, entry.baseValue) // 大于技能数值才能增长 // todo 看下能不能等于
+      const canGrowth = firstRoll.total > Math.min(95, entry.baseValue) // 大于技能数值才能增长
       this.skill2Growth[skill] = {
         firstRoll,
         canGrowth,

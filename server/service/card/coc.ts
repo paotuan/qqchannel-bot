@@ -77,7 +77,11 @@ export class CocCard {
   }
 
   markSkillGrowth(skill: string) {
-    // todo 克苏鲁和信用评级不能成长
+    // 克苏鲁和信用评级不能成长
+    const possibleSkills = skillAliasMap[skill] ?? [skill]
+    if (possibleSkills.includes('克苏鲁') || possibleSkills.includes('信用')) {
+      return false
+    }
     if (this.data.meta.skillGrowth[skill]) {
       return false // 已经标记为成长了，无需额外的更新
     } else {
