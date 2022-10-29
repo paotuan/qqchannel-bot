@@ -1,14 +1,25 @@
 import type { IDiceRollContext } from './utils'
 import type { MedianDiceRoll } from './standard/median'
 import { getMedianDiceRollKlass } from './standard/median'
+import { calculateTargetValueWithDifficulty, ICocCardEntry, parseDifficulty } from '../card/coc'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
   protected readonly context: IDiceRollContext
   protected readonly medianRolls: MedianDiceRoll[] = []
 
-  protected get(key: string) {
-    return this.context.card?.getEntry(key) ?? null
+  protected get(key: string, tempValue = NaN) {
+    const entry = this.context.card?.getEntry(key) ?? null
+    if (entry) {
+      return entry
+    } else if (!isNaN(tempValue)) {
+      // 如果人物卡中没这项，但用户指定了临时值，就组装一个临时的 entry。临时 entry 的 type 不重要
+      const [skillWithoutDifficulty, difficulty] = parseDifficulty(key)
+      const value = calculateTargetValueWithDifficulty(tempValue, difficulty)
+      return { expression: key, type: 'skills', name: skillWithoutDifficulty, difficulty, value, baseValue: tempValue, isTemp: true } as ICocCardEntry
+    } else {
+      return null
+    }
   }
 
   protected get decide() {

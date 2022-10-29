@@ -1,6 +1,6 @@
 // en list / enl 列出
 // en // all
-// en aa [tempvalue] [desc]
+// en aa [tempvalue]
 
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
@@ -16,7 +16,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
 
   private listMode = false
   private enSkillNames: string[] = []
-  private description = ''
+  private tempValue = NaN
   // 先 d100 判断是否能成长，再 0/d10
   private readonly skill2Growth: Record<string, IGrowthDecideResult> = {}
 
@@ -45,7 +45,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
         this.enSkillNames = [expression]
       } else {
         this.enSkillNames = [expression.slice(0, index)]
-        this.description = expression.slice(index)
+        this.tempValue = parseInt(expression.slice(index), 10)
       }
     }
   }
@@ -53,15 +53,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
   private realRoll() {
     if (this.listMode) return
     this.enSkillNames.forEach(skill => {
-      let entry = this.get(skill)
-      if (!entry && this.description) {
-        // 如果没有人物卡，但是 description 传的是数字格式，就认为它代表临时的技能值
-        const tempValue = Number(this.description)
-        if (!isNaN(tempValue)) {
-          entry = { expression: skill, type: 'skills', name: skill, difficulty: 'normal', value: tempValue, baseValue: tempValue }
-          this.description = ''
-        }
-      }
+      const entry = this.get(skill, this.tempValue)
       if (!entry) return // 没有人物卡，也没有临时值，就忽略
       const firstRoll = new DiceRoll('d%')
       const canGrowth = firstRoll.total > Math.min(95, entry.baseValue) // 大于技能数值才能增长

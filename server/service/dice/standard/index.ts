@@ -5,12 +5,13 @@ import { BasePtDiceRoll } from '../index'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
-  times = 1
+  protected times = 1
   hidden = false
-  quiet = false
+  protected quiet = false
   expression = ''
   description = ''
-  private isAlias = false
+  protected isAlias = false
+  protected tempValue = NaN // 临时检定值
 
   protected rolls: DiceRoll[] = []
   protected decideResults: IDeciderResult[] = []
@@ -24,12 +25,12 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     this.rolls = new Array(this.times).fill(this.expression).map(exp => new DiceRoll(exp))
     // 收集副作用
     // 是否是人物卡某项属性的检定
-    const entry = this.get(this.description)
+    const entry = this.get(this.description, this.tempValue)
     if (entry) {
       this.decideResults = this.rolls.map(roll => {
         const decideResult = this.decide(roll.total, entry)
-        if (decideResult.success) {
-          this.skills2growth.push(entry.name) // 记录人物卡技能成长
+        if (!entry.isTemp && decideResult.success) {
+          this.skills2growth.push(entry.name) // 非临时值且检定成功，记录人物卡技能成长
         }
         return decideResult
       })
@@ -78,14 +79,13 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   private parseDescriptions(expression: string) {
-    if (this.isAlias) {
-      // 如果是 alias dice，则认为 expression 已经由 config 指定，剩下的都是 description
-      this.description = expression
-    } else {
-      const [exp, desc] = parseDescriptions(expression)
+    const [exp, desc, tempValue] = parseDescriptions(expression)
+    // 如果是 alias dice，则认为 expression 已经由 config 指定，无视解析出的 exp
+    if (!this.isAlias) {
       this.expression = exp
-      this.description = desc
     }
+    this.description = desc
+    this.tempValue = tempValue
   }
 
   private detectDefaultRoll(defaultRoll = 'd%') {

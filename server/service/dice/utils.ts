@@ -24,11 +24,16 @@ export interface IDiceRollContext {
   decide: DeciderFunc
 }
 
-// 按第一个中文或空格分割 表达式 和 描述
-export function parseDescriptions(expression: string) {
-  const index = expression.trim().search(/[\p{Unified_Ideograph}\s]/u)
-  const [exp, desc = ''] = index < 0 ? [expression] : [expression.slice(0, index), expression.slice(index)]
-  return [exp, desc.trim()]
+// 按第一个中文或空格分割 表达式 和 描述，按结尾是否有数字分割 描述 和 临时值
+export function parseDescriptions(rawExp: string): [string, string, number] {
+  rawExp = rawExp.trim()
+  const index = rawExp.search(/[\p{Unified_Ideograph}\s]/u)
+  // eslint-disable-next-line prefer-const
+  let [exp, desc = ''] = index < 0 ? [rawExp] : [rawExp.slice(0, index), rawExp.slice(index)]
+  desc = desc.trim()
+  const index2 = desc.search(/(\d+)$/)
+  const [desc2, tempValue = ''] = index2 < 0 ? [desc] : [desc.slice(0, index2), desc.slice(index2)]
+  return [exp, desc2.trim(), parseInt(tempValue, 10)] // tempValue 不存在返回 NaN
 }
 
 // 工厂方法创建骰子实例

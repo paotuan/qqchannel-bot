@@ -11,6 +11,7 @@ export interface ICocCardEntry {
   difficulty: Difficulty // 难度
   value: number // 该难度下成功的数值
   baseValue: number // 该字段原始数值（不计难度）
+  isTemp: boolean // 是否是临时数值
 }
 
 export class CocCard {
@@ -25,16 +26,8 @@ export class CocCard {
     const [skillWithoutDifficulty, difficulty] = parseDifficulty(expression)
     const target = this.getTargetValue(skillWithoutDifficulty)
     if (target) {
-      const value = (() => {
-        if (difficulty === 'hard') {
-          return Math.floor(target.value / 2)
-        } else if (difficulty === 'ex') {
-          return Math.floor(target.value / 5)
-        } else {
-          return target.value
-        }
-      })()
-      return { expression, type: target.type, name: target.name, difficulty, value, baseValue: target.value } as ICocCardEntry
+      const value = calculateTargetValueWithDifficulty(target.value, difficulty)
+      return { expression, type: target.type, name: target.name, difficulty, value, baseValue: target.value, isTemp: false } as ICocCardEntry
     } else {
       return null
     }
@@ -131,7 +124,7 @@ const skillAliasMap: Record<string, string[]> = skillAlias
   .map(line => line.reduce((obj, str) => Object.assign(obj, { [str]: line }), {}))
   .reduce((total, obj) => Object.assign(total, obj), {})
 
-function parseDifficulty(expression: string) {
+export function parseDifficulty(expression: string): [string, Difficulty] {
   let difficulty: Difficulty = 'normal'
   if (expression.includes('困难')) {
     difficulty = 'hard'
@@ -140,4 +133,14 @@ function parseDifficulty(expression: string) {
   }
   expression = expression.replace(/(困难|极难|极限)/g, '')
   return [expression, difficulty]
+}
+
+export function calculateTargetValueWithDifficulty(normalValue: number, difficulty: Difficulty) {
+  if (difficulty === 'hard') {
+    return Math.floor(normalValue / 2)
+  } else if (difficulty === 'ex') {
+    return Math.floor(normalValue / 5)
+  } else {
+    return normalValue
+  }
 }

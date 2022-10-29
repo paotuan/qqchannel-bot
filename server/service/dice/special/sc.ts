@@ -9,6 +9,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   private expression1 = ''
   private expression2 = ''
   private description = ''
+  private tempValue = NaN
 
   private rollSc?: DiceRoll
   private rollScResult?: IDeciderResult
@@ -27,15 +28,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
     this.rollScResult = undefined
     this.rollSc = new DiceRoll('d%')
     // 2. 理智损失
-    let scEntry = this.get(SC_CARD_ENTRY_NAME)
-    if (!scEntry && this.description) {
-      // 如果没有人物卡，但是 description 传的是数字格式，就认为它代表临时的 san 值进入判断
-      const tempSc = Number(this.description)
-      if (!isNaN(tempSc)) {
-        scEntry = { expression: 'san', type: 'props', name: 'san', difficulty: 'normal', value: tempSc, baseValue: tempSc }
-        this.description = ''
-      }
-    }
+    const scEntry = this.get(SC_CARD_ENTRY_NAME, this.tempValue)
     if (scEntry) {
       this.rollScResult = this.decide(this.rollSc.total, scEntry)
       if (this.rollScResult.level === -2) {
@@ -72,10 +65,11 @@ export class ScDiceRoll extends BasePtDiceRoll {
       exp2andDesc = expression.slice(firstSplitIndex + 1).trim()
     }
     // 没有 / 的时候就认为 exp1=exp2 吧
-    const [exp, desc] = parseDescriptions(exp2andDesc)
+    const [exp, desc, tempValue] = parseDescriptions(exp2andDesc)
     this.expression2 = exp
     this.expression1 ||= exp
     this.description = desc
+    this.tempValue = tempValue
   }
 
   private detectDefaultRoll(defaultRoll = 'd%') {
