@@ -21,7 +21,7 @@ export const AliasExpressions: IAliasExpressionConfig[] = [
     replacer: () => 'd%'
   },
   {
-    alias: 'w{1,2}\\s*(\\d+)\\s*a?\\s*(\\d+)*',
+    alias: 'w{1,2}(\\d+)a?(\\d+)*',
     regexCache: null,
     replacer: (result) => {
       const diceCount = parseInt(result[1], 10)
