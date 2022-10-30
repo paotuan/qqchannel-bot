@@ -24,16 +24,27 @@ export interface IDiceRollContext {
   decide: DeciderFunc
 }
 
+export const ParseFlags = Object.freeze({
+  PARSE_EXP: 0b01,
+  PARSE_TEMPVALUE: 0b10
+})
+
 // 按第一个中文或空格分割 表达式 和 描述，按结尾是否有数字分割 描述 和 临时值
-export function parseDescriptions(rawExp: string): [string, string, number] {
-  rawExp = rawExp.trim()
-  const index = rawExp.search(/[\p{Unified_Ideograph}\s]/u)
-  // eslint-disable-next-line prefer-const
-  let [exp, desc = ''] = index < 0 ? [rawExp] : [rawExp.slice(0, index), rawExp.slice(index)]
-  desc = desc.trim()
-  const index2 = desc.search(/(\d+)$/)
-  const [desc2, tempValue = ''] = index2 < 0 ? [desc] : [desc.slice(0, index2), desc.slice(index2)]
-  return [exp, desc2.trim(), parseInt(tempValue, 10)] // tempValue 不存在返回 NaN
+export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | ParseFlags.PARSE_TEMPVALUE): [string, string, number] {
+  let exp = '', desc = rawExp.trim(), tempValue = NaN
+  if (flag & ParseFlags.PARSE_EXP) {
+    const index = desc.search(/[\p{Unified_Ideograph}\s]/u)
+    const [_exp, _desc = ''] = index < 0 ? [rawExp] : [rawExp.slice(0, index), rawExp.slice(index)]
+    exp = _exp
+    desc = _desc.trim()
+  }
+  if (flag & ParseFlags.PARSE_TEMPVALUE) {
+    const index = desc.search(/(\d+)$/)
+    const [_desc, _tempValue = ''] = index < 0 ? [desc] : [desc.slice(0, index), desc.slice(index)]
+    desc = _desc.trim()
+    tempValue = parseInt(_tempValue, 10) // tempValue 不存在返回 NaN
+  }
+  return [exp, desc, tempValue]
 }
 
 // 工厂方法创建骰子实例

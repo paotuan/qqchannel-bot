@@ -1,6 +1,6 @@
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { parseDescriptions } from '../utils'
+import { parseDescriptions, ParseFlags } from '../utils'
 
 type RiList = Record<string, DiceRoll>
 const Channel2RiMap: Record<string, RiList> = {}  // channelId => RiList
@@ -30,7 +30,7 @@ export class RiDiceRoll extends BasePtDiceRoll {
     const segments = removeRi.split(/[,，]+/).filter(segment => !!segment.trim())
     if (segments.length === 0) segments.push('') // push 一个空的代表自己
     segments.forEach(segment => {
-      const [exp, desc] = parseDescriptions(segment)
+      const [exp, desc] = parseDescriptions(segment, ParseFlags.PARSE_EXP)
       const diceRoll = new DiceRoll(exp.startsWith('+') || exp.startsWith('-') ? `d20${exp}` : (exp || 'd20'))
       this.rolls.push({ name: desc || this.context.username, roll: diceRoll })
     })
