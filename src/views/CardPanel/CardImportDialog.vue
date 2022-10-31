@@ -26,7 +26,7 @@
                  class="input input-bordered input-sm w-full" :class="{ 'input-error': !textName }"/>
         </div>
         <textarea v-model="textareaContent" class="mt-4 textarea textarea-bordered w-full h-60"
-                  placeholder="请输入属性，使用冒号和空格分隔，冒号周围不要带空格。例如：力量:37 体质:60 体格:65 敏捷:73 外貌:75 妙手:10 侦查:25 潜行:20 ……"/>
+                  placeholder="请输入属性列表，例如：力量37体质60体格65敏捷73外貌75妙手10侦查25潜行20 ……"/>
       </div>
       <!-- excel 导入 -->
       <div v-if="tab === 'excel'" class="mt-4">

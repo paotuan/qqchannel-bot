@@ -227,25 +227,25 @@ export function parseCoCXlsx(sheet: XLSX.WorkSheet) {
   const user = getCardProto()
   // read basic info
   user.basic = {
-    name: sheet['D3'].v,
-    job: sheet['D5'].v,
-    age: sheet['D6'].v,
-    gender: sheet['L6'].v,
-    hp: sheet['F10'].v,
-    san: sheet['N10'].v,
-    luck: sheet['V10'].v,
-    mp: (sheet['AD10'] || sheet['AF10']).v
+    name: sheet['D3']?.v || '未命名',
+    job: sheet['D5']?.v || '',
+    age: sheet['D6']?.v || 0,
+    gender: sheet['L6']?.v || '',
+    hp: sheet['F10']?.v || 0,
+    san: sheet['N10']?.v || 0,
+    luck: sheet['V10']?.v || 0,
+    mp: (sheet['AD10'] || sheet['AF10'])?.v || 0
   }
   // read props
   user.props = {
-    '力量': sheet['S3'].v,
-    '体质': sheet['S5'].v,
-    '体型': sheet['S7'].v,
-    '敏捷': sheet['Y3'].v,
-    '外貌': sheet['Y5'].v,
-    '智力': sheet['Y7'].v,
-    '意志': sheet['AE3'].v,
-    '教育': sheet['AE5'].v,
+    '力量': sheet['S3']?.v || 0,
+    '体质': sheet['S5']?.v || 0,
+    '体型': sheet['S7']?.v || 0,
+    '敏捷': sheet['Y3']?.v || 0,
+    '外貌': sheet['Y5']?.v || 0,
+    '智力': sheet['Y7']?.v || 0,
+    '意志': sheet['AE3']?.v || 0,
+    '教育': sheet['AE5']?.v || 0,
   }
   const setter = new CardSetter(user)
   // read first column
