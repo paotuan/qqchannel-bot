@@ -20,7 +20,7 @@ export class LogManager {
 
     // 无视 @机器人 和指令消息
     const botUserId = this.api.botInfo?.id
-    if (content.startsWith(`<@!${botUserId}> `) || content.startsWith('.') || content.startsWith('。')) {
+    if (content.startsWith(`<@!${botUserId}>`) || content.startsWith('.') || content.startsWith('。')) {
       return
     }
 

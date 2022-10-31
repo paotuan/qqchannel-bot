@@ -3,9 +3,18 @@ import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
 import { EnDiceRoll } from './special/en'
 import { RiDiceRoll, RiListDiceRoll } from './special/ri'
+import { OpposedDiceRoll } from './standard/oppose'
 
-// 成功等级：大失败，失败，成功，大成功
-export type SuccessLevel = -2 | -1 | 1 | 2
+// 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
+// export type SuccessLevel = -2 | -1 | 1 | 2
+export enum SuccessLevel {
+  WORST = -2,
+  FAIL = -1,
+  REGULAR_SUCCESS = 1,
+  HARD_SUCCESS = 2,
+  EX_SUCCESS = 3,
+  BEST = 4
+}
 
 // 检定结果
 export interface IDeciderResult {
@@ -21,7 +30,8 @@ export interface IDiceRollContext {
   channelId?: string
   username: string
   card: CocCard | null
-  decide: DeciderFunc
+  decide: DeciderFunc,
+  opposedRoll?: StandardDiceRoll | null
 }
 
 export const ParseFlags = Object.freeze({
@@ -58,6 +68,10 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
   } else if (expression.startsWith('init')) {
     return new RiListDiceRoll(expression, context).roll()
   } else {
-    return new StandardDiceRoll(expression, context).roll()
+    if (context.opposedRoll) {
+      return new OpposedDiceRoll(expression, context).roll()
+    } else {
+      return new StandardDiceRoll(expression, context).roll()
+    }
   }
 }

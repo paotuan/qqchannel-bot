@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../index'
-import { IDeciderResult, parseDescriptions } from '../utils'
+import { IDeciderResult, parseDescriptions, SuccessLevel } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 
 const SC_CARD_ENTRY_NAME = 'san' // sc 在人物卡中的字段名
@@ -31,7 +31,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
     const scEntry = this.get(SC_CARD_ENTRY_NAME, this.tempValue)
     if (scEntry) {
       this.rollScResult = this.decide(this.rollSc.total, scEntry)
-      if (this.rollScResult.level === -2) {
+      if (this.rollScResult.level === SuccessLevel.WORST) {
         this.rollLoss = new DiceRoll('99')
       } else {
         this.rollLoss = new DiceRoll(this.rollScResult.success ? this.expression1 : this.expression2)

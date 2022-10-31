@@ -20,10 +20,11 @@ export class Channel {
     this.api = api
   }
 
-  sendMessage(msg: MessageToCreate, recordLog = true) {
+  async sendMessage(msg: MessageToCreate, recordLog = true) {
     // todo 未来把 note 的逻辑也收过来
-    // console.time('message')
-    this.api.qqClient.messageApi.postMessage(this.id, msg).then((res) => {
+    try {
+      // console.time('message')
+      const res = await this.api.qqClient.messageApi.postMessage(this.id, msg)
       // console.timeEnd('message')
       console.log('[Message] 发送成功 ' + msg.content)
       if (recordLog) {
@@ -36,8 +37,10 @@ export class Channel {
           timestamp: res.data.timestamp
         })
       }
-    }).catch((err) => {
-      console.error('[Message] 发送失败', err)
-    })
+      return res.data
+    } catch (e) {
+      console.error('[Message] 发送失败', e)
+      return null
+    }
   }
 }

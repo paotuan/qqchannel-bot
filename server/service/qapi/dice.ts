@@ -4,8 +4,8 @@ import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
 import type { ICocCardEntry } from '../card/coc'
 import type { IDeciderResult } from '../dice/utils'
+import { createDiceRoll, SuccessLevel } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
-import { createDiceRoll } from '../dice/utils'
 
 interface IMessageCache {
   text?: string
@@ -16,6 +16,7 @@ export class DiceManager {
   private readonly api: QApi
   private get wss() { return this.api.wss }
   private readonly msgCache: LRUCache<string, IMessageCache>
+  private readonly opposedRollCache: LRUCache<string, StandardDiceRoll> // 对抗检定缓存 msgid => roll
 
   constructor(api: QApi) {
     makeAutoObservable<this, 'api' | 'wss'>(this, { api: false, wss: false })
@@ -29,46 +30,52 @@ export class DiceManager {
         return { text, instruction: text ? undefined : null } as IMessageCache // 非文本消息就直接记录为 null 了
       }
     })
+    this.opposedRollCache = new LRUCache({ max: 50 })
     this.initListeners()
   }
 
   /**
    * 处理子频道骰子指令
    */
-  private handleGuildMessage(msg: IMessage) {
+  private async handleGuildMessage(msg: IMessage) {
     // 无视非文本消息
     const content = msg.content?.trim()
     if (!content) return
 
     // 提取出指令体，无视非指令消息
     const botUserId = this.api.botInfo?.id
-    let fullExp = '' // .d100 困难侦察
-    if (content.startsWith(`<@!${botUserId}> `)) {
-      // @机器人的消息
-      fullExp = content.replace(`<@!${botUserId}> `, '').trim()
-    } else if (content.startsWith('.') || content.startsWith('。')) {
-      // 指令消息
-      fullExp = content.substring(1).trim()
+    let fullExp = content // .d100 困难侦察
+    // @机器人的消息
+    if (fullExp.startsWith(`<@!${botUserId}>`)) {
+      fullExp = fullExp.replace(`<@!${botUserId}>`, '').trim()
     }
-    if (!fullExp) return
+    // 指令消息
+    if (fullExp.startsWith('.') || fullExp.startsWith('。')) {
+      fullExp = fullExp.substring(1).trim()
+    }
     // 转义 转义得放在 at 消息和 emoji 之类的后面
     fullExp = unescapeHTML(fullExp)
 
     // 投骰
     const username = msg.member.nick || msg.author.username || msg.author.id
-    const roll = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username })
+    const replyMsgId = (msg as any).message_reference?.message_id
+    const roll = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username, replyMsgId })
     if (roll) {
       // 拼装结果，并发消息
       const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
       if (!channel) return // channel 信息不存在
       if (roll instanceof StandardDiceRoll && roll.hidden) { // 处理暗骰
         const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${roll.description}，猜猜结果是什么`
-        channel.sendMessage({content: channelMsg, msg_id: msg.id})
+        channel.sendMessage({ content: channelMsg, msg_id: msg.id })
         const user = this.api.guilds.findUser(msg.author.id, msg.guild_id)
         if (!user) return // 用户信息不存在
         user.sendMessage({ content: roll.output, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
       } else {
-        channel.sendMessage({ content: roll.output, msg_id: msg.id })
+        const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: msg.id })
+        // 如果是可供对抗的投骰，记录下缓存
+        if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
+          this.opposedRollCache.set(replyMsg.id, roll)
+        }
       }
     }
   }
@@ -130,7 +137,12 @@ export class DiceManager {
     if (roll) {
       // 表情表态也没有暗骰
       const channel = this.api.guilds.findChannel(channelId, guildId)
-      channel?.sendMessage({ content: roll.output, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
+      if (!channel) return // channel 信息不存在
+      const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
+      // 如果是可供对抗的投骰，记录下缓存
+      if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
+        this.opposedRollCache.set(replyMsg.id, roll)
+      }
     }
   }
 
@@ -140,18 +152,22 @@ export class DiceManager {
    * @param userId 投骰用户的 id
    * @param channelId 投骰所在的子频道，选填。若存在子频道说明不是私信场景，会去判断人物卡数值
    * @param username 用户昵称，用于拼接结果字符串
+   * @param replyMsgId 回复的消息 id，选填，用于区分通过回复进行的对抗检定
    */
-  private tryRollDice(fullExp: string, { userId, channelId, username }: { userId: string, channelId?: string, username?: string }) {
+  private tryRollDice(fullExp: string, { userId, channelId, username, replyMsgId }: { userId: string, channelId?: string, username?: string, replyMsgId?: string }) {
     try {
       // console.time('dice')
       // 是否有人物卡
       const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
+      // 是否有回复消息(目前仅用于对抗检定)
+      const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
       // 投骰
       const roller = createDiceRoll(fullExp, {
         channelId,
         username: username || userId,
         card: cocCard,
-        decide: (value, target) => this.decideResult(target, value)
+        decide: (value, target) => this.decideResult(target, value),
+        opposedRoll
       })
       // 保存人物卡更新
       if (cocCard) {
@@ -172,13 +188,14 @@ export class DiceManager {
   // todo 规则自定义
   private decideResult(cardEntry: ICocCardEntry, roll: number): IDeciderResult {
     if (roll === 1) {
-      return { success: true, level: 2, desc: '大成功' }
+      return { success: true, level: SuccessLevel.BEST, desc: '大成功' }
     } else if ((cardEntry.baseValue < 50 && roll > 95) || (cardEntry.baseValue >= 50 && roll === 100)) {
-      return { success: false, level: -2, desc: '大失败' }
+      return { success: false, level: SuccessLevel.WORST, desc: '大失败' }
     } else if (roll <= cardEntry.value) {
-      return { success: true, level: 1, desc: `≤ ${cardEntry.value} 成功` }
+      // 此处只计普通成功，如果是对抗检定需要判断成功等级的场合，则做二次计算
+      return { success: true, level: SuccessLevel.REGULAR_SUCCESS, desc: `≤ ${cardEntry.value} 成功` }
     } else {
-      return { success: false, level: -1, desc: `> ${cardEntry.value} 失败` }
+      return { success: false, level: SuccessLevel.FAIL, desc: `> ${cardEntry.value} 失败` }
     }
   }
 

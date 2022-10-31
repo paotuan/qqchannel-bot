@@ -1,7 +1,9 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { AliasExpressions } from '../alias'
-import { IDeciderResult, parseDescriptions } from '../utils'
+import { IDeciderResult, parseDescriptions, SuccessLevel } from '../utils'
 import { BasePtDiceRoll } from '../index'
+import type { ICocCardEntry } from '../../card/coc'
+import { calculateTargetValueWithDifficulty } from '../../card/coc'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
@@ -14,6 +16,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   protected tempValue = NaN // 临时检定值
 
   protected rolls: DiceRoll[] = []
+  protected cardEntry?: ICocCardEntry | null
   protected decideResults: IDeciderResult[] = []
   // side effects
   protected skills2growth: string[] = []
@@ -25,7 +28,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     this.rolls = new Array(this.times).fill(this.expression).map(exp => new DiceRoll(exp))
     // 收集副作用
     // 是否是人物卡某项属性的检定
-    const entry = this.get(this.description, this.tempValue)
+    const entry = this.cardEntry = this.get(this.description, this.tempValue)
     if (entry) {
       this.decideResults = this.rolls.map(roll => {
         const decideResult = this.decide(roll.total, entry)
@@ -78,7 +81,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     return expression
   }
 
-  private parseDescriptions(expression: string) {
+  protected parseDescriptions(expression: string) {
     const [exp, desc, tempValue] = parseDescriptions(expression)
     // 如果是 alias dice，则认为 expression 已经由 config 指定，无视解析出的 exp
     if (!this.isAlias) {
@@ -136,5 +139,32 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       needUpdate ||= updated
     })
     return needUpdate
+  }
+
+  // 是否可以用于对抗
+  get eligibleForOpposedRoll() {
+    if (this.hidden) return false
+    if (this.times !== 1) return false
+    return this.decideResults.length !== 0
+  }
+
+  // 用于对抗检定的数据
+  /* protected */ getSuccessLevelForOpposedRoll() {
+    const rollValue = this.rolls[0].total
+    const decideResult = this.decideResults[0]
+    const baseValue = this.cardEntry!.baseValue
+    const res = { username: this.context.username, skill: this.cardEntry!.name, baseValue }
+    if (decideResult.level === SuccessLevel.REGULAR_SUCCESS) {
+      // 成功的检定，要比较成功等级哪个更高
+      if (rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {
+        return Object.assign(res, { level: SuccessLevel.EX_SUCCESS })
+      } else if (rollValue <= calculateTargetValueWithDifficulty(baseValue, 'hard')) {
+        return Object.assign(res, { level: SuccessLevel.HARD_SUCCESS })
+      } else {
+        return Object.assign(res, { level: SuccessLevel.REGULAR_SUCCESS })
+      }
+    } else {
+      return Object.assign(res, { level: decideResult.level })
+    }
   }
 }
