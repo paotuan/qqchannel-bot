@@ -4,6 +4,7 @@ import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 import XLSX from 'xlsx'
 import { gtagEvent } from '../utils'
+import { skillAliasMap } from '../../interface/coc'
 
 export const useCardStore = defineStore('card', () => {
   const cardMap = reactive<Record<string, ICard>>({})
@@ -166,67 +167,58 @@ function getCardProto(): ICard {
   }
 }
 
-const PROP_KEYS = Object.keys(getCardProto().props) as Array<keyof ICard['props']>
+class CardSetter {
+  data: ICard
 
-function _unifiedKey(key: string) {
-  let unifiedKey = key
-  if (unifiedKey.startsWith('计算机')) {
-    unifiedKey = '计算机'
-  } else if (unifiedKey.startsWith('图书馆')) {
-    unifiedKey = '图书馆'
-  } else if (unifiedKey.startsWith('电子学')) {
-    unifiedKey = '电子学'
-  } else if (unifiedKey.startsWith('母语')) {
-    unifiedKey = '母语'
-  } else if (unifiedKey === '侦查') {
-    unifiedKey = '侦察'
-  } else if (unifiedKey === '体格') {
-    unifiedKey = '体型'
+  constructor(data: ICard) {
+    this.data = data
   }
-  return unifiedKey
+
+  set(name: string, value: number, types = ['basic', 'props', 'skills']) {
+    const unifiedName = this._unifiedKey(name)
+    const entry = this.getEntry(unifiedName, types)
+    const card = this.data as any
+    card[entry.type][entry.name] = value
+  }
+
+  private getEntry(rawSkillName: string, types: string[]) {
+    const possibleSkills = skillAliasMap[rawSkillName] ?? [rawSkillName] // 处理属性别名
+    for (const skill of possibleSkills) {
+      for (const type of types) {
+        const target = (this.data as any)[type][skill]
+        if (typeof target === 'number') {
+          return { name: skill, type } // 返回真实存在的那个别名
+        }
+      }
+    }
+    return { name: rawSkillName, type: 'skills' } // 以前不存在 entry，就认为是 skill
+  }
+
+  private _unifiedKey(key: string) {
+    let unifiedKey = key
+    if (unifiedKey.startsWith('计算机')) {
+      unifiedKey = '计算机'
+    } else if (unifiedKey.startsWith('图书馆')) {
+      unifiedKey = '图书馆'
+    } else if (unifiedKey.startsWith('电子学')) {
+      unifiedKey = '电子学'
+    } else if (unifiedKey.startsWith('母语')) {
+      unifiedKey = '母语'
+    }
+    return unifiedKey
+  }
 }
 
 export function parseText(name: string, rawText: string): ICard {
   const card = getCardProto()
   card.basic.name = name.trim()
-  rawText.trim().split(/\s+/).forEach(kv => {
-    const [key, value] = kv.split(/[:：]/)
-    if (!value) return
-    const num = parseInt(value, 10)
-    // 0. 属性统一
-    const unifiedKey = _unifiedKey(key)
-    // 1. 特殊的属性
-    switch (unifiedKey) {
-    case '年龄':
-    case 'age':
-      card.basic.age = num
-      break
-    case 'hp':
-    case 'HP':
-    case '生命':
-      card.basic.hp = num
-      break
-    case 'san':
-    case '理智':
-      card.basic.san = num
-      break
-    case '幸运':
-      card.basic.luck = num
-      break
-    case 'mp':
-    case '魔法':
-    case '魔力':
-      card.basic.mp = num
-      break
-    default:
-      // 2. props
-      if ((PROP_KEYS as string[]).includes(unifiedKey)) {
-        card.props[unifiedKey as keyof ICard['props']] = num
-      } else {
-        // 3. any skills
-        card.skills[unifiedKey] = num
-      }
-    }
+  const setter = new CardSetter(card)
+  Array.from(rawText.trim().matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
+    const index = entry.search(/\d/) // 根据数字分隔
+    const name = entry.slice(0, index).replace(/[:：]/g, '').trim()
+    const value = parseInt(entry.slice(index), 10)
+    if (!name || isNaN(value)) return // 理论不可能
+    setter.set(name, value)
   })
   return card
 }
@@ -255,19 +247,20 @@ export function parseCoCXlsx(sheet: XLSX.WorkSheet) {
     '意志': sheet['AE3'].v,
     '教育': sheet['AE5'].v,
   }
+  const setter = new CardSetter(user)
   // read first column
   const E_LINES = [19, 20, 21, 33, 34, 35, 36, 37, 38, 43, 44, 45]
   for (let i = 15; i <= 46; i++) {
     const name = sheet[(E_LINES.includes(i) ? 'E' : 'C') + i]
     if (!name) continue // 自选技能，玩家没选的情况
-    user.skills[_unifiedKey(name.v)] = sheet['P' + i].v
+    setter.set(name.v, sheet['P' + i].v, ['skills'])
   }
   // read second column
   const Y_LINES = [26, 30, 31, 32, 36, 40]
   for (let i = 15; i <= 40; i++) {
     const name = sheet[(Y_LINES.includes(i) ? 'Y' : 'W') + i]
     if (!name) continue // 自选技能，玩家没选的情况
-    user.skills[_unifiedKey(name.v)] = sheet['AJ' + i].v
+    setter.set(name.v, sheet['AJ' + i].v, ['skills'])
   }
 
   return user

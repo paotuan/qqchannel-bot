@@ -27,7 +27,7 @@ export class RiDiceRoll extends BasePtDiceRoll {
     const parsedExpression = this.parseTemplate()
     const removeRi = parsedExpression.slice(2).trim()
     // 根据空格和中文区分出指令部分和名字部分
-    const segments = removeRi.split(/[,，]+/).filter(segment => !!segment.trim())
+    const segments = removeRi.split(/[,，;；]+/).filter(segment => !!segment.trim())
     if (segments.length === 0) segments.push('') // push 一个空的代表自己
     segments.forEach(segment => {
       const [exp, desc] = parseDescriptions(segment, ParseFlags.PARSE_EXP)
@@ -80,7 +80,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
   }
 
   private parseDelList(expression: string) {
-    const delList = expression.trim().split(/[\s,，]+/).map(name => name || this.context.username) // 没指定相当于自己的 username
+    const delList = expression.trim().split(/[\s,，;；]+/).map(name => name || this.context.username) // 没指定相当于自己的 username
     const uniqList = Array.from(new Set(delList))
     this.delList = uniqList.length > 0 ? uniqList : [this.context.username]
   }
