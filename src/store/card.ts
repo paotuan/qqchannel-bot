@@ -175,7 +175,7 @@ class CardSetter {
   }
 
   set(name: string, value: number, types = ['basic', 'props', 'skills']) {
-    const unifiedName = this._unifiedKey(name)
+    const unifiedName = CardSetter._unifiedKey(name)
     const entry = this.getEntry(unifiedName, types)
     const card = this.data as any
     card[entry.type][entry.name] = value
@@ -194,7 +194,7 @@ class CardSetter {
     return { name: rawSkillName, type: 'skills' } // 以前不存在 entry，就认为是 skill
   }
 
-  private _unifiedKey(key: string) {
+  private static _unifiedKey(key: string) {
     let unifiedKey = key
     if (unifiedKey.startsWith('计算机')) {
       unifiedKey = '计算机'
@@ -223,44 +223,64 @@ export function parseText(name: string, rawText: string): ICard {
   return card
 }
 
-export function parseCoCXlsx(sheet: XLSX.WorkSheet) {
+export function parseCoCXlsx(workbook: XLSX.WorkBook) {
   const user = getCardProto()
-  // read basic info
-  user.basic = {
-    name: sheet['D3']?.v || '未命名',
-    job: sheet['D5']?.v || '',
-    age: sheet['D6']?.v || 0,
-    gender: sheet['L6']?.v || '',
-    hp: sheet['F10']?.v || 0,
-    san: sheet['N10']?.v || 0,
-    luck: sheet['V10']?.v || 0,
-    mp: (sheet['AD10'] || sheet['AF10'])?.v || 0
-  }
-  // read props
-  user.props = {
-    '力量': sheet['S3']?.v || 0,
-    '体质': sheet['S5']?.v || 0,
-    '体型': sheet['S7']?.v || 0,
-    '敏捷': sheet['Y3']?.v || 0,
-    '外貌': sheet['Y5']?.v || 0,
-    '智力': sheet['Y7']?.v || 0,
-    '意志': sheet['AE3']?.v || 0,
-    '教育': sheet['AE5']?.v || 0,
-  }
   const setter = new CardSetter(user)
-  // read first column
-  const E_LINES = [19, 20, 21, 33, 34, 35, 36, 37, 38, 43, 44, 45]
-  for (let i = 15; i <= 46; i++) {
-    const name = sheet[(E_LINES.includes(i) ? 'E' : 'C') + i]
-    if (!name) continue // 自选技能，玩家没选的情况
-    setter.set(name.v, sheet['P' + i].v, ['skills'])
-  }
-  // read second column
-  const Y_LINES = [26, 30, 31, 32, 36, 40]
-  for (let i = 15; i <= 40; i++) {
-    const name = sheet[(Y_LINES.includes(i) ? 'Y' : 'W') + i]
-    if (!name) continue // 自选技能，玩家没选的情况
-    setter.set(name.v, sheet['AJ' + i].v, ['skills'])
+  // 解析 excel
+  const sheet = workbook.Sheets['人物卡']
+  const cySheet = workbook.Sheets['简化卡 骰娘导入']
+  if (cySheet) {
+    // 是否是 CY 卡
+    user.basic.name = sheet['E3']?.v || '未命名'
+    user.basic.job = sheet['E5']?.v || ''
+    user.basic.age = sheet['E6']?.v || 0
+    user.basic.gender = sheet['M6']?.v || ''
+    // 其他属性直接读导入表达式
+    const exps: string = cySheet['B40']?.v || ''
+    Array.from(exps.slice(4).matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
+      const index = entry.search(/\d/) // 根据数字分隔
+      const name = entry.slice(0, index).trim()
+      const value = parseInt(entry.slice(index), 10)
+      if (!name || isNaN(value)) return // 理论不可能
+      setter.set(name, value)
+    })
+  } else {
+    // read basic info
+    user.basic = {
+      name: sheet['D3']?.v || '未命名',
+      job: sheet['D5']?.v || '',
+      age: sheet['D6']?.v || 0,
+      gender: sheet['L6']?.v || '',
+      hp: sheet['F10']?.v || 0,
+      san: sheet['N10']?.v || 0,
+      luck: sheet['V10']?.v || 0,
+      mp: (sheet['AD10'] || sheet['AF10'])?.v || 0
+    }
+    // read props
+    user.props = {
+      '力量': sheet['S3']?.v || 0,
+      '体质': sheet['S5']?.v || 0,
+      '体型': sheet['S7']?.v || 0,
+      '敏捷': sheet['Y3']?.v || 0,
+      '外貌': sheet['Y5']?.v || 0,
+      '智力': sheet['Y7']?.v || 0,
+      '意志': sheet['AE3']?.v || 0,
+      '教育': sheet['AE5']?.v || 0,
+    }
+    // read first column
+    const E_LINES = [19, 20, 21, 33, 34, 35, 36, 37, 38, 43, 44, 45]
+    for (let i = 15; i <= 46; i++) {
+      const name = sheet[(E_LINES.includes(i) ? 'E' : 'C') + i]
+      if (!name) continue // 自选技能，玩家没选的情况
+      setter.set(name.v, sheet['P' + i].v, ['skills'])
+    }
+    // read second column
+    const Y_LINES = [26, 30, 31, 32, 36, 40]
+    for (let i = 15; i <= 40; i++) {
+      const name = sheet[(Y_LINES.includes(i) ? 'Y' : 'W') + i]
+      if (!name) continue // 自选技能，玩家没选的情况
+      setter.set(name.v, sheet['AJ' + i].v, ['skills'])
+    }
   }
 
   return user

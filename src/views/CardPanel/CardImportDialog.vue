@@ -32,8 +32,9 @@
       <div v-if="tab === 'excel'" class="mt-4">
         <input ref="fileChooser" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                @change="handleFile"/>
-        <div class="mt-4">当前支持的人物卡模版：COC七版人物卡v1.6.0 <a class="link" href="https://paotuan.github.io/static/cocv7.xlsx"
-                                                       target="_blank">点击下载</a></div>
+        <div class="mt-4">当前支持的人物卡模版：</div>
+        <div>COC七版人物卡v1.6.0 <a class="link" href="https://paotuan.github.io/static/cocv7.xlsx" target="_blank">点击下载</a></div>
+        <div>COC7 CY22.3Plus <a class="link" href="https://congyu.lanzoui.com/b00nb3n2d" target="_blank">点击下载</a> (密码：29mb)</div>
       </div>
       <!-- 提交 -->
       <div class="modal-action items-center">
@@ -96,13 +97,11 @@ const submit = () => {
 const handleFile = (e: Event) => {
   const files = (e.target as HTMLInputElement).files, f = files![0]
   const reader = new FileReader()
-  // todo 输入框取消的情况
   reader.onload = (e) => {
     try {
       const data = new Uint8Array(e.target!.result as ArrayBuffer)
       const workbook = XLSX.read(data, { type: 'array' })
-      const sheet = workbook.Sheets[workbook.SheetNames[0]]
-      xlsxCard.value = parseCoCXlsx(sheet)
+      xlsxCard.value = parseCoCXlsx(workbook)
     } catch (e) {
       console.log(e)
       Toast.error('文件解析失败！')
