@@ -14,6 +14,8 @@
 
 [【bilibili】搭建流程](https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt)
 
+欢迎 [加入我们的官方频道](https://pd.qq.com/s/gv78r06x1) 体验机器人各项指令功能
+
 ### 一键使用
 如果你不了解代码，或只是想用最简单的方式用起来，可以直接下载二进制包，本地运行。
 
