@@ -46,6 +46,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
     const removeFlags = this.parseFlags(removeSc)
     this.parseMain(removeFlags)
     this.detectDefaultRoll()
+    console.log('[Dice] 理智检定 原始指令', this.rawExpression, '成功', this.expression1, '失败', this.expression2, '描述', this.description, '临时值', this.tempValue, 'noModify', this.noModify)
   }
 
   private parseFlags(expression: string) {

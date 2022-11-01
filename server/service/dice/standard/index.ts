@@ -49,7 +49,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const removeFlags = this.parseFlags(removeR).trim()
     this.parseDescriptions(removeFlags)
     this.detectDefaultRoll()
-    console.log('[Dice] 原始指令：', this.rawExpression, '解析指令：', this.expression, '描述：', this.description, '暗骰：', this.hidden, '省略：', this.quiet, '次数：', this.times)
+    console.log('[Dice] 原始指令', this.rawExpression, '解析指令', this.expression, '描述', this.description, '临时值', this.tempValue, '暗骰', this.hidden, '省略', this.quiet, '次数', this.times)
   }
 
   private parseAlias(expression: string) {

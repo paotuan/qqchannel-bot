@@ -29,6 +29,7 @@ export class RiDiceRoll extends BasePtDiceRoll {
     // 根据空格和中文区分出指令部分和名字部分
     const segments = removeRi.split(/[,，;；]+/).filter(segment => !!segment.trim())
     if (segments.length === 0) segments.push('') // push 一个空的代表自己
+    console.log('[Dice] 先攻指令 原始指令', this.rawExpression)
     segments.forEach(segment => {
       const [exp, desc] = parseDescriptions(segment, ParseFlags.PARSE_EXP)
       const diceRoll = new DiceRoll(exp.startsWith('+') || exp.startsWith('-') ? `d20${exp}` : (exp || 'd20'))
@@ -71,6 +72,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
     } else if (removeInit.startsWith('rm')) {
       this.parseDelList(removeInit.slice(2))
     }
+    console.log('[Dice] 先攻列表 原始指令', this.rawExpression)
     // 先存一份列表，避免 apply 后清空，output 获取不到
     if (this.context.channelId) {
       this.riList = getRiList(this.context.channelId)

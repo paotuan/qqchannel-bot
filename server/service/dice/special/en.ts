@@ -25,7 +25,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
     return cardData ? Object.keys(cardData.meta.skillGrowth).filter(name => cardData.meta.skillGrowth[name]) : [] // 过滤掉值为 false 的
   }
 
-  override roll(): this {
+  override roll() {
     const parsedExpression = this.parseTemplate()
     const removeEn = parsedExpression.slice(2).trim()
     this.parseMain(removeEn)
@@ -48,6 +48,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
         this.tempValue = parseInt(expression.slice(index), 10)
       }
     }
+    console.log('[Dice] 成长检定 原始指令', this.rawExpression, '列出', this.listMode, '技能', this.enSkillNames.join('|'), '临时值', this.tempValue)
   }
 
   private realRoll() {
