@@ -32,7 +32,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     if (entry) {
       this.decideResults = this.rolls.map(roll => {
         const decideResult = this.decide(roll.total, entry)
-        if (!entry.isTemp && decideResult.success) {
+        if (!entry.isTemp && entry.type === 'skills' && decideResult.success) {
           this.skills2growth.push(entry.name) // 非临时值且检定成功，记录人物卡技能成长
         }
         return decideResult
