@@ -45,14 +45,18 @@ export class DiceManager {
     // 提取出指令体，无视非指令消息
     const botUserId = this.api.botInfo?.id
     let fullExp = content // .d100 困难侦察
+    let isInstruction = false
     // @机器人的消息
     if (fullExp.startsWith(`<@!${botUserId}>`)) {
+      isInstruction = true
       fullExp = fullExp.replace(`<@!${botUserId}>`, '').trim()
     }
     // 指令消息
     if (fullExp.startsWith('.') || fullExp.startsWith('。')) {
+      isInstruction = true
       fullExp = fullExp.substring(1).trim()
     }
+    if (!isInstruction) return
     // 转义 转义得放在 at 消息和 emoji 之类的后面
     fullExp = unescapeHTML(fullExp)
 
