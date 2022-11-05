@@ -15,12 +15,34 @@ export interface ICocCardEntry {
   isTemp: boolean // 是否是临时数值
 }
 
+export interface ICocCardAbility {
+  expression: string // 原始表达式
+  type: 'ability'
+  name: string // macro 字段名
+  value: string // macro 对应的值
+  entry?: ICocCardEntry | null // 是否对应了某个技能
+}
+
 export class CocCard {
   data: ICard
 
   constructor(data: ICard) {
     makeAutoObservable(this)
     this.data = data
+  }
+
+  getAbility(expression: string) {
+    const [name, difficulty] = parseDifficulty(expression)
+    if (name === '手枪') {
+      const value = '[[1d10]]+$1' // todo mock
+      // todo 反正解析的逻辑差不多，如果拿不到 ability 直接拿 entry 如何。算了，先冗余一点，保险
+      return { expression, type: 'ability', name, value } as ICocCardAbility
+    } else if (name === '拉拉') {
+      const value = '$手枪+1'
+      return { expression, type: 'ability', name, value } as ICocCardAbility
+    } else {
+      return null
+    }
   }
 
   getEntry(expression: string) {

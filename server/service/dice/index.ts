@@ -1,6 +1,7 @@
 import type { IDiceRollContext } from './utils'
 import type { MedianDiceRoll } from './standard/median'
-import { getMedianDiceRollKlass } from './standard/median'
+// import { getMedianDiceRollKlass } from './standard/median'
+import { parseTemplate } from '../../test/parse'
 import { calculateTargetValueWithDifficulty, ICocCardEntry, parseDifficulty } from '../card/coc'
 
 export abstract class BasePtDiceRoll {
@@ -49,35 +50,35 @@ export abstract class BasePtDiceRoll {
   }
 
   // 解析含中括号的表达式模板，返回替换后的表达式，并把中途的骰子结果存入 medianRolls 中
-  protected parseTemplate() {
+  protected parseTemplate(): string {
     this.medianRolls.length = 0
-    return parseTemplate(this.rawExpression, this.context, this.medianRolls)
+    return parseTemplate(this.rawExpression, this.context, this.medianRolls, 0)
   }
 }
 
-const templateRegex = /\[([^[\]]+)\]/
-export function parseTemplate(expression: string, context: IDiceRollContext, history: MedianDiceRoll[]): string {
-  if (templateRegex.test(expression)) {
-    // 读取人物卡变量方法
-    const get = (key: string) => context.card?.getEntry(key)?.value || ''
-    // 替换 [xxx]
-    expression = expression.replace(templateRegex, (_, notation: string) => {
-      // 替换历史骰子
-      notation = notation.replace(/\$(\d+)/, (_, index: string) => {
-        const historyRoll = history[Number(index) - 1] // $1 代表 roller.log[0]
-        return historyRoll ? String(historyRoll.total) : ''
-      })
-      // 替换变量
-      notation = notation.replace(/\$([\w\p{Unified_Ideograph}]+)/u, (_, key: string) => {
-        return String(get(key) ?? '')
-      })
-      // 如果是暗骰则不显示，否则返回值
-      const MedianDiceRoll = getMedianDiceRollKlass()
-      const dice = new MedianDiceRoll(notation.trim(), context).roll()
-      history.push(dice) // median roll 存起来
-      return dice.hidden ? '' : String(dice.total)
-    })
-    return parseTemplate(expression, context, history)
-  }
-  return expression
-}
+// const templateRegex = /\[([^[\]]+)\]/
+// export function parseTemplate(expression: string, context: IDiceRollContext, history: MedianDiceRoll[]): string {
+//   if (templateRegex.test(expression)) {
+//     // 读取人物卡变量方法
+//     const get = (key: string) => context.card?.getEntry(key)?.value || ''
+//     // 替换 [xxx]
+//     expression = expression.replace(templateRegex, (_, notation: string) => {
+//       // 替换历史骰子
+//       notation = notation.replace(/\$(\d+)/, (_, index: string) => {
+//         const historyRoll = history[Number(index) - 1] // $1 代表 roller.log[0]
+//         return historyRoll ? String(historyRoll.total) : ''
+//       })
+//       // 替换变量
+//       notation = notation.replace(/\$([\w\p{Unified_Ideograph}]+)/u, (_, key: string) => {
+//         return String(get(key) ?? '')
+//       })
+//       // 如果是暗骰则不显示，否则返回值
+//       const MedianDiceRoll = getMedianDiceRollKlass()
+//       const dice = new MedianDiceRoll(notation.trim(), context).roll()
+//       history.push(dice) // median roll 存起来
+//       return dice.hidden ? '' : String(dice.total)
+//     })
+//     return parseTemplate(expression, context, history)
+//   }
+//   return expression
+// }

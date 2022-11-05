@@ -27,6 +27,10 @@ function initClass() {
       return this.diceRoll!.total // 如果单骰（times===1）就是结果。如果多连骰，则取第一个结果
     }
 
+    override parseTemplate() {
+      return this.rawExpression // todo 理论上 median 传入的时候已经是 parse 好的了
+    }
+
     override get output() {
       const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
       const roll = this.diceRoll!
