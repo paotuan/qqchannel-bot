@@ -1,4 +1,5 @@
-import type { ICard, ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
+import type { ICard } from '../../interface/coc'
+import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
 import * as fs from 'fs'
 import * as glob from 'glob'
 import { makeAutoObservable } from 'mobx'

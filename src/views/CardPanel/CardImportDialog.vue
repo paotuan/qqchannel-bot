@@ -53,7 +53,7 @@ import { PlusCircleIcon, DocumentTextIcon, ExclamationCircleIcon } from '@heroic
 import { computed, ref } from 'vue'
 import * as XLSX from 'xlsx'
 import { parseCoCXlsx, parseText, useCardStore } from '../../store/card'
-import type { ICard } from '../../../interface/common'
+import type { ICard } from '../../../interface/coc'
 import { Toast } from '../../utils'
 
 const tab = ref<'text' | 'excel'>('text')

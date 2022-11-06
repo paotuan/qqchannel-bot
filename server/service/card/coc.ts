@@ -1,6 +1,6 @@
-import type { ICard } from '../../../interface/common'
+import type { ICard } from '../../../interface/coc'
 import { makeAutoObservable } from 'mobx'
-import { skillAliasMap } from '../../../interface/coc'
+import { getDBAndSizeLevel, skillAliasMap } from '../../../interface/coc'
 
 type Difficulty = 'normal' | 'hard' | 'ex'
 type EntryType = 'basic' | 'props' | 'skills'
@@ -20,7 +20,7 @@ export interface ICocCardAbility {
   type: 'ability'
   name: string // macro 字段名
   value: string // macro 对应的值
-  entry?: ICocCardEntry | null // 是否对应了某个技能
+  // entry?: ICocCardEntry | null // 是否对应了某个技能 // 暂不做，增加额外复杂度且并不完全通用
 }
 
 export class CocCard {
@@ -31,10 +31,15 @@ export class CocCard {
     this.data = data
   }
 
+  get dbAndSizeLevel() {
+    return getDBAndSizeLevel(this.data)
+  }
+
   getAbility(expression: string) {
-    const [name, difficulty] = parseDifficulty(expression)
+    // const [name, difficulty] = parseDifficulty(expression)
+    const name = expression
     if (name === '手枪') {
-      const value = '[[1d10]]+$1' // todo mock
+      const value = '1d3+$db' // todo mock
       // todo 反正解析的逻辑差不多，如果拿不到 ability 直接拿 entry 如何。算了，先冗余一点，保险
       return { expression, type: 'ability', name, value } as ICocCardAbility
     } else if (name === '拉拉') {

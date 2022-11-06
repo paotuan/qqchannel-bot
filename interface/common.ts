@@ -1,3 +1,5 @@
+import type { ICard } from './coc'
+
 export type Command =
   | 'bot/login' // req/res
   | 'bot/info'  // res
@@ -105,35 +107,6 @@ export interface INoteDeleteReq {
 // endregion note
 
 // region card
-export interface ICard {
-  version: number // 2
-  basic: {
-    name: string
-    job: string
-    age: number
-    gender: string
-    hp: number
-    san: number
-    luck: number
-    mp: number
-  },
-  props: {
-    '力量': number
-    '体质': number
-    '体型': number
-    '敏捷': number
-    '外貌': number
-    '智力': number
-    '意志': number
-    '教育': number
-  },
-  skills: { [key: string]: number },
-  meta: {
-    skillGrowth: { [key: string]: boolean },
-    lastModified: number // ms
-  }
-}
-
 export interface ICardImportReq {
   card: ICard
 }

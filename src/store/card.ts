@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import type { ICard, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp } from '../../interface/common'
+import type { ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp } from '../../interface/common'
 import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 import XLSX from 'xlsx'
 import { gtagEvent } from '../utils'
-import { skillAliasMap } from '../../interface/coc'
+import { ICard, skillAliasMap } from '../../interface/coc'
 
 export const useCardStore = defineStore('card', () => {
   const cardMap = reactive<Record<string, ICard>>({})

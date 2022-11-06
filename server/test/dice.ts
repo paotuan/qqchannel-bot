@@ -1,6 +1,6 @@
 import { createDiceRoll, IDeciderResult, IDiceRollContext, SuccessLevel } from '../service/dice/utils'
 import { CocCard, ICocCardEntry } from '../service/card/coc'
-import { ICard } from '../../interface/common'
+import type { ICard } from '../../interface/coc'
 
 const list1 = [
   'd100',                  // 基础指令
