@@ -138,7 +138,7 @@ export const useCardStore = defineStore('card', () => {
 
 function getCardProto(): ICard {
   return {
-    version: 2,
+    version: 3,
     basic: {
       name: '',
       job: '学生',
@@ -160,6 +160,7 @@ function getCardProto(): ICard {
       '教育': 0
     },
     skills: {},
+    abilities: [],
     meta: {
       skillGrowth: {},
       lastModified: Date.now()

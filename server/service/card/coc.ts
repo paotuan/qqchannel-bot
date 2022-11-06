@@ -1,6 +1,6 @@
 import type { ICard } from '../../../interface/coc'
 import { makeAutoObservable } from 'mobx'
-import { getDBAndSizeLevel, skillAliasMap } from '../../../interface/coc'
+import { getDBAndBuild, skillAliasMap } from '../../../interface/coc'
 
 type Difficulty = 'normal' | 'hard' | 'ex'
 type EntryType = 'basic' | 'props' | 'skills'
@@ -31,8 +31,8 @@ export class CocCard {
     this.data = data
   }
 
-  get dbAndSizeLevel() {
-    return getDBAndSizeLevel(this.data)
+  get dbAndBuild() {
+    return getDBAndBuild(this.data)
   }
 
   getAbility(expression: string) {

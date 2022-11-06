@@ -97,7 +97,7 @@ function decideResult(cardEntry: ICocCardEntry, roll: number): IDeciderResult {
 
 function getCardProto(): ICard {
   return {
-    version: 2,
+    version: 3,
     basic: {
       name: '铃木翼',
       job: '学生',
@@ -122,6 +122,7 @@ function getCardProto(): ICard {
       '侦查': 46,
       '图书馆': 70
     },
+    abilities: [],
     meta: {
       skillGrowth: {},
       lastModified: Date.now()

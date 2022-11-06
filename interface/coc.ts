@@ -2,7 +2,7 @@
  * coc 人物卡定义
  */
 export interface ICard {
-  version: number // 2
+  version: number // 3
   basic: {
     name: string
     job: string
@@ -24,6 +24,11 @@ export interface ICard {
     '教育': number
   },
   skills: { [key: string]: number },
+  abilities: {
+    name: string
+    expression: string
+    ext: string
+  }[],
   meta: {
     skillGrowth: { [key: string]: boolean },
     lastModified: number // ms
@@ -33,7 +38,7 @@ export interface ICard {
 /**
  * 计算伤害加成和体格
  */
-export function getDBAndSizeLevel(card: ICard): [string, number] {
+export function getDBAndBuild(card: ICard): [string, number] {
   const sum = card.props['力量'] + card.props['体型'] // str+siz
   if (sum < 65) {
     return ['-2', -2]

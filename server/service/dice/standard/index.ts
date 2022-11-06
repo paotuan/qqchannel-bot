@@ -104,6 +104,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     }
     this.description = desc
     this.tempValue = tempValue
+    // todo 单纯 ability 的情况
   }
 
   private detectDefaultRoll(defaultRoll = 'd%') {
