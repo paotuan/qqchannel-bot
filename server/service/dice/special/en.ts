@@ -26,8 +26,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
   }
 
   override roll() {
-    const parsedExpression = this.parseTemplate()
-    const removeEn = parsedExpression.slice(2).trim()
+    const removeEn = this.rawExpression.slice(2).trim()
     this.parseMain(removeEn)
     this.realRoll()
     return this

@@ -41,8 +41,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   }
 
   private parse() {
-    const parsedExpression = this.parseTemplate()
-    const removeSc = parsedExpression.slice(2).trim()
+    const removeSc = this.rawExpression.slice(2).trim()
     const removeFlags = this.parseFlags(removeSc)
     this.parseMain(removeFlags)
     this.detectDefaultRoll()

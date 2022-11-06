@@ -1,6 +1,6 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { AliasExpressions } from '../alias'
-import { IDeciderResult, parseDescriptions, SuccessLevel } from '../utils'
+import { IDeciderResult, parseDescriptions, SuccessLevel, parseTemplate } from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { ICocCardEntry } from '../../card/coc'
 import { calculateTargetValueWithDifficulty } from '../../card/coc'
@@ -43,8 +43,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   // 解析指令，最终结果存入 this.expression
   private parse() {
-    const parsedExpression = this.parseTemplate() // median rolls 在这一步 roll 了
-    const removeAlias = this.parseAlias(parsedExpression).trim()
+    const removeAlias = this.parseAlias(this.rawExpression).trim()
     const removeR = removeAlias.startsWith('r') ? removeAlias.slice(1).trim() : removeAlias
     const removeFlags = this.parseFlags(removeR).trim()
     this.parseDescriptions(removeFlags)
@@ -52,14 +51,30 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     console.log('[Dice] 原始指令', this.rawExpression, '解析指令', this.expression, '描述', this.description, '临时值', this.tempValue, '暗骰', this.hidden, '省略', this.quiet, '次数', this.times)
   }
 
+  // 解析别名指令
   private parseAlias(expression: string) {
     for (const config of AliasExpressions) {
       config.regexCache ??= new RegExp(`^${config.alias}`)
       const match = expression.match(config.regexCache)
       if (match) {
         this.isAlias = true
-        this.expression = config.replacer(match)
+        this.expression = this._parseAlias(expression)
         return expression.slice(match[0].length)
+      }
+    }
+    return expression
+  }
+
+  private _parseAlias(expression: string, depth = 0): string {
+    if (depth > 99) throw new Error('stackoverflow!!')
+    for (const config of AliasExpressions) {
+      config.regexCache ??= new RegExp(`^${config.alias}`)
+      const match = expression.match(config.regexCache)
+      if (match) {
+        const replacement = config.replacer(match)
+        console.log('[Dice] 解析别名:', match[0], '=', replacement)
+        const parsed = parseTemplate(replacement, this.context, this.medianRolls)
+        return this._parseAlias(parsed, depth + 1)
       }
     }
     return expression

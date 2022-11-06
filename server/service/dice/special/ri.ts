@@ -24,8 +24,7 @@ export class RiDiceRoll extends BasePtDiceRoll {
   }
 
   override roll() {
-    const parsedExpression = this.parseTemplate()
-    const removeRi = parsedExpression.slice(2).trim()
+    const removeRi = this.rawExpression.slice(2).trim()
     // 根据空格和中文区分出指令部分和名字部分
     const segments = removeRi.split(/[,，;；]+/).filter(segment => !!segment.trim())
     if (segments.length === 0) segments.push('') // push 一个空的代表自己
