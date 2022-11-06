@@ -62,6 +62,7 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
     }
     // 1.2 是否是 attribute，如是，则替换为值
     const skillValue = getEntry(key)
+    debug(depth, '解析 attribute:', key, '=', skillValue)
     return String(skillValue ?? '')
   })
   // 2. 如检测到 inline dice，则求值并记录结果
