@@ -73,7 +73,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       if (match) {
         const replacement = config.replacer(match)
         console.log('[Dice] 解析别名:', match[0], '=', replacement)
-        const parsed = parseTemplate(replacement, this.context, this.medianRolls)
+        const parsed = parseTemplate(replacement, this.context, this.inlineRolls)
         return this._parseAlias(parsed, depth + 1)
       }
     }
@@ -116,19 +116,19 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
     const lines = [`${this.context.username} 🎲${descriptionStr}`]
     // 是否有中间骰
-    if (this.hasMedianRolls && !this.quiet) {
-      const medianLines = this.medianRolls.map((roll, i) => {
+    if (this.hasInlineRolls && !this.quiet) {
+      const inlineLines = this.inlineRolls.map((roll, i) => {
         return `${i === 0 ? '先是' : '然后' } ${roll.output}`
       })
-      lines.push(...medianLines)
+      lines.push(...inlineLines)
     }
     // 普通骰
     const rollLines = this.rolls.map((roll, i) => {
       const decideResult = this.decideResults[i]?.desc || ''
       return `${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output} ${decideResult}`
     })
-    // 有中间骰且没有 skip 的情况下，普通骰也增加前缀，以便与中间骰对应起来
-    if (this.hasMedianRolls && !this.quiet) {
+    // 有中间骰且没有 quiet 的情况下，普通骰也增加前缀，以便与中间骰对应起来
+    if (this.hasInlineRolls && !this.quiet) {
       if (rollLines.length === 1) {
         rollLines[0] = '最后 🎲 ' + rollLines[0]
       } else {
@@ -146,8 +146,8 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   override applyToCard() {
     const card = this.context.card
     if (!card) return false
-    const medianSkills2growth = this.medianRolls.map(medianRoll => medianRoll.skills2growth).flat()
-    const uniqSkills = Array.from(new Set([...medianSkills2growth, ...this.skills2growth]))
+    const inlineSkills2growth = this.inlineRolls.map(inlineRoll => inlineRoll.skills2growth).flat()
+    const uniqSkills = Array.from(new Set([...inlineSkills2growth, ...this.skills2growth]))
     let needUpdate = false
     uniqSkills.forEach(skill => {
       const updated = card.markSkillGrowth(skill)

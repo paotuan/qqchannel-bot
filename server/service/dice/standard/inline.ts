@@ -1,11 +1,11 @@
 import { StandardDiceRoll } from './index'
 
-export type MedianDiceRoll = InstanceType<ReturnType<typeof getMedianDiceRollKlass>>
+export type InlineDiceRoll = InstanceType<ReturnType<typeof getInlineDiceRollKlass>>
 
 let klass: ReturnType<typeof initClass>
 
-// 延迟初始化解决 StandardDiceRoll 到 MedianDiceRoll 的循环引用问题
-export function getMedianDiceRollKlass() {
+// 延迟初始化解决 StandardDiceRoll 到 InlineDiceRoll 的循环引用问题
+export function getInlineDiceRollKlass() {
   if (!klass) {
     klass = initClass()
   }
@@ -13,7 +13,7 @@ export function getMedianDiceRollKlass() {
 }
 
 function initClass() {
-  return class MedianDiceRoll extends StandardDiceRoll {
+  return class InlineDiceRoll extends StandardDiceRoll {
 
     private get diceRoll() {
       return this.rolls[0]

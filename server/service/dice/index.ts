@@ -1,11 +1,11 @@
 import type { IDiceRollContext } from './utils'
-import type { MedianDiceRoll } from './standard/median'
+import type { InlineDiceRoll } from './standard/inline'
 import { calculateTargetValueWithDifficulty, ICocCardEntry, parseDifficulty } from '../card/coc'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
   protected readonly context: IDiceRollContext
-  protected readonly medianRolls: MedianDiceRoll[]
+  protected readonly inlineRolls: InlineDiceRoll[]
 
   protected get(key: string, tempValue = NaN) {
     const entry = this.context.card?.getEntry(key) ?? null
@@ -25,14 +25,14 @@ export abstract class BasePtDiceRoll {
     return this.context.decide
   }
 
-  protected get hasMedianRolls() {
-    return this.medianRolls.length > 0
+  protected get hasInlineRolls() {
+    return this.inlineRolls.length > 0
   }
 
   constructor(fullExp: string, context: IDiceRollContext, inlineRolls: any[] = []) {
     this.rawExpression = fullExp
     this.context = context
-    this.medianRolls = inlineRolls
+    this.inlineRolls = inlineRolls
     // this.roll() // 防止构造器调用子类 roll 访问到子类的实例变量导致未初始化，目前由外部调用完构造函数之后调用
   }
 

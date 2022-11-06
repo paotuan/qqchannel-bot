@@ -4,7 +4,7 @@ import { ScDiceRoll } from './special/sc'
 import { EnDiceRoll } from './special/en'
 import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { OpposedDiceRoll } from './standard/oppose'
-import { getMedianDiceRollKlass, MedianDiceRoll } from './standard/median'
+import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -41,12 +41,12 @@ export interface IDiceRollContext {
 const ENTRY_REGEX = /\$\{(.*)\}|\$([a-zA-Z\p{Unified_Ideograph}]+)/gu // match ${ any content } or $AnyContent
 const INLINE_ROLL_REGEX = /\[\[([^[\]]+)]]/ // match [[ any content ]]
 const HISTORY_ROLL_REGEX = /\$(\d+)/g // match $1 $2...
-export function parseTemplate(expression: string, context: IDiceRollContext, history: MedianDiceRoll[], depth = 0): string {
+export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], depth = 0): string {
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
   const getEntry = (key: string) => context.card?.getEntry(key)?.value || ''
   const getAbility = (key: string) => context.card?.getAbility(key)?.value || ''
-  const MedianDiceRoll = getMedianDiceRollKlass()
+  const InlineDiceRoll = getInlineDiceRollKlass()
   // 1. 如检测到 ability or attribute，则求值并替换
   expression = expression.replace(ENTRY_REGEX, (_, key1?: string, key2?: string) => {
     const key = key1 ?? key2 ?? ''
@@ -55,7 +55,7 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
     if (abilityExpression) {
       debug(depth, '递归解析 ability:', key, '=', abilityExpression)
       const parsedAbility = parseTemplate(abilityExpression, context, history, depth + 1)
-      const dice = new MedianDiceRoll(parsedAbility.trim(), context).roll()
+      const dice = new InlineDiceRoll(parsedAbility.trim(), context).roll()
       debug(depth, '求值 ability:', dice.total)
       history.push(dice) // 计入 history
       return dice.hidden ? '' : String(dice.total)
@@ -66,30 +66,30 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
     return String(skillValue ?? '')
   })
   // 2. 如检测到 inline dice，则求值并记录结果
-  const thisLevelMedianRolls: MedianDiceRoll[] = [] // 只保存本层的 median roll 结果，避免 $1 引用到其他层的结果
+  const thisLevelInlineRolls: InlineDiceRoll[] = [] // 只保存本层的 inline roll 结果，避免 $1 引用到其他层的结果
   //    考虑到 inline dice 嵌套的场景，无限循环来为所有 inline dice 求值
   while (INLINE_ROLL_REGEX.test(expression)) {
     expression = expression.replace(INLINE_ROLL_REGEX, (_, notation: string) => {
       debug(depth, '循环解析 inline:', notation)
-      // 注意 inline dice 的 notation 中可能含有 $1，此时需要引用到 thisLevelMedianRolls 的结果
+      // 注意 inline dice 的 notation 中可能含有 $1，此时需要引用到 thisLevelInlineRolls 的结果
       notation = notation.replace(HISTORY_ROLL_REGEX, (_, index: string) => {
-        const historyRoll = thisLevelMedianRolls[Number(index) - 1]
+        const historyRoll = thisLevelInlineRolls[Number(index) - 1]
         const result = historyRoll ? String(historyRoll.total) : ''
         debug(depth, `替换 $${index} =`, result)
         return result
       })
       // 理论上 ability 和 attribute 都被替换完了，这里无需再递归解析，可以直接 roll
-      const dice = new MedianDiceRoll(notation.trim(), context).roll()
+      const dice = new InlineDiceRoll(notation.trim(), context).roll()
       debug(depth, '求值 inline:', dice.total)
       history.push(dice)
-      thisLevelMedianRolls.push(dice) // median roll 存起来
+      thisLevelInlineRolls.push(dice) // inline roll 存起来
       // 如果是暗骰则不显示，否则返回值
       return dice.hidden ? '' : String(dice.total)
     })
   }
   // 3. 替换 $1 $2
   expression = expression.replace(HISTORY_ROLL_REGEX, (_, index: string) => {
-    const historyRoll = thisLevelMedianRolls[Number(index) - 1]
+    const historyRoll = thisLevelInlineRolls[Number(index) - 1]
     const result = historyRoll ? String(historyRoll.total) : ''
     debug(depth, `替换 $${index} =`, result)
     return result
@@ -134,8 +134,8 @@ export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | 
  */
 export function createDiceRoll(expression: string, context: IDiceRollContext) {
   // 1. 通用解析原始表达式
-  const medianRolls: MedianDiceRoll[] = []
-  const parsedExpression = parseTemplate(expression, context, medianRolls)
+  const inlineRolls: InlineDiceRoll[] = []
+  const parsedExpression = parseTemplate(expression, context, inlineRolls)
   // 2. 根据起始指令派发不同类型
   const constructor = (() => {
     if (parsedExpression.startsWith('sc')) {
@@ -155,5 +155,5 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
     }
   })()
   // 3. 真正掷骰
-  return new constructor(parsedExpression, context, medianRolls).roll()
+  return new constructor(parsedExpression, context, inlineRolls).roll()
 }
