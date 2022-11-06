@@ -137,7 +137,7 @@ export class DiceManager {
     }
     if (!cacheMsg.instruction) return
     const user = this.api.guilds.findUser(userId, guildId)
-    const roll = this.tryRollDice(`d% ${cacheMsg.instruction}`, { userId, channelId, username: user?.persona })
+    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username: user?.persona })
     if (roll) {
       // 表情表态也没有暗骰
       const channel = this.api.guilds.findChannel(channelId, guildId)
@@ -242,16 +242,26 @@ export class DiceManager {
   }
 }
 
-const instRegex = new RegExp('(力量|体质|体型|敏捷|外貌|智力|灵感|意志|教育|理智|幸运|运气|会计|人类学|估价|考古学|魅惑|攀爬|计算机|电脑|信用|信誉|克苏鲁|乔装|闪避|驾驶|汽车|电气维修|电子学|话术|格斗|射击|急救|历史|恐吓|跳跃|母语|法律|图书馆|聆听|锁匠|开锁|撬锁|机械维修|医学|博物学|领航|导航|神秘学|重型|说服|精神分析|心理学|骑术|妙手|侦查|侦察|潜行|游泳|投掷|追踪|sc|SC)', 'g')
+const ATTRIBUTE_REGEX = new RegExp('(力量|体质|体型|敏捷|外貌|智力|灵感|意志|教育|理智|幸运|运气|会计|人类学|估价|考古学|魅惑|攀爬|计算机|电脑|信用|信誉|克苏鲁|乔装|闪避|驾驶|汽车|电气维修|电子学|话术|格斗|射击|急救|历史|恐吓|跳跃|母语|法律|图书馆|聆听|锁匠|开锁|撬锁|机械维修|医学|博物学|领航|导航|神秘学|重型|说服|精神分析|心理学|骑术|妙手|侦查|侦察|潜行|游泳|投掷|追踪|sc|SC)', 'g')
+const DIFFICULTY_REGEX = /(困难|极难|极限)/
+const INST_WRAPPER_REGEX = /【(.+)】/
 
 // 判断文本中有没有包含指令
 function detectInstruction(text: string) {
-  const skillMatch = text.match(instRegex)
-  if (!skillMatch) return null
-  const skill = skillMatch[0]
-  const difficultyMatch = text.match(/(困难|极难|极限)/)
-  const difficulty = difficultyMatch ? difficultyMatch[0] : ''
-  return difficulty + skill
+  // 1. 是否包含【...】
+  const fullInstMatch = text.match(INST_WRAPPER_REGEX)
+  if (fullInstMatch) {
+    return fullInstMatch[1]
+  }
+  // 2. 是否包含常用属性/技能名
+  const skillMatch = text.match(ATTRIBUTE_REGEX)
+  if (skillMatch) {
+    const skill = skillMatch[0]
+    const difficultyMatch = text.match(DIFFICULTY_REGEX)
+    const difficulty = difficultyMatch ? difficultyMatch[0] : ''
+    return 'd%' + difficulty + skill // todo 默认骰？
+  }
+  return null
 }
 
 // https://www.zhangxinxu.com/wordpress/2021/01/dom-api-html-encode-decode/
