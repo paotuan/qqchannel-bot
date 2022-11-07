@@ -99,12 +99,25 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   protected parseDescriptions(expression: string) {
     const [exp, desc, tempValue] = parseDescriptions(expression)
     // 如果是 alias dice，则认为 expression 已经由 config 指定，无视解析出的 exp
-    if (!this.isAlias) {
-      this.expression = exp
+    if (this.isAlias) {
+      this.description = desc
+      this.tempValue = tempValue
+      return
     }
+    // 如果只有 desc，没有 exp，判断一下是否是直接调用人物卡的表达式
+    // 例如【.徒手格斗】直接替换成【.1d3+$db】. 而【.$徒手格斗】走通用逻辑，求值后【.const】
+    if (desc && !exp) {
+      const ability = this.context.card?.getAbility(desc)
+      if (ability) {
+        this.expression = parseTemplate(ability.value, this.context, this.inlineRolls)
+        this.tempValue = tempValue
+        return
+      }
+    }
+    // 默认情况，分别代入即可
+    this.expression = exp
     this.description = desc
     this.tempValue = tempValue
-    // todo 单纯 ability 的情况
   }
 
   private detectDefaultRoll(defaultRoll = 'd%') {

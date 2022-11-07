@@ -52,7 +52,11 @@ const list2 = [
   'd100 侦察 50',           // 无视临时值
   '不存在技能',              // 不存在的技能
   '3d100<=$力量',           // 人物卡引用
-  // todo 引用 ability
+  '徒手格斗',                // 直接骰 ability
+  'r徒手格斗',                //
+  'd% 徒手格斗',             // 应解析为描述
+  '$徒手格斗',               // 人物卡引用 ability
+  '$徒手格斗+1d6+1',         //
   'sc 0/d10',              // sc
   'enl',                   // 成长检定列出
   'en',                    // 成长全部
@@ -122,7 +126,14 @@ function getCardProto(): ICard {
       '侦查': 46,
       '图书馆': 70
     },
-    abilities: [],
+    abilities: [
+      {
+        name: '徒手格斗',
+        expression: '1d3+$db',
+        ext: ''
+      }
+    ],
+    ext: '',
     meta: {
       skillGrowth: {},
       lastModified: Date.now()

@@ -161,6 +161,7 @@ function getCardProto(): ICard {
     },
     skills: {},
     abilities: [],
+    ext: '',
     meta: {
       skillGrowth: {},
       lastModified: Date.now()

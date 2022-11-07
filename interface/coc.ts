@@ -29,11 +29,14 @@ export interface ICard {
     expression: string
     ext: string
   }[],
+  ext: string
   meta: {
     skillGrowth: { [key: string]: boolean },
     lastModified: number // ms
   }
 }
+
+export type IAbility = ICard['abilities'][number]
 
 /**
  * 计算伤害加成和体格
