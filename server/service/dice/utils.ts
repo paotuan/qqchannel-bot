@@ -57,7 +57,7 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
       debug(depth, '递归解析 ability:', key, '=', abilityExpression)
       const parsedAbility = parseTemplate(abilityExpression, context, history, depth + 1)
       const dice = new InlineDiceRoll(parsedAbility.trim(), context).roll()
-      // todo ability 的 inline dice 将 key 作为 description 优化输出展示
+      dice.description = key // 将 key 作为 inline dice 的 description，优化 output 展示
       debug(depth, '求值 ability:', dice.total)
       history.push(dice) // 计入 history
       return dice.hidden ? '' : String(dice.total)
