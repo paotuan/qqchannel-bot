@@ -73,6 +73,8 @@
             </tbody>
           </table>
         </div>
+        <!-- ext -->
+        <textarea v-model="cardnn.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
       </div>
       <div style="flex: 2 1 0">
         <table class="table table-compact table-zebra w-full">
@@ -107,6 +109,51 @@
           </tr>
           </tbody>
         </table>
+        <div class="mt-4 flex gap-2 items-start">
+          <table class="table table-compact table-zebra w-full" style="flex: 4 1 0">
+            <thead>
+            <tr>
+              <th class="w-1/4">武器/能力名</th>
+              <th class="w-1/4">表达式</th>
+              <th>备注</th>
+              <th class="w-8"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(ability, i) in cardnn.abilities" :key="i">
+              <td>
+                <text-input v-model="ability.name" class="input input-ghost input-xs w-full"/>
+              </td>
+              <td>
+                <text-input v-model="ability.expression" class="input input-ghost input-xs w-full"/>
+              </td>
+              <td>
+                <text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/>
+              </td>
+              <td style="padding: 0">
+                <button class="btn btn-xs btn-circle btn-ghost" @click="deleteAbility(i)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4">
+                <button class="btn btn-xs btn-ghost" @click="newAbility">+ 新增一行</button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          <table class="table table-compact w-full" style="flex: 1 1 0">
+            <thead>
+            <tr><th>战斗属性</th></tr>
+            </thead>
+            <tbody>
+            <tr><td>DB: {{ dbAndBuild[0] }}</td></tr>
+            <tr><td>体格: {{ dbAndBuild[1] }}</td></tr>
+            <tr><td>闪避: {{ cardnn.skills['闪避'] || 0 }}/{{ Math.floor(cardnn.skills['闪避'] || 0 / 2) }}/{{ Math.floor(cardnn.skills['闪避'] || 0 / 5) }}</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -117,6 +164,7 @@ import { computed, ref, watch } from 'vue'
 import TextInput from './TextInput.vue'
 import NumberInput from './NumberInput.vue'
 import type { ICard } from '../../../interface/coc'
+import { getDBAndBuild } from '../../../interface/coc'
 
 const cardStore = useCardStore()
 const card = computed(() => cardStore.selectedCard)
@@ -126,6 +174,7 @@ const cardnn = computed(() => card.value!)
 const propKeyOf = (card: ICard) => {
   return Object.keys(card.props) as Array<keyof typeof card.props>
 }
+const dbAndBuild = computed(() => getDBAndBuild(cardnn.value))
 // endregion 给模板用的
 
 // 分三栏显示，技能值越高越前面
@@ -155,6 +204,28 @@ const deleteCard = () => {
     cardStore.deleteCard(card.value)
   }
 }
+
+// 标记人物卡被编辑
+const markEdited = () => {
+  if (card.value) {
+    cardStore.markCardEdited(card.value)
+  }
+}
+
+// 新增一条 ability
+const newAbility = () => {
+  if (card.value) {
+    card.value.abilities.push({ name: '', expression: '', ext: '' })
+  }
+}
+
+// 删除一条 ability
+const deleteAbility = (index: number) => {
+  if (card.value) {
+    card.value.abilities.splice(index, 1)
+    markEdited()
+  }
+}
 </script>
 <style scoped>
 .table-compact :where(td) {
@@ -165,7 +236,7 @@ const deleteCard = () => {
   --tw-bg-opacity: 0.5;
 }
 
-.table input[type=number]:focus {
+.table input:focus {
   outline: none;
 }
 

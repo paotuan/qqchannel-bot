@@ -133,5 +133,10 @@ function handleCardUpgrade(card: ICard) {
     card.meta.lastModified = 0
     card.version = 2
   }
+  if (card.version === 2) {
+    card.ext = ''
+    card.abilities = []
+    card.version = 3
+  }
   return card
 }
