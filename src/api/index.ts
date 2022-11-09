@@ -1,6 +1,6 @@
 import ws from './ws'
-import {
-  IBotInfo, ICard, ICardLinkResp,
+import type {
+  IBotInfo, ICardLinkResp,
   ICardTestResp,
   IChannel,
   ILog,
@@ -8,6 +8,7 @@ import {
   INoteSendResp,
   INoteSyncResp, IUser
 } from '../../interface/common'
+import type { ICard } from '../../interface/coc'
 import { useBotStore } from '../store/bot'
 import { useChannelStore } from '../store/channel'
 import { useLogStore } from '../store/log'
