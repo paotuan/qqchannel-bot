@@ -1,2 +1,2 @@
-export const VERSION_NAME = 'v0.4.1'
-export const VERSION_CODE = 6
+export const VERSION_NAME = 'v0.5.0'
+export const VERSION_CODE = 7
