@@ -150,7 +150,7 @@
             <tbody>
             <tr><td>DB: {{ dbAndBuild[0] }}</td></tr>
             <tr><td>体格: {{ dbAndBuild[1] }}</td></tr>
-            <tr><td>闪避: {{ cardnn.skills['闪避'] || 0 }}/{{ Math.floor(cardnn.skills['闪避'] || 0 / 2) }}/{{ Math.floor(cardnn.skills['闪避'] || 0 / 5) }}</td></tr>
+            <tr><td>闪避: {{ cardnn.skills['闪避'] || 0 }}/{{ Math.floor((cardnn.skills['闪避'] || 0) / 2) }}/{{ Math.floor((cardnn.skills['闪避'] || 0) / 5) }}</td></tr>
             </tbody>
           </table>
         </div>

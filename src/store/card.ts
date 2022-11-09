@@ -246,6 +246,17 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
       if (!name || isNaN(value)) return // 理论不可能
       setter.set(name, value)
     })
+    // 读武器列表
+    for (let i = 53; i <= 58; i++) {
+      const combatName = sheet['B' + i]?.v || ''
+      if (!combatName) continue
+      const expression = sheet['W' + i]?.v || ''
+      user.abilities.push({
+        name: combatName,
+        expression: expression.toLowerCase().replaceAll('db', '$db'),
+        ext: sheet['M' + i]?.v || ''
+      })
+    }
   } else {
     // read basic info
     user.basic = {
@@ -282,6 +293,17 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
       const name = sheet[(Y_LINES.includes(i) ? 'Y' : 'W') + i]
       if (!name) continue // 自选技能，玩家没选的情况
       setter.set(name.v, sheet['AJ' + i].v, ['skills'])
+    }
+    // 读武器列表
+    for (let i = 50; i <= 55; i++) {
+      const combatName = sheet['B' + i]?.v || ''
+      if (!combatName) continue
+      const expression = sheet['R' + i]?.v || ''
+      user.abilities.push({
+        name: combatName,
+        expression: expression.toLowerCase().replaceAll('db', '$db'),
+        ext: ''
+      })
     }
   }
 

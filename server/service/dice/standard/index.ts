@@ -110,6 +110,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       const ability = this.context.card?.getAbility(desc)
       if (ability) {
         this.expression = parseTemplate(ability.value, this.context, this.inlineRolls)
+        this.description = desc
         this.tempValue = tempValue
         return
       }
