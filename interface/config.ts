@@ -1,8 +1,8 @@
 // region 自定义回复
 export interface ICustomReplyConfigItem {
   weight: number // 权重
-  reply?: string
-  replyFunc?: () => string // 先简单起见，返回 string 走一遍 parse，后续可暴露 card
+  reply?: string // {{xxx}} 引用常用变量和命名捕获组
+  replyFunc?: (env: Record<string, string>, matchGroup?: Record<string, string>) => string // 返回 string 走一遍 parse
 }
 
 export interface ICustomReplyConfig {
@@ -15,11 +15,16 @@ export interface ICustomReplyConfig {
 }
 // endregion
 
+export interface IPluginRegisterContext {
+  versionName: string
+  versionCode: string
+}
+
 export interface IPluginConfig {
   id: string
   name?: string
   version?: number
-  customReply: ICustomReplyConfig[]
+  customReply?: ICustomReplyConfig[]
 }
 
 export interface IChannelConfig {

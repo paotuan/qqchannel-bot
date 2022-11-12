@@ -5,6 +5,7 @@ import { dispatch } from './dispatcher'
 import { QApiManager } from '../service/QApiManager'
 import { makeAutoObservable } from 'mobx'
 import { CardManager } from '../service/CardManager'
+import { ConfigManager } from '../service/config'
 
 /**
  * The server is a singleton websocket server
@@ -14,6 +15,7 @@ export class Wss {
   private readonly clients: WsClient[] = []
   readonly qApis = new QApiManager(this)
   readonly cards = new CardManager(this)
+  readonly config = new ConfigManager(this)
   private readonly _listeningChannels: string[] = []
 
   constructor(port = 4174) {

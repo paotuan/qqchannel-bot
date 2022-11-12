@@ -72,6 +72,8 @@ export class QApi {
     botConfig.intents.forEach(intent => {
       this.qqWs.on(intent, data => this.eventEmitter.emit(intent, data))
     })
+
+    // 初始化串行监听器
   }
 
   private fetchBotInfo() {
@@ -94,5 +96,9 @@ export class QApi {
 
   on(intent: AvailableIntentsEventsEnum, listener: (data: unknown) => void) {
     this.eventEmitter.on(intent, listener)
+  }
+
+  onGuildMessage(listener: (data: unknown) => boolean) {
+
   }
 }
