@@ -2,7 +2,7 @@
 export interface ICustomReplyConfigItem {
   weight: number // 权重
   reply?: string // {{xxx}} 引用常用变量和命名捕获组
-  replyFunc?: (env: Record<string, string>, matchGroup?: Record<string, string>) => string // 返回 string 走一遍 parse
+  replyFunc?: (env: Record<string, string>, matchGroup: Record<string, string>) => string // 返回 string 走一遍 parse
 }
 
 export interface ICustomReplyConfig {
@@ -30,7 +30,7 @@ export interface IPluginConfig {
 export interface IChannelConfig {
   version: number // 1
   defaultRoll: string // d100/d20/4dF
-  customReplyIds: string[]
+  customReplyIds: { id: string, enabled: boolean }[]
   embedPlugin: IPluginConfig // id = io.paotuan.embed.[channelId]
   lastModified: number // ms
 }

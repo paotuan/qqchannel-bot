@@ -29,8 +29,8 @@ export class CardManager {
 
   private initCardFiles() {
     try {
+      console.log('[Card] 开始读取人物卡')
       if (!fs.existsSync(dir)) {
-        console.log('[Card] 没有人物卡')
         return
       }
       const files: string[] = glob.sync(`${dir}/*.json`)

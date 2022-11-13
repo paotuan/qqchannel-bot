@@ -22,20 +22,26 @@ export class ConfigManager {
     return this.configMap['default']
   }
 
+  getChannelConfig(channelId: string) {
+    return this.configMap[channelId] || this.defaultConfig
+  }
+
   private initConfig() {
     try {
-      if (!fs.existsSync(CONFIG_DIR)) return
-      const files: string[] = glob.sync(`${CONFIG_DIR}/*.json`)
-      files.forEach(filename => {
-        try {
-          const str = fs.readFileSync(filename, 'utf8')
-          const config = JSON.parse(str) as IChannelConfig
-          const name = filename.match(/\/(.+)\.json$/)![1]
-          this.configMap[name] = config // handleUpgrade, 如果是增加了新的配置可以加上
-        } catch (e) {
-          console.log(`[Config] ${filename} 解析失败`, e)
-        }
-      })
+      console.log('[Config] 开始读取配置')
+      if (fs.existsSync(CONFIG_DIR)) {
+        const files: string[] = glob.sync(`${CONFIG_DIR}/*.json`)
+        files.forEach(filename => {
+          try {
+            const str = fs.readFileSync(filename, 'utf8')
+            const config = JSON.parse(str) as IChannelConfig
+            const name = filename.match(/\/(.+)\.json$/)![1]
+            this.configMap[name] = config // handleUpgrade, 如果是增加了新的配置可以加上
+          } catch (e) {
+            console.log(`[Config] ${filename} 解析失败`, e)
+          }
+        })
+      }
     } catch (e) {
       console.error('[Config] 读取配置列表失败', e)
     }
@@ -50,9 +56,14 @@ function getInitialDefaultConfig(): IChannelConfig {
   return {
     version: 1,
     defaultRoll: 'd100',
-    customReplyIds: [],
+    customReplyIds: [
+      {
+        id: 'io.paotuan.embed.jrrp',
+        enabled: true
+      }
+    ],
     embedPlugin: {
-      id: 'io.paotuan.embed.default',
+      id: 'io.paotuan.embed',
       customReply: [
         {
           id: 'jrrp',
@@ -62,7 +73,7 @@ function getInitialDefaultConfig(): IChannelConfig {
           items: [
             {
               weight: 1,
-              reply: '{{at}} 今天的运势是 [[d100]] !'
+              reply: '{{at}}今天的幸运指数是 [[d100]] !'
             }
           ]
         }

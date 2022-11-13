@@ -7,6 +7,9 @@ import { LogManager } from './log'
 import { EventEmitter } from 'events'
 import { NoteManager } from './note'
 import { DiceManager } from './dice'
+import { CustomReplyManager } from './customReply'
+
+type QueueListener = (data: unknown) => Promise<boolean>
 
 /**
  * A bot connection to QQ
@@ -21,6 +24,7 @@ export class QApi {
   readonly logs: LogManager
   readonly notes: NoteManager
   readonly dice: DiceManager
+  readonly customReply: CustomReplyManager
   private readonly eventEmitter = new EventEmitter()
 
   botInfo: IBotInfo | null = null
@@ -65,6 +69,8 @@ export class QApi {
     this.logs = new LogManager(this)
     // 初始化重要笔记
     this.notes = new NoteManager(this)
+    // 初始化自定义回复（优先级在骰子之前）
+    this.customReply = new CustomReplyManager(this)
     // 初始化骰子
     this.dice = new DiceManager(this)
 
@@ -74,6 +80,16 @@ export class QApi {
     })
 
     // 初始化串行监听器
+    this.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, async (data: any) => {
+      // 过滤掉未监听的频道消息
+      const channelId = data.msg.channel_id
+      if (!this.wss.listeningChannels.includes(channelId)) return
+      // 串行触发
+      for (const listener of this.guildMessageQueueListeners) {
+        const consumed = await listener(data)
+        if (consumed) return
+      }
+    })
   }
 
   private fetchBotInfo() {
@@ -94,11 +110,14 @@ export class QApi {
     this.qqWs.disconnect()
   }
 
+  // nativeOn
   on(intent: AvailableIntentsEventsEnum, listener: (data: unknown) => void) {
     this.eventEmitter.on(intent, listener)
   }
 
-  onGuildMessage(listener: (data: unknown) => boolean) {
+  private readonly guildMessageQueueListeners: QueueListener[] = []
 
+  onGuildMessage(listener: QueueListener) {
+    this.guildMessageQueueListeners.push(listener)
   }
 }
