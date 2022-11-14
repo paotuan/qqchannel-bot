@@ -1,10 +1,13 @@
 import type { ICard } from './coc'
+import type { IChannelConfig } from './config'
 
 export type Command =
   | 'bot/login' // req/res
   | 'bot/info'  // res
   | 'channel/list' // res
   | 'channel/listen' // req
+  | 'channel/config' // req/res
+  | 'channel/config/reset' // req
   | 'user/list' // res
   | 'log/push' // res
   | 'note/send' // req/res
@@ -51,6 +54,21 @@ export type IChannelListResp = IChannel[]
 export interface IListenToChannelReq {
   channelId: string
   guildId: string
+}
+
+export interface IChannelConfigReq {
+  channelId: string
+  config: IChannelConfig
+  setDefault: boolean
+}
+
+export interface IChannelConfigResp {
+  channelId: string
+  config: IChannelConfig
+}
+
+export interface IChannelConfigResetReq {
+  channelId: string
 }
 
 export interface IUser {

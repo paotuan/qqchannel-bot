@@ -3,6 +3,7 @@ import * as glob from 'glob'
 import type { Wss } from '../../app/wss'
 import { makeAutoObservable } from 'mobx'
 import type { IChannelConfig, IPluginConfig } from '../../../interface/config'
+import type { IChannelConfigReq, IChannelConfigResetReq } from '../../../interface/common'
 
 const CONFIG_DIR = './config'
 const PLUGIN_DIR = './plugins'
@@ -24,6 +25,29 @@ export class ConfigManager {
 
   getChannelConfig(channelId: string) {
     return this.configMap[channelId] || this.defaultConfig
+  }
+
+  saveChannelConfig({ channelId, config, setDefault }: IChannelConfigReq) {
+    console.log('[Config] 保存配置，设为默认配置：', setDefault)
+    this.configMap[channelId] = config
+    this.saveToFile(channelId, config)
+    if (setDefault) {
+      this.configMap['default'] = config
+      this.saveToFile('default', config)
+    }
+  }
+
+  resetChannelConfig({ channelId }: IChannelConfigResetReq) {
+    console.log('[Config] 删除配置')
+    delete this.configMap[channelId]
+    try {
+      if (!fs.existsSync(CONFIG_DIR)) {
+        return
+      }
+      fs.unlinkSync(`${CONFIG_DIR}/${channelId}.json`)
+    } catch (e) {
+      console.error('[Config] 删除配置失败', e)
+    }
   }
 
   private initConfig() {
@@ -49,6 +73,17 @@ export class ConfigManager {
     if (!this.configMap['default']) {
       this.configMap['default'] = getInitialDefaultConfig()
     }
+  }
+
+  private saveToFile(channelIdOrDefault: string, config: IChannelConfig) {
+    if (!fs.existsSync(CONFIG_DIR)) {
+      fs.mkdirSync(CONFIG_DIR)
+    }
+    fs.writeFile(`${CONFIG_DIR}/${channelIdOrDefault}.json`, JSON.stringify(config), (e) => {
+      if (e) {
+        console.error('[Config] 配置写文件失败', e)
+      }
+    })
   }
 }
 

@@ -2,7 +2,7 @@ import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
 import type {
   IBotInfoResp, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp,
-  IChannel,
+  IChannel, IChannelConfigReq, IChannelConfigResetReq, IChannelConfigResp,
   IChannelListResp,
   IListenToChannelReq,
   ILoginReq,
@@ -37,6 +37,12 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'card/link':
     handleCardLink(client, server, request.data as ICardLinkReq)
+    break
+  case 'channel/config':
+    handleChannelConfig(client, server, request.data as IChannelConfigReq)
+    break
+  case 'channel/config/reset':
+    handleResetChannelConfig(client, server, request.data as IChannelConfigResetReq)
     break
   }
 }
@@ -101,6 +107,14 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
     }
   })
+  // watch channel config
+  client.autorun(ws => {
+    const channelId = ws.listenToChannelId
+    if (channelId) {
+      const config = server.config.getChannelConfig(channelId)
+      ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { channelId, config } })
+    }
+  })
 }
 
 function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
@@ -146,4 +160,12 @@ function handleCardDelete(client: WsClient, server: Wss, data: ICardDeleteReq) {
 function handleCardLink(client: WsClient, server: Wss, data: ICardLinkReq) {
   if (!client.listenToChannelId) return
   server.cards.linkCard(client, data)
+}
+
+function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfigReq) {
+  server.config.saveChannelConfig(data)
+}
+
+function handleResetChannelConfig(client: WsClient, server: Wss, data: IChannelConfigResetReq) {
+  server.config.resetChannelConfig(data)
 }
