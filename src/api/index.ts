@@ -2,7 +2,7 @@ import ws from './ws'
 import type {
   IBotInfo, ICardLinkResp,
   ICardTestResp,
-  IChannel,
+  IChannel, IChannelConfigResp,
   ILog,
   INoteFetchResp,
   INoteSendResp,
@@ -16,6 +16,7 @@ import { useNoteStore } from '../store/note'
 import { useCardStore } from '../store/card'
 import { useUserStore } from '../store/user'
 import { gtagEvent, Toast } from '../utils'
+import { useConfigStore } from '../store/config'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -113,4 +114,11 @@ ws.on('card/test', data => {
     if (!card || !card.skills[res.propOrSkill]) return
     cardStore.markSkillGrowth(card, res.propOrSkill, true)
   }
+})
+
+ws.on('channel/config', data => {
+  const res = data.data as IChannelConfigResp
+  const configStore = useConfigStore()
+  configStore.onUpdateConfig(res.config)
+  Toast.success('配置更新成功！')
 })

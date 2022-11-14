@@ -124,6 +124,6 @@ function randomReplyItem(items: ICustomReplyConfigItem[]) {
       return item
     }
   }
-  // 理论不可能
+  // 理论不可能，除非权重填 0 了
   return items[items.length - 1]
 }

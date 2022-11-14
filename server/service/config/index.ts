@@ -3,7 +3,8 @@ import * as glob from 'glob'
 import type { Wss } from '../../app/wss'
 import { makeAutoObservable } from 'mobx'
 import type { IChannelConfig, IPluginConfig } from '../../../interface/config'
-import type { IChannelConfigReq, IChannelConfigResetReq } from '../../../interface/common'
+import type { IChannelConfigReq } from '../../../interface/common'
+import type { WsClient } from '../../app/wsclient'
 
 const CONFIG_DIR = './config'
 const PLUGIN_DIR = './plugins'
@@ -27,8 +28,9 @@ export class ConfigManager {
     return this.configMap[channelId] || this.defaultConfig
   }
 
-  saveChannelConfig({ channelId, config, setDefault }: IChannelConfigReq) {
+  saveChannelConfig(client: WsClient, { config, setDefault }: IChannelConfigReq) {
     console.log('[Config] 保存配置，设为默认配置：', setDefault)
+    const channelId = client.listenToChannelId
     this.configMap[channelId] = config
     this.saveToFile(channelId, config)
     if (setDefault) {
@@ -37,8 +39,9 @@ export class ConfigManager {
     }
   }
 
-  resetChannelConfig({ channelId }: IChannelConfigResetReq) {
+  resetChannelConfig(client: WsClient) {
     console.log('[Config] 删除配置')
+    const channelId = client.listenToChannelId
     delete this.configMap[channelId]
     try {
       if (!fs.existsSync(CONFIG_DIR)) {
@@ -95,6 +98,18 @@ function getInitialDefaultConfig(): IChannelConfig {
       {
         id: 'io.paotuan.embed.jrrp',
         enabled: true
+      },
+      {
+        id: 'io.paotuan.embed.coccardrand',
+        enabled: true
+      },
+      {
+        id: 'io.paotuan.embed.gacha',
+        enabled: true
+      },
+      {
+        id: 'io.paotuan.embed.fudu',
+        enabled: true
       }
     ],
     embedPlugin: {
@@ -103,12 +118,64 @@ function getInitialDefaultConfig(): IChannelConfig {
         {
           id: 'jrrp',
           name: '今日运势',
+          description: '使用 /jrrp 查询今日运势',
           command: 'jrrp',
           trigger: 'exact',
           items: [
             {
               weight: 1,
               reply: '{{at}}今天的幸运指数是 [[d100]] !'
+            }
+          ]
+        },
+        {
+          id: 'coccardrand',
+          name: 'COC 人物作成',
+          description: '使用 /coc 随机人物作成',
+          command: 'coc',
+          trigger: 'exact',
+          items: [
+            {
+              weight: 1,
+              reply: '{{at}}人物作成：\n力量[[3d6*5]] 体质[[3d6*5]] 体型[[(2d6+6)*5]] 敏捷[[3d6*5]] 外貌[[3d6*5]] 智力[[(2d6+6)*5]] 意志[[3d6*5]] 教育[[(2d6+6)*5]] 幸运[[3d6*5]]'
+            }
+          ]
+        },
+        {
+          id: 'gacha',
+          name: '简单抽卡',
+          description: '使用不同权重进行抽卡的例子',
+          command: '抽卡',
+          trigger: 'exact',
+          items: [
+            {
+              weight: 2,
+              reply: '{{at}}抽到了 ★★★★★★'
+            },
+            {
+              weight: 8,
+              reply: '{{at}}抽到了 ★★★★★'
+            },
+            {
+              weight: 48,
+              reply: '{{at}}抽到了 ★★★★'
+            },
+            {
+              weight: 42,
+              reply: '{{at}}抽到了 ★★★'
+            }
+          ]
+        },
+        {
+          id: 'fudu',
+          name: '复读机',
+          description: '使用正则匹配的例子',
+          command: '复读(?<content>.+)',
+          trigger: 'regex',
+          items: [
+            {
+              weight: 1,
+              reply: '{{content}}'
             }
           ]
         }

@@ -57,18 +57,12 @@ export interface IListenToChannelReq {
 }
 
 export interface IChannelConfigReq {
-  channelId: string
   config: IChannelConfig
   setDefault: boolean
 }
 
 export interface IChannelConfigResp {
-  channelId: string
   config: IChannelConfig
-}
-
-export interface IChannelConfigResetReq {
-  channelId: string
 }
 
 export interface IUser {

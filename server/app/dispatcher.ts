@@ -2,7 +2,7 @@ import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
 import type {
   IBotInfoResp, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp,
-  IChannel, IChannelConfigReq, IChannelConfigResetReq, IChannelConfigResp,
+  IChannel, IChannelConfigReq, IChannelConfigResp,
   IChannelListResp,
   IListenToChannelReq,
   ILoginReq,
@@ -42,7 +42,7 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     handleChannelConfig(client, server, request.data as IChannelConfigReq)
     break
   case 'channel/config/reset':
-    handleResetChannelConfig(client, server, request.data as IChannelConfigResetReq)
+    handleResetChannelConfig(client, server)
     break
   }
 }
@@ -112,7 +112,7 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
     const channelId = ws.listenToChannelId
     if (channelId) {
       const config = server.config.getChannelConfig(channelId)
-      ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { channelId, config } })
+      ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
     }
   })
 }
@@ -163,9 +163,11 @@ function handleCardLink(client: WsClient, server: Wss, data: ICardLinkReq) {
 }
 
 function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfigReq) {
-  server.config.saveChannelConfig(data)
+  if (!client.listenToChannelId) return
+  server.config.saveChannelConfig(client, data)
 }
 
-function handleResetChannelConfig(client: WsClient, server: Wss, data: IChannelConfigResetReq) {
-  server.config.resetChannelConfig(data)
+function handleResetChannelConfig(client: WsClient, server: Wss) {
+  if (!client.listenToChannelId) return
+  server.config.resetChannelConfig(client)
 }
