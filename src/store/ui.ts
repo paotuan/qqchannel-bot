@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export type Tabs = 'log' | 'note' | 'card'
+export type Tabs = 'log' | 'note' | 'card' | 'config'
 export type ToastType = 'success' | 'warning' | 'info' | 'error'
 let toastId = 0
 

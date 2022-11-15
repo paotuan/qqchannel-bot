@@ -12,6 +12,9 @@
     <keep-alive>
       <card-panel v-if="ui.activeTab === 'card'" />
     </keep-alive>
+    <keep-alive>
+      <config-panel v-if="ui.activeTab === 'config'" />
+    </keep-alive>
   </div>
 </template>
 <script setup lang="ts">
@@ -20,6 +23,7 @@ import LogPanel from '../../views/LogPanel.vue'
 import NotePanel from '../../views/NotePanel.vue'
 import CardPanel from '../../views/CardPanel/CardPanel.vue'
 import ConnectionStatus from './ConnectionStatus.vue'
+import ConfigPanel from '../../views/ConfigPanel/ConfigPanel.vue'
 
 const ui = useUIStore()
 </script>

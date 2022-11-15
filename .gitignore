@@ -24,6 +24,8 @@ dist-ssr
 
 .env
 cards/
+config/
+plugins/
 dist/client
 dist/server
 dist/bin
