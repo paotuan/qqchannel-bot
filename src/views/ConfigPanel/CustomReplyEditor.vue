@@ -47,8 +47,8 @@ import type { ICustomReplyConfig } from '../../../interface/config'
 import { computed, ref, toRefs } from 'vue'
 import { Bars3Icon, XMarkIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../store/config'
-import DNativeSelect from '../../dui/modal/DNativeSelect.vue'
-import DNumberInput from '../../dui/modal/DNumberInput.vue'
+import DNativeSelect from '../../dui/select/DNativeSelect.vue'
+import DNumberInput from '../../dui/input/DNumberInput.vue'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
 interface Emits {
