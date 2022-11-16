@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { IChannelConfig } from '../../../interface/config'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import ws from '../../api/ws'
 import type { IChannelConfigReq } from '../../../interface/common'
 import { useCustomReply } from './useCustomReply'
@@ -20,7 +20,9 @@ export const useConfigStore = defineStore('config', () => {
   // 接收从服务端的 config 更新。就不按照时间戳判断了
   const onUpdateConfig = (config: IChannelConfig) => {
     state.config = config
-    edited.value = false
+    nextTick(() => {
+      edited.value = false
+    })
   }
 
   // 保存配置

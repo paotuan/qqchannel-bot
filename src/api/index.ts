@@ -120,5 +120,4 @@ ws.on('channel/config', data => {
   const res = data.data as IChannelConfigResp
   const configStore = useConfigStore()
   configStore.onUpdateConfig(res.config)
-  Toast.success('配置更新成功！')
 })

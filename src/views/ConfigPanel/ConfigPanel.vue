@@ -26,10 +26,10 @@
     <!-- 底部栏 -->
     <div class="absolute left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
       <div class="tooltip" data-tip="保存为当前子频道的配置">
-        <button class="btn btn-primary w-52" @click="configStore.requestSaveConfig(false)">保存</button>
+        <button class="btn btn-primary w-52" :disabled="!configStore.edited" @click="configStore.requestSaveConfig(false)">保存</button>
       </div>
       <div class="tooltip" data-tip="保存为所有子频道的默认配置。如果其他子频道没有单独的配置，将会使用默认配置">
-        <button class="btn btn-primary w-52" @click="configStore.requestSaveConfig(true)">保存为默认配置</button>
+        <button class="btn btn-primary w-52" :disabled="!configStore.edited" @click="configStore.requestSaveConfig(true)">保存为默认配置</button>
       </div>
       <div class="tooltip" data-tip="使用默认配置覆盖当前子频道的配置">
         <button class="btn btn-accent w-52" @click="configStore.requestResetConfig()">重置到默认配置</button>

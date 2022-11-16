@@ -182,7 +182,6 @@ export class DiceManager {
       }
       return roller
     } catch (e: any) {
-      console.error(e)
       // 表达式不合法，无视之
       console.log('[Dice] 未识别表达式', e?.message)
       return null
