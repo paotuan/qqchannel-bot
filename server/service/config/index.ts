@@ -58,11 +58,12 @@ export class ConfigManager {
       console.log('[Config] 开始读取配置')
       if (fs.existsSync(CONFIG_DIR)) {
         const files: string[] = glob.sync(`${CONFIG_DIR}/*.json`)
+        console.log(files)
         files.forEach(filename => {
           try {
             const str = fs.readFileSync(filename, 'utf8')
             const config = JSON.parse(str) as IChannelConfig
-            const name = filename.match(/\/(.+)\.json$/)![1]
+            const name = filename.match(/config\/(.+)\.json$/)![1]
             this.configMap[name] = config // handleUpgrade, 如果是增加了新的配置可以加上
           } catch (e) {
             console.log(`[Config] ${filename} 解析失败`, e)

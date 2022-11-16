@@ -19,6 +19,14 @@ body {
   min-width: 1280px;
 }
 
+code {
+  @apply bg-info text-info-content;
+  font-size: 0.875rem;
+  padding: 0.0625rem 0.25rem;
+  margin: 0 0.25rem;
+  border-radius: 0.25rem;
+}
+
 ::-webkit-scrollbar {
   @apply w-2;
 }

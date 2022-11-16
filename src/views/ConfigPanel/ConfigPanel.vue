@@ -17,14 +17,14 @@
       </section>
       <!-- 自定义回复 -->
       <section class="mt-4">
-        <h2>自定义回复：</h2>
+        <div class="flex items-center"><h2>自定义回复：</h2><custom-reply-help /></div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <custom-reply-list />
         </div>
       </section>
     </div>
     <!-- 底部栏 -->
-    <div class="absolute left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
+    <div class="fixed left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
       <div class="tooltip" data-tip="保存为当前子频道的配置">
         <button class="btn btn-primary w-52" :disabled="!configStore.edited" @click="configStore.requestSaveConfig(false)">保存</button>
       </div>
@@ -41,6 +41,7 @@
 import { useConfigStore } from '../../store/config'
 import { computed } from 'vue'
 import CustomReplyList from './CustomReplyList.vue'
+import CustomReplyHelp from './CustomReplyHelp.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
