@@ -6,7 +6,7 @@ export interface ICustomReplyConfigItem {
 }
 
 export interface ICustomReplyConfig {
-  id: string // embed id 如何生成. nanoid？
+  id: string // 短 id
   name: string
   description?: string
   command: string // 触发词
@@ -30,7 +30,7 @@ export interface IPluginConfig {
 export interface IChannelConfig {
   version: number // 1
   defaultRoll: string // d100/d20/4dF
-  customReplyIds: { id: string, enabled: boolean }[]
+  customReplyIds: { id: string, enabled: boolean }[] // full id
   embedPlugin: IPluginConfig // id = io.paotuan.embed.[channelId]
   lastModified: number // ms
 }

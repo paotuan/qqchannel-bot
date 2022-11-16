@@ -3,7 +3,12 @@
     <div class="collapse-title text-md font-medium flex items-center gap-2 cursor-pointer" @click="isOpen = !isOpen">
       <Bars3Icon class="w-4 h-4 cursor-move flex-none sortable-handle" @click.stop/>
       <input v-model="item.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
-      <span>{{ processor.name }}</span>
+      <span class="inline-flex items-center gap-1 group">
+        {{ processor.name }}
+        <button class="btn btn-circle btn-ghost btn-xs invisible group-hover:visible" @click.stop="editSelf">
+          <PencilSquareIcon class="w-4 h-4 flex-none" />
+        </button>
+      </span>
       <span class="flex-grow text-right">
         <button class="btn btn-circle btn-outline btn-xs" @click.stop="deleteSelf">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -40,13 +45,19 @@
 <script setup lang="ts">
 import type { ICustomReplyConfig } from '../../../interface/config'
 import { computed, ref, toRefs } from 'vue'
-import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { Bars3Icon, XMarkIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../store/config'
 import DNativeSelect from '../../dui/modal/DNativeSelect.vue'
 import DNumberInput from '../../dui/modal/DNumberInput.vue'
 
-const props = defineProps<{ item: { id: string, enabled: boolean }, defaultOpen: boolean }>()
-const emit = defineEmits<{ (e: 'delete', value: string): void }>()
+interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
+interface Emits {
+  (e: 'delete', value: string): void
+  (e: 'edit', value: { id: string, name: string, desc: string }): void // full id
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 const { item } = toRefs(props)
 
 // 根据 id 获取自定义回复配置的具体内容
@@ -58,6 +69,9 @@ const isOpen = ref(props.defaultOpen)
 
 // 删除自己
 const deleteSelf = () => emit('delete', item.value.id)
+
+// 编辑标题描述
+const editSelf = () => emit('edit', { id: item.value.id, name: processor.value.name, desc: processor.value.description || '' })
 
 // 删除一条回复条目
 const deleteReplyItem = (index: number) => processor.value.items.splice(index, 1)

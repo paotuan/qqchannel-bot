@@ -23,6 +23,7 @@
     "lru-cache": "^7.14.0",
     "mitt": "^3.0.0",
     "mobx": "^6.6.2",
+    "nanoid": "^4.0.0",
     "pinia": "^2.0.22",
     "qq-guild-bot": "^2.9.5",
     "sortablejs": "^1.15.0",

@@ -23,10 +23,10 @@ dist-ssr
 *.sw?
 
 .env
-cards/
-config/
-plugins/
-dist/client
-dist/server
-dist/bin
-dist/log.txt
+/cards/
+/config/
+/plugins/
+/dist/client
+/dist/server
+/dist/bin
+/dist/log.txt
