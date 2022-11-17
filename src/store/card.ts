@@ -214,15 +214,7 @@ class CardSetter {
 export function parseText(name: string, rawText: string): ICard {
   const card = getCardProto()
   card.basic.name = name.trim()
-  const setter = new CardSetter(card)
-  Array.from(rawText.trim().matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
-    const index = entry.search(/\d/) // 根据数字分隔
-    const name = entry.slice(0, index).replace(/[:：]/g, '').trim()
-    const value = parseInt(entry.slice(index), 10)
-    if (!name || isNaN(value)) return // 理论不可能
-    setter.set(name, value)
-  })
-  return card
+  return addAttributesBatch(card, rawText)
 }
 
 export function parseCoCXlsx(workbook: XLSX.WorkBook) {
@@ -308,4 +300,16 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
   }
 
   return user
+}
+
+export function addAttributesBatch(card: ICard, rawText: string): ICard {
+  const setter = new CardSetter(card)
+  Array.from(rawText.trim().matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
+    const index = entry.search(/\d/) // 根据数字分隔
+    const name = entry.slice(0, index).replace(/[:：]/g, '').trim()
+    const value = parseInt(entry.slice(index), 10)
+    if (!name || isNaN(value)) return // 理论不可能
+    setter.set(name, value)
+  })
+  return card
 }

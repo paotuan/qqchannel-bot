@@ -12,6 +12,7 @@
           <span class="text-sm">是</span>
           <text-input v-model="cardnn.basic.job" placeholder="职业" class="input input-bordered input-xs w-20"/>
         </span>
+      <card-add-attribute @submit="addSkillsBatch" />
       <button class="btn btn-xs btn-primary" :disabled="!cardStore.isEdited(cardnn)"
               @click="cardStore.requestSaveCard(cardnn)">保存修改
       </button>
@@ -98,11 +99,16 @@
                     {{ skill }}
                   </button>
                 </td>
-                <td :key="`value-${j}`" :class="{ highlight: !!cardnn.meta.skillGrowth[skill] }">
-                  <number-input v-model="cardnn.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
-                  <span class="text-gray-400 text-xs">
-                    {{ Math.floor(cardnn.skills[skill] / 2) }}/{{ Math.floor(cardnn.skills[skill] / 5) }}
+                <td :key="`value-${j}`" class="flex items-center justify-between group" :class="{ highlight: !!cardnn.meta.skillGrowth[skill] }">
+                  <span>
+                    <number-input v-model="cardnn.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
+                    <span class="text-gray-400 text-xs">
+                      {{ Math.floor(cardnn.skills[skill] / 2) }}/{{ Math.floor(cardnn.skills[skill] / 5) }}
+                    </span>
                   </span>
+                  <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteSkill(skill)">
+                    <XMarkIcon class="w-4 h-4" />
+                  </button>
                 </td>
               </template>
             </template>
@@ -120,7 +126,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(ability, i) in cardnn.abilities" :key="i">
+            <tr v-for="(ability, i) in cardnn.abilities" :key="i" class="group">
               <td>
                 <text-input v-model="ability.name" class="input input-ghost input-xs w-full"/>
               </td>
@@ -131,8 +137,8 @@
                 <text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/>
               </td>
               <td style="padding: 0">
-                <button class="btn btn-xs btn-circle btn-ghost" @click="deleteAbility(i)">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility(i)">
+                  <XMarkIcon class="w-4 h-4" />
                 </button>
               </td>
             </tr>
@@ -159,12 +165,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useCardStore } from '../../store/card'
+import { addAttributesBatch, useCardStore } from '../../store/card'
 import { computed, ref, watch } from 'vue'
+import { XMarkIcon } from '@heroicons/vue/24/outline'
 import TextInput from './TextInput.vue'
 import NumberInput from './NumberInput.vue'
 import type { ICard } from '../../../interface/coc'
 import { getDBAndBuild } from '../../../interface/coc'
+import CardAddAttribute from './CardAddAttribute.vue'
 
 const cardStore = useCardStore()
 const card = computed(() => cardStore.selectedCard)
@@ -177,22 +185,19 @@ const propKeyOf = (card: ICard) => {
 const dbAndBuild = computed(() => getDBAndBuild(cardnn.value))
 // endregion 给模板用的
 
-// 分三栏显示，技能值越高越前面
-// 缓存一下选择卡片时的技能值顺序，避免编辑过程中实时数值改变导致排序跳动
-const originCard = ref<ICard | undefined>()
-watch(
-  () => card.value,
-  () => {
-    if (card.value) {
-      originCard.value = JSON.parse(JSON.stringify(card.value))
-    }
-  },
-  { immediate: true }
-)
+// 技能按数值排序。缓存一下选择卡片时的技能值顺序，避免编辑过程中实时数值改变导致排序跳动
+const skillsSortList = ref<string[]>([])
+const updateSortList = (cardValue: ICard | null) => {
+  if (cardValue) {
+    skillsSortList.value = Object.keys(cardValue.skills).sort((s1, s2) => cardValue.skills[s2] - cardValue.skills[s1])
+  } else {
+    skillsSortList.value = []
+  }
+}
+watch(card, updateSortList, { immediate: true })
+// skills grid 分三栏展示
 const skills = computed(() => {
-  if (!originCard.value) return []
-  const cardValue = originCard.value
-  const skillList = Object.keys(cardValue.skills).sort((s1, s2) => cardValue.skills[s2] - cardValue.skills[s1])
+  const skillList = skillsSortList.value
   const length = Math.ceil(skillList.length / 3)
   return new Array(length).fill(0).map((_, i) => [skillList[i * 3], skillList[i * 3 + 1], skillList[i * 3 + 2]])
 })
@@ -223,6 +228,28 @@ const newAbility = () => {
 const deleteAbility = (index: number) => {
   if (card.value) {
     card.value.abilities.splice(index, 1)
+    markEdited()
+  }
+}
+
+// 删除一条 skill
+const deleteSkill = (name: string) => {
+  if (card.value) {
+    delete card.value.skills[name]
+    delete card.value.meta.skillGrowth[name] // 如有成长标记也一起删了
+    // 从 skillsSortList 也删除
+    const index = skillsSortList.value.indexOf(name)
+    if (index >= 0) {
+      skillsSortList.value.splice(index, 1)
+    }
+    markEdited()
+  }
+}
+
+const addSkillsBatch = (rawText: string) => {
+  if (card.value) {
+    addAttributesBatch(card.value, rawText)
+    updateSortList(card.value)
     markEdited()
   }
 }
