@@ -1,8 +1,9 @@
 <template>
   <span>
     <input :checked="props.visible" type="checkbox" class="modal-toggle" @change="closeModal" />
-    <div class="modal" @click="closeModal">
-      <div class="modal-box" @click.stop>
+    <div class="modal" @click="clickOutside">
+      <div class="modal-box relative" @click.stop>
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="closeModal">✕</button>
         <h3 v-if="props.title" class="font-bold text-lg">{{ props.title }}</h3>
         <div class="py-4">
           <slot></slot>
@@ -24,10 +25,12 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { lock: false })
 const emit = defineEmits<{ (e: 'update:visible', value: boolean): void }>()
 
-const closeModal = () => {
+const clickOutside = () => {
   if (!props.lock) {
-    emit('update:visible', false)
+    closeModal()
   }
 }
+
+const closeModal = () => emit('update:visible', false)
 </script>
 
