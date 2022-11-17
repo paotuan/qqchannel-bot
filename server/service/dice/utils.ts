@@ -39,7 +39,7 @@ export interface IDiceRollContext {
 /**
  * 解析原始表达式模板，替换 ability, attribute and inline rolls
  */
-const ENTRY_REGEX = /\$\{(.*)\}|\$([a-zA-Z\p{Unified_Ideograph}]+)/gu // match ${ any content } or $AnyContent
+const ENTRY_REGEX = /\$\{(.*?)\}|\$([a-zA-Z\p{Unified_Ideograph}]+)/gu // match ${ any content } or $AnyContent
 const INLINE_ROLL_REGEX = /\[\[([^[\]]+)]]/ // match [[ any content ]]
 const HISTORY_ROLL_REGEX = /\$(\d+)/g // match $1 $2...
 export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], depth = 0): string {

@@ -72,7 +72,8 @@ export class CustomReplyManager {
     const channelId = msg.channel_id
     const replyFunc = item.replyFunc || ((env: Record<string, string>, _matchGroup: Record<string, string>) => {
       if (!item.reply) return ''
-      return item.reply.replace(/\{\{\s*(.*)\s*\}\}/g, (_, key) => {
+      // 正则的逻辑和 inline roll 一致，但不支持嵌套，没必要
+      return item.reply.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
         if (_matchGroup[key]) {
           return _matchGroup[key]
         } else if (env[key]) {
@@ -117,11 +118,11 @@ function isMatch(processor: ICustomReplyConfig, command: string): Record<string,
 
 function randomReplyItem(items: ICustomReplyConfigItem[]) {
   if (items.length === 1) return items[0] // 大多数情况只有一条，直接返回
-  // 根据权重计算. 权重放大 100 倍以支持小数
-  const totalWeight = items.map(item => item.weight * 100).reduce((a, b) => a + b, 0)
+  // 根据权重计算. 权重目前只支持整数
+  const totalWeight = items.map(item => item.weight).reduce((a, b) => a + b, 0)
   let randomWeight = Math.random() * totalWeight
   for (const item of items) {
-    randomWeight -= item.weight * 100
+    randomWeight -= item.weight
     if (randomWeight < 0) {
       return item
     }
