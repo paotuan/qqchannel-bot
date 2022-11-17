@@ -12,6 +12,7 @@
       <li>开头是：　当用户输入的内容以匹配词开头时，则触发</li>
       <li>包含：　　当用户输入的内容中包含该匹配词，则触发</li>
       <li>正则匹配：使用正则表达式匹配用户输入的内容，支持使用命名捕获组提取内容</li>
+      <li>　　　　　也可以通过例如<code>jrrp|今日运势</code>的写法匹配多种触发词</li>
     </ul>
     <h3>回复内容</h3>
     <ul>
@@ -28,6 +29,7 @@
     </p>
     <h3>编辑</h3>
     <p>鼠标悬浮到自定义回复标题上，可以通过标题右边的 <kbd class="kbd kbd-sm"><PencilSquareIcon /></kbd> 图标编辑标题和描述。</p>
+    <p>如遇到任何问题，或不确定某些功能是否能用自定义回复实现，欢迎<a class="link link-info" href="https://jq.qq.com/?_wv=1027&k=jae4GZJX" target="_blank">联系我们</a>。</p>
   </d-modal>
 </template>
 <script setup lang="ts">

@@ -47,7 +47,11 @@ export class ConfigManager {
       if (!fs.existsSync(CONFIG_DIR)) {
         return
       }
-      fs.unlinkSync(`${CONFIG_DIR}/${channelId}.json`)
+      const filePath = `${CONFIG_DIR}/${channelId}.json`
+      if (!fs.existsSync(filePath)) {
+        return // 可能本来就是用的默认配置，无需处理
+      }
+      fs.unlinkSync(filePath)
     } catch (e) {
       console.error('[Config] 删除配置失败', e)
     }
@@ -58,7 +62,6 @@ export class ConfigManager {
       console.log('[Config] 开始读取配置')
       if (fs.existsSync(CONFIG_DIR)) {
         const files: string[] = glob.sync(`${CONFIG_DIR}/*.json`)
-        console.log(files)
         files.forEach(filename => {
           try {
             const str = fs.readFileSync(filename, 'utf8')
@@ -171,7 +174,7 @@ function getInitialDefaultConfig(): IChannelConfig {
           id: 'fudu',
           name: '复读机',
           description: '使用正则匹配的例子',
-          command: '复读(?<content>.+)',
+          command: '复读\\s*(?<content>.+)',
           trigger: 'regex',
           items: [
             {
