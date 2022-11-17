@@ -1,7 +1,8 @@
 import * as fs from 'fs'
 import * as glob from 'glob'
-import type { Wss } from '../../app/wss'
+import { cloneDeep } from 'lodash'
 import { makeAutoObservable } from 'mobx'
+import type { Wss } from '../../app/wss'
 import type { IChannelConfig, IPluginConfig } from '../../../interface/config'
 import type { IChannelConfigReq } from '../../../interface/common'
 import type { WsClient } from '../../app/wsclient'
@@ -40,9 +41,11 @@ export class ConfigManager {
   }
 
   resetChannelConfig(client: WsClient) {
-    console.log('[Config] 删除配置')
+    console.log('[Config] 重置为默认配置')
     const channelId = client.listenToChannelId
-    delete this.configMap[channelId]
+    // 重置配置时，显式 clone 一个新的对象放到内存中。确保依赖发生变化，autorun 推送配置到前端
+    // 否则只在前端编辑，未保存时，点击重置配置，后端无法感知到频道的默认配置发生了变化
+    this.configMap[channelId] = cloneDeep(this.defaultConfig)
     try {
       if (!fs.existsSync(CONFIG_DIR)) {
         return
