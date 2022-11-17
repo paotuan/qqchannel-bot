@@ -121,9 +121,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     this.tempValue = tempValue
   }
 
-  private detectDefaultRoll(defaultRoll = 'd%') {
+  private detectDefaultRoll() {
     if (this.expression === '' || this.expression === 'd') {
-      this.expression = defaultRoll // todo 默认骰
+      this.expression = this.context.defaultRoll || 'd%'
     }
   }
 

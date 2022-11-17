@@ -86,9 +86,11 @@ export class CustomReplyManager {
     const template = replyFunc(env, matchGroups)
     // 替换 inline rolls
     const card = channelId ? this.wss.cards.getCard(channelId, userId) : null
+    const defaultRoll = channelId ? this.wss.config.getChannelConfig(channelId).defaultRoll : undefined
     const context: IDiceRollContext = {
       channelId,
       username,
+      defaultRoll,
       card,
       decide: () => ({ success: false, level: SuccessLevel.FAIL, desc: '' }) // 没用，随便写一个，后面可以统一到配置
     }

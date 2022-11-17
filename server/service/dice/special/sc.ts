@@ -72,12 +72,12 @@ export class ScDiceRoll extends BasePtDiceRoll {
     this.tempValue = tempValue
   }
 
-  private detectDefaultRoll(defaultRoll = 'd%') {
+  private detectDefaultRoll() {
     if (this.expression1 === '' || this.expression1 === 'd') {
-      this.expression1 = defaultRoll // todo 默认骰
+      this.expression1 = this.context.defaultRoll || 'd%'
     }
     if (this.expression2 === '' || this.expression2 === 'd') {
-      this.expression2 = defaultRoll // todo 默认骰
+      this.expression2 = this.context.defaultRoll || 'd%'
     }
   }
 

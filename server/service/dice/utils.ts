@@ -30,6 +30,7 @@ export type DeciderFunc = (value: number, target: ICocCardEntry) => IDeciderResu
 export interface IDiceRollContext {
   channelId?: string
   username: string
+  defaultRoll?: string
   card: CocCard | null
   decide: DeciderFunc,
   opposedRoll?: StandardDiceRoll | null

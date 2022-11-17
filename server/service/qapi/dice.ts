@@ -167,10 +167,13 @@ export class DiceManager {
       const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
+      // 默认骰
+      const defaultRoll = channelId ? this.wss.config.getChannelConfig(channelId).defaultRoll : undefined
       // 投骰
       const roller = createDiceRoll(fullExp, {
         channelId,
         username: username || userId,
+        defaultRoll,
         card: cocCard,
         decide: (value, target) => this.decideResult(target, value),
         opposedRoll
@@ -259,7 +262,7 @@ function detectInstruction(text: string) {
     const skill = skillMatch[0]
     const difficultyMatch = text.match(DIFFICULTY_REGEX)
     const difficulty = difficultyMatch ? difficultyMatch[0] : ''
-    return 'd%' + difficulty + skill // todo 默认骰？
+    return 'd' + difficulty + skill
   }
   return null
 }

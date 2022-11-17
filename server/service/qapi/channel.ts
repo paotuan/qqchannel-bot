@@ -26,6 +26,11 @@ export class Channel {
     return this.api.wss.config.getChannelConfig(this.id)
   }
 
+  // 默认骰配置
+  get defaultRoll() {
+    return this.config.defaultRoll
+  }
+
   // 子频道 embed 自定义回复配置索引
   private get embedCustomReplyMap(): Record<string, ICustomReplyConfig> {
     const items = this.config.embedPlugin.customReply
