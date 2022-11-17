@@ -35,6 +35,7 @@ export class NoteManager {
 
   async sendNote(client: WsClient, req: INoteSendReq) {
     const msgToCreate: MessageToCreate = { content: req.content }
+    const guildId = client.listenToGuildId
     const channelId = client.listenToChannelId
     const lastChannelMessage = this.lastChannelMessageMap[channelId]
     try {
@@ -54,7 +55,7 @@ export class NoteManager {
       const resp = await this.api.qqClient.messageApi.postMessage(channelId, msgToCreate)
       // 2. 发消息成功后记录 log
       const msgId = resp.data.id
-      this.api.logs.pushToClients(channelId, {
+      this.api.logs.pushToClients(guildId, channelId, {
         msgId: msgId,
         msgType: req.msgType,
         userId: this.api.botInfo?.id || '',

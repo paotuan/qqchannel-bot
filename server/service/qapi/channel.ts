@@ -54,7 +54,7 @@ export class Channel {
       // console.timeEnd('message')
       console.log('[Message] 发送成功 ' + msg.content)
       if (recordLog) {
-        this.api.logs.pushToClients(this.id, {
+        this.api.logs.pushToClients(this.guildId, this.id, {
           msgId: res.data.id,
           msgType: 'text',
           userId: this.api.botInfo?.id || '',

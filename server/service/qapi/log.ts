@@ -18,14 +18,13 @@ export class LogManager {
     const content = msg.content?.trim()
     if (!content) return
 
-    // 无视 @机器人 和指令消息
-    const botUserId = this.api.botInfo?.id
-    if (content.startsWith(`<@!${botUserId}>`) || content.startsWith('.') || content.startsWith('。')) {
+    // 无视指令消息
+    if (content.startsWith('.') || content.startsWith('。')) {
       return
     }
 
     // 发送给客户端
-    this.pushToClients(msg.channel_id, {
+    this.pushToClients(msg.guild_id, msg.channel_id, {
       msgId: msg.id,
       msgType: 'text',
       userId: msg.author.id,
@@ -35,7 +34,20 @@ export class LogManager {
     })
   }
 
-  pushToClients(channelId: string, ...logs: ILog[]) {
+  pushToClients(guildId: string, channelId: string, ...logs: ILog[]) {
+    // log @ 替换
+    logs.forEach(log => {
+      if (log.content) {
+        log.content = log.content.replace(/<@!(\d+)>/g, (_, userId: string) => {
+          const user = this.api.guilds.findUser(userId, guildId)
+          let name = user ? user.nick || user.username || user.id : userId
+          if (user?.bot) {
+            name = name.replace(/-测试中$/, '')
+          }
+          return `@${name} `
+        })
+      }
+    })
     this.wss.sendToChannel<ILogPushResp>(channelId, {
       cmd: 'log/push',
       success: true,
