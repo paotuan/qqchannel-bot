@@ -4,6 +4,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue'
 import ws from '../../api/ws'
 import type { IChannelConfigReq } from '../../../interface/common'
 import { useCustomReply } from './useCustomReply'
+import { gtagEvent } from '../../utils'
 
 export const useConfigStore = defineStore('config', () => {
   const state = reactive({ config: null as IChannelConfig | null })
@@ -29,11 +30,13 @@ export const useConfigStore = defineStore('config', () => {
   const requestSaveConfig = (setDefault: boolean) => {
     if (!config.value) return
     ws.send<IChannelConfigReq>({ cmd: 'channel/config', data: { config: config.value, setDefault } })
+    gtagEvent('config/save')
   }
 
   // 重置配置
   const requestResetConfig = () => {
     ws.send<null>({ cmd: 'channel/config/reset', data: null })
+    gtagEvent('config/reset')
   }
 
   // 自定义回复相关功能

@@ -1,5 +1,6 @@
 import { useUIStore } from '../store/ui'
 import { useChannelStore } from '../store/channel'
+import { VERSION_NAME } from '../../interface/version'
 
 export const Toast = {
   success: (msg: string) => useUIStore().toast('success', msg),
@@ -8,6 +9,7 @@ export const Toast = {
   error: (msg: string) => useUIStore().toast('error', msg),
 }
 
+gtag('set', { version_name: VERSION_NAME })
 export function gtagEvent(eventName: string, params: Record<string, any> = {}, globalParams = true) {
   if (globalParams) {
     const channelInfo = useChannelStore().selectedChannel

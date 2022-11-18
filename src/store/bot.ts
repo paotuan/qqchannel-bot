@@ -12,6 +12,9 @@ export const useBotStore = defineStore('bot', {
     loginState: 'NOT_LOGIN' as LoginState,
     info: null as IBotInfo | null
   }),
+  getters: {
+    botId: state => state.info?.id || ''
+  },
   actions: {
     connect() {
       if (!this.appid || !this.token) return

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { ILog } from '../../interface/common'
 import { useUserStore } from './user'
 import { gtagEvent } from '../utils'
+import { useBotStore } from './bot'
 
 export const useLogStore = defineStore('log', {
   state: () => ({
@@ -10,6 +11,7 @@ export const useLogStore = defineStore('log', {
   actions: {
     addLogs(logs: ILog[]) {
       this.logs.push(...logs)
+      gtagLogs(logs)
     },
     removeLog(log: ILog) {
       const index = this.logs.indexOf(log)
@@ -127,4 +129,14 @@ function download(type: 'text' | 'html' | 'json', text: string) {
 
 function formatTime(str: string) {
   return new Date(str).toLocaleString().replaceAll('/', '-')
+}
+
+function gtagLogs(logs: ILog[]) {
+  const botStore = useBotStore()
+  logs.forEach(log => {
+    gtagEvent('log/message')
+    if (log.userId === botStore.botId) {
+      gtagEvent('log/botMessage')
+    }
+  })
 }
