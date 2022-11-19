@@ -30,7 +30,7 @@ export type DeciderFunc = (value: number, target: ICocCardEntry) => IDeciderResu
 export interface IDiceRollContext {
   channelId?: string
   username: string
-  defaultRoll?: string
+  defaultRoll?: string // todo 私信场景取默认配置。直接传 config 对象进来
   card: CocCard | null
   decide: DeciderFunc,
   opposedRoll?: StandardDiceRoll | null
