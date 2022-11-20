@@ -1,9 +1,7 @@
 // region 自定义回复
 export interface ICustomReplyConfigItem {
   weight: number // 权重
-  // todo 以下两者统一
-  reply?: string // {{xxx}} 引用常用变量和命名捕获组
-  replyFunc?: (env: Record<string, string>, matchGroup: Record<string, string>) => string // 返回 string 走一遍 parse
+  reply: string | ((env: Record<string, string>, matchGroup: Record<string, string>) => string)
 }
 
 export interface ICustomReplyConfig {

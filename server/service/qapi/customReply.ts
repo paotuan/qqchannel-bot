@@ -70,10 +70,11 @@ export class CustomReplyManager {
     const username = msg.member.nick || msg.author.username || msg.author.id
     const userId = msg.author.id
     const channelId = msg.channel_id
-    const replyFunc = item.replyFunc || ((env: Record<string, string>, _matchGroup: Record<string, string>) => {
-      if (!item.reply) return ''
+    const replyFunc = typeof item.reply === 'function' ? item.reply : ((env: Record<string, string>, _matchGroup: Record<string, string>) => {
+      const replyString = item.reply as string // 不是 function 必然是 string
+      if (!replyString) return ''
       // 正则的逻辑和 inline roll 一致，但不支持嵌套，没必要
-      return item.reply.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
+      return replyString.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
         if (_matchGroup[key]) {
           return _matchGroup[key]
         } else if (env[key]) {
