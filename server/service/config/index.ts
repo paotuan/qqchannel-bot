@@ -3,23 +3,15 @@ import * as glob from 'glob'
 import { cloneDeep } from 'lodash'
 import { makeAutoObservable } from 'mobx'
 import type { Wss } from '../../app/wss'
-import type {
-  IAliasRollConfig,
-  IChannelConfig,
-  ICustomReplyConfig,
-  IPluginConfig,
-  IRollDeciderConfig
-} from '../../../interface/config'
+import type { IAliasRollConfig, IChannelConfig, ICustomReplyConfig, IRollDeciderConfig } from '../../../interface/config'
 import type { IChannelConfigReq } from '../../../interface/common'
 import type { WsClient } from '../../app/wsclient'
 
 const CONFIG_DIR = './config'
-const PLUGIN_DIR = './plugins'
 
 export class ConfigManager {
   private readonly wss: Wss
   private readonly configMap: Record<string, IChannelConfig> = {}
-  private readonly pluginMap: Record<string, IPluginConfig> = {} // 后续看要不要放到单独的类里
 
   constructor(wss: Wss) {
     makeAutoObservable<this, 'wss'>(this, { wss: false })

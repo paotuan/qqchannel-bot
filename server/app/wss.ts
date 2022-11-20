@@ -6,6 +6,7 @@ import { QApiManager } from '../service/QApiManager'
 import { makeAutoObservable } from 'mobx'
 import { CardManager } from '../service/CardManager'
 import { ConfigManager } from '../service/config'
+import { PluginManager } from '../service/config/plugin'
 
 /**
  * The server is a singleton websocket server
@@ -16,6 +17,7 @@ export class Wss {
   readonly qApis = new QApiManager(this)
   readonly cards = new CardManager(this)
   readonly config = new ConfigManager(this)
+  readonly plugin = new PluginManager(this)
   private readonly _listeningChannels: string[] = []
 
   constructor(port = 4174) {
