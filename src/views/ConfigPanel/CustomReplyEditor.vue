@@ -81,12 +81,12 @@ const newReplyItem = () => processor.value.items.push({ weight: 1, reply: '' })
 
 // 匹配方式
 type MatchOptions = { label: string, value: ICustomReplyConfig['trigger'] }
-const matchOptions = Object.freeze<MatchOptions>([
+const matchOptions: /* Object.freeze */ MatchOptions[] = [
   { label: '精确匹配', value: 'exact' },
   { label: '开头是', value: 'startWith' },
   { label: '包含', value: 'include' },
   { label: '正则匹配', value: 'regex' }
-])
+]
 </script>
 <style scoped>
 .collapse-title {
