@@ -20,6 +20,6 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.1",
-    "open": "^8.4.0"
+    "open": "git+https://github.com/maliut/open-with-result.git"
   }
 }
