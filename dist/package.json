@@ -8,7 +8,7 @@
   },
   "bin": "bundle.js",
   "pkg": {
-    "assets": "client/**/*",
+    "assets": ["client/**/*", "server/plugins/**/*"],
     "targets": [
       "node16-macos-x64",
       "node16-win-x64",
