@@ -26,6 +26,11 @@ export class Channel {
     return this.api.wss.config.getChannelConfig(this.id)
   }
 
+  // 插件配置
+  private get plugin() {
+    return this.api.wss.plugin
+  }
+
   // 默认骰配置
   get defaultRoll() {
     return this.config.defaultRoll
@@ -41,8 +46,13 @@ export class Channel {
 
   // 子频道自定义回复处理器列表
   get customReplyProcessors() {
-    // todo map 还没把插件放进来
-    return this.config.customReplyIds.filter(item => item.enabled).map(item => this.embedCustomReplyMap[item.id]).filter(conf => !!conf)
+    const ret = this.config.customReplyIds
+      .filter(item => item.enabled)
+      .map(item => this.embedCustomReplyMap[item.id]/* || this.plugin.pluginCustomReplyMap[item.id]*/)
+      .filter(conf => !!conf)
+    // todo 目前全部启用插件
+    ret.push(...Object.values(this.plugin.pluginCustomReplyMap))
+    return ret
   }
 
   // 发消息到该子频道

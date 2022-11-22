@@ -1,8 +1,8 @@
 /**
- * @typedef { import('../../../interface/config').IPluginConfig} IPluginConfig
- * @type {IPluginConfig}
+ * (context: IPluginRegisterContext): IPluginConfig
+ * @see interface/config.ts
  */
-module.exports = {
+module.exports = () => ({
   id: 'io.paotuan.plugin.example',
   name: '插件 test',
   version: 1,
@@ -20,4 +20,4 @@ module.exports = {
       ]
     }
   ]
-}
+})

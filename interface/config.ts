@@ -46,7 +46,7 @@ export interface IRollDeciderConfig {
 
 export interface IPluginRegisterContext {
   versionName: string
-  versionCode: string
+  versionCode: number
 }
 
 export interface IPluginConfig {

@@ -1,8 +1,9 @@
 import type { Wss } from '../../app/wss'
-import type { IPluginConfig } from '../../../interface/config'
+import type { IPluginConfig, ICustomReplyConfig, IPluginRegisterContext } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import { readdirSync } from 'fs'
 import * as path from 'path'
+import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -17,6 +18,10 @@ export class PluginManager {
     this.extractOfficialPluginsIfNeed()
     this.loadPlugins()
     this.checkOfficialPluginsUpdate()
+  }
+
+  private get pluginRegisterContext(): IPluginRegisterContext {
+    return { versionName: VERSION_NAME, versionCode: VERSION_CODE } // todo: getItem/setItem
   }
 
   // 自带插件释放到 plugins 文件夹下
@@ -34,16 +39,32 @@ export class PluginManager {
       .filter(d => d.isDirectory())
       .map(d => d.name)
       .forEach(pluginName => {
-        // 此处 ncc 打包时会智能地打到 dist/server/plugins 下，pkg 打包时通过 assets 配置保留文件，因此路径比较 tricky 地保持了一致
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const plugin = require(path.join(pluginPath, pluginName)) as IPluginConfig
-        console.log('[Plugin] 加载插件', pluginName, '->',plugin.id)
-        this.pluginMap[plugin.id] = plugin
+        try {
+          // 此处 ncc 打包时会智能地打到 dist/server/plugins 下，pkg 打包时通过 assets 配置保留文件，因此路径比较 tricky 地保持了一致
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const plugin = require(path.join(pluginPath, pluginName))(this.pluginRegisterContext) as IPluginConfig
+          console.log('[Plugin] 加载插件', pluginName, '->',plugin.id)
+          this.pluginMap[plugin.id] = plugin
+        } catch (e) {
+          console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
+        }
       })
   }
 
   private checkOfficialPluginsUpdate() {
     // todo
+  }
+
+  // 提供 custom reply 的列表: fullId => config
+  get pluginCustomReplyMap(): Record<string, ICustomReplyConfig> {
+    const ret: Record<string, ICustomReplyConfig> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.customReply) return
+      plugin.customReply.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
   }
 
 }
