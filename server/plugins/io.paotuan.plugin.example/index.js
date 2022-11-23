@@ -1,3 +1,4 @@
+/* eslint-env node */
 /**
  * (context: IPluginRegisterContext): IPluginConfig
  * @see interface/config.ts

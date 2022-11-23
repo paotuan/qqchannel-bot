@@ -27,8 +27,8 @@ export interface IAliasRollConfig {
 
 // region 自定义房规
 export interface IRollDeciderRule {
-  expression: string // new Function => boolean
-  reply: string // ≤ {{targetValue}} 成功
+  expression: string // new Function => "use strict"; !!boolean
+  reply: string
 }
 
 export interface IRollDeciderConfig {
