@@ -1,7 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import type { QApi } from './index'
-import { MessageToCreate } from 'qq-guild-bot'
-import type { ICustomReplyConfig } from '../../../interface/config'
+import type { MessageToCreate } from 'qq-guild-bot'
 
 /**
  * 子频道实例
@@ -19,40 +18,6 @@ export class Channel {
     this.guildId = guildId
     this.name = name
     this.api = api
-  }
-
-  // 子频道配置
-  private get config() {
-    return this.api.wss.config.getChannelConfig(this.id)
-  }
-
-  // 插件配置
-  private get plugin() {
-    return this.api.wss.plugin
-  }
-
-  // 默认骰配置
-  get defaultRoll() {
-    return this.config.defaultRoll
-  }
-
-  // 子频道 embed 自定义回复配置索引
-  private get embedCustomReplyMap(): Record<string, ICustomReplyConfig> {
-    const items = this.config.embedPlugin.customReply
-    if (!items) return {}
-    const embedPluginId = this.config.embedPlugin.id
-    return items.reduce((obj, item) => Object.assign(obj, { [`${embedPluginId}.${item.id}`]: item }), {})
-  }
-
-  // 子频道自定义回复处理器列表
-  get customReplyProcessors() {
-    const ret = this.config.customReplyIds
-      .filter(item => item.enabled)
-      .map(item => this.embedCustomReplyMap[item.id]/* || this.plugin.pluginCustomReplyMap[item.id]*/)
-      .filter(conf => !!conf)
-    // todo 目前全部启用插件
-    ret.push(...Object.values(this.plugin.pluginCustomReplyMap))
-    return ret
   }
 
   // 发消息到该子频道

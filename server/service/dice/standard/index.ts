@@ -1,9 +1,10 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { AliasExpressions } from '../alias'
-import { IDeciderResult, parseDescriptions, SuccessLevel, parseTemplate } from '../utils'
+import { parseDescriptions, SuccessLevel, parseTemplate } from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { ICocCardEntry } from '../../card/coc'
 import { calculateTargetValueWithDifficulty } from '../../card/coc'
+import type { IRollDecideResult } from '../../config/config'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
@@ -17,7 +18,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   protected rolls: DiceRoll[] = []
   protected cardEntry?: ICocCardEntry | null
-  protected decideResults: IDeciderResult[] = []
+  protected decideResults: (IRollDecideResult | undefined)[] = []
   // side effects
   protected skills2growth: string[] = []
 
@@ -32,7 +33,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     if (entry) {
       this.decideResults = this.rolls.map(roll => {
         const decideResult = this.decide(roll.total, entry)
-        if (!entry.isTemp && entry.type === 'skills' && decideResult.success) {
+        if (!entry.isTemp && entry.type === 'skills' && decideResult?.success) {
           this.skills2growth.push(entry.name) // 非临时值且检定成功，记录人物卡技能成长
         }
         return decideResult
@@ -123,7 +124,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   private detectDefaultRoll() {
     if (this.expression === '' || this.expression === 'd') {
-      this.expression = this.context.defaultRoll || 'd%'
+      this.expression = this.defaultRoll
     }
   }
 
@@ -175,13 +176,13 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   get eligibleForOpposedRoll() {
     if (this.hidden) return false
     if (this.times !== 1) return false
-    return this.decideResults.length !== 0
+    return this.decideResults.length !== 0 && this.decideResults[0]
   }
 
   // 用于对抗检定的数据
   /* protected */ getSuccessLevelForOpposedRoll() {
     const rollValue = this.rolls[0].total
-    const decideResult = this.decideResults[0]
+    const decideResult = this.decideResults[0]! // eligibleForOpposedRoll 确保了检定结果存在
     const baseValue = this.cardEntry!.baseValue
     const res = { username: this.context.username, skill: this.cardEntry!.name, baseValue }
     if (decideResult.level === SuccessLevel.REGULAR_SUCCESS) {

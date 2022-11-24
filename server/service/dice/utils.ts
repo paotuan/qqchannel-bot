@@ -1,10 +1,11 @@
-import type { ICocCardEntry, CocCard } from '../card/coc'
+import type { CocCard } from '../card/coc'
 import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
 import { EnDiceRoll } from './special/en'
 import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { OpposedDiceRoll } from './standard/oppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
+import { ChannelConfig } from '../config/config'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -17,22 +18,11 @@ export enum SuccessLevel {
   BEST = 4
 }
 
-// 检定结果
-export interface IDeciderResult {
-  success: boolean
-  level: SuccessLevel
-  desc: string
-}
-
-// 根据当前 roll 出的值和目标数值，判断成功等级
-export type DeciderFunc = (value: number, target: ICocCardEntry) => IDeciderResult
-
 export interface IDiceRollContext {
   channelId?: string
   username: string
-  defaultRoll?: string // todo 私信场景取默认配置。直接传 config 对象进来
+  config?: ChannelConfig
   card: CocCard | null
-  decide: DeciderFunc,
   opposedRoll?: StandardDiceRoll | null
 }
 

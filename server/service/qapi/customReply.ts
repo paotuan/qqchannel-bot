@@ -3,7 +3,7 @@ import { makeAutoObservable } from 'mobx'
 import type { IMessage } from 'qq-guild-bot'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
-import { IDiceRollContext, parseTemplate, SuccessLevel } from '../dice/utils'
+import { IDiceRollContext, parseTemplate } from '../dice/utils'
 
 export class CustomReplyManager {
   private readonly api: QApi
@@ -50,7 +50,8 @@ export class CustomReplyManager {
     // 获取配置列表
     const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
     if (!channel) return false
-    const processors = channel.customReplyProcessors
+    const config = this.wss.config.getChannelConfig(msg.channel_id)
+    const processors = config.customReplyProcessors
     // 从上到下匹配
     for (const processor of processors) {
       const matchGroups = isMatch(processor, fullExp)
@@ -88,14 +89,8 @@ export class CustomReplyManager {
     const template = replyFunc(env, matchGroups)
     // 替换 inline rolls
     const card = channelId ? this.wss.cards.getCard(channelId, userId) : null
-    const defaultRoll = channelId ? this.wss.config.getChannelConfig(channelId).defaultRoll : undefined
-    const context: IDiceRollContext = {
-      channelId,
-      username,
-      defaultRoll,
-      card,
-      decide: () => ({ success: false, level: SuccessLevel.FAIL, desc: '' }) // 没用，随便写一个，后面可以统一到配置
-    }
+    const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
+    const context: IDiceRollContext = { channelId, username, config, card }
     return parseTemplate(template, context, [])
   }
 }

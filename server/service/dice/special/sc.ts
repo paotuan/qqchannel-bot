@@ -1,6 +1,7 @@
 import { BasePtDiceRoll } from '../index'
-import { IDeciderResult, parseDescriptions, SuccessLevel } from '../utils'
+import { parseDescriptions, SuccessLevel } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
+import type { IRollDecideResult } from '../../config/config'
 
 const SC_CARD_ENTRY_NAME = 'san' // sc 在人物卡中的字段名
 
@@ -12,7 +13,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   private tempValue = NaN
 
   private rollSc?: DiceRoll
-  private rollScResult?: IDeciderResult
+  private rollScResult?: IRollDecideResult
   private rollLoss?: DiceRoll
 
   private get scLoss() {
@@ -31,10 +32,12 @@ export class ScDiceRoll extends BasePtDiceRoll {
     const scEntry = this.get(SC_CARD_ENTRY_NAME, this.tempValue)
     if (scEntry) {
       this.rollScResult = this.decide(this.rollSc.total, scEntry)
-      if (this.rollScResult.level === SuccessLevel.WORST) {
-        this.rollLoss = new DiceRoll('99')
-      } else {
-        this.rollLoss = new DiceRoll(this.rollScResult.success ? this.expression1 : this.expression2)
+      if (this.rollScResult) {
+        if (this.rollScResult.level === SuccessLevel.WORST) {
+          this.rollLoss = new DiceRoll('99')
+        } else {
+          this.rollLoss = new DiceRoll(this.rollScResult.success ? this.expression1 : this.expression2)
+        }
       }
     }
     return this
@@ -74,10 +77,10 @@ export class ScDiceRoll extends BasePtDiceRoll {
 
   private detectDefaultRoll() {
     if (this.expression1 === '' || this.expression1 === 'd') {
-      this.expression1 = this.context.defaultRoll || 'd%'
+      this.expression1 = this.defaultRoll
     }
     if (this.expression2 === '' || this.expression2 === 'd') {
-      this.expression2 = this.context.defaultRoll || 'd%'
+      this.expression2 = this.defaultRoll
     }
   }
 

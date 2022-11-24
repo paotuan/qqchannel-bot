@@ -1,5 +1,10 @@
 import type { Wss } from '../../app/wss'
-import type { IPluginConfig, ICustomReplyConfig, IPluginRegisterContext } from '../../../interface/config'
+import type {
+  IPluginConfig,
+  ICustomReplyConfig,
+  IPluginRegisterContext,
+  IRollDeciderConfig
+} from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import { readdirSync } from 'fs'
 import * as path from 'path'
@@ -61,6 +66,18 @@ export class PluginManager {
     Object.values(this.pluginMap).forEach(plugin => {
       if (!plugin.customReply) return
       plugin.customReply.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 roll decider 的列表：fullId => config
+  get pluginRollDeciderMap(): Record<string, IRollDeciderConfig> {
+    const ret: Record<string, IRollDeciderConfig> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.rollDecider) return
+      plugin.rollDecider.forEach(item => {
         ret[`${plugin.id}.${item.id}`] = item
       })
     })

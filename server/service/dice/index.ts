@@ -1,6 +1,7 @@
 import type { IDiceRollContext } from './utils'
 import type { InlineDiceRoll } from './standard/inline'
 import { calculateTargetValueWithDifficulty, ICocCardEntry, parseDifficulty } from '../card/coc'
+import type { IRollDecideResult } from '../config/config'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -21,8 +22,8 @@ export abstract class BasePtDiceRoll {
     }
   }
 
-  protected get decide() {
-    return this.context.decide
+  protected get defaultRoll() {
+    return this.context.config?.defaultRoll || 'd%'
   }
 
   protected get hasInlineRolls() {
@@ -45,5 +46,14 @@ export abstract class BasePtDiceRoll {
   // 应用副作用修改人物卡，返回人物卡是否真正修改了
   applyToCard() {
     return false
+  }
+
+  // 根据配置判断成功等级
+  protected decide(value: number, target: ICocCardEntry): IRollDecideResult | undefined {
+    return this.context.config?.decideRoll({
+      baseValue: target.baseValue,
+      targetValue: target.value,
+      roll: value
+    })
   }
 }

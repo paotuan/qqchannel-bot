@@ -1,5 +1,5 @@
-import { createDiceRoll, IDeciderResult, IDiceRollContext, SuccessLevel } from '../service/dice/utils'
-import { CocCard, ICocCardEntry } from '../service/card/coc'
+import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
+import { CocCard } from '../service/card/coc'
 import type { ICard } from '../../interface/coc'
 
 const list1 = [
@@ -68,7 +68,6 @@ const context: IDiceRollContext = {
   channelId: 'abc123',
   username: 'Maca',
   card: null,
-  decide: (value, target) => decideResult(target, value),
 }
 
 console.log('========== 未指定人物卡 =========')
@@ -85,19 +84,6 @@ list2.forEach(exp => {
   console.log(roller.output)
   console.log('========================')
 })
-
-function decideResult(cardEntry: ICocCardEntry, roll: number): IDeciderResult {
-  if (roll === 1) {
-    return { success: true, level: SuccessLevel.BEST, desc: '大成功' }
-  } else if ((cardEntry.baseValue < 50 && roll > 95) || (cardEntry.baseValue >= 50 && roll === 100)) {
-    return { success: false, level: SuccessLevel.WORST, desc: '大失败' }
-  } else if (roll <= cardEntry.value) {
-    // 此处只计普通成功，如果是对抗检定需要判断成功等级的场合，则做二次计算
-    return { success: true, level: SuccessLevel.REGULAR_SUCCESS, desc: `≤ ${cardEntry.value} 成功` }
-  } else {
-    return { success: false, level: SuccessLevel.FAIL, desc: `> ${cardEntry.value} 失败` }
-  }
-}
 
 function getCardProto(): ICard {
   return {

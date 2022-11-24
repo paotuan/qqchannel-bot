@@ -16,8 +16,8 @@ export class Wss {
   private readonly clients: WsClient[] = []
   readonly qApis = new QApiManager(this)
   readonly cards = new CardManager(this)
-  readonly config = new ConfigManager(this)
   readonly plugin = new PluginManager(this)
+  readonly config = new ConfigManager(this, this.plugin)
   private readonly _listeningChannels: string[] = []
 
   constructor(port = 4174) {

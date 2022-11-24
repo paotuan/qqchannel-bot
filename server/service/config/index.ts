@@ -1,22 +1,25 @@
 import * as fs from 'fs'
 import * as glob from 'glob'
-import { cloneDeep } from 'lodash'
 import { makeAutoObservable } from 'mobx'
 import type { Wss } from '../../app/wss'
 import type { IChannelConfig } from '../../../interface/config'
 import type { IChannelConfigReq } from '../../../interface/common'
 import type { WsClient } from '../../app/wsclient'
 import { getInitialDefaultConfig, handleUpgrade } from './default'
+import { ChannelConfig } from './config'
+import type { PluginManager } from './plugin'
 
 const CONFIG_DIR = './config'
 
 export class ConfigManager {
   private readonly wss: Wss
-  private readonly configMap: Record<string, IChannelConfig> = {}
+  private readonly plugin: PluginManager
+  private readonly configMap: Record<string, ChannelConfig> = {}
 
-  constructor(wss: Wss) {
-    makeAutoObservable<this, 'wss'>(this, { wss: false })
+  constructor(wss: Wss, plugin: PluginManager) {
+    makeAutoObservable<this, 'wss' | 'plugin'>(this, { wss: false, plugin: false })
     this.wss = wss
+    this.plugin = plugin
     this.initConfig()
   }
 
@@ -31,10 +34,10 @@ export class ConfigManager {
   saveChannelConfig(client: WsClient, { config, setDefault }: IChannelConfigReq) {
     console.log('[Config] 保存配置，设为默认配置：', setDefault)
     const channelId = client.listenToChannelId
-    this.configMap[channelId] = config
+    this.configMap[channelId] = new ChannelConfig(config, this.plugin)
     this.saveToFile(channelId, config)
     if (setDefault) {
-      this.configMap['default'] = config
+      this.configMap['default'] = new ChannelConfig(config, this.plugin)
       this.saveToFile('default', config)
     }
   }
@@ -42,9 +45,9 @@ export class ConfigManager {
   resetChannelConfig(client: WsClient) {
     console.log('[Config] 重置为默认配置')
     const channelId = client.listenToChannelId
-    // 重置配置时，显式 clone 一个新的对象放到内存中。确保依赖发生变化，autorun 推送配置到前端
+    // 重置配置时，显式为这个子频道创建一个新的配置对象。确保依赖发生变化，autorun 推送配置到前端
     // 否则只在前端编辑，未保存时，点击重置配置，后端无法感知到频道的默认配置发生了变化
-    this.configMap[channelId] = cloneDeep(this.defaultConfig)
+    this.configMap[channelId] = new ChannelConfig(this.defaultConfig.config, this.plugin)
     try {
       if (!fs.existsSync(CONFIG_DIR)) {
         return
@@ -69,7 +72,7 @@ export class ConfigManager {
             const str = fs.readFileSync(filename, 'utf8')
             const config = JSON.parse(str) as IChannelConfig
             const name = filename.match(/config\/(.+)\.json$/)![1]
-            this.configMap[name] = handleUpgrade(config)
+            this.configMap[name] = new ChannelConfig(handleUpgrade(config), this.plugin)
           } catch (e) {
             console.log(`[Config] ${filename} 解析失败`, e)
           }
@@ -80,7 +83,7 @@ export class ConfigManager {
     }
     // 判断是否有默认配置
     if (!this.configMap['default']) {
-      this.configMap['default'] = getInitialDefaultConfig()
+      this.configMap['default'] = new ChannelConfig(getInitialDefaultConfig(), this.plugin)
     }
   }
 

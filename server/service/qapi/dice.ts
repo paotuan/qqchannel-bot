@@ -2,9 +2,7 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import type { ICocCardEntry } from '../card/coc'
-import type { IDeciderResult } from '../dice/utils'
-import { createDiceRoll, SuccessLevel } from '../dice/utils'
+import { createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 
@@ -167,15 +165,14 @@ export class DiceManager {
       const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
-      // 默认骰
-      const defaultRoll = channelId ? this.wss.config.getChannelConfig(channelId).defaultRoll : undefined
+      // 配置
+      const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
       // 投骰
       const roller = createDiceRoll(fullExp, {
         channelId,
         username: username || userId,
-        defaultRoll,
+        config,
         card: cocCard,
-        decide: (value, target) => this.decideResult(target, value),
         opposedRoll
       })
       // 保存人物卡更新
@@ -190,20 +187,6 @@ export class DiceManager {
       return null
     } finally {
       // console.timeEnd('dice')
-    }
-  }
-
-  // todo 规则自定义
-  private decideResult(cardEntry: ICocCardEntry, roll: number): IDeciderResult {
-    if (roll === 1) {
-      return { success: true, level: SuccessLevel.BEST, desc: '大成功' }
-    } else if ((cardEntry.baseValue < 50 && roll > 95) || (cardEntry.baseValue >= 50 && roll === 100)) {
-      return { success: false, level: SuccessLevel.WORST, desc: '大失败' }
-    } else if (roll <= cardEntry.value) {
-      // 此处只计普通成功，如果是对抗检定需要判断成功等级的场合，则做二次计算
-      return { success: true, level: SuccessLevel.REGULAR_SUCCESS, desc: `≤ ${cardEntry.value} 成功` }
-    } else {
-      return { success: false, level: SuccessLevel.FAIL, desc: `> ${cardEntry.value} 失败` }
     }
   }
 

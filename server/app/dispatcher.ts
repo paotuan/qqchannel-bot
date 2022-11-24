@@ -111,7 +111,7 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
   client.autorun(ws => {
     const channelId = ws.listenToChannelId
     if (channelId) {
-      const config = server.config.getChannelConfig(channelId)
+      const config = server.config.getChannelConfig(channelId).config
       ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
     }
   })
