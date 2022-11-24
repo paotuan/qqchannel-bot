@@ -54,7 +54,7 @@ export interface IPluginConfig {
   name?: string
   version?: number
   customReply?: ICustomReplyConfig[]
-  aliasRoll?: IAliasRollConfig[]
+  // aliasRoll?: IAliasRollConfig[]
   rollDecider?: IRollDeciderConfig[]
 }
 
@@ -62,7 +62,7 @@ export interface IChannelConfig {
   version: number // 2
   defaultRoll: string // d100/d20/4dF
   customReplyIds: { id: string, enabled: boolean }[] // full id
-  aliasRollIds: { id: string, enabled: boolean }[] // full id
+  // aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选
   rollDeciderIds: string[] // full id
   embedPlugin: IPluginConfig // id = io.paotuan.embed.[channelId]
