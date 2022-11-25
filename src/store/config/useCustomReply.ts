@@ -3,7 +3,7 @@ import { computed, ComputedRef } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 
 export function useCustomReply(config: ComputedRef<IChannelConfig | null>) {
-  // @private embed custom reply 索引表 id -> config
+  // @private embed custom reply 索引表 fullId -> config
   const embedCustomReplyMap = computed<Record<string, ICustomReplyConfig>>(() => {
     const items = config.value?.embedPlugin.customReply
     if (!items) return {}
@@ -12,29 +12,32 @@ export function useCustomReply(config: ComputedRef<IChannelConfig | null>) {
   })
 
   // 根据 full id 获取 reply config
-  const getCustomReplyProcessor = (id: string) => {
+  const getCustomReplyProcessor = (fullId: string) => {
     // todo 插件情况，信息可能不全
-    return embedCustomReplyMap.value[id]
+    return embedCustomReplyMap.value[fullId]
   }
 
   // 删除某条 config
-  const deleteCustomReplyConfig = (id: string) => {
+  const deleteCustomReplyConfig = (fullId: string) => {
     if (!config.value) return
     // 删除 id
-    const index = config.value!.customReplyIds.findIndex(item => item.id === id)
+    const index = config.value!.customReplyIds.findIndex(item => item.id === fullId)
     if (index >= 0) {
       config.value!.customReplyIds.splice(index, 1)
     }
     // 如果是 embed plugin，则删除 embed plugin 中的内容
-    const embedPluginIndex = config.value!.embedPlugin.customReply?.findIndex(item => item.id === id)
-    if (typeof embedPluginIndex !== 'undefined' && embedPluginIndex >= 0) {
-      config.value!.embedPlugin.customReply!.splice(embedPluginIndex, 1)
+    const embedPlugin = config.value!.embedPlugin
+    if (fullId.startsWith(embedPlugin.id)) {
+      const embedPluginIndex = embedPlugin.customReply?.findIndex(item => `${embedPlugin.id}.${item.id}` === fullId)
+      if (typeof embedPluginIndex !== 'undefined' && embedPluginIndex >= 0) {
+        config.value!.embedPlugin.customReply!.splice(embedPluginIndex, 1)
+      }
     }
   }
 
   // 编辑某条 config 的标题和描述
-  const editCustomReplyConfig = (id: string, name: string, desc: string) => {
-    const oldConfig = getCustomReplyProcessor(id)
+  const editCustomReplyConfig = (fullId: string, name: string, desc: string) => {
+    const oldConfig = getCustomReplyProcessor(fullId)
     if (oldConfig) {
       oldConfig.name = name
       oldConfig.description = desc
