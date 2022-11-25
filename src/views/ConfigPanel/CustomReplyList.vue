@@ -13,8 +13,9 @@
   <div class="p-2 border-t border-base-content/10">
     <button class="btn btn-sm btn-ghost" @click="newEmbedConfig">+ 新增自定义回复</button>
   </div>
-  <custom-reply-name-edit
+  <config-name-edit
     v-model:mode="editForm.mode"
+    module="自定义回复"
     :default-name="editForm.name"
     :default-desc="editForm.desc"
     @submit="submitEditForm"
@@ -25,7 +26,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import Sortable from 'sortablejs'
 import { useConfigStore } from '../../store/config'
 import CustomReplyEditor from './CustomReplyEditor.vue'
-import CustomReplyNameEdit from './CustomReplyNameEdit.vue'
+import ConfigNameEdit from './ConfigNameEdit.vue'
 
 const configStore = useConfigStore()
 const customReplyIds = computed(() => configStore.config!.customReplyIds)

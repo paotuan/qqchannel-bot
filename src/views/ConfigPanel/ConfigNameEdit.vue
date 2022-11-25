@@ -1,5 +1,6 @@
 <template>
   <d-modal :visible="!!props.mode" :title="title" lock @update:visible="close">
+    <div>名称和功能描述只用于展示，不影响实际功能</div>
     <div class="form-control w-full">
       <label class="label">
         <span class="label-text">请输入名称</span>
@@ -24,6 +25,7 @@ import { computed, reactive, ref, watch } from 'vue'
 
 interface Props {
   mode?: 'add' | 'edit' | null
+  module?: string
   defaultName?: string
   defaultDesc?: string
 }
@@ -33,10 +35,10 @@ interface Emits {
   (e: 'submit', value: { name: string, desc: string }): void
 }
 
-const props = withDefaults(defineProps<Props>(), { defaultName: '', defaultDesc: '' })
+const props = withDefaults(defineProps<Props>(), { defaultName: '', defaultDesc: '', module: '' })
 const emit = defineEmits<Emits>()
 
-const title = computed(() => props.mode === 'add' ? '新增自定义回复' : '编辑自定义回复')
+const title = computed(() => (props.mode === 'add' ? '新增' : '编辑') + props.module)
 const form = reactive({ name: '', desc: '' })
 watch(
   props,
