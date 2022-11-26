@@ -5,6 +5,7 @@ import ws from '../../api/ws'
 import type { IChannelConfigReq } from '../../../interface/common'
 import { useCustomReply } from './useCustomReply'
 import { gtagEvent } from '../../utils'
+import { useRollDecider } from './useRollDecider'
 
 export const useConfigStore = defineStore('config', () => {
   const state = reactive({ config: null as IChannelConfig | null })
@@ -41,6 +42,8 @@ export const useConfigStore = defineStore('config', () => {
 
   // 自定义回复相关功能
   const customReplyApis = useCustomReply(config)
+  // 自定义规则相关功能
+  const rollDeciderApis = useRollDecider(config)
 
   return {
     config,
@@ -49,5 +52,6 @@ export const useConfigStore = defineStore('config', () => {
     requestSaveConfig,
     requestResetConfig,
     ...customReplyApis,
+    ...rollDeciderApis
   }
 })

@@ -27,6 +27,12 @@ code {
   border-radius: 0.25rem;
 }
 
+/* 应该是 tailwind 新版本特性 */
+.divider-y > * + * {
+  border-top-width: 1px;
+  border-bottom-width: 0px;
+}
+
 ::-webkit-scrollbar {
   @apply w-2;
 }

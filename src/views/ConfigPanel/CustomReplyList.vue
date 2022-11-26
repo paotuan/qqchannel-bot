@@ -81,10 +81,3 @@ const editConfig = ({ id, name, desc }: { id: string, name: string, desc: string
   editForm.desc = desc
 }
 </script>
-<style scoped>
-/* 应该是 tailwind 新版本特性 */
-.divider-y > * + * {
-  border-top-width: 1px;
-  border-bottom-width: 0px;
-}
-</style>

@@ -22,6 +22,13 @@
           <custom-reply-list />
         </div>
       </section>
+      <!-- 自定义规则 -->
+      <section class="mt-4">
+        <h2>检定规则：</h2>
+        <div class="card card-compact w-full bg-base-100 shadow-lg">
+          <roll-decider-list />
+        </div>
+      </section>
     </div>
     <!-- 底部栏 -->
     <div class="fixed left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
@@ -42,6 +49,7 @@ import { useConfigStore } from '../../store/config'
 import { computed } from 'vue'
 import CustomReplyList from './CustomReplyList.vue'
 import CustomReplyHelp from './CustomReplyHelp.vue'
+import RollDeciderList from './RollDeciderList.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
