@@ -15,10 +15,27 @@
       </span>
     </div>
     <div class="collapse-content">
-      <div class="pl-6">
+      <div class="pl-8">
         <div>
           {{ config.description || '作者什么说明都没有留下' }}
           <span class="text-base-100">&nbsp;(id: {{ props.id }})</span>
+        </div>
+        <div class="grid rules-grid gap-2 mt-2">
+          <div></div>
+          <div class="font-bold">检定规则</div>
+          <div class="font-bold">结果描述</div>
+          <div class="leading-8 font-bold">大失败</div>
+          <input v-model="config.rules.worst.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+          <input v-model="config.rules.worst.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+          <div class="leading-8 font-bold">大成功</div>
+          <input v-model="config.rules.best.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+          <input v-model="config.rules.best.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+          <div class="leading-8 font-bold">失败</div>
+          <input v-model="config.rules.fail.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+          <input v-model="config.rules.fail.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+          <div class="leading-8 font-bold">成功</div>
+          <input v-model="config.rules.success.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+          <input v-model="config.rules.success.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
         </div>
       </div>
     </div>
@@ -54,3 +71,12 @@ const deleteSelf = () => emit('delete', props.id)
 // 编辑标题描述
 const editSelf = () => emit('edit', { id: props.id, name: config.value.name, desc: config.value.description || '' })
 </script>
+<style scoped>
+.collapse-title {
+  padding-right: 1rem;
+}
+
+.rules-grid {
+  grid-template-columns: 60px 1fr 1fr;
+}
+</style>

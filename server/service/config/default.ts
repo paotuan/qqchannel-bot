@@ -161,8 +161,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
   return [
     {
       id: 'coc0',
-      name: 'COC默认规则',
-      description: '出1大成功；不满50出96-100大失败，满50出100大失败',
+      name: 'COC 默认规则',
+      description: '出 1 大成功；不满 50 出 96-100 大失败，满 50 出 100 大失败',
       rules: {
         worst: {
           expression: '(baseValue < 50 && roll > 95) || (baseValue >= 50 && roll == 100)',
@@ -184,8 +184,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
     },
     {
       id: 'dnd0',
-      name: 'DND默认规则',
-      description: '大于等于DC成功，小于DC失败',
+      name: 'DND 默认规则',
+      description: '大于等于 DC 成功，小于 DC 失败',
       rules: {
         worst: {
           expression: 'false',
@@ -207,8 +207,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
     },
     {
       id: 'coc1',
-      name: 'COC规则1',
-      description: '不满50出1大成功，满50出1-5大成功；不满50出96-100大失败，满50出100大失败',
+      name: 'COC 规则 1',
+      description: '不满 50 出 1 大成功，满 50 出 1-5 大成功；不满 50 出 96-100 大失败，满 50 出 100 大失败',
       rules: {
         worst: {
           expression: '(baseValue < 50 && roll > 95) || (baseValue >= 50 && roll == 100)',
@@ -230,8 +230,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
     },
     {
       id: 'coc2',
-      name: 'COC规则2',
-      description: '出1-5且<=成功率大成功；出100或出96-99且>成功率大失败',
+      name: 'COC 规则 2',
+      description: '出 1-5 且 ≤ 成功率大成功；出 100 或出 96-99 且 > 成功率大失败',
       rules: {
         worst: {
           expression: 'roll == 100 || (roll > 95 && roll > targetValue)',
@@ -253,8 +253,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
     },
     {
       id: 'coc3',
-      name: 'COC规则3',
-      description: '出1-5大成功；出96-100大失败',
+      name: 'COC 规则 3',
+      description: '出 1-5 大成功；出 96-100 大失败',
       rules: {
         worst: {
           expression: 'roll > 95',
@@ -276,8 +276,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
     },
     {
       id: 'coc4',
-      name: 'COC规则4',
-      description: '出1-5且<=成功率/10大成功；不满50出>=96+成功率/10大失败，满50出100大失败',
+      name: 'COC 规则 4',
+      description: '出 1-5 且 ≤ 成功率/10 大成功；不满 50 出 ≥ 96+成功率/10 大失败，满 50 出 100 大失败',
       rules: {
         worst: {
           expression: '(baseValue < 50 && roll >= 96 + targetValue / 10) || (baseValue >= 50 && roll == 100)',
@@ -299,8 +299,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
     },
     {
       id: 'coc5',
-      name: 'COC规则5',
-      description: '出1-2且<成功率/5大成功；不满50出96-100大失败，满50出99-100大失败',
+      name: 'COC 规则 5',
+      description: '出 1-2 且 < 成功率/5 大成功；不满 50 出 96-100 大失败，满 50 出 99-100 大失败',
       rules: {
         worst: {
           expression: '(baseValue < 50 && roll >= 96) || (baseValue >= 50 && roll >= 99)',
@@ -322,8 +322,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
     },
     {
       id: 'coc6',
-      name: 'COC规则6',
-      description: '个位数=十位数且<=成功率则大成功；个位数=十位数且>成功率则大失败',
+      name: 'COC 规则 6',
+      description: '个位数 = 十位数且 ≤ 成功率则大成功；个位数 = 十位数且 > 成功率则大失败',
       rules: {
         worst: {
           expression: 'roll % 11 == 0 && roll > targetValue',
