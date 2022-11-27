@@ -11,7 +11,7 @@ module.exports = () => ({
       id: 'name',
       name: '随机人物名字',
       description: '/name (en/enzh/zh/jp) (生成个数)',
-      command: 'name\\s*(?<type>enzh|en|zh|jp|cn)?\\s*(?<count>\\d+)?', // enzh 放最前
+      command: '^\\s*name\\s*(?<type>enzh|en|zh|jp|cn)?\\s*(?<count>\\d+)?', // enzh 放最前
       trigger: 'regex',
       items: [
         {

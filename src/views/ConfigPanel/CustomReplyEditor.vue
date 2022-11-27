@@ -32,7 +32,7 @@
             <span class="px-2">权重</span>
             <d-number-input v-model="item.weight" class="input-sm input-bordered w-20" />
           </label>
-          <textarea v-model="item.reply" class="textarea textarea-bordered w-full custom-reply" placeholder="请输入回复内容" />
+          <textarea v-model="item.reply as string" class="textarea textarea-bordered w-full custom-reply" placeholder="请输入回复内容" />
           <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: processor.items.length <= 1 }" @click="deleteReplyItem(i)">
             <XMarkIcon class="w-4 h-4" />
           </button>
