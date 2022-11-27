@@ -58,7 +58,9 @@ export class CustomReplyManager {
       if (!matchGroups) continue
       const reply = this.parseMessage(processor, matchGroups, msg)
       // 发消息
-      channel.sendMessage({ content: reply, msg_id: msg.id })
+      if (reply) {
+        channel.sendMessage({ content: reply, msg_id: msg.id })
+      }
       return true
     }
 
@@ -66,32 +68,37 @@ export class CustomReplyManager {
   }
 
   private parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, msg: IMessage) {
-    const item = randomReplyItem(processor.items)
-    // 替换模板
-    const username = msg.member.nick || msg.author.username || msg.author.id
-    const userId = msg.author.id
-    const channelId = msg.channel_id
-    const replyFunc = typeof item.reply === 'function' ? item.reply : ((env: Record<string, string>, _matchGroup: Record<string, string>) => {
-      const replyString = item.reply as string // 不是 function 必然是 string
-      if (!replyString) return ''
-      // 正则的逻辑和 inline roll 一致，但不支持嵌套，没必要
-      return replyString.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
-        if (_matchGroup[key]) {
-          return _matchGroup[key]
-        } else if (env[key]) {
-          return env[key]
-        } else {
-          return key
-        }
+    try {
+      const item = randomReplyItem(processor.items)
+      // 替换模板
+      const username = msg.member.nick || msg.author.username || msg.author.id
+      const userId = msg.author.id
+      const channelId = msg.channel_id
+      const replyFunc = typeof item.reply === 'function' ? item.reply : ((env: Record<string, string>, _matchGroup: Record<string, string>) => {
+        const replyString = item.reply as string // 不是 function 必然是 string
+        if (!replyString) return ''
+        // 正则的逻辑和 inline roll 一致，但不支持嵌套，没必要
+        return replyString.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
+          if (_matchGroup[key]) {
+            return _matchGroup[key]
+          } else if (env[key]) {
+            return env[key]
+          } else {
+            return key
+          }
+        })
       })
-    })
-    const env: Record<string, string> = { nick: username, at: `<@!${msg.author.id}>` }
-    const template = replyFunc(env, matchGroups)
-    // 替换 inline rolls
-    const card = channelId ? this.wss.cards.getCard(channelId, userId) : null
-    const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
-    const context: IDiceRollContext = { channelId, username, config, card }
-    return parseTemplate(template, context, [])
+      const env: Record<string, string> = { nick: username, at: `<@!${msg.author.id}>` }
+      const template = replyFunc(env, matchGroups)
+      // 替换 inline rolls
+      const card = channelId ? this.wss.cards.getCard(channelId, userId) : null
+      const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
+      const context: IDiceRollContext = { channelId, username, config, card }
+      return parseTemplate(template, context, [])
+    } catch (e: any) {
+      console.error('[Config] 自定义回复处理出错', e?.message)
+      return undefined
+    }
   }
 }
 
