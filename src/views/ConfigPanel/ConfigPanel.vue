@@ -24,7 +24,7 @@
       </section>
       <!-- 自定义规则 -->
       <section class="mt-4">
-        <h2>检定规则：</h2>
+        <div class="flex items-center"><h2>检定规则：</h2><roll-decider-help /></div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <roll-decider-list />
         </div>
@@ -50,6 +50,7 @@ import { computed } from 'vue'
 import CustomReplyList from './CustomReplyList.vue'
 import CustomReplyHelp from './CustomReplyHelp.vue'
 import RollDeciderList from './RollDeciderList.vue'
+import RollDeciderHelp from './RollDeciderHelp.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)

@@ -24,7 +24,8 @@ const RollDeciderExpressionCache = new SyncLruCache<string, RollDeciderExpressio
   max: 50,
   fetchMethod: expression => {
     // console.log('[Config] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
-    return new Function('context', `"use strict"; const { baseValue, targetValue, roll } = context; return !!(${expression})`) as RollDeciderExpressionResolved
+    const normalized = expression.trim() || false // expression 不填默认认为是 false
+    return new Function('context', `"use strict"; const { baseValue, targetValue, roll } = context; return !!(${normalized})`) as RollDeciderExpressionResolved
   }
 })
 
@@ -96,7 +97,6 @@ export class ChannelConfig {
     }
     // 根据命中等级解析描述字符串
     const rule = decider.rules[resultLevel]
-    // const template = RollDeciderReplyTemplateCache.get(rule.reply)
     return {
       success: ['best', 'success'].includes(resultLevel),
       level: transformSuccessLevel(resultLevel),

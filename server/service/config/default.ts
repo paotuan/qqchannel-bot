@@ -321,16 +321,16 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       }
     },
     {
-      id: 'coc6',
-      name: 'COC 规则 6',
-      description: '个位数 = 十位数且 ≤ 成功率则大成功；个位数 = 十位数且 > 成功率则大失败',
+      id: 'deltagreen',
+      name: '绿色三角洲规则',
+      description: '出 1，或个位数 = 十位数且 ≤ 成功率则大成功；出 100，或个位数 = 十位数且 > 成功率则大失败',
       rules: {
         worst: {
-          expression: 'roll % 11 == 0 && roll > targetValue',
+          expression: 'roll == 100 || (roll % 11 == 0 && roll > targetValue)',
           reply: '大失败'
         },
         best: {
-          expression: 'roll % 11 == 0 && roll <= targetValue',
+          expression: 'roll == 1 || (roll % 11 == 0 && roll <= targetValue)',
           reply: '大成功'
         },
         fail: {
