@@ -18,11 +18,6 @@ export class LogManager {
     const content = msg.content?.trim()
     if (!content) return
 
-    // 无视指令消息
-    if (content.startsWith('.') || content.startsWith('。')) {
-      return
-    }
-
     // 发送给客户端
     this.pushToClients(msg.guild_id, msg.channel_id, {
       msgId: msg.id,

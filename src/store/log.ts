@@ -6,11 +6,16 @@ import { useBotStore } from './bot'
 
 export const useLogStore = defineStore('log', {
   state: () => ({
-    logs: [] as ILog[]
+    logs: [] as ILog[],
+    filterDiceCommand: Boolean(localStorage.getItem('config-filterDiceCommand')) // 是否无视指令消息
   }),
   actions: {
     addLogs(logs: ILog[]) {
-      this.logs.push(...logs)
+      if (this.filterDiceCommand) {
+        this.logs.push(...logs.filter(log => !(log.content.startsWith('.') || log.content.startsWith('。'))))
+      } else {
+        this.logs.push(...logs)
+      }
       gtagLogs(logs)
     },
     removeLog(log: ILog) {
@@ -35,6 +40,10 @@ export const useLogStore = defineStore('log', {
         exportJson(this.logs)
         break
       }
+    },
+    toggleFilterDiceCommand() {
+      this.filterDiceCommand = !this.filterDiceCommand
+      localStorage.setItem('config-filterDiceCommand', String(this.filterDiceCommand))
     }
   }
 })
