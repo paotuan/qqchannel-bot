@@ -1,7 +1,6 @@
 import type { IDiceRollContext } from './utils'
 import type { InlineDiceRoll } from './standard/inline'
 import { calculateTargetValueWithDifficulty, ICocCardEntry, parseDifficulty } from '../card/coc'
-import type { IRollDecideResult } from '../config/config'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -49,7 +48,7 @@ export abstract class BasePtDiceRoll {
   }
 
   // 根据配置判断成功等级
-  protected decide(value: number, target: ICocCardEntry): IRollDecideResult | undefined {
+  protected decide(value: number, target: ICocCardEntry) {
     return this.context.config?.decideRoll({
       baseValue: target.baseValue,
       targetValue: target.value,
