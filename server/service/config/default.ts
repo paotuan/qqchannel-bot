@@ -5,19 +5,19 @@ const CONFIG_VERSION = 2
 
 export function getInitialDefaultConfig(): IChannelConfig {
   const customReplies = getEmbedCustomReply()
-  // const aliasRolls = getEmbedAliasRoll()
+  const aliasRolls = getEmbedAliasRoll()
   const rollDeciders = getEmbedRollDecider()
   return {
     version: CONFIG_VERSION,
     defaultRoll: 'd100',
     customReplyIds: customReplies.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
-    // aliasRollIds: aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
+    aliasRollIds: aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
     rollDeciderId: `${embedPluginId}.${rollDeciders[0].id}`,
     rollDeciderIds: rollDeciders.map(item => `${embedPluginId}.${item.id}`),
     embedPlugin: {
       id: embedPluginId,
       customReply: customReplies,
-      // aliasRoll: aliasRolls,
+      aliasRoll: aliasRolls,
       rollDecider: rollDeciders
     },
     lastModified: 0
@@ -31,6 +31,12 @@ export function handleUpgrade(config: IChannelConfig) {
     config.rollDeciderId = `${embedPluginId}.${rollDeciders[0].id}`
     config.rollDeciderIds = rollDeciders.map(item => `${embedPluginId}.${item.id}`)
     config.version = 2
+  }
+  if (config.version === 2) {
+    const aliasRolls = getEmbedAliasRoll()
+    config.embedPlugin.aliasRoll = aliasRolls
+    config.aliasRollIds = aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
+    config.version = 3
   }
   return config
 }
