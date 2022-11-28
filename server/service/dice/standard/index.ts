@@ -1,5 +1,5 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { AliasExpressions } from '../alias'
+import { parseAlias } from '../alias'
 import { parseDescriptions, SuccessLevel, parseTemplate } from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { ICocCardEntry } from '../../card/coc'
@@ -54,29 +54,11 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   // 解析别名指令
   private parseAlias(expression: string) {
-    for (const config of AliasExpressions) {
-      config.regexCache ??= new RegExp(`^${config.alias}`)
-      const match = expression.match(config.regexCache)
-      if (match) {
-        this.isAlias = true
-        this.expression = this._parseAlias(expression)
-        return expression.slice(match[0].length)
-      }
-    }
-    return expression
-  }
-
-  private _parseAlias(expression: string, depth = 0): string {
-    if (depth > 99) throw new Error('stackoverflow!!')
-    for (const config of AliasExpressions) {
-      config.regexCache ??= new RegExp(`^${config.alias}`)
-      const match = expression.match(config.regexCache)
-      if (match) {
-        const replacement = config.replacer(match)
-        console.log('[Dice] 解析别名:', match[0], '=', replacement)
-        const parsed = parseTemplate(replacement, this.context, this.inlineRolls)
-        return this._parseAlias(parsed, depth + 1)
-      }
+    const parsed = parseAlias(expression, this.context, this.inlineRolls)
+    if (expression !== parsed.expression) { // 解析前后不相等，代表命中了别名解析逻辑
+      this.isAlias = true
+      this.expression = parsed.expression
+      return parsed.rest
     }
     return expression
   }

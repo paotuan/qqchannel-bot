@@ -18,7 +18,7 @@ const list1 = [
   'rb侦察50',               // 奖惩骰检定
   'ww4',                   // 骰池
   'ww4a5',                 //
-  'ra',                    // alias
+  'rc',                    // alias
   'rh心理学',               // flags
   'rqx3 手枪连射',           // flags 组合
   'rb2qh 组合',             //
