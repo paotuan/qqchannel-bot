@@ -1,8 +1,15 @@
 <template>
-  <div v-if="config" class="flex-grow p-4 overflow-y-auto pb-20">
+  <div v-if="config" class="flex-grow py-4 overflow-y-auto pb-20">
+    <!-- 侧边栏目录 -->
+    <ul class="menu bg-transparent w-56 sticky top-0 float-left">
+      <li><a href="#defaultroll">默认骰</a></li>
+      <li><a href="#customreply">自定义回复</a></li>
+      <li><a href="#rolldecider">检定规则</a></li>
+      <li><a href="#aliasroll">别名指令</a></li>
+    </ul>
     <div class="max-w-4xl mx-auto" style="--btn-text-case: none">
       <!-- 默认骰 -->
-      <section>
+      <section id="defaultroll">
         <h2>默认骰：</h2>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <div class="card-body">
@@ -16,21 +23,21 @@
         </div>
       </section>
       <!-- 自定义回复 -->
-      <section class="mt-4">
+      <section id="customreply" class="mt-4">
         <div class="flex items-center"><h2>自定义回复：</h2><custom-reply-help /></div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <custom-reply-list />
         </div>
       </section>
       <!-- 自定义规则 -->
-      <section class="mt-4">
+      <section id="rolldecider" class="mt-4">
         <div class="flex items-center"><h2>检定规则：</h2><roll-decider-help /></div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <roll-decider-list />
         </div>
       </section>
       <!-- 别名指令 -->
-      <section class="mt-4">
+      <section id="aliasroll" class="mt-4">
         <div class="flex items-center"><h2>别名指令：</h2><custom-reply-help /></div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <alias-roll-list />
