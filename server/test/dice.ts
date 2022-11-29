@@ -1,6 +1,8 @@
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { CocCard } from '../service/card/coc'
 import type { ICard } from '../../interface/coc'
+import { getInitialDefaultConfig } from '../service/config/default'
+import { ChannelConfig } from '../service/config/config'
 
 const list1 = [
   'd100',                  // 基础指令
@@ -67,6 +69,7 @@ const list2 = [
 const context: IDiceRollContext = {
   channelId: 'abc123',
   username: 'Maca',
+  config: new ChannelConfig(getInitialDefaultConfig()),
   card: null,
 }
 

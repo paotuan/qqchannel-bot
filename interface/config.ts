@@ -15,14 +15,14 @@ export interface ICustomReplyConfig {
 // endregion
 
 // region 指令别名
-export interface IAliasRollConfig {
+type AliasRollNaiveTrigger = { trigger: 'naive', replacer: string } // {{X=1}} => (?<X>\d*) => replacer: {{X}}
+type AliasRollRegexTrigger = { trigger: 'regex', replacer: ((matchResult: RegExpMatchArray) => string) }
+export type IAliasRollConfig = {
   id: string // 短 id
   name: string
   description?: string
   command: string // 触发指令
-  trigger: 'naive' | 'regex' // naive: {{X=1}} => (?<X>\d*) => replacer: {{X}}
-  replacer: string | ((matchResult: RegExpMatchArray) => string) // 解析后指令
-}
+} & (AliasRollNaiveTrigger | AliasRollRegexTrigger)
 // endregion
 
 // region 自定义房规

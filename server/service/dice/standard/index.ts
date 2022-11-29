@@ -1,10 +1,9 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { parseAlias } from '../alias'
 import { parseDescriptions, SuccessLevel, parseTemplate } from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { ICocCardEntry } from '../../card/coc'
 import { calculateTargetValueWithDifficulty } from '../../card/coc'
-import type { IRollDecideResult } from '../../config/config'
+import type { IRollDecideResult } from '../../config/helpers/decider'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
@@ -54,8 +53,8 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   // 解析别名指令
   private parseAlias(expression: string) {
-    const parsed = parseAlias(expression, this.context, this.inlineRolls)
-    if (expression !== parsed.expression) { // 解析前后不相等，代表命中了别名解析逻辑
+    const parsed = this.context.config?.parseAliasRoll(expression, this.context, this.inlineRolls)
+    if (parsed && expression !== parsed.expression) { // 解析前后不相等，代表命中了别名解析逻辑
       this.isAlias = true
       this.expression = parsed.expression
       return parsed.rest

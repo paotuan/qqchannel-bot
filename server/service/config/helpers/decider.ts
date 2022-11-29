@@ -21,7 +21,7 @@ type RollDeciderExpressionResolved = (c: IRollDecideContext) => boolean
 const RollDeciderExpressionCache = new SyncLruCache<string, RollDeciderExpressionResolved>({
   max: 50,
   fetchMethod: expression => {
-    // console.log('[Config] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
+    console.log('[Config.Decider] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
     const normalized = expression.trim() || false // expression 不填默认认为是 false
     return new Function('context', `"use strict"; const { baseValue, targetValue, roll } = context; return !!(${normalized})`) as RollDeciderExpressionResolved
   }

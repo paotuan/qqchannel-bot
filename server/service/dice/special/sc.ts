@@ -1,7 +1,7 @@
 import { BasePtDiceRoll } from '../index'
 import { parseDescriptions, SuccessLevel } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import type { IRollDecideResult } from '../../config/config'
+import type { IRollDecideResult } from '../../config/helpers/decider'
 
 const SC_CARD_ENTRY_NAME = 'san' // sc 在人物卡中的字段名
 
