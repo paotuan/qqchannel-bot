@@ -45,8 +45,9 @@ const RegexCommandCache = new SyncLruCache<string, RegExp>({
 type ParseAliasResult = { expression: string, rest: string }
 
 export function parseAlias(processors: IAliasRollConfig[], expression: string, context: IDiceRollContext, inlineRolls: InlineDiceRoll[], depth = 0): ParseAliasResult {
-  if (depth > 99) throw new Error('stackoverflow!!')
+  if (depth > 99) throw new Error('别名指令嵌套过深，可能触发死循环，请检查你的别名指令配置！')
   for (const config of processors) {
+    if (!config.command) continue // 避免 command 啥都没填的情况，匹配任意值，变成死循环
     let match: RegExpMatchArray | null = null // 正则表达式匹配结果
     let replacement: string | undefined = undefined // 别名指令替换后的结果
     if (config.trigger === 'naive') {

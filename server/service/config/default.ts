@@ -1,7 +1,7 @@
 import type { IAliasRollConfig, IChannelConfig, ICustomReplyConfig, IRollDeciderConfig } from '../../../interface/config'
 
 const embedPluginId = 'io.paotuan.embed'
-const CONFIG_VERSION = 2
+const CONFIG_VERSION = 3
 
 export function getInitialDefaultConfig(): IChannelConfig {
   const customReplies = getEmbedCustomReply()

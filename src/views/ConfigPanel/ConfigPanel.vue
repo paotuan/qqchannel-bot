@@ -29,6 +29,13 @@
           <roll-decider-list />
         </div>
       </section>
+      <!-- 别名指令 -->
+      <section class="mt-4">
+        <div class="flex items-center"><h2>别名指令：</h2><custom-reply-help /></div>
+        <div class="card card-compact w-full bg-base-100 shadow-lg">
+          <alias-roll-list />
+        </div>
+      </section>
     </div>
     <!-- 底部栏 -->
     <div class="fixed left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
@@ -51,6 +58,7 @@ import CustomReplyList from './CustomReplyList.vue'
 import CustomReplyHelp from './CustomReplyHelp.vue'
 import RollDeciderList from './RollDeciderList.vue'
 import RollDeciderHelp from './RollDeciderHelp.vue'
+import AliasRollList from './AliasRollList.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)

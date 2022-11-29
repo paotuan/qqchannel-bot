@@ -27,7 +27,7 @@ export type IAliasRollConfig = {
 
 // region 自定义房规
 export interface IRollDeciderRule {
-  expression: string // new Function => "use strict"; !!boolean
+  expression: string
   reply: string
 }
 
@@ -65,6 +65,6 @@ export interface IChannelConfig {
   aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选
   rollDeciderIds: string[] // full id
-  embedPlugin: IPluginConfig // id = io.paotuan.embed.[channelId]
+  embedPlugin: IPluginConfig // id = io.paotuan.embed.xx
   lastModified: number // ms
 }

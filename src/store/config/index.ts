@@ -6,6 +6,7 @@ import type { IChannelConfigReq } from '../../../interface/common'
 import { useCustomReply } from './useCustomReply'
 import { gtagEvent } from '../../utils'
 import { useRollDecider } from './useRollDecider'
+import { useAliasRoll } from './useAliasRoll'
 
 export const useConfigStore = defineStore('config', () => {
   const state = reactive({ config: null as IChannelConfig | null })
@@ -44,6 +45,8 @@ export const useConfigStore = defineStore('config', () => {
   const customReplyApis = useCustomReply(config)
   // 自定义规则相关功能
   const rollDeciderApis = useRollDecider(config)
+  // 别名指令相关功能
+  const aliasRollApis = useAliasRoll(config)
 
   return {
     config,
@@ -52,6 +55,7 @@ export const useConfigStore = defineStore('config', () => {
     requestSaveConfig,
     requestResetConfig,
     ...customReplyApis,
-    ...rollDeciderApis
+    ...rollDeciderApis,
+    ...aliasRollApis
   }
 })
