@@ -29,7 +29,7 @@ export class RiDiceRoll extends BasePtDiceRoll {
     const segments = removeRi.split(/[,，;；]+/).filter(segment => !!segment.trim())
     if (segments.length === 0) segments.push('') // push 一个空的代表自己
     console.log('[Dice] 先攻指令 原始指令', this.rawExpression)
-    const baseRoll = this.context.config?.specialDice.riDice.baseRoll.trim() || 'd20'
+    const baseRoll = this.context.config.specialDice.riDice.baseRoll.trim() || 'd20'
     segments.forEach(segment => {
       const [exp, desc] = parseDescriptions(segment, ParseFlags.PARSE_EXP)
       const expression = exp.startsWith('+') || exp.startsWith('-') ? `${baseRoll}${exp}` : (exp || baseRoll)

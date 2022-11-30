@@ -21,7 +21,7 @@ export enum SuccessLevel {
 export interface IDiceRollContext {
   channelId?: string
   username: string
-  config?: ChannelConfig
+  config: ChannelConfig
   card: CocCard | null
   opposedRoll?: StandardDiceRoll | null
 }
@@ -126,22 +126,25 @@ export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | 
  * 工厂方法创建骰子实例
  */
 export function createDiceRoll(expression: string, context: IDiceRollContext) {
+  const specialDiceConfig = context.config.specialDice
   const inlineRolls: InlineDiceRoll[] = []
-  if (expression.startsWith('sc')) {
+  if (expression.startsWith('sc') && specialDiceConfig.scDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new ScDiceRoll(parsedExpression, context, inlineRolls).roll()
-  } else if (expression.startsWith('en')) {
+  } else if (expression.startsWith('en') && specialDiceConfig.enDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new EnDiceRoll(parsedExpression, context, inlineRolls).roll()
-  } else if (expression.startsWith('ri')) {
+  } else if (expression.startsWith('ri') && specialDiceConfig.riDice.enabled) {
     // ri 由于基数给用户输入，可能包含 attributes，因此统一由内部 parseTemplate
     return new RiDiceRoll(expression, context, inlineRolls).roll()
-  } else if (expression.startsWith('init')) {
+  } else if (expression.startsWith('init') && specialDiceConfig.riDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new RiListDiceRoll(parsedExpression, context, inlineRolls).roll()
-  } else {
-    const constructor = context.opposedRoll ? OpposedDiceRoll : StandardDiceRoll
+  } else if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
-    return new constructor(parsedExpression, context, inlineRolls).roll()
+    return new OpposedDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new StandardDiceRoll(parsedExpression, context, inlineRolls).roll()
   }
 }

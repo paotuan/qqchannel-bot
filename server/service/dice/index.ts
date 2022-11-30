@@ -22,7 +22,7 @@ export abstract class BasePtDiceRoll {
   }
 
   protected get defaultRoll() {
-    return this.context.config?.defaultRoll || 'd%'
+    return this.context.config.defaultRoll || 'd%'
   }
 
   protected get hasInlineRolls() {
@@ -49,7 +49,7 @@ export abstract class BasePtDiceRoll {
 
   // 根据配置判断成功等级
   protected decide(value: number, target: ICocCardEntry) {
-    return this.context.config?.decideRoll({
+    return this.context.config.decideRoll({
       baseValue: target.baseValue,
       targetValue: target.value,
       roll: value

@@ -166,7 +166,7 @@ export class DiceManager {
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
       // 配置
-      const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
+      const config = this.wss.config.getChannelConfig(channelId || 'default')
       // 投骰
       const roller = createDiceRoll(fullExp, {
         channelId,

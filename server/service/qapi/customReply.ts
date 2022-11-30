@@ -91,8 +91,8 @@ export class CustomReplyManager {
       const env: Record<string, string> = { nick: username, at: `<@!${msg.author.id}>` }
       const template = replyFunc(env, matchGroups)
       // 替换 inline rolls
-      const card = channelId ? this.wss.cards.getCard(channelId, userId) : null
-      const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
+      const card = this.wss.cards.getCard(channelId, userId)
+      const config = this.wss.config.getChannelConfig(channelId)
       const context: IDiceRollContext = { channelId, username, config, card }
       return parseTemplate(template, context, [])
     } catch (e: any) {
