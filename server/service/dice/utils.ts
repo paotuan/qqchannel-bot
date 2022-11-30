@@ -126,27 +126,22 @@ export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | 
  * 工厂方法创建骰子实例
  */
 export function createDiceRoll(expression: string, context: IDiceRollContext) {
-  // 1. 通用解析原始表达式
   const inlineRolls: InlineDiceRoll[] = []
-  const parsedExpression = parseTemplate(expression, context, inlineRolls)
-  // 2. 根据起始指令派发不同类型
-  const constructor = (() => {
-    if (parsedExpression.startsWith('sc')) {
-      return ScDiceRoll
-    } else if (parsedExpression.startsWith('en')) {
-      return EnDiceRoll
-    } else if (parsedExpression.startsWith('ri')) {
-      return RiDiceRoll
-    } else if (parsedExpression.startsWith('init')) {
-      return RiListDiceRoll
-    } else {
-      if (context.opposedRoll) {
-        return OpposedDiceRoll
-      } else {
-        return StandardDiceRoll
-      }
-    }
-  })()
-  // 3. 真正掷骰
-  return new constructor(parsedExpression, context, inlineRolls).roll()
+  if (expression.startsWith('sc')) {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new ScDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else if (expression.startsWith('en')) {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new EnDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else if (expression.startsWith('ri')) {
+    // ri 由于基数给用户输入，可能包含 attributes，因此统一由内部 parseTemplate
+    return new RiDiceRoll(expression, context, inlineRolls).roll()
+  } else if (expression.startsWith('init')) {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new RiListDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else {
+    const constructor = context.opposedRoll ? OpposedDiceRoll : StandardDiceRoll
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new constructor(parsedExpression, context, inlineRolls).roll()
+  }
 }

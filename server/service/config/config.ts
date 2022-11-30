@@ -31,6 +31,13 @@ export class ChannelConfig {
     return this.config.defaultRoll
   }
 
+  /**
+   * 特殊指令配置
+   */
+  get specialDice() {
+    return this.config.specialDice
+  }
+
   // 子频道 embed 自定义回复配置索引
   private get embedCustomReplyMap(): Record<string, ICustomReplyConfig> {
     const items = this.config.embedPlugin.customReply
