@@ -44,6 +44,7 @@ export interface IRollDeciderConfig {
 }
 // endregion
 
+// region 插件相关
 export interface IPluginRegisterContext {
   versionName: string
   versionCode: number
@@ -57,10 +58,22 @@ export interface IPluginConfig {
   aliasRoll?: IAliasRollConfig[]
   rollDecider?: IRollDeciderConfig[]
 }
+// endregion
+
+// 特殊指令配置
+export interface ISpecialDiceConfig {
+  enDice: { enabled: boolean },
+  scDice: { enabled: boolean },
+  riDice: { enabled: boolean, baseRoll: string }
+  stDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
+  opposeDice: { enabled: boolean, refineSuccessLevels: boolean }
+  inMessageDice: { enabled: boolean }
+}
 
 export interface IChannelConfig {
   version: number // 3
   defaultRoll: string // d100/d20/4dF
+  specialDice: ISpecialDiceConfig
   customReplyIds: { id: string, enabled: boolean }[] // full id
   aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选

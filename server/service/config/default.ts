@@ -1,4 +1,10 @@
-import type { IAliasRollConfig, IChannelConfig, ICustomReplyConfig, IRollDeciderConfig } from '../../../interface/config'
+import type {
+  IAliasRollConfig,
+  IChannelConfig,
+  ICustomReplyConfig,
+  IRollDeciderConfig,
+  ISpecialDiceConfig
+} from '../../../interface/config'
 
 const embedPluginId = 'io.paotuan.embed'
 const CONFIG_VERSION = 3
@@ -10,6 +16,7 @@ export function getInitialDefaultConfig(): IChannelConfig {
   return {
     version: CONFIG_VERSION,
     defaultRoll: 'd100',
+    specialDice: getSpecialDiceConfig(),
     customReplyIds: customReplies.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
     aliasRollIds: aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
     rollDeciderId: `${embedPluginId}.${rollDeciders[0].id}`,
@@ -36,6 +43,7 @@ export function handleUpgrade(config: IChannelConfig) {
     const aliasRolls = getEmbedAliasRoll()
     config.embedPlugin.aliasRoll = aliasRolls
     config.aliasRollIds = aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
+    config.specialDice = getSpecialDiceConfig()
     config.version = 3
   }
   return config
@@ -350,4 +358,15 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       }
     }
   ]
+}
+
+function getSpecialDiceConfig(): ISpecialDiceConfig {
+  return {
+    enDice: { enabled: true },
+    scDice: { enabled: true },
+    riDice: { enabled: true, baseRoll: 'd20' },
+    stDice: { enabled: true, writable: 'all' },
+    opposeDice: { enabled: true, refineSuccessLevels: true },
+    inMessageDice: { enabled: true }
+  }
 }
