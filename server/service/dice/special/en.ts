@@ -21,7 +21,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
   private readonly skill2Growth: Record<string, IGrowthDecideResult> = {}
 
   get allSkillsCanEn() {
-    const cardData = this.context.card?.data
+    const cardData = this.selfCard?.data
     return cardData ? Object.keys(cardData.meta.skillGrowth).filter(name => cardData.meta.skillGrowth[name]) : [] // 过滤掉值为 false 的
   }
 
@@ -94,9 +94,9 @@ export class EnDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  override applyToCard(): boolean {
-    const card = this.context.card
-    if (!card) return false
+  override applyToCard() {
+    const card = this.selfCard
+    if (!card) return []
     let updated = false
     Object.keys(this.skill2Growth).forEach(skill => {
       const entry = this.get(skill)
@@ -113,6 +113,6 @@ export class EnDiceRoll extends BasePtDiceRoll {
         updated = true
       }
     })
-    return updated
+    return updated ? [card] : []
   }
 }

@@ -89,7 +89,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     // 如果只有 desc，没有 exp，判断一下是否是直接调用人物卡的表达式
     // 例如【.徒手格斗】直接替换成【.1d3+$db】. 而【.$徒手格斗】走通用逻辑，求值后【.const】
     if (desc && !exp) {
-      const ability = this.context.card?.getAbility(desc)
+      const ability = this.selfCard?.getAbility(desc)
       if (ability) {
         this.expression = parseTemplate(ability.value, this.context, this.inlineRolls)
         this.description = desc
@@ -141,8 +141,8 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard() {
-    const card = this.context.card
-    if (!card) return false
+    const card = this.selfCard
+    if (!card) return []
     const inlineSkills2growth = this.inlineRolls.map(inlineRoll => inlineRoll.skills2growth).flat()
     const uniqSkills = Array.from(new Set([...inlineSkills2growth, ...this.skills2growth]))
     let needUpdate = false
@@ -150,7 +150,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       const updated = card.markSkillGrowth(skill)
       needUpdate ||= updated
     })
-    return needUpdate
+    return needUpdate ? [card] : []
   }
 
   // 是否可以用于对抗

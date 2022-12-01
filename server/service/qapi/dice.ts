@@ -137,7 +137,7 @@ export class DiceManager {
     }
     if (!cacheMsg.instruction) return
     const user = this.api.guilds.findUser(userId, guildId)
-    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username: user?.persona })
+    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username: user?.persona ?? userId })
     if (roll) {
       // 表情表态也没有暗骰
       const channel = this.api.guilds.findChannel(channelId, guildId)
@@ -158,28 +158,22 @@ export class DiceManager {
    * @param username 用户昵称，用于拼接结果字符串
    * @param replyMsgId 回复的消息 id，选填，用于区分通过回复进行的对抗检定
    */
-  private tryRollDice(fullExp: string, { userId, channelId, username, replyMsgId }: { userId: string, channelId?: string, username?: string, replyMsgId?: string }) {
+  private tryRollDice(fullExp: string, { userId, channelId, username, replyMsgId }: { userId: string, channelId?: string, username: string, replyMsgId?: string }) {
     try {
       // console.time('dice')
       // 是否有人物卡
-      const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
+      const getCard = (userId: string) => channelId ? this.wss.cards.getCard(channelId, userId) : null
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
       // 配置
       const config = this.wss.config.getChannelConfig(channelId || 'default')
       // 投骰
-      const roller = createDiceRoll(fullExp, {
-        channelId,
-        username: username || userId,
-        config,
-        card: cocCard,
-        opposedRoll
-      })
+      const roller = createDiceRoll(fullExp, { channelId, userId, username, config, getCard, opposedRoll })
       // 保存人物卡更新
-      if (cocCard) {
-        const cardNeedUpdate = roller.applyToCard()
-        cardNeedUpdate && this.wss.cards.saveCard(cocCard)
-      }
+      const updatedCards = roller.applyToCard()
+      updatedCards.forEach(card => {
+        this.wss.cards.saveCard(card)
+      })
       return roller
     } catch (e: any) {
       // 表达式不合法，无视之

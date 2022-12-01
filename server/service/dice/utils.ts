@@ -20,9 +20,10 @@ export enum SuccessLevel {
 
 export interface IDiceRollContext {
   channelId?: string
+  userId: string
   username: string
   config: ChannelConfig
-  card: CocCard | null
+  getCard: (userId: string) => CocCard | null | undefined
   opposedRoll?: StandardDiceRoll | null
 }
 
@@ -35,9 +36,10 @@ const HISTORY_ROLL_REGEX = /\$(\d+)/g // match $1 $2...
 export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], depth = 0): string {
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
-  const getEntry = (key: string) => context.card?.getEntry(key)?.value || ''
-  const getAbility = (key: string) => context.card?.getAbility(key)?.value || ''
-  const dbAndBuild = context.card?.dbAndBuild || [] // db 和 体格要特殊处理下，因为是计算属性，不能修改，而且是必有的。todo 思考如何通用
+  const selfCard = context.getCard(context.userId)
+  const getEntry = (key: string) => selfCard?.getEntry(key)?.value || ''
+  const getAbility = (key: string) => selfCard?.getAbility(key)?.value || ''
+  const dbAndBuild = selfCard?.dbAndBuild || [] // db 和 体格要特殊处理下，因为是计算属性，不能修改，而且是必有的。todo 思考如何通用
   const InlineDiceRoll = getInlineDiceRollKlass()
   // 1. 如检测到 ability or attribute，则求值并替换
   expression = expression.replace(ENTRY_REGEX, (_, key1?: string, key2?: string) => {

@@ -68,9 +68,10 @@ const list2 = [
 
 const context: IDiceRollContext = {
   channelId: 'abc123',
+  userId: 'abc456',
   username: 'Maca',
   config: new ChannelConfig(getInitialDefaultConfig()),
-  card: null,
+  getCard: () => null,
 }
 
 console.log('========== 未指定人物卡 =========')
@@ -80,7 +81,8 @@ list1.forEach(exp => {
   console.log('========================')
 })
 
-context.card = new CocCard(getCardProto())
+const mockCard = new CocCard(getCardProto())
+context.getCard = () => mockCard
 console.log('========== 指定人物卡 =========')
 list2.forEach(exp => {
   const roller = createDiceRoll(exp, context)

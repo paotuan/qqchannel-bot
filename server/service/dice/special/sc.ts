@@ -95,14 +95,15 @@ export class ScDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard() {
-    const card = this.context.card
-    if (this.noModify || !card || this.scLoss === 0) return false
+    const card = this.selfCard
+    if (this.noModify || !card || this.scLoss === 0) return []
     const oldSan = card.getEntry(SC_CARD_ENTRY_NAME)
-    if (!oldSan) return false
+    if (!oldSan) return []
     const newSan = Math.max(0, oldSan.value - this.scLoss)
     if (this.scLoss < 0) {
       console.warn('[Dice] 您试图通过负数回 san，系统将不会校验 san 值小于 99-克苏鲁神话 的限制')
     }
-    return card.setEntry(SC_CARD_ENTRY_NAME, newSan)
+    const updated = card.setEntry(SC_CARD_ENTRY_NAME, newSan)
+    return updated? [card] : []
   }
 }
