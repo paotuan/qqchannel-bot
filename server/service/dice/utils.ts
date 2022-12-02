@@ -6,6 +6,7 @@ import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { OpposedDiceRoll } from './standard/oppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
+import { StDiceRoll } from './special/st'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -18,10 +19,13 @@ export enum SuccessLevel {
   BEST = 4
 }
 
+export type UserRole = 'admin' | 'manager' | 'user'
+
 export interface IDiceRollContext {
   channelId?: string
   userId: string
   username: string
+  // todo userRole
   config: ChannelConfig
   getCard: (userId: string) => CocCard | null | undefined
   opposedRoll?: StandardDiceRoll | null
@@ -142,6 +146,9 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
   } else if (expression.startsWith('init') && specialDiceConfig.riDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new RiListDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else if (expression.startsWith('st') && specialDiceConfig.stDice.enabled) {
+    // st 由于可能要读取他人人物卡，也由内部 parseTemplate
+    return new StDiceRoll(expression, context, inlineRolls).roll()
   } else if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new OpposedDiceRoll(parsedExpression, context, inlineRolls).roll()

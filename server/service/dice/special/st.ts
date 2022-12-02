@@ -42,6 +42,10 @@ export class StDiceRoll extends BasePtDiceRoll {
     return this
   }
 
+  private get hasEditPermission() {
+    // todo
+  }
+
   private rollSet() {
     const segments = this.exp.split(/[,，;；]+/).filter(segment => !!segment.trim())
     // 解析表达式，注意要指定 targetUserId 的人物卡
