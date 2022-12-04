@@ -1,11 +1,12 @@
 <template>
   <div v-if="config" class="flex-grow py-4 overflow-y-auto pb-20">
     <!-- 侧边栏目录 -->
-    <ul class="menu bg-transparent w-56 sticky top-0 float-left">
+    <ul class="menu bg-transparent w-48 sticky top-0 float-left">
       <li><a href="#defaultroll">默认骰</a></li>
       <li><a href="#customreply">自定义回复</a></li>
       <li><a href="#rolldecider">检定规则</a></li>
       <li><a href="#aliasroll">别名指令</a></li>
+      <li><a href="#specialdice">特殊指令</a></li>
     </ul>
     <div class="max-w-4xl mx-auto" style="--btn-text-case: none">
       <!-- 默认骰 -->
@@ -43,6 +44,13 @@
           <alias-roll-list />
         </div>
       </section>
+      <!-- 特殊指令 -->
+      <section id="specialdice" class="mt-4">
+        <h2>特殊指令：</h2>
+        <div class="card card-compact w-full bg-base-100 shadow-lg">
+          <special-dice-list />
+        </div>
+      </section>
     </div>
     <!-- 底部栏 -->
     <div class="fixed left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
@@ -66,6 +74,7 @@ import CustomReplyHelp from './CustomReplyHelp.vue'
 import RollDeciderList from './RollDeciderList.vue'
 import RollDeciderHelp from './RollDeciderHelp.vue'
 import AliasRollList from './AliasRollList.vue'
+import SpecialDiceList from './SpecialDiceList.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
