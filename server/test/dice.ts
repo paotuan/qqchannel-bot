@@ -70,6 +70,7 @@ const context: IDiceRollContext = {
   channelId: 'abc123',
   userId: 'abc456',
   username: 'Maca',
+  userRole: 'admin',
   config: new ChannelConfig(getInitialDefaultConfig()),
   getCard: () => null,
 }

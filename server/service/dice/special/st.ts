@@ -36,14 +36,23 @@ export class StDiceRoll extends BasePtDiceRoll {
     if (!this.targetUserCard) return this
     if (this.show) {
       this.rollShow()
-    } else {
+    } else if (this.hasEditPermission) {
       this.rollSet()
     }
     return this
   }
 
   private get hasEditPermission() {
-    // todo
+    const control = this.context.config.specialDice.stDice.writable
+    const userRole = this.context.userRole
+    console.log('userRole', userRole)
+    if (control === 'none') {
+      return false
+    } else if (control === 'all') {
+      return true
+    } else { // manager
+      return userRole !== 'user'
+    }
   }
 
   private rollSet() {
@@ -52,7 +61,7 @@ export class StDiceRoll extends BasePtDiceRoll {
     const context: IDiceRollContext = { ...this.context, userId: this.targetUserId, username: this.targetUserId }
     segments.forEach(segment => {
       // 根据空格、+、—、数字来分隔，满足大多数的情况
-      const index = segment.search(/\s\+-\d/)
+      const index = segment.search(/[\s+\-\d]/)
       if (index < 0) return
       const name = segment.slice(0, index).trim()
       const value = segment.slice(index).trim()
@@ -96,9 +105,14 @@ export class StDiceRoll extends BasePtDiceRoll {
     if (this.show) {
       // 展示
       const list = this.shows.map(item => item.name + (isNaN(item.value) ? '-' : item.value)).join(' ')
-      return `${at(this.targetUserId)}(${cardName}):\n${list}`
+      return `${at(this.targetUserId)}(${cardName}):${this.shows.length > 1 ? '\n' : ' '}${list}`
     } else {
-      // 设置。如果只设置一个属性，就显示详细信息，否则就简略吧
+      // 设置
+      // 权限判断
+      if (!this.hasEditPermission) {
+        return `${this.context.username} 没有修改人物卡的权限`
+      }
+      // 如果只设置一个属性，就显示详细信息，否则就简略吧
       if (this.rolls.length === 0) {
         return '请指定想要设置的属性名与属性值'
       } else if (this.rolls.length === 1) {
@@ -127,5 +141,5 @@ export class StDiceRoll extends BasePtDiceRoll {
 }
 
 function at(userId: string) {
-  return `<@!(${userId})>`
+  return `<@!${userId}>`
 }

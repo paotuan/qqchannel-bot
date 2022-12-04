@@ -25,7 +25,7 @@ export interface IDiceRollContext {
   channelId?: string
   userId: string
   username: string
-  // todo userRole
+  userRole: UserRole
   config: ChannelConfig
   getCard: (userId: string) => CocCard | null | undefined
   opposedRoll?: StandardDiceRoll | null
@@ -155,5 +155,17 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
   } else {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new StandardDiceRoll(parsedExpression, context, inlineRolls).roll()
+  }
+}
+
+// 用户权限 id 适配 理论上不要放在这里
+// https://bot.q.qq.com/wiki/develop/nodesdk/model/role.html#DefaultRoleIDs
+export function convertRoleIds(ids: string[]): UserRole {
+  if (ids.includes('4')) {
+    return 'admin'
+  } else if (ids.includes('2') || ids.includes('5')) {
+    return 'manager'
+  } else {
+    return 'user'
   }
 }
