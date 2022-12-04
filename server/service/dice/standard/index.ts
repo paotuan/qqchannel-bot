@@ -166,11 +166,12 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const decideResult = this.decideResults[0]! // eligibleForOpposedRoll 确保了检定结果存在
     const baseValue = this.cardEntry!.baseValue
     const res = { username: this.context.username, skill: this.cardEntry!.name, baseValue }
+    const refineSuccessLevels = this.context.config.specialDice.opposeDice.refineSuccessLevels
     if (decideResult.level === SuccessLevel.REGULAR_SUCCESS) {
-      // 成功的检定，要比较成功等级哪个更高
-      if (rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {
+      // 成功的检定，如设置 refineSuccessLevels，要比较成功等级哪个更高
+      if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {
         return Object.assign(res, { level: SuccessLevel.EX_SUCCESS })
-      } else if (rollValue <= calculateTargetValueWithDifficulty(baseValue, 'hard')) {
+      } else if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'hard')) {
         return Object.assign(res, { level: SuccessLevel.HARD_SUCCESS })
       } else {
         return Object.assign(res, { level: SuccessLevel.REGULAR_SUCCESS })
