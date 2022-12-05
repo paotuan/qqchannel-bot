@@ -1,6 +1,6 @@
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { CocCard } from '../../card/coc'
+import type { CocCard } from '../../card/coc'
 import { IDiceRollContext, parseTemplate } from '../utils'
 
 const AtUserPattern = /^<@!(\d+)>/ // todo 后续配置注入
@@ -45,7 +45,6 @@ export class StDiceRoll extends BasePtDiceRoll {
   private get hasEditPermission() {
     const control = this.context.config.specialDice.stDice.writable
     const userRole = this.context.userRole
-    console.log('userRole', userRole)
     if (control === 'none') {
       return false
     } else if (control === 'all') {
@@ -114,7 +113,7 @@ export class StDiceRoll extends BasePtDiceRoll {
       }
       // 如果只设置一个属性，就显示详细信息，否则就简略吧
       if (this.rolls.length === 0) {
-        return '请指定想要设置的属性名与属性值'
+        return `${at(this.context.userId)}请指定想要设置的属性名与属性值`
       } else if (this.rolls.length === 1) {
         const entry = this.rolls[0]
         return `${at(this.targetUserId)}(${cardName}) 设置 ${entry.name} ${entry.roll.output}`
@@ -125,7 +124,7 @@ export class StDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  override applyToCard() {
+  override applyToCard(): CocCard[] {
     if (this.show) return []
     if (!this.targetUserCard) return []
     if (this.rolls.length === 0) return []

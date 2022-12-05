@@ -2,6 +2,7 @@ import { BasePtDiceRoll } from '../index'
 import { parseDescriptions, SuccessLevel } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
+import type { CocCard } from '../../card/coc'
 
 const SC_CARD_ENTRY_NAME = 'san' // sc 在人物卡中的字段名
 
@@ -94,7 +95,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
     return line
   }
 
-  override applyToCard() {
+  override applyToCard(): CocCard[] {
     const card = this.selfCard
     if (this.noModify || !card || this.scLoss === 0) return []
     const oldSan = card.getEntry(SC_CARD_ENTRY_NAME)
