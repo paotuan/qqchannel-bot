@@ -43,7 +43,8 @@ const list1 = [
   'init',                  // 先攻列表
   'init del 人物a',         // 先攻删除
   'init clr',              // 先攻清空
-  'init'                   // 确认清空
+  'init',                  // 确认清空
+  'st show'                // 无人物卡
 ]
 
 const list2 = [
@@ -64,6 +65,11 @@ const list2 = [
   'en',                    // 成长全部
   'en图书馆',               // 成长单个
   'en图书馆60',             // 成长临时值
+  'st show 侦查',           // st 查看
+  'st',                    // st 未指定
+  'st 侦查+10',             // st 修改
+  'st 拉拉20，打架30',       // st 新增
+  'st show'                 // st 展示全部
 ]
 
 const context: IDiceRollContext = {
