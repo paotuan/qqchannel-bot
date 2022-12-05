@@ -12,7 +12,7 @@ interface INaiveCommandParsed {
 const NaiveCommandCache = new SyncLruCache<string, INaiveCommandParsed>({
   max: 50,
   fetchMethod: expression => { // rb{{X=1}} => rb(?<X>\d*)
-    console.log('[Config.Alias] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
+    // console.log('[Config.Alias] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
     const defaultValues: { [key: string]: number } = {}
     const parsed = expression.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
       const [_name, _defaultValue = ''] = key.split('=')
@@ -28,7 +28,7 @@ type StringReplacerResolved = (c: { [key: string]: number }) => string
 const StringReplacerCache = new SyncLruCache<string, StringReplacerResolved>({
   max: 50,
   fetchMethod: expression => {
-    console.log('[Config.Alias] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
+    // console.log('[Config.Alias] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
     const [paramsList, funcBody] = expression.split('|')
     // {{X+1}}d%kl1 => ${X+1}d%kl1
     const templateString = funcBody.replace(/\{\{\s*([^{}]*)\s*\}\}/g, '${$1}')

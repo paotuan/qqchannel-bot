@@ -31,7 +31,7 @@
         <span>先攻（ri/init）</span>
       </span>
       <span class="flex items-center gap-2 text-sm">
-        <span>先攻基准值</span>
+        <span>先攻默认骰</span>
         <input v-model="config.riDice.baseRoll" type="text" placeholder="Type here" class="input input-bordered input-xs w-24" />
       </span>
     </div>

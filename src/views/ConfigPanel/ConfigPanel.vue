@@ -39,7 +39,7 @@
       </section>
       <!-- 别名指令 -->
       <section id="aliasroll" class="mt-4">
-        <div class="flex items-center"><h2>别名指令：</h2><custom-reply-help /></div>
+        <div class="flex items-center"><h2>别名指令：</h2><alias-roll-help /></div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <alias-roll-list />
         </div>
@@ -75,6 +75,7 @@ import RollDeciderList from './RollDeciderList.vue'
 import RollDeciderHelp from './RollDeciderHelp.vue'
 import AliasRollList from './AliasRollList.vue'
 import SpecialDiceList from './SpecialDiceList.vue'
+import AliasRollHelp from './AliasRollHelp.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
