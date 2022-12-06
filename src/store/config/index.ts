@@ -61,7 +61,7 @@ export const useConfigStore = defineStore('config', () => {
       config.rollDeciderId = ruleId
     }
     // 特殊指令
-    config.specialDice.opposeDice.refineSuccessLevels = mode === 'coc'
+    // config.specialDice.opposeDice.refineSuccessLevels = mode === 'coc'
     config.specialDice.riDice.baseRoll = mode === 'coc' ? '$敏捷' : 'd20'
     config.specialDice.scDice.enabled = mode === 'coc'
     config.specialDice.enDice.enabled = mode === 'coc'

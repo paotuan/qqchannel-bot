@@ -366,7 +366,7 @@ function getSpecialDiceConfig(): ISpecialDiceConfig {
     scDice: { enabled: true },
     riDice: { enabled: true, baseRoll: 'd20' },
     stDice: { enabled: true, writable: 'all' },
-    opposeDice: { enabled: true, refineSuccessLevels: true },
+    opposeDice: { enabled: true },
     inMessageDice: { enabled: true } // 暂不处理
   }
 }

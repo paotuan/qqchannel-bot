@@ -66,7 +66,7 @@ export interface ISpecialDiceConfig {
   scDice: { enabled: boolean },
   riDice: { enabled: boolean, baseRoll: string }
   stDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
-  opposeDice: { enabled: boolean, refineSuccessLevels: boolean }
+  opposeDice: { enabled: boolean }
   inMessageDice: { enabled: boolean }
 }
 

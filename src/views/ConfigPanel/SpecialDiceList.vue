@@ -12,18 +12,18 @@
       </span>
     </div>
     <!-- 对抗 -->
-    <div class="collapse-title flex justify-between">
-      <span class="flex items-center gap-2">
-        <input v-model="config.opposeDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
-        <span>对抗检定</span>
-      </span>
-      <div class="form-control">
-        <label class="label cursor-pointer gap-2 p-0">
-          <span class="label-text">比较困难/极难成功</span>
-          <input v-model="config.opposeDice.refineSuccessLevels" type="checkbox" class="toggle toggle-sm" />
-        </label>
-      </div>
-    </div>
+<!--    <div class="collapse-title flex justify-between">-->
+<!--      <span class="flex items-center gap-2">-->
+<!--        <input v-model="config.opposeDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />-->
+<!--        <span>对抗检定</span>-->
+<!--      </span>-->
+<!--      <div class="form-control">-->
+<!--        <label class="label cursor-pointer gap-2 p-0">-->
+<!--          <span class="label-text">比较困难/极难成功</span>-->
+<!--          <input v-model="config.opposeDice.refineSuccessLevels" type="checkbox" class="toggle toggle-sm" />-->
+<!--        </label>-->
+<!--      </div>-->
+<!--    </div>-->
     <!-- 先攻 -->
     <div class="collapse-title flex justify-between">
       <span class="flex items-center gap-2">
