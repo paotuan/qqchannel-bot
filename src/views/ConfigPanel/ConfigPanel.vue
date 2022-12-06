@@ -1,12 +1,16 @@
 <template>
   <div v-if="config" class="flex-grow py-4 overflow-y-auto pb-20">
     <!-- 侧边栏目录 -->
-    <ul class="menu bg-transparent w-48 sticky top-0 float-left">
+    <ul class="menu bg-transparent w-48 sticky top-0 float-left z-10">
+      <li class="menu-title"><span>目录</span></li>
       <li><a href="#defaultroll">默认骰</a></li>
       <li><a href="#customreply">自定义回复</a></li>
       <li><a href="#rolldecider">检定规则</a></li>
       <li><a href="#aliasroll">别名指令</a></li>
       <li><a href="#specialdice">特殊指令</a></li>
+      <li class="menu-title mt-4"><span>快捷设置</span></li>
+      <li class="tooltip tooltip-right" :data-tip="cocDesc.join(`&#xa;`)"><a @click="quickSet('coc')">设为 COC 常用规则</a></li>
+      <li class="tooltip tooltip-right" :data-tip="dndDesc.join(`&#xa;`)"><a @click="quickSet('dnd')">设为 DND 常用规则</a></li>
     </ul>
     <div class="max-w-4xl mx-auto" style="--btn-text-case: none">
       <!-- 默认骰 -->
@@ -76,12 +80,38 @@ import RollDeciderHelp from './RollDeciderHelp.vue'
 import AliasRollList from './AliasRollList.vue'
 import SpecialDiceList from './SpecialDiceList.vue'
 import AliasRollHelp from './AliasRollHelp.vue'
+import { Toast } from '../../utils'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
+
+const cocDesc = [
+  '默认骰设为 d100；',
+  '检定规则设为 COC 默认规则（若有）；',
+  '对抗检定比较困难/极难成功；',
+  '先攻默认骰设为 $敏捷'
+]
+
+const dndDesc = [
+  '默认骰设为 d20；',
+  '检定规则设为 DND 默认规则（若有）；',
+  '对抗检定不比较困难/极难成功；',
+  '先攻默认骰设为 d20；',
+  '禁用理智检定、成长检定'
+]
+
+const quickSet = (mode: 'coc' | 'dnd') => {
+  configStore.quickSet(mode)
+  Toast.success('设置成功')
+}
 </script>
 <style scoped>
 h2 {
   @apply font-bold leading-10;
+}
+
+.tooltip:before {
+  white-space: pre;
+  text-align: left;
 }
 </style>

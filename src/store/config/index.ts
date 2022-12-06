@@ -48,6 +48,25 @@ export const useConfigStore = defineStore('config', () => {
   // 别名指令相关功能
   const aliasRollApis = useAliasRoll(config)
 
+  // 快捷设置
+  const quickSet = (mode: 'coc' | 'dnd') => {
+    const config = state.config
+    if (!config) return
+    // 默认骰
+    config.defaultRoll = mode === 'coc' ? 'd100' : 'd20'
+    // 规则
+    const ruleId = config.embedPlugin.id + (mode === 'coc' ? '.coc0' : '.dnd0')
+    const ruleExist = config.rollDeciderIds.includes(ruleId)
+    if (ruleExist) {
+      config.rollDeciderId = ruleId
+    }
+    // 特殊指令
+    config.specialDice.opposeDice.refineSuccessLevels = mode === 'coc'
+    config.specialDice.riDice.baseRoll = mode === 'coc' ? '$敏捷' : 'd20'
+    config.specialDice.scDice.enabled = mode === 'coc'
+    config.specialDice.enDice.enabled = mode === 'coc'
+  }
+
   return {
     config,
     edited,
@@ -56,6 +75,7 @@ export const useConfigStore = defineStore('config', () => {
     requestResetConfig,
     ...customReplyApis,
     ...rollDeciderApis,
-    ...aliasRollApis
+    ...aliasRollApis,
+    quickSet
   }
 })
