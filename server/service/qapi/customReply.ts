@@ -3,7 +3,7 @@ import { makeAutoObservable } from 'mobx'
 import type { IMessage } from 'qq-guild-bot'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
-import { IDiceRollContext, parseTemplate } from '../dice/utils'
+import { convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
 
 export class CustomReplyManager {
   private readonly api: QApi
@@ -91,9 +91,10 @@ export class CustomReplyManager {
       const env: Record<string, string> = { nick: username, at: `<@!${msg.author.id}>` }
       const template = replyFunc(env, matchGroups)
       // 替换 inline rolls
-      const card = channelId ? this.wss.cards.getCard(channelId, userId) : null
-      const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
-      const context: IDiceRollContext = { channelId, username, config, card }
+      const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
+      const config = this.wss.config.getChannelConfig(channelId)
+      const userRole = convertRoleIds(msg.member.roles)
+      const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
       return parseTemplate(template, context, [])
     } catch (e: any) {
       console.error('[Config] 自定义回复处理出错', e?.message)

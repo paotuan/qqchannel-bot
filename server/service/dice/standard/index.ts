@@ -1,10 +1,9 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { AliasExpressions } from '../alias'
 import { parseDescriptions, SuccessLevel, parseTemplate } from '../utils'
 import { BasePtDiceRoll } from '../index'
-import type { ICocCardEntry } from '../../card/coc'
+import type { ICocCardEntry, CocCard } from '../../card/coc'
 import { calculateTargetValueWithDifficulty } from '../../card/coc'
-import type { IRollDecideResult } from '../../config/config'
+import type { IRollDecideResult } from '../../config/helpers/decider'
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
@@ -54,29 +53,11 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   // 解析别名指令
   private parseAlias(expression: string) {
-    for (const config of AliasExpressions) {
-      config.regexCache ??= new RegExp(`^${config.alias}`)
-      const match = expression.match(config.regexCache)
-      if (match) {
-        this.isAlias = true
-        this.expression = this._parseAlias(expression)
-        return expression.slice(match[0].length)
-      }
-    }
-    return expression
-  }
-
-  private _parseAlias(expression: string, depth = 0): string {
-    if (depth > 99) throw new Error('stackoverflow!!')
-    for (const config of AliasExpressions) {
-      config.regexCache ??= new RegExp(`^${config.alias}`)
-      const match = expression.match(config.regexCache)
-      if (match) {
-        const replacement = config.replacer(match)
-        console.log('[Dice] 解析别名:', match[0], '=', replacement)
-        const parsed = parseTemplate(replacement, this.context, this.inlineRolls)
-        return this._parseAlias(parsed, depth + 1)
-      }
+    const parsed = this.context.config.parseAliasRoll(expression, this.context, this.inlineRolls)
+    if (parsed && expression !== parsed.expression) { // 解析前后不相等，代表命中了别名解析逻辑
+      this.isAlias = true
+      this.expression = parsed.expression
+      return parsed.rest
     }
     return expression
   }
@@ -108,7 +89,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     // 如果只有 desc，没有 exp，判断一下是否是直接调用人物卡的表达式
     // 例如【.徒手格斗】直接替换成【.1d3+$db】. 而【.$徒手格斗】走通用逻辑，求值后【.const】
     if (desc && !exp) {
-      const ability = this.context.card?.getAbility(desc)
+      const ability = this.selfCard?.getAbility(desc)
       if (ability) {
         this.expression = parseTemplate(ability.value, this.context, this.inlineRolls)
         this.description = desc
@@ -159,9 +140,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  override applyToCard() {
-    const card = this.context.card
-    if (!card) return false
+  override applyToCard(): CocCard[] {
+    const card = this.selfCard
+    if (!card) return []
     const inlineSkills2growth = this.inlineRolls.map(inlineRoll => inlineRoll.skills2growth).flat()
     const uniqSkills = Array.from(new Set([...inlineSkills2growth, ...this.skills2growth]))
     let needUpdate = false
@@ -169,7 +150,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       const updated = card.markSkillGrowth(skill)
       needUpdate ||= updated
     })
-    return needUpdate
+    return needUpdate ? [card] : []
   }
 
   // 是否可以用于对抗
@@ -180,16 +161,16 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   // 用于对抗检定的数据
-  /* protected */ getSuccessLevelForOpposedRoll() {
+  /* protected */ getSuccessLevelForOpposedRoll(refineSuccessLevels = true) {
     const rollValue = this.rolls[0].total
     const decideResult = this.decideResults[0]! // eligibleForOpposedRoll 确保了检定结果存在
     const baseValue = this.cardEntry!.baseValue
     const res = { username: this.context.username, skill: this.cardEntry!.name, baseValue }
     if (decideResult.level === SuccessLevel.REGULAR_SUCCESS) {
-      // 成功的检定，要比较成功等级哪个更高
-      if (rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {
+      // 成功的检定，如设置 refineSuccessLevels，要比较成功等级哪个更高
+      if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {
         return Object.assign(res, { level: SuccessLevel.EX_SUCCESS })
-      } else if (rollValue <= calculateTargetValueWithDifficulty(baseValue, 'hard')) {
+      } else if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'hard')) {
         return Object.assign(res, { level: SuccessLevel.HARD_SUCCESS })
       } else {
         return Object.assign(res, { level: SuccessLevel.REGULAR_SUCCESS })

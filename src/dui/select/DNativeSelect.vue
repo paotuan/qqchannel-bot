@@ -1,6 +1,6 @@
 <template>
   <select :value="props.modelValue" class="select" @change="onChange">
-    <option disabled :selected="!props.modelValue">{{ props.placeholder }}</option>
+    <option v-if="placeholder" disabled :selected="!props.modelValue">{{ props.placeholder }}</option>
     <option v-for="op in options" :key="op.value" :value="op.value">{{ op.label }}</option>
   </select>
 </template>

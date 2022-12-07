@@ -6,6 +6,7 @@ import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { OpposedDiceRoll } from './standard/oppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
+import { StDiceRoll } from './special/st'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -18,11 +19,15 @@ export enum SuccessLevel {
   BEST = 4
 }
 
+export type UserRole = 'admin' | 'manager' | 'user'
+
 export interface IDiceRollContext {
   channelId?: string
+  userId: string
   username: string
-  config?: ChannelConfig
-  card: CocCard | null
+  userRole: UserRole
+  config: ChannelConfig
+  getCard: (userId: string) => CocCard | null | undefined
   opposedRoll?: StandardDiceRoll | null
 }
 
@@ -35,9 +40,10 @@ const HISTORY_ROLL_REGEX = /\$(\d+)/g // match $1 $2...
 export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], depth = 0): string {
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
-  const getEntry = (key: string) => context.card?.getEntry(key)?.value || ''
-  const getAbility = (key: string) => context.card?.getAbility(key)?.value || ''
-  const dbAndBuild = context.card?.dbAndBuild || [] // db 和 体格要特殊处理下，因为是计算属性，不能修改，而且是必有的。todo 思考如何通用
+  const selfCard = context.getCard(context.userId)
+  const getEntry = (key: string) => selfCard?.getEntry(key)?.value || ''
+  const getAbility = (key: string) => selfCard?.getAbility(key)?.value || ''
+  const dbAndBuild = selfCard?.dbAndBuild || [] // db 和 体格要特殊处理下，因为是计算属性，不能修改，而且是必有的。todo 思考如何通用
   const InlineDiceRoll = getInlineDiceRollKlass()
   // 1. 如检测到 ability or attribute，则求值并替换
   expression = expression.replace(ENTRY_REGEX, (_, key1?: string, key2?: string) => {
@@ -126,27 +132,40 @@ export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | 
  * 工厂方法创建骰子实例
  */
 export function createDiceRoll(expression: string, context: IDiceRollContext) {
-  // 1. 通用解析原始表达式
+  const specialDiceConfig = context.config.specialDice
   const inlineRolls: InlineDiceRoll[] = []
-  const parsedExpression = parseTemplate(expression, context, inlineRolls)
-  // 2. 根据起始指令派发不同类型
-  const constructor = (() => {
-    if (parsedExpression.startsWith('sc')) {
-      return ScDiceRoll
-    } else if (parsedExpression.startsWith('en')) {
-      return EnDiceRoll
-    } else if (parsedExpression.startsWith('ri')) {
-      return RiDiceRoll
-    } else if (parsedExpression.startsWith('init')) {
-      return RiListDiceRoll
-    } else {
-      if (context.opposedRoll) {
-        return OpposedDiceRoll
-      } else {
-        return StandardDiceRoll
-      }
-    }
-  })()
-  // 3. 真正掷骰
-  return new constructor(parsedExpression, context, inlineRolls).roll()
+  if (expression.startsWith('sc') && specialDiceConfig.scDice.enabled) {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new ScDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else if (expression.startsWith('en') && specialDiceConfig.enDice.enabled) {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new EnDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else if (expression.startsWith('ri') && specialDiceConfig.riDice.enabled) {
+    // ri 由于基数给用户输入，可能包含 attributes，因此统一由内部 parseTemplate
+    return new RiDiceRoll(expression, context, inlineRolls).roll()
+  } else if (expression.startsWith('init') && specialDiceConfig.riDice.enabled) {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new RiListDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else if (expression.startsWith('st') && specialDiceConfig.stDice.enabled) {
+    // st 由于可能要读取他人人物卡，也由内部 parseTemplate
+    return new StDiceRoll(expression, context, inlineRolls).roll()
+  } else if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new OpposedDiceRoll(parsedExpression, context, inlineRolls).roll()
+  } else {
+    const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    return new StandardDiceRoll(parsedExpression, context, inlineRolls).roll()
+  }
+}
+
+// 用户权限 id 适配 理论上不要放在这里
+// https://bot.q.qq.com/wiki/develop/nodesdk/model/role.html#DefaultRoleIDs
+export function convertRoleIds(ids: string[]): UserRole {
+  if (ids.includes('4')) {
+    return 'admin'
+  } else if (ids.includes('2') || ids.includes('5')) {
+    return 'manager'
+  } else {
+    return 'user'
+  }
 }

@@ -1,41 +1,24 @@
-import type { IChannelConfig, ICustomReplyConfig, IRollDeciderConfig } from '../../../interface/config'
+import type {
+  IAliasRollConfig,
+  IChannelConfig,
+  ICustomReplyConfig,
+  IRollDeciderConfig
+} from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import type { PluginManager } from './plugin'
-import { SuccessLevel } from '../dice/utils'
-import { SyncLruCache } from './sync-lru-cache'
-import { render } from 'mustache'
-
-interface IRollDecideContext {
-  baseValue: number
-  targetValue: number
-  roll: number
-}
-
-export interface IRollDecideResult {
-  success: boolean
-  level: SuccessLevel
-  desc: string
-}
-
-// 全局模板和 function 缓存配置
-// config 嵌套比较复杂，与其小心翼翼地维护每一级的对象结构，不如简单粗暴地用一个缓存，反正它们都是纯的
-type RollDeciderExpressionResolved = (c: IRollDecideContext) => boolean
-const RollDeciderExpressionCache = new SyncLruCache<string, RollDeciderExpressionResolved>({
-  max: 50,
-  fetchMethod: expression => {
-    // console.log('[Config] 缓存预热中。如果长期运行后仍然频繁出现此提示，可以考虑增加缓存容量')
-    const normalized = expression.trim() || false // expression 不填默认认为是 false
-    return new Function('context', `"use strict"; const { baseValue, targetValue, roll } = context; return !!(${normalized})`) as RollDeciderExpressionResolved
-  }
-})
+import { decideRoll, IRollDecideContext } from './helpers/decider'
+import type { IDiceRollContext } from '../dice/utils'
+import type { InlineDiceRoll } from '../dice/standard/inline'
+import { parseAlias } from './helpers/alias'
 
 // 频道配置文件封装
 // !只读 config，不要写 config
 export class ChannelConfig {
   config: IChannelConfig
-  private readonly plugin: PluginManager // todo plugin 后续和 wss 解耦？
+  private readonly plugin?: PluginManager // todo plugin 后续和 wss 解耦？
 
-  constructor(config: IChannelConfig, plugins: PluginManager) {
+  // plugin 可选 for mock test 的情况，正常运行中不会为空
+  constructor(config: IChannelConfig, plugins?: PluginManager) {
     makeAutoObservable<this, 'plugin'>(this, { plugin: false })
     this.config = config
     this.plugin = plugins
@@ -46,6 +29,13 @@ export class ChannelConfig {
    */
   get defaultRoll() {
     return this.config.defaultRoll
+  }
+
+  /**
+   * 特殊指令配置
+   */
+  get specialDice() {
+    return this.config.specialDice
   }
 
   // 子频道 embed 自定义回复配置索引
@@ -65,7 +55,7 @@ export class ChannelConfig {
       .map(item => this.embedCustomReplyMap[item.id]/* || this.plugin.pluginCustomReplyMap[item.id]*/)
       .filter(conf => !!conf)
     // todo 目前全部启用插件
-    ret.push(...Object.values(this.plugin.pluginCustomReplyMap))
+    ret.push(...Object.values(this.plugin?.pluginCustomReplyMap || {}))
     return ret
   }
 
@@ -81,58 +71,36 @@ export class ChannelConfig {
   private get rollDecider() {
     const currentId = this.config.rollDeciderId
     if (!currentId) return undefined // 不要规则的情况
-    return this.embedRollDeciderMap[currentId] || this.plugin.pluginRollDeciderMap[currentId]
+    return this.embedRollDeciderMap[currentId] || this.plugin?.pluginRollDeciderMap[currentId]
   }
 
-  // 根据当前的规则计算是否成功
-  decideRoll(context: IRollDecideContext): IRollDecideResult | undefined {
-    const decider = this.rollDecider
-    if (!decider) {
-      return undefined // 不要规则
-    }
-    // 根据顺序判断命中了哪个成功等级
-    const resultLevel = rollDeciderHit(decider, context)
-    if (!resultLevel) {
-      return undefined // 规则出错或匹配不上任何一条成功等级
-    }
-    // 根据命中等级解析描述字符串
-    const rule = decider.rules[resultLevel]
-    return {
-      success: ['best', 'success'].includes(resultLevel),
-      level: transformSuccessLevel(resultLevel),
-      desc: render(rule.reply, context) // mustache 内部有缓存
-    }
+  /**
+   * 根据当前的规则计算是否成功
+   */
+  decideRoll(context: IRollDecideContext) {
+    return decideRoll(this.rollDecider, context)
   }
-}
 
-// 判断投骰结果命中了哪个等级
-function rollDeciderHit(decider: IRollDeciderConfig, context: IRollDecideContext) {
-  try {
-    const resultLevels = ['worst', 'best', 'fail', 'success'] as const
-    for (const resultLevel of resultLevels) {
-      const rule = decider.rules[resultLevel]
-      const func = RollDeciderExpressionCache.get(rule.expression)
-      if (func?.(context)) {
-        return resultLevel
-      }
-    }
-    return undefined
-  } catch (e: any) {
-    console.error('[Config] 判断成功等级出错', e?.message, 'context=', JSON.stringify(context))
-    return undefined
+  // 子频道 embed 别名指令配置索引
+  private get embedAliasRollMap(): Record<string, IAliasRollConfig> {
+    const items = this.config.embedPlugin.aliasRoll
+    if (!items) return {}
+    const embedPluginId = this.config.embedPlugin.id
+    return items.reduce((obj, item) => Object.assign(obj, { [`${embedPluginId}.${item.id}`]: item }), {})
   }
-}
 
-function transformSuccessLevel(level: string): SuccessLevel {
-  switch (level) {
-  case 'worst':
-    return SuccessLevel.WORST
-  case 'best':
-    return SuccessLevel.BEST
-  case 'success':
-    return SuccessLevel.REGULAR_SUCCESS
-  case 'fail':
-  default:
-    return SuccessLevel.FAIL
+  // 子频道别名指令处理器列表
+  private get aliasRollProcessors() {
+    return this.config.aliasRollIds
+      .filter(item => item.enabled)
+      .map(item => this.embedAliasRollMap[item.id]/* || this.plugin.pluginCustomReplyMap[item.id]*/)
+      .filter(conf => !!conf)
+  }
+
+  /**
+   * 解析别名指令
+   */
+  parseAliasRoll(expression: string, context: IDiceRollContext, inlineRolls: InlineDiceRoll[]) {
+    return parseAlias(this.aliasRollProcessors, expression, context, inlineRolls)
   }
 }

@@ -26,6 +26,8 @@ export class OpposedDiceRoll extends StandardDiceRoll {
   private opposedRoll(other: StandardDiceRoll) {
     if (!this.eligibleForOpposedRoll || !other.eligibleForOpposedRoll) return ''
     // 1. 判断各自成功等级 大失败-2 失败-1 成功1 困难成功2 极难成功3 大成功4
+    // const refineSuccessLevels = this.context.config.specialDice.opposeDice.refineSuccessLevels
+    // refineSuccessLevels 配置传入。不能在内部读取 config，因为可能读到到老的 context 中的 config
     const selfResult = this.getSuccessLevelForOpposedRoll()
     const otherResult = other.getSuccessLevelForOpposedRoll()
     // 2. 比较

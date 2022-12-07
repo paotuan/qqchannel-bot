@@ -33,10 +33,9 @@
   </d-modal>
 </template>
 <script setup lang="ts">
-import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
+import { QuestionMarkCircleIcon, Bars3Icon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 import DModal from '../../dui/modal/DModal.vue'
-import { Bars3Icon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 
 const open = ref(false)
 

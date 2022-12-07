@@ -1,15 +1,18 @@
 import type { IDiceRollContext } from './utils'
 import type { InlineDiceRoll } from './standard/inline'
-import { calculateTargetValueWithDifficulty, ICocCardEntry, parseDifficulty } from '../card/coc'
-import type { IRollDecideResult } from '../config/config'
+import { calculateTargetValueWithDifficulty, CocCard, ICocCardEntry, parseDifficulty } from '../card/coc'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
   protected readonly context: IDiceRollContext
   protected readonly inlineRolls: InlineDiceRoll[]
 
+  protected get selfCard() {
+    return this.context.getCard(this.context.userId)
+  }
+
   protected get(key: string, tempValue = NaN) {
-    const entry = this.context.card?.getEntry(key) ?? null
+    const entry = this.selfCard?.getEntry(key) ?? null
     if (entry) {
       return entry
     } else if (!isNaN(tempValue)) {
@@ -23,7 +26,7 @@ export abstract class BasePtDiceRoll {
   }
 
   protected get defaultRoll() {
-    return this.context.config?.defaultRoll || 'd%'
+    return this.context.config.defaultRoll || 'd%'
   }
 
   protected get hasInlineRolls() {
@@ -43,14 +46,14 @@ export abstract class BasePtDiceRoll {
   // 掷骰的结果用于展示
   abstract get output(): string
 
-  // 应用副作用修改人物卡，返回人物卡是否真正修改了
-  applyToCard() {
-    return false
+  // 应用副作用修改人物卡，返回被真正修改的人物卡列表
+  applyToCard(): CocCard[] {
+    return []
   }
 
   // 根据配置判断成功等级
-  protected decide(value: number, target: ICocCardEntry): IRollDecideResult | undefined {
-    return this.context.config?.decideRoll({
+  protected decide(value: number, target: ICocCardEntry) {
+    return this.context.config.decideRoll({
       baseValue: target.baseValue,
       targetValue: target.value,
       roll: value

@@ -27,7 +27,7 @@ export class ConfigManager {
     return this.configMap['default']
   }
 
-  getChannelConfig(channelId: string) {
+  getChannelConfig(channelId: string | 'default') {
     return this.configMap[channelId] || this.defaultConfig
   }
 

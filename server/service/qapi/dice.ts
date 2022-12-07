@@ -2,7 +2,7 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import { createDiceRoll } from '../dice/utils'
+import { convertRoleIds, createDiceRoll, UserRole } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 
@@ -62,7 +62,8 @@ export class DiceManager {
     // 投骰
     const username = msg.member.nick || msg.author.username || msg.author.id
     const replyMsgId = (msg as any).message_reference?.message_id
-    const roll = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username, replyMsgId })
+    const userRole = convertRoleIds(msg.member.roles)
+    const roll = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username, replyMsgId, userRole })
     if (roll) {
       // 拼装结果，并发消息
       const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
@@ -137,7 +138,8 @@ export class DiceManager {
     }
     if (!cacheMsg.instruction) return
     const user = this.api.guilds.findUser(userId, guildId)
-    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username: user?.persona })
+    // todo 表情表态暂时不处理权限的问题，不方便拿到而且几乎不会用到
+    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username: user?.persona ?? userId })
     if (roll) {
       // 表情表态也没有暗骰
       const channel = this.api.guilds.findChannel(channelId, guildId)
@@ -157,29 +159,24 @@ export class DiceManager {
    * @param channelId 投骰所在的子频道，选填。若存在子频道说明不是私信场景，会去判断人物卡数值
    * @param username 用户昵称，用于拼接结果字符串
    * @param replyMsgId 回复的消息 id，选填，用于区分通过回复进行的对抗检定
+   * @param userRole 用户权限。目前仅用于 st dice 的权限控制
    */
-  private tryRollDice(fullExp: string, { userId, channelId, username, replyMsgId }: { userId: string, channelId?: string, username?: string, replyMsgId?: string }) {
+  private tryRollDice(fullExp: string, { userId, channelId, username, replyMsgId, userRole }: { userId: string, channelId?: string, username: string, replyMsgId?: string, userRole?: UserRole }) {
     try {
       // console.time('dice')
       // 是否有人物卡
-      const cocCard = channelId ? this.wss.cards.getCard(channelId, userId) : null
+      const getCard = (userId: string) => channelId ? this.wss.cards.getCard(channelId, userId) : null
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
       // 配置
-      const config = channelId ? this.wss.config.getChannelConfig(channelId) : undefined
+      const config = this.wss.config.getChannelConfig(channelId || 'default')
       // 投骰
-      const roller = createDiceRoll(fullExp, {
-        channelId,
-        username: username || userId,
-        config,
-        card: cocCard,
-        opposedRoll
-      })
+      const roller = createDiceRoll(fullExp, { channelId, userId, username, userRole: userRole ?? 'user', config, getCard, opposedRoll })
       // 保存人物卡更新
-      if (cocCard) {
-        const cardNeedUpdate = roller.applyToCard()
-        cardNeedUpdate && this.wss.cards.saveCard(cocCard)
-      }
+      const updatedCards = roller.applyToCard()
+      updatedCards.forEach(card => {
+        this.wss.cards.saveCard(card)
+      })
       return roller
     } catch (e: any) {
       // 表达式不合法，无视之

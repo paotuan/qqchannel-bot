@@ -1,23 +1,30 @@
-import type { IAliasRollConfig, IChannelConfig, ICustomReplyConfig, IRollDeciderConfig } from '../../../interface/config'
+import type {
+  IAliasRollConfig,
+  IChannelConfig,
+  ICustomReplyConfig,
+  IRollDeciderConfig,
+  ISpecialDiceConfig
+} from '../../../interface/config'
 
 const embedPluginId = 'io.paotuan.embed'
-const CONFIG_VERSION = 2
+const CONFIG_VERSION = 3
 
 export function getInitialDefaultConfig(): IChannelConfig {
   const customReplies = getEmbedCustomReply()
-  // const aliasRolls = getEmbedAliasRoll()
+  const aliasRolls = getEmbedAliasRoll()
   const rollDeciders = getEmbedRollDecider()
   return {
     version: CONFIG_VERSION,
     defaultRoll: 'd100',
+    specialDice: getSpecialDiceConfig(),
     customReplyIds: customReplies.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
-    // aliasRollIds: aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
+    aliasRollIds: aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
     rollDeciderId: `${embedPluginId}.${rollDeciders[0].id}`,
     rollDeciderIds: rollDeciders.map(item => `${embedPluginId}.${item.id}`),
     embedPlugin: {
       id: embedPluginId,
       customReply: customReplies,
-      // aliasRoll: aliasRolls,
+      aliasRoll: aliasRolls,
       rollDecider: rollDeciders
     },
     lastModified: 0
@@ -31,6 +38,13 @@ export function handleUpgrade(config: IChannelConfig) {
     config.rollDeciderId = `${embedPluginId}.${rollDeciders[0].id}`
     config.rollDeciderIds = rollDeciders.map(item => `${embedPluginId}.${item.id}`)
     config.version = 2
+  }
+  if (config.version === 2) {
+    const aliasRolls = getEmbedAliasRoll()
+    config.embedPlugin.aliasRoll = aliasRolls
+    config.aliasRollIds = aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
+    config.specialDice = getSpecialDiceConfig()
+    config.version = 3
   }
   return config
 }
@@ -344,4 +358,15 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       }
     }
   ]
+}
+
+function getSpecialDiceConfig(): ISpecialDiceConfig {
+  return {
+    enDice: { enabled: true },
+    scDice: { enabled: true },
+    riDice: { enabled: true, baseRoll: 'd20' },
+    stDice: { enabled: true, writable: 'all' },
+    opposeDice: { enabled: true },
+    inMessageDice: { enabled: true } // 暂不处理
+  }
 }

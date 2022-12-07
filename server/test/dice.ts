@@ -1,6 +1,8 @@
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { CocCard } from '../service/card/coc'
 import type { ICard } from '../../interface/coc'
+import { getInitialDefaultConfig } from '../service/config/default'
+import { ChannelConfig } from '../service/config/config'
 
 const list1 = [
   'd100',                  // 基础指令
@@ -18,7 +20,7 @@ const list1 = [
   'rb侦察50',               // 奖惩骰检定
   'ww4',                   // 骰池
   'ww4a5',                 //
-  'ra',                    // alias
+  'rc',                    // alias
   'rh心理学',               // flags
   'rqx3 手枪连射',           // flags 组合
   'rb2qh 组合',             //
@@ -41,7 +43,8 @@ const list1 = [
   'init',                  // 先攻列表
   'init del 人物a',         // 先攻删除
   'init clr',              // 先攻清空
-  'init'                   // 确认清空
+  'init',                  // 确认清空
+  'st show'                // 无人物卡
 ]
 
 const list2 = [
@@ -62,12 +65,20 @@ const list2 = [
   'en',                    // 成长全部
   'en图书馆',               // 成长单个
   'en图书馆60',             // 成长临时值
+  'st show 侦查',           // st 查看
+  'st',                    // st 未指定
+  'st 侦查+10',             // st 修改
+  'st 拉拉20，打架30',       // st 新增
+  'st show'                 // st 展示全部
 ]
 
 const context: IDiceRollContext = {
   channelId: 'abc123',
+  userId: 'abc456',
   username: 'Maca',
-  card: null,
+  userRole: 'admin',
+  config: new ChannelConfig(getInitialDefaultConfig()),
+  getCard: () => null,
 }
 
 console.log('========== 未指定人物卡 =========')
@@ -77,7 +88,8 @@ list1.forEach(exp => {
   console.log('========================')
 })
 
-context.card = new CocCard(getCardProto())
+const mockCard = new CocCard(getCardProto())
+context.getCard = () => mockCard
 console.log('========== 指定人物卡 =========')
 list2.forEach(exp => {
   const roller = createDiceRoll(exp, context)
