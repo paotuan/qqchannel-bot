@@ -31,7 +31,7 @@ export class PluginManager {
 
   // 自带插件释放到 plugins 文件夹下
   // 如果 plugins 下没有该 plugin 的文件夹，则复制过去
-  // 如果已经有该 plugin 的文件夹，先加载进来看版本号，如果版本号有更新，则删除旧文件复制新文件，并提示下次打开后更新
+  // 如果已经有该 plugin 的文件夹，先加载进来看版本号，如果版本号有更新，则删除旧文件，并提示下次打开后更新
   private extractOfficialPluginsIfNeed() {
     // todo
   }
