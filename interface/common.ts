@@ -19,6 +19,7 @@ export type Command =
   | 'card/delete' // req
   | 'card/link'  // req/res
   | 'card/test' // res
+  | 'plugin/list' // res
 
 export interface IMessage<T> {
   cmd: Command
@@ -144,3 +145,18 @@ export interface ICardTestResp {
   success: boolean
 }
 // endregion card
+
+// region plugin
+interface IPluginItemConfig {
+  id: string // 短 id
+  name: string
+  description?: string
+}
+
+export interface IPluginConfigDisplay {
+  id: string
+  name: string
+  customReply: IPluginItemConfig[]
+  aliasRoll: IPluginItemConfig[]
+  rollDecider: IPluginItemConfig[]
+}

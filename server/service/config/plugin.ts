@@ -3,13 +3,14 @@ import type {
   IPluginConfig,
   ICustomReplyConfig,
   IPluginRegisterContext,
-  IRollDeciderConfig
+  IRollDeciderConfig, IAliasRollConfig
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
 import * as path from 'path'
 import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 import { copyFolderSync } from '../../utils'
+import type { IPluginConfigDisplay } from '../../../interface/common'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -84,6 +85,28 @@ export class PluginManager {
     })
   }
 
+  get pluginListForDisplay(): IPluginConfigDisplay[] {
+    return Object.values(this.pluginMap).map<IPluginConfigDisplay>(plugin => ({
+      id: plugin.id,
+      name: plugin.name || plugin.id,
+      customReply: (plugin.customReply || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description
+      })),
+      rollDecider: (plugin.rollDecider || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description
+      })),
+      aliasRoll: (plugin.aliasRoll || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description
+      }))
+    }))
+  }
+
   // 提供 custom reply 的列表: fullId => config
   get pluginCustomReplyMap(): Record<string, ICustomReplyConfig> {
     const ret: Record<string, ICustomReplyConfig> = {}
@@ -108,6 +131,17 @@ export class PluginManager {
     return ret
   }
 
+  // 提供 alias roll 的列表：fullId => config
+  get pluginAliasRollMap(): Record<string, IAliasRollConfig> {
+    const ret: Record<string, IAliasRollConfig> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.aliasRoll) return
+      plugin.aliasRoll.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
 }
 
 const officialPluginsVersions = {

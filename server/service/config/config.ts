@@ -50,13 +50,10 @@ export class ChannelConfig {
    * 子频道自定义回复处理器列表
    */
   get customReplyProcessors() {
-    const ret = this.config.customReplyIds
+    return this.config.customReplyIds
       .filter(item => item.enabled)
-      .map(item => this.embedCustomReplyMap[item.id]/* || this.plugin.pluginCustomReplyMap[item.id]*/)
+      .map(item => this.embedCustomReplyMap[item.id] || this.plugin?.pluginCustomReplyMap[item.id])
       .filter(conf => !!conf)
-    // todo 目前全部启用插件
-    ret.push(...Object.values(this.plugin?.pluginCustomReplyMap || {}))
-    return ret
   }
 
   // embed 规则配置索引
@@ -93,7 +90,7 @@ export class ChannelConfig {
   private get aliasRollProcessors() {
     return this.config.aliasRollIds
       .filter(item => item.enabled)
-      .map(item => this.embedAliasRollMap[item.id]/* || this.plugin.pluginCustomReplyMap[item.id]*/)
+      .map(item => this.embedAliasRollMap[item.id]|| this.plugin?.pluginAliasRollMap[item.id])
       .filter(conf => !!conf)
   }
 
