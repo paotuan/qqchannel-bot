@@ -1,10 +1,13 @@
 <template>
-  <div class="collapse" :class="{ 'collapse-open': isOpen, 'collapse-close': !isOpen }">
+  <div v-if="config" class="collapse" :class="{ 'collapse-open': isOpen, 'collapse-close': !isOpen }">
     <div class="collapse-title text-md font-medium flex items-center gap-2 cursor-pointer" @click="isOpen = !isOpen">
       <input type="radio" class="radio" :checked="currentIsSelected" @click.stop="configStore.currentRollDeciderId = props.id" />
       <span class="inline-flex items-center gap-1 group">
         {{ config.name }}
-        <button class="btn btn-circle btn-ghost btn-xs invisible group-hover:visible" @click.stop="editSelf">
+        <div v-if="fromPlugin" class="tooltip tooltip-right" :data-tip="`来自插件：${fromPlugin}`">
+          <Squares2X2Icon class="w-4 h-4 flex-none" />
+        </div>
+        <button v-else class="btn btn-circle btn-ghost btn-xs invisible group-hover:visible" @click.stop="editSelf">
           <PencilSquareIcon class="w-4 h-4 flex-none" />
         </button>
       </span>
@@ -20,31 +23,34 @@
           {{ config.description || '作者什么说明都没有留下' }}
           <span class="text-base-100">&nbsp;(id: {{ props.id }})</span>
         </div>
-        <div class="grid rules-grid gap-2 mt-2">
-          <div></div>
-          <div class="font-bold">检定规则</div>
-          <div class="font-bold">结果描述</div>
-          <div class="leading-8 font-bold">大失败</div>
-          <input v-model="config.rules.worst.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-          <input v-model="config.rules.worst.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
-          <div class="leading-8 font-bold">大成功</div>
-          <input v-model="config.rules.best.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-          <input v-model="config.rules.best.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
-          <div class="leading-8 font-bold">失败</div>
-          <input v-model="config.rules.fail.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-          <input v-model="config.rules.fail.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
-          <div class="leading-8 font-bold">成功</div>
-          <input v-model="config.rules.success.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-          <input v-model="config.rules.success.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
-        </div>
+        <template v-if="!fromPlugin">
+          <div class="grid rules-grid gap-2 mt-2">
+            <div></div>
+            <div class="font-bold">检定规则</div>
+            <div class="font-bold">结果描述</div>
+            <div class="leading-8 font-bold">大失败</div>
+            <input v-model="config.rules.worst.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+            <input v-model="config.rules.worst.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+            <div class="leading-8 font-bold">大成功</div>
+            <input v-model="config.rules.best.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+            <input v-model="config.rules.best.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+            <div class="leading-8 font-bold">失败</div>
+            <input v-model="config.rules.fail.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+            <input v-model="config.rules.fail.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+            <div class="leading-8 font-bold">成功</div>
+            <input v-model="config.rules.success.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+            <input v-model="config.rules.success.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { PencilSquareIcon } from '@heroicons/vue/24/outline'
+import { PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../store/config'
+import { IPluginItemConfigForDisplay, usePluginStore } from '../../store/plugin'
 
 interface Props { id: string, defaultOpen: boolean } // full id
 interface Emits {
@@ -57,7 +63,9 @@ const emit = defineEmits<Emits>()
 
 // 根据 id 获取规则配置的具体内容
 const configStore = useConfigStore()
-const config = computed(() => configStore.getRollDeciderConfig(props.id))
+const pluginStore = usePluginStore()
+const config = computed(() => configStore.getRollDeciderConfig(props.id) || pluginStore.getPluginRollDeciderConfig(props.id))
+const fromPlugin = computed(() => (config.value as unknown as IPluginItemConfigForDisplay).fromPlugin) // 如果是插件，则取插件名
 
 // 当前规则是否被选中
 const currentIsSelected = computed(() => configStore.currentRollDeciderId === props.id)

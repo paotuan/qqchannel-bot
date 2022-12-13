@@ -1,11 +1,14 @@
 <template>
-  <div class="collapse" :class="{ 'collapse-open': isOpen, 'collapse-close': !isOpen }">
+  <div v-if="processor" class="collapse" :class="{ 'collapse-open': isOpen, 'collapse-close': !isOpen }">
     <div class="collapse-title text-md font-medium flex items-center gap-2 cursor-pointer" @click="isOpen = !isOpen">
       <Bars3Icon class="w-4 h-4 cursor-move flex-none sortable-handle" @click.stop/>
       <input v-model="item.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
       <span class="inline-flex items-center gap-1 group">
         {{ processor.name }}
-        <button class="btn btn-circle btn-ghost btn-xs invisible group-hover:visible" @click.stop="editSelf">
+        <div v-if="fromPlugin" class="tooltip tooltip-right" :data-tip="`来自插件：${fromPlugin}`">
+          <Squares2X2Icon class="w-4 h-4 flex-none" />
+        </div>
+        <button v-else class="btn btn-circle btn-ghost btn-xs invisible group-hover:visible" @click.stop="editSelf">
           <PencilSquareIcon class="w-4 h-4 flex-none" />
         </button>
       </span>
@@ -21,20 +24,23 @@
           {{ processor.description || '作者什么说明都没有留下' }}
           <span class="text-base-100">&nbsp;(id: {{ item.id }})</span>
         </div>
-        <div class="py-2 flex items-center">
-          当指令匹配
-          <input v-model="processor.command" type="text" placeholder="请输入匹配指令" class="input input-bordered input-sm w-60 mx-2" />
-          时，将它解析为：
-          <input v-model="processor.replacer" type="text" placeholder="请输入解析后的指令" class="input input-bordered input-sm w-60 mx-2" />
-        </div>
+        <template v-if="!fromPlugin">
+          <div class="py-2 flex items-center">
+            当指令匹配
+            <input v-model="processor.command" type="text" placeholder="请输入匹配指令" class="input input-bordered input-sm w-60 mx-2" />
+            时，将它解析为：
+            <input v-model="processor.replacer" type="text" placeholder="请输入解析后的指令" class="input input-bordered input-sm w-60 mx-2" />
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { computed, ref, toRefs } from 'vue'
-import { Bars3Icon, PencilSquareIcon } from '@heroicons/vue/24/outline'
+import { Bars3Icon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../store/config'
+import { IPluginItemConfigForDisplay, usePluginStore } from '../../store/plugin'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
 interface Emits {
@@ -48,7 +54,9 @@ const { item } = toRefs(props)
 
 // 根据 id 获取自定义回复配置的具体内容
 const configStore = useConfigStore()
-const processor = computed(() => configStore.getAliasRollProcessor(item.value.id))
+const pluginStore = usePluginStore()
+const processor = computed(() => configStore.getAliasRollProcessor(item.value.id) || pluginStore.getPluginAliasRollProcessor(item.value.id))
+const fromPlugin = computed(() => (processor.value as unknown as IPluginItemConfigForDisplay).fromPlugin) // 如果是插件，则取插件名
 
 // 面板展开状态
 const isOpen = ref(props.defaultOpen)

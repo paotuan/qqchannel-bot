@@ -5,8 +5,8 @@ import type { IPluginConfigDisplay } from '../../interface/common'
 export interface IPluginItemConfigForDisplay {
   id: string // fullId
   name: string
-  description: string // + 来自插件 xxx
-  fromPlugin: true // 标识是插件
+  description: string
+  fromPlugin: string // 标识插件名字，用于展示
 }
 
 export const usePluginStore = defineStore('plugin', () => {
@@ -21,8 +21,8 @@ export const usePluginStore = defineStore('plugin', () => {
         map[id] = {
           id,
           name: item.name,
-          description: `${item.description || ''} (来自 ${plugin.name})`,
-          fromPlugin: true
+          description: item.description || '',
+          fromPlugin: plugin.name
         }
       })
     })
@@ -34,7 +34,6 @@ export const usePluginStore = defineStore('plugin', () => {
   const aliasRollMap = computed(() => plugin2map('aliasRoll'))
 
   const getPluginCustomReplyProcessor = (fullId: string) => {
-    console.log(customReplyMap.value)
     return customReplyMap.value[fullId]
   }
 

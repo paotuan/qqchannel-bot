@@ -87,8 +87,8 @@ export class PluginManager {
 
   get pluginListForDisplay(): IPluginConfigDisplay[] {
     return Object.values(this.pluginMap).map<IPluginConfigDisplay>(plugin => ({
-      id: plugin.id,
-      name: plugin.name || plugin.id,
+      id: plugin.id || '--', // 以防万一空值容错
+      name: plugin.name || plugin.id || '--',
       customReply: (plugin.customReply || []).map(item => ({
         id: item.id,
         name: item.name,
