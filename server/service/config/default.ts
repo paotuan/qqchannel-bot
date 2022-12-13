@@ -7,17 +7,20 @@ import type {
 } from '../../../interface/config'
 
 const embedPluginId = 'io.paotuan.embed'
-const CONFIG_VERSION = 3
+const CONFIG_VERSION = 4
 
 export function getInitialDefaultConfig(): IChannelConfig {
   const customReplies = getEmbedCustomReply()
   const aliasRolls = getEmbedAliasRoll()
   const rollDeciders = getEmbedRollDecider()
+  const customReplyPlugins = ['io.paotuan.plugin.namegen.name']
   return {
     version: CONFIG_VERSION,
     defaultRoll: 'd100',
     specialDice: getSpecialDiceConfig(),
-    customReplyIds: customReplies.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
+    customReplyIds: customReplies
+      .map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
+      .concat(customReplyPlugins.map(id => ({ id, enabled: true }))),
     aliasRollIds: aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
     rollDeciderId: `${embedPluginId}.${rollDeciders[0].id}`,
     rollDeciderIds: rollDeciders.map(item => `${embedPluginId}.${item.id}`),
@@ -45,6 +48,10 @@ export function handleUpgrade(config: IChannelConfig) {
     config.aliasRollIds = aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
     config.specialDice = getSpecialDiceConfig()
     config.version = 3
+  }
+  if (config.version === 3) {
+    config.customReplyIds.push({ id: 'io.paotuan.plugin.namegen.name', enabled: true })
+    config.version = 4
   }
   return config
 }

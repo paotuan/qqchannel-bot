@@ -6,7 +6,7 @@ import type {
   ILog,
   INoteFetchResp,
   INoteSendResp,
-  INoteSyncResp, IUser
+  INoteSyncResp, IUser, IPluginConfigDisplay
 } from '../../interface/common'
 import type { ICard } from '../../interface/coc'
 import { useBotStore } from '../store/bot'
@@ -17,6 +17,7 @@ import { useCardStore } from '../store/card'
 import { useUserStore } from '../store/user'
 import { gtagEvent, Toast } from '../utils'
 import { useConfigStore } from '../store/config'
+import { usePluginStore } from '../store/plugin'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -120,4 +121,10 @@ ws.on('channel/config', data => {
   const res = data.data as IChannelConfigResp
   const configStore = useConfigStore()
   configStore.onUpdateConfig(res.config)
+})
+
+ws.on('plugin/list', data => {
+  const res = data.data as IPluginConfigDisplay[]
+  const pluginStore = usePluginStore()
+  pluginStore.onGetPlugins(res)
 })

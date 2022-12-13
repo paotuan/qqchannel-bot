@@ -13,7 +13,6 @@ export function useAliasRoll(config: ComputedRef<IChannelConfig | null>) {
 
   // 根据 full id 获取 reply config
   const getAliasRollProcessor = (fullId: string) => {
-    // todo 插件情况，信息可能不全
     return embedAliasRollMap.value[fullId]
   }
 
