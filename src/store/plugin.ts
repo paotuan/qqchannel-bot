@@ -9,11 +9,13 @@ export interface IPluginItemConfigForDisplay {
   fromPlugin: string // 标识插件名字，用于展示
 }
 
+export type PluginItemType = 'customReply' | 'rollDecider' | 'aliasRoll'
+
 export const usePluginStore = defineStore('plugin', () => {
   const plugins = ref<IPluginConfigDisplay[]>([])
 
   // @private fullId => config
-  const plugin2map = (type: 'customReply' | 'rollDecider' | 'aliasRoll') => {
+  const plugin2map = (type: PluginItemType) => {
     const map: Record<string, IPluginItemConfigForDisplay> = {}
     plugins.value.forEach(plugin => {
       plugin[type].forEach(item => {
@@ -50,6 +52,9 @@ export const usePluginStore = defineStore('plugin', () => {
   }
 
   return {
+    customReplyMap,
+    rollDeciderMap,
+    aliasRollMap,
     getPluginCustomReplyProcessor,
     getPluginRollDeciderConfig,
     getPluginAliasRollProcessor,
