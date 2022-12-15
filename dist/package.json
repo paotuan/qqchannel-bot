@@ -21,6 +21,6 @@
   "dependencies": {
     "chalk": "4",
     "express": "^4.18.1",
-    "open": "git+https://github.com/maliut/open-with-result.git"
+    "open-with-result": "^8.4.0"
   }
 }

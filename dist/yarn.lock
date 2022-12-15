@@ -327,9 +327,10 @@ on-finished@2.4.1:
   dependencies:
     ee-first "1.1.1"
 
-"open@git+https://github.com/maliut/open-with-result.git":
+open-with-result@^8.4.0:
   version "8.4.0"
-  resolved "git+https://github.com/maliut/open-with-result.git#0f7b920593a1b272fe0081ab544a3a55716db2c3"
+  resolved "https://registry.yarnpkg.com/open-with-result/-/open-with-result-8.4.0.tgz#7d1e003ae3849bc493c93682a8344d976b8f741f"
+  integrity sha512-f5peb3faPC6iq7+FjUTNxylbAcTd2v7hPpVjIhHdczE/bBEuqHaRdwIgyZdKuhqKe5OMZydiKraz67FAprVNDQ==
   dependencies:
     define-lazy-prop "^2.0.0"
     is-docker "^2.1.1"
