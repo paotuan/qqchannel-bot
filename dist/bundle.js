@@ -7,7 +7,7 @@ process
     // process.exit(1)
   })
 
-require('./server/index')
+require('./server/index') // 内部调用了 dotenv
 
 const express = require('express')
 const path = require('path')
@@ -16,9 +16,12 @@ const server = express()
 const open = require('open-with-result')
 const staticPath = path.resolve(__dirname, './client')
 server.use(express.static(staticPath))
-server.listen(4175)
 
-const localhostUrl = 'http://localhost:4175'
+const serverUrl = process.env.WS_SERVER_ADDR || 'localhost' // 如果通过该文件部署，必然不是前后端分离，server addr 是同一个
+const port = parseInt(process.env.WEB_PORT || '', 10) || 4175
+server.listen(port)
+
+const localhostUrl = `http://${serverUrl}:${port}`
 console.log(chalk.bold(`管理后台已启动，请使用浏览器访问 ${localhostUrl} 登录机器人`))
 ;(async () => {
   try {

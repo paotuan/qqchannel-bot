@@ -2,7 +2,9 @@ import mitt from 'mitt'
 import type { IMessage, Command } from '../../interface/common'
 import { useUIStore } from '../store/ui'
 
-const ws = new WebSocket('ws://localhost:4174')
+const serverAddr = import.meta.env.WS_SERVER_ADDR ?? 'localhost'
+const serverPort = import.meta.env.WS_SERVER_PORT ?? '4174'
+const ws = new WebSocket(`ws://${serverAddr}:${serverPort}`)
 const wsEmitter = mitt()
 
 ws.onopen = () => {
