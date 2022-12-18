@@ -11,6 +11,7 @@ import * as path from 'path'
 import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
+import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -28,7 +29,11 @@ export class PluginManager {
   }
 
   private get pluginRegisterContext(): IPluginRegisterContext {
-    return { versionName: VERSION_NAME, versionCode: VERSION_CODE } // todo: getItem/setItem
+    return {
+      versionName: VERSION_NAME,
+      versionCode: VERSION_CODE,
+      roll: exp => new DiceRoll(exp).total
+    } // todo: getItem/setItem
   }
 
   // 自带插件释放到 plugins 文件夹下
@@ -145,5 +150,8 @@ export class PluginManager {
 }
 
 const officialPluginsVersions = {
-  'io.paotuan.plugin.namegen': 1
+  'io.paotuan.plugin.namegen': 1,
+  'io.paotuan.plugin.insane': 1,
+  'io.paotuan.plugin.cardgen': 1,
+  'io.paotuan.plugin.cocrules': 1,
 }

@@ -99,6 +99,9 @@ const onEditPlugins = (newPluginIds: string[]) => {
       if (pluginIndex >= 0) {
         // 原来存在，删除
         configStore.config!.rollDeciderIds.splice(pluginIndex, 1)
+        if (configStore.config!.rollDeciderId === pluginFullId) {
+          configStore.config!.rollDeciderId = ''
+        }
       }
     }
   })

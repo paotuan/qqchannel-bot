@@ -13,7 +13,13 @@ export function getInitialDefaultConfig(): IChannelConfig {
   const customReplies = getEmbedCustomReply()
   const aliasRolls = getEmbedAliasRoll()
   const rollDeciders = getEmbedRollDecider()
-  const customReplyPlugins = ['io.paotuan.plugin.namegen.name']
+  const customReplyPlugins = [
+    'io.paotuan.plugin.namegen.name',
+    'io.paotuan.plugin.insane.ti',
+    'io.paotuan.plugin.insane.li',
+    'io.paotuan.plugin.cardgen.coc',
+    'io.paotuan.plugin.cardgen.dnd'
+  ]
   return {
     version: CONFIG_VERSION,
     defaultRoll: 'd100',
@@ -51,6 +57,34 @@ export function handleUpgrade(config: IChannelConfig) {
   }
   if (config.version === 3) {
     config.customReplyIds.push({ id: 'io.paotuan.plugin.namegen.name', enabled: true })
+    config.customReplyIds.push({ id: 'io.paotuan.plugin.insane.ti', enabled: true })
+    config.customReplyIds.push({ id: 'io.paotuan.plugin.insane.li', enabled: true })
+    config.customReplyIds.push({ id: 'io.paotuan.plugin.cardgen.coc', enabled: true })
+    config.customReplyIds.push({ id: 'io.paotuan.plugin.cardgen.dnd', enabled: true })
+    // 删除旧 coc 生成
+    const index = config.embedPlugin.customReply?.findIndex(item => item.id === 'coccardrand')
+    if (typeof index === 'number' && index >= 0) {
+      config.embedPlugin.customReply?.splice(index, 1)
+    }
+    const index1 = config.customReplyIds.findIndex(item => item.id === 'io.paotuan.embed.coccardrand')
+    if (index1 >= 0) {
+      config.customReplyIds.splice(index1, 1)
+    }
+    // 删除旧自定义规则
+    const rules2remove = ['coc1', 'coc2', 'coc3', 'coc4', 'coc5', 'deltagreen']
+    rules2remove.forEach(id => {
+      const index = config.embedPlugin.rollDecider?.findIndex(item => item.id === id)
+      if (typeof index === 'number' && index >= 0) {
+        config.embedPlugin.rollDecider?.splice(index, 1)
+      }
+      const index1 = config.rollDeciderIds.findIndex(_id => _id === 'io.paotuan.embed.' + id)
+      if (index1 >= 0) {
+        config.rollDeciderIds.splice(index1, 1)
+        if (config.rollDeciderId === 'io.paotuan.embed.' + id) {
+          config.rollDeciderId = 'io.paotuan.embed.coc0'
+        }
+      }
+    })
     config.version = 4
   }
   return config
@@ -71,19 +105,19 @@ function getEmbedCustomReply(): ICustomReplyConfig[] {
         }
       ]
     },
-    {
-      id: 'coccardrand',
-      name: 'COC 人物作成',
-      description: '使用 /coc 随机人物作成',
-      command: 'coc',
-      trigger: 'exact',
-      items: [
-        {
-          weight: 1,
-          reply: '{{at}}人物作成：\n力量[[3d6*5]] 体质[[3d6*5]] 体型[[(2d6+6)*5]] 敏捷[[3d6*5]] 外貌[[3d6*5]] 智力[[(2d6+6)*5]] 意志[[3d6*5]] 教育[[(2d6+6)*5]] 幸运[[3d6*5]]'
-        }
-      ]
-    },
+    // {
+    //   id: 'coccardrand',
+    //   name: 'COC 人物作成',
+    //   description: '使用 /coc 随机人物作成',
+    //   command: 'coc',
+    //   trigger: 'exact',
+    //   items: [
+    //     {
+    //       weight: 1,
+    //       reply: '{{at}}人物作成：\n力量[[3d6*5]] 体质[[3d6*5]] 体型[[(2d6+6)*5]] 敏捷[[3d6*5]] 外貌[[3d6*5]] 智力[[(2d6+6)*5]] 意志[[3d6*5]] 教育[[(2d6+6)*5]] 幸运[[3d6*5]]'
+    //     }
+    //   ]
+    // },
     {
       id: 'gacha',
       name: '简单抽卡',
@@ -226,144 +260,144 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
         }
       }
     },
-    {
-      id: 'coc1',
-      name: 'COC 规则 1',
-      description: '不满 50 出 1 大成功，满 50 出 1-5 大成功；不满 50 出 96-100 大失败，满 50 出 100 大失败',
-      rules: {
-        worst: {
-          expression: '(baseValue < 50 && roll > 95) || (baseValue >= 50 && roll == 100)',
-          reply: '大失败'
-        },
-        best: {
-          expression: '(baseValue < 50 && roll == 1) || (baseValue >= 50 && roll <= 5)',
-          reply: '大成功'
-        },
-        fail: {
-          expression: 'roll > targetValue',
-          reply: '> {{targetValue}} 失败'
-        },
-        success: {
-          expression: 'roll <= targetValue',
-          reply: '≤ {{targetValue}} 成功'
-        }
-      }
-    },
-    {
-      id: 'coc2',
-      name: 'COC 规则 2',
-      description: '出 1-5 且 ≤ 成功率大成功；出 100 或出 96-99 且 > 成功率大失败',
-      rules: {
-        worst: {
-          expression: 'roll == 100 || (roll > 95 && roll > targetValue)',
-          reply: '大失败'
-        },
-        best: {
-          expression: 'roll <= 5 && roll <= targetValue',
-          reply: '大成功'
-        },
-        fail: {
-          expression: 'roll > targetValue',
-          reply: '> {{targetValue}} 失败'
-        },
-        success: {
-          expression: 'roll <= targetValue',
-          reply: '≤ {{targetValue}} 成功'
-        }
-      }
-    },
-    {
-      id: 'coc3',
-      name: 'COC 规则 3',
-      description: '出 1-5 大成功；出 96-100 大失败',
-      rules: {
-        worst: {
-          expression: 'roll > 95',
-          reply: '大失败'
-        },
-        best: {
-          expression: 'roll <= 5',
-          reply: '大成功'
-        },
-        fail: {
-          expression: 'roll > targetValue',
-          reply: '> {{targetValue}} 失败'
-        },
-        success: {
-          expression: 'roll <= targetValue',
-          reply: '≤ {{targetValue}} 成功'
-        }
-      }
-    },
-    {
-      id: 'coc4',
-      name: 'COC 规则 4',
-      description: '出 1-5 且 ≤ 成功率/10 大成功；不满 50 出 ≥ 96+成功率/10 大失败，满 50 出 100 大失败',
-      rules: {
-        worst: {
-          expression: '(baseValue < 50 && roll >= 96 + targetValue / 10) || (baseValue >= 50 && roll == 100)',
-          reply: '大失败'
-        },
-        best: {
-          expression: 'roll <= 5 && roll <= targetValue / 10',
-          reply: '大成功'
-        },
-        fail: {
-          expression: 'roll > targetValue',
-          reply: '> {{targetValue}} 失败'
-        },
-        success: {
-          expression: 'roll <= targetValue',
-          reply: '≤ {{targetValue}} 成功'
-        }
-      }
-    },
-    {
-      id: 'coc5',
-      name: 'COC 规则 5',
-      description: '出 1-2 且 < 成功率/5 大成功；不满 50 出 96-100 大失败，满 50 出 99-100 大失败',
-      rules: {
-        worst: {
-          expression: '(baseValue < 50 && roll >= 96) || (baseValue >= 50 && roll >= 99)',
-          reply: '大失败'
-        },
-        best: {
-          expression: 'roll <= 2 && roll < targetValue / 5',
-          reply: '大成功'
-        },
-        fail: {
-          expression: 'roll > targetValue',
-          reply: '> {{targetValue}} 失败'
-        },
-        success: {
-          expression: 'roll <= targetValue',
-          reply: '≤ {{targetValue}} 成功'
-        }
-      }
-    },
-    {
-      id: 'deltagreen',
-      name: '绿色三角洲规则',
-      description: '出 1，或个位数 = 十位数且 ≤ 成功率则大成功；出 100，或个位数 = 十位数且 > 成功率则大失败',
-      rules: {
-        worst: {
-          expression: 'roll == 100 || (roll % 11 == 0 && roll > targetValue)',
-          reply: '大失败'
-        },
-        best: {
-          expression: 'roll == 1 || (roll % 11 == 0 && roll <= targetValue)',
-          reply: '大成功'
-        },
-        fail: {
-          expression: 'roll > targetValue',
-          reply: '> {{targetValue}} 失败'
-        },
-        success: {
-          expression: 'roll <= targetValue',
-          reply: '≤ {{targetValue}} 成功'
-        }
-      }
-    }
+    // {
+    //   id: 'coc1',
+    //   name: 'COC 规则 1',
+    //   description: '不满 50 出 1 大成功，满 50 出 1-5 大成功；不满 50 出 96-100 大失败，满 50 出 100 大失败',
+    //   rules: {
+    //     worst: {
+    //       expression: '(baseValue < 50 && roll > 95) || (baseValue >= 50 && roll == 100)',
+    //       reply: '大失败'
+    //     },
+    //     best: {
+    //       expression: '(baseValue < 50 && roll == 1) || (baseValue >= 50 && roll <= 5)',
+    //       reply: '大成功'
+    //     },
+    //     fail: {
+    //       expression: 'roll > targetValue',
+    //       reply: '> {{targetValue}} 失败'
+    //     },
+    //     success: {
+    //       expression: 'roll <= targetValue',
+    //       reply: '≤ {{targetValue}} 成功'
+    //     }
+    //   }
+    // },
+    // {
+    //   id: 'coc2',
+    //   name: 'COC 规则 2',
+    //   description: '出 1-5 且 ≤ 成功率大成功；出 100 或出 96-99 且 > 成功率大失败',
+    //   rules: {
+    //     worst: {
+    //       expression: 'roll == 100 || (roll > 95 && roll > targetValue)',
+    //       reply: '大失败'
+    //     },
+    //     best: {
+    //       expression: 'roll <= 5 && roll <= targetValue',
+    //       reply: '大成功'
+    //     },
+    //     fail: {
+    //       expression: 'roll > targetValue',
+    //       reply: '> {{targetValue}} 失败'
+    //     },
+    //     success: {
+    //       expression: 'roll <= targetValue',
+    //       reply: '≤ {{targetValue}} 成功'
+    //     }
+    //   }
+    // },
+    // {
+    //   id: 'coc3',
+    //   name: 'COC 规则 3',
+    //   description: '出 1-5 大成功；出 96-100 大失败',
+    //   rules: {
+    //     worst: {
+    //       expression: 'roll > 95',
+    //       reply: '大失败'
+    //     },
+    //     best: {
+    //       expression: 'roll <= 5',
+    //       reply: '大成功'
+    //     },
+    //     fail: {
+    //       expression: 'roll > targetValue',
+    //       reply: '> {{targetValue}} 失败'
+    //     },
+    //     success: {
+    //       expression: 'roll <= targetValue',
+    //       reply: '≤ {{targetValue}} 成功'
+    //     }
+    //   }
+    // },
+    // {
+    //   id: 'coc4',
+    //   name: 'COC 规则 4',
+    //   description: '出 1-5 且 ≤ 成功率/10 大成功；不满 50 出 ≥ 96+成功率/10 大失败，满 50 出 100 大失败',
+    //   rules: {
+    //     worst: {
+    //       expression: '(baseValue < 50 && roll >= 96 + targetValue / 10) || (baseValue >= 50 && roll == 100)',
+    //       reply: '大失败'
+    //     },
+    //     best: {
+    //       expression: 'roll <= 5 && roll <= targetValue / 10',
+    //       reply: '大成功'
+    //     },
+    //     fail: {
+    //       expression: 'roll > targetValue',
+    //       reply: '> {{targetValue}} 失败'
+    //     },
+    //     success: {
+    //       expression: 'roll <= targetValue',
+    //       reply: '≤ {{targetValue}} 成功'
+    //     }
+    //   }
+    // },
+    // {
+    //   id: 'coc5',
+    //   name: 'COC 规则 5',
+    //   description: '出 1-2 且 < 成功率/5 大成功；不满 50 出 96-100 大失败，满 50 出 99-100 大失败',
+    //   rules: {
+    //     worst: {
+    //       expression: '(baseValue < 50 && roll >= 96) || (baseValue >= 50 && roll >= 99)',
+    //       reply: '大失败'
+    //     },
+    //     best: {
+    //       expression: 'roll <= 2 && roll < targetValue / 5',
+    //       reply: '大成功'
+    //     },
+    //     fail: {
+    //       expression: 'roll > targetValue',
+    //       reply: '> {{targetValue}} 失败'
+    //     },
+    //     success: {
+    //       expression: 'roll <= targetValue',
+    //       reply: '≤ {{targetValue}} 成功'
+    //     }
+    //   }
+    // },
+    // {
+    //   id: 'deltagreen',
+    //   name: '绿色三角洲规则',
+    //   description: '出 1，或个位数 = 十位数且 ≤ 成功率则大成功；出 100，或个位数 = 十位数且 > 成功率则大失败',
+    //   rules: {
+    //     worst: {
+    //       expression: 'roll == 100 || (roll % 11 == 0 && roll > targetValue)',
+    //       reply: '大失败'
+    //     },
+    //     best: {
+    //       expression: 'roll == 1 || (roll % 11 == 0 && roll <= targetValue)',
+    //       reply: '大成功'
+    //     },
+    //     fail: {
+    //       expression: 'roll > targetValue',
+    //       reply: '> {{targetValue}} 失败'
+    //     },
+    //     success: {
+    //       expression: 'roll <= targetValue',
+    //       reply: '≤ {{targetValue}} 成功'
+    //     }
+    //   }
+    // }
   ]
 }
 
