@@ -1,6 +1,8 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage, MessageToCreate } from 'qq-guild-bot'
+import * as FormData from 'form-data'
+import fetch from 'node-fetch'
 import type {
   INoteFetchReq,
   INoteSendReq,
@@ -75,6 +77,41 @@ export class NoteManager {
     } catch (e: any) {
       console.error('[Note] 发送失败', e)
       this.api.wss.sendToClient<string>(client, { cmd: 'note/send', success: false, data: `发送失败 ${e?.code || ''}` })
+    }
+  }
+
+  async sendRawImage(client: WsClient, img: Buffer) {
+    const guildId = client.listenToGuildId
+    const channelId = client.listenToChannelId
+    const lastChannelMessage = this.lastChannelMessageMap[channelId]
+    try {
+      const formData = new FormData()
+      const lastMsgTime = lastChannelMessage ? new Date(lastChannelMessage.timestamp).getTime() : 0
+      const currentTime = new Date().getTime()
+      // 判断有没有超过被动消息有效期
+      if (currentTime - lastMsgTime <= 5 * 60 * 1000 - 2000) {
+        formData.append('msg_id', lastChannelMessage?.id)
+        console.log('[Note] 发送被动消息')
+      } else {
+        delete this.lastChannelMessageMap[channelId]
+        console.log('[Note] 发送主动消息 暂不支持')
+        // todo 暂时屏蔽发主动消息，省的处理审核那一坨东西
+        throw { code: '频道不活跃' }
+      }
+      formData.append('file_image', img, 'test.png') // 名字必须有以获取正确的 content-type, 但只要是图片就行
+      console.log(formData)
+      // 发消息
+      const res = await fetch(`https://api.sgroup.qq.com/channels/${channelId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': formData.getHeaders()['content-type'],
+          'Authorization': `Bot ${this.api.appid}.${this.api.token}`
+        },
+        body: formData
+      })
+      console.log(res)
+    } catch (e) {
+      console.log(e)
     }
   }
 

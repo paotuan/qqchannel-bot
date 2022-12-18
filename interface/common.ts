@@ -11,6 +11,7 @@ export type Command =
   | 'user/list' // res
   | 'log/push' // res
   | 'note/send' // req/res
+  | 'note/sendImageRaw' // req*
   | 'note/sync' // req/res
   | 'note/fetch' // req/res
   | 'note/delete' // req

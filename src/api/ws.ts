@@ -37,5 +37,8 @@ export default {
   },
   send<T>(msg: IMessage<T>) {
     ws.send(JSON.stringify(msg))
+  },
+  sendRaw(msg: Blob) {
+    ws.send(msg)
   }
 }

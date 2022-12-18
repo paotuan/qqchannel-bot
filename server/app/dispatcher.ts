@@ -20,6 +20,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'note/send':
     handleSendNote(client, server, request.data as INoteSendReq)
     break
+  case 'note/sendImageRaw':
+    handleSendImage(client, server, request.data as Buffer)
+    break
   case 'note/sync':
     handleSyncNotes(client, server)
     break
@@ -124,6 +127,14 @@ function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
   const qApi = server.qApis.find(client.appid)
   if (qApi) {
     qApi.notes.sendNote(client, data)
+  }
+}
+
+function handleSendImage(client: WsClient, server: Wss, data: Buffer) {
+  if (!client.listenToChannelId) return
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    qApi.notes.sendRawImage(client, data)
   }
 }
 
