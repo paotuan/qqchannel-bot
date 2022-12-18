@@ -19,10 +19,7 @@
     </div>
     <div class="collapse-content">
       <div class="pl-8">
-        <div>
-          {{ config.description || '作者什么说明都没有留下' }}
-          <span class="text-base-100">&nbsp;(id: {{ props.id }})</span>
-        </div>
+        <div>{{ config.description || '作者什么说明都没有留下' }}</div>
         <template v-if="!fromPlugin">
           <div class="grid rules-grid gap-2 mt-2">
             <div></div>

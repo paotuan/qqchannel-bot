@@ -20,10 +20,7 @@
     </div>
     <div class="collapse-content">
       <div class="pl-6">
-        <div>
-          {{ processor.description || '作者什么说明都没有留下' }}
-          <span class="text-base-100">&nbsp;(id: {{ item.id }})</span>
-        </div>
+        <div>{{ processor.description || '作者什么说明都没有留下' }}</div>
         <template v-if="!fromPlugin">
           <div class="py-2 flex items-center">
             当指令匹配

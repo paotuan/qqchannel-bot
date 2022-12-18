@@ -1,6 +1,6 @@
 <template>
   <d-modal :visible="props.visible" title="选择插件" lock @update:visible="emit('update:visible', false)">
-    <div class="divider-y">
+    <div class="divider-y max-h-[70vh] overflow-y-auto">
       <template v-for="item in props.list" :key="item.id">
         <div class="collapse" :class="{ 'collapse-open': collapseOpenMap[item.id], 'collapse-close': !collapseOpenMap[item.id] }">
           <div class="collapse-title text-md font-medium flex items-center gap-2 cursor-pointer px-0" @click="collapseOpenMap[item.id] = !collapseOpenMap[item.id]">
@@ -11,10 +11,7 @@
             </div>
           </div>
           <div class="collapse-content">
-            <div class="pl-6">
-              {{ item.description || '作者什么说明都没有留下' }}
-              <span class="text-base-100">&nbsp;(id: {{ item.id }})</span>
-            </div>
+            <div class="pl-6">{{ item.description || '作者什么说明都没有留下' }}</div>
           </div>
         </div>
       </template>
