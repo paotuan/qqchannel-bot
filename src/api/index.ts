@@ -56,9 +56,17 @@ ws.on('note/send', data => {
     const res = data.data as INoteSendResp
     const note = useNoteStore()
     note.ids = res.allNoteIds
-    note.msgMap[res.note.msgId] = res.note
+    if (res.note) {
+      note.msgMap[res.note.msgId] = res.note
+    }
     note.lastSyncTime = Date.now()
-    note.clearText()
+    note.fetchNotesIfNeed()
+    if (res.msgType === 'text') {
+      note.clearText()
+    } else {
+      note.clearImage()
+    }
+    Toast.success('发送成功！')
   } else {
     console.error('[Note]', data.data)
     Toast.error('发送失败！')

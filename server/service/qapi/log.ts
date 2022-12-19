@@ -32,7 +32,7 @@ export class LogManager {
   pushToClients(guildId: string, channelId: string, ...logs: ILog[]) {
     // log @ 替换
     logs.forEach(log => {
-      if (log.content) {
+      if (log.msgType === 'text' && log.content) {
         log.content = log.content.replace(/<@!(\d+)>/g, (_, userId: string) => {
           const user = this.api.guilds.findUser(userId, guildId)
           let name = user ? user.nick || user.username || user.id : userId

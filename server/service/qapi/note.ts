@@ -10,7 +10,7 @@ import type {
   INoteSyncResp,
   INote,
   INoteFetchResp,
-  INoteDeleteReq
+  INoteDeleteReq, MessageType
 } from '../../../interface/common'
 import type { WsClient } from '../../app/wsclient'
 
@@ -36,35 +36,19 @@ export class NoteManager {
   }
 
   async sendNote(client: WsClient, req: INoteSendReq) {
-    const msgToCreate: MessageToCreate = { content: req.content }
     const guildId = client.listenToGuildId
     const channelId = client.listenToChannelId
-    const lastChannelMessage = this.lastChannelMessageMap[channelId]
     try {
-      const lastMsgTime = lastChannelMessage ? new Date(lastChannelMessage.timestamp).getTime() : 0
-      const currentTime = new Date().getTime()
-      // 判断有没有超过被动消息有效期
-      if (currentTime - lastMsgTime <= 5 * 60 * 1000 - 2000) {
-        msgToCreate.msg_id = lastChannelMessage?.id
-        console.log('[Note] 发送被动消息')
-      } else {
-        delete this.lastChannelMessageMap[channelId]
-        console.log('[Note] 发送主动消息 暂不支持')
-        // todo 暂时屏蔽发主动消息，省的处理审核那一坨东西
-        throw { code: '频道不活跃' }
+      const msgToCreate: MessageToCreate = {
+        msg_id: this.getLastChannelMessageId(channelId),
+        content: req.msgType === 'text' ? req.content : undefined,
+        image: req.msgType === 'image' ? req.content : undefined
       }
       // 1. 发消息
       const resp = await this.api.qqClient.messageApi.postMessage(channelId, msgToCreate)
       // 2. 发消息成功后记录 log
       const msgId = resp.data.id
-      this.api.logs.pushToClients(guildId, channelId, {
-        msgId: msgId,
-        msgType: req.msgType,
-        userId: this.api.botInfo?.id || '',
-        username: this.api.botInfo?.username || '',
-        content: req.content,
-        timestamp: resp.data.timestamp
-      })
+      this.sendLogAsync(guildId, channelId, msgId, req.content, resp.data.timestamp)
       // 3. 设为精华消息
       const { data } = await this.api.qqClient.pinsMessageApi.putPinsMessage(channelId, msgId)
       console.log('[Note] 发送成功', req.content)
@@ -72,7 +56,7 @@ export class NoteManager {
       this.api.wss.sendToChannel<INoteSendResp>(channelId, {
         cmd: 'note/send',
         success: true,
-        data: { note: { ...req, msgId }, allNoteIds: data.message_ids }
+        data: { allNoteIds: data.message_ids, msgType: req.msgType }
       })
     } catch (e: any) {
       console.error('[Note] 发送失败', e)
@@ -83,24 +67,11 @@ export class NoteManager {
   async sendRawImage(client: WsClient, img: Buffer) {
     const guildId = client.listenToGuildId
     const channelId = client.listenToChannelId
-    const lastChannelMessage = this.lastChannelMessageMap[channelId]
     try {
       const formData = new FormData()
-      const lastMsgTime = lastChannelMessage ? new Date(lastChannelMessage.timestamp).getTime() : 0
-      const currentTime = new Date().getTime()
-      // 判断有没有超过被动消息有效期
-      if (currentTime - lastMsgTime <= 5 * 60 * 1000 - 2000) {
-        formData.append('msg_id', lastChannelMessage?.id)
-        console.log('[Note] 发送被动消息')
-      } else {
-        delete this.lastChannelMessageMap[channelId]
-        console.log('[Note] 发送主动消息 暂不支持')
-        // todo 暂时屏蔽发主动消息，省的处理审核那一坨东西
-        throw { code: '频道不活跃' }
-      }
+      formData.append('msg_id', this.getLastChannelMessageId(channelId))
       formData.append('file_image', img, 'test.png') // 名字必须有以获取正确的 content-type, 但只要是图片就行
-      console.log(formData)
-      // 发消息
+      // 1. 发消息
       const res = await fetch(`https://api.sgroup.qq.com/channels/${channelId}/messages`, {
         method: 'POST',
         headers: {
@@ -109,9 +80,22 @@ export class NoteManager {
         },
         body: formData
       })
-      console.log(res)
-    } catch (e) {
-      console.log(e)
+      const resp = await res.json() as IMessage
+      // 2. 发消息成功后记录 log
+      const msgId = resp.id
+      this.sendLogAsync(guildId, channelId, msgId)
+      // 3. 设为精华消息
+      const { data } = await this.api.qqClient.pinsMessageApi.putPinsMessage(channelId, msgId)
+      console.log('[Note] 发送成功 本地图片')
+      // 4. 返回成功结果
+      this.api.wss.sendToChannel<INoteSendResp>(channelId, {
+        cmd: 'note/send',
+        success: true,
+        data: { allNoteIds: data.message_ids, msgType: 'image' } // 发图片返回的 res 没有图片链接，干脆只返回所有 id 去同步
+      })
+    } catch (e: any) {
+      console.error('[Note] 发送本地图片失败', e)
+      this.api.wss.sendToClient<string>(client, { cmd: 'note/send', success: false, data: `发送失败 ${e?.code || ''}` })
     }
   }
 
@@ -167,6 +151,62 @@ export class NoteManager {
       console.log('[Note] 取消精华成功')
     } catch (e) {
       console.error('[Note] 取消精华失败', e)
+    }
+  }
+
+  // 获取频道最新一条消息，用于发被动
+  private getLastChannelMessageId(channelId: string) {
+    const lastChannelMessage = this.lastChannelMessageMap[channelId]
+    const lastMsgTime = lastChannelMessage ? new Date(lastChannelMessage.timestamp).getTime() : 0
+    const currentTime = new Date().getTime()
+    // 判断有没有超过被动消息有效期
+    if (currentTime - lastMsgTime <= 5 * 60 * 1000 - 2000) {
+      console.log('[Note] 发送被动消息')
+      return lastChannelMessage?.id
+    } else {
+      delete this.lastChannelMessageMap[channelId]
+      console.log('[Note] 发送主动消息 暂不支持')
+      // todo 暂时屏蔽发主动消息，省的处理审核那一坨东西
+      throw { code: '频道不活跃' }
+    }
+  }
+
+  // 机器人自己发的消息异步推送 log
+  private async sendLogAsync(guildId: string, channelId: string, msgId: string, content?: string, timestamp?: string) {
+    // 文字可以直接有 content, 直接 push
+    if (content) {
+      this.api.logs.pushToClients(guildId, channelId, {
+        msgId: msgId,
+        msgType: 'text',
+        userId: this.api.botInfo?.id || '',
+        username: this.api.botInfo?.username || '',
+        content: content,
+        timestamp: timestamp!
+      })
+    }
+    try {
+      // 没 content 的情况，是图片，获取不到转存后的图片地址，需要单独请求下
+      const resp = await this.api.qqClient.messageApi.message(channelId, msgId)
+      const msg = resp.data.message
+      let fetchedContent: string = msg.content
+      let msgType: MessageType = 'text'
+      if (msg.attachments?.[0]?.url) {
+        fetchedContent = msg.attachments[0].url
+        msgType = 'image'
+      }
+      if (!fetchedContent) {
+        fetchedContent = '消息为空或暂不支持'
+      }
+      this.api.logs.pushToClients(guildId, channelId, {
+        msgId: msgId,
+        msgType: msgType,
+        userId: this.api.botInfo?.id || '',
+        username: this.api.botInfo?.username || '',
+        content: fetchedContent,
+        timestamp: msg.timestamp
+      })
+    } catch (e) {
+      console.error('[Note] 获取消息详情失败', e)
     }
   }
 }

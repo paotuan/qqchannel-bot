@@ -1,11 +1,17 @@
 import { defineStore } from 'pinia'
 import type { INote, INoteDeleteReq, INoteFetchReq, INoteSendReq } from '../../interface/common'
 import ws from '../api/ws'
-import { gtagEvent } from '../utils'
+import { gtagEvent, Toast } from '../utils'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
+    // 表单相关
     textContent: '',
+    imageDialogVisible: false,
+    imageUrl: '',
+    imageFile: null as File | null,
+    imageFileChooser: null as HTMLInputElement | null,
+    // 表单相关 end
     ids: [] as string[],
     msgMap: {} as { [key: string]: INote },
     lastSyncTime: 0
@@ -19,8 +25,28 @@ export const useNoteStore = defineStore('note', {
       ws.send<INoteSendReq>({ cmd: 'note/send', data: { msgType: 'text', content: this.textContent } })
       gtagEvent('note/send')
     },
+    sendImage() {
+      if (this.imageUrl) {
+        const url = this.imageUrl.trim()
+        if (!url.startsWith('https://')) {
+          Toast.error('图片链接必须以 https:// 开头！')
+          return
+        }
+        ws.send<INoteSendReq>({ cmd: 'note/send', data: { msgType: 'image', content: url } })
+        gtagEvent('note/send')
+      } else if (this.imageFile) {
+        ws.sendRaw(this.imageFile)
+        gtagEvent('note/send')
+      }
+    },
     clearText() {
       this.textContent = ''
+    },
+    clearImage() {
+      this.imageDialogVisible = false
+      this.imageUrl = ''
+      this.imageFile = null
+      if (this.imageFileChooser) this.imageFileChooser.value = ''
     },
     sync() {
       ws.send({ cmd: 'note/sync', data: '' })
