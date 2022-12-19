@@ -4,7 +4,18 @@
       <div v-for="log in logStore.logs" :key="log.msgId" class="group w-full flex items-center gap-2 leading-loose">
         <Bars3Icon class="w-4 h-4 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
         <span class="font-bold flex-none" :title="log.userId">{{ nickOf(log) }}</span>
-        <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
+        <template v-if="log.msgType === 'text'">
+          <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
+        </template>
+        <template v-else>
+          <div class="flex-grow">
+            <div class="w-1/2 h-40">
+              <a :href="`https://${log.content}`" target="_blank" rel="noopener noreferrer">
+                <img :src="`https://${log.content}`" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
+              </a>
+            </div>
+          </div>
+        </template>
         <XMarkIcon class="w-4 h-4 cursor-pointer invisible group-hover:visible text-error justify-self-end flex-none"
                    @click="logStore.removeLog(log)"/>
       </div>
