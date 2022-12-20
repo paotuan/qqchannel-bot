@@ -66,6 +66,7 @@ const CSS_TEMPLATE = `
 .chat-item { padding: 4px; }
 .chat-item-name { font-weight: bold; }
 .chat-item-time { margin-left: 0.5em; }
+.chat-item-img { max-width: 50% }
 ${PATTLE.map((colors, i) => `.chat-user-${i} { background: ${colors[0]}; border-left: 4px solid ${colors[1]}; }`).join('\n')}
 `
 
@@ -77,6 +78,7 @@ function exportHTML(logs: ILog[]) {
   let listHtml = ''   // 最终结果
   logs.forEach(log => {
     const user = userStore.nickOf(log.userId) || log.username || log.userId
+    const content = log.msgType === 'text' ? log.content : logImageContent(log)
     if (user !== lastUser) {
       // 上一段结尾
       if (listHtml !== '') listHtml += '</div>'
@@ -89,9 +91,9 @@ function exportHTML(logs: ILog[]) {
       listHtml += `<div class='chat-item chat-user-${userIndex}'>`
         + `<div class='meta'><span class='chat-item-name'>${user}</span>`
         + `<span class='chat-item-time'>${formatTime(log.timestamp)}</span>`
-        + `</div><div class='content'>${log.content}</div>`
+        + `</div><div class='content'>${content}</div>`
     } else {
-      listHtml += `<div class='content'>${log.content}</div>`
+      listHtml += `<div class='content'>${content}</div>`
     }
     lastUser = user
   })
@@ -99,6 +101,10 @@ function exportHTML(logs: ILog[]) {
   // add css
   listHtml += `<style>${CSS_TEMPLATE}</style>`
   download('html', listHtml)
+}
+
+function logImageContent(log: ILog) {
+  return `<a href="https://${log.content}" target="_blank" rel="noopener noreferrer"><img src="https://${log.content}" referrerpolicy="no-referrer" class="chat-item-img" /></a>`
 }
 
 // 导出字符串
@@ -111,7 +117,8 @@ function exportText(logs: ILog[]) {
     if (user !== lastUser) {
       result += `${user} ${formatTime(log.timestamp)}\n`
     }
-    result += log.content + '\n'
+    const content = log.msgType === 'text' ? log.content : `[图片](https://${log.content})`
+    result += content + '\n'
     lastUser = user
   })
   download('text', result)
