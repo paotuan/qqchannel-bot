@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { useUIStore } from '../../store/ui'
 import LogPanel from '../../views/LogPanel.vue'
-import NotePanel from '../../views/NotePanel.vue'
+import NotePanel from '../../views/NotePanel/NotePanel.vue'
 import CardPanel from '../../views/CardPanel/CardPanel.vue'
 import ConnectionStatus from './ConnectionStatus.vue'
 import ConfigPanel from '../../views/ConfigPanel/ConfigPanel.vue'

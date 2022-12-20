@@ -11,6 +11,7 @@ export type Command =
   | 'user/list' // res
   | 'log/push' // res
   | 'note/send' // req/res
+  | 'note/sendImageRaw' // req*
   | 'note/sync' // req/res
   | 'note/fetch' // req/res
   | 'note/delete' // req
@@ -19,6 +20,7 @@ export type Command =
   | 'card/delete' // req
   | 'card/link'  // req/res
   | 'card/test' // res
+  | 'plugin/list' // res
 
 export interface IMessage<T> {
   cmd: Command
@@ -102,7 +104,8 @@ export interface INote {
 export type INoteSendReq = Omit<INote, 'msgId'>
 
 export interface INoteSendResp {
-  note: INote
+  msgType: MessageType
+  note?: INote // 发图片获取不了转存后的地址，所以干脆不传了，直接前端通过 id 获取
   allNoteIds: string[]
 }
 
@@ -144,3 +147,18 @@ export interface ICardTestResp {
   success: boolean
 }
 // endregion card
+
+// region plugin
+interface IPluginItemConfig {
+  id: string // 短 id
+  name: string
+  description?: string
+}
+
+export interface IPluginConfigDisplay {
+  id: string
+  name: string
+  customReply: IPluginItemConfig[]
+  aliasRoll: IPluginItemConfig[]
+  rollDecider: IPluginItemConfig[]
+}

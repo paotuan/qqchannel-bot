@@ -13,7 +13,6 @@ export function useRollDecider(config: ComputedRef<IChannelConfig | null>) {
 
   // 根据 full id 获取 roll decider
   const getRollDeciderConfig = (fullId: string) => {
-    // todo 插件
     return embedRollDeciderMap.value[fullId]
   }
 

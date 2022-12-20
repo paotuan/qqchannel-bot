@@ -6,5 +6,6 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     outDir: 'dist/client'
-  }
+  },
+  envPrefix: 'WS_'
 })

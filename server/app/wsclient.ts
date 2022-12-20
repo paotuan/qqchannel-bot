@@ -20,13 +20,23 @@ export class WsClient {
   constructor(ws: WebSocket, server: Wss) {
     makeAutoObservable<this, 'ws'>(this, { ws: false })
     this.ws = ws
-    ws.on('message', (rawData: string) => {
-      try {
-        const body = JSON.parse(rawData) as IMessage<unknown>
-        server.handleClientRequest(this, body)
-      } catch (e) {
-        console.error('消息处理失败', e)
-        console.error('原始消息', rawData)
+    ws.on('message', (rawData: Buffer) => {
+      if (rawData[0] === 0x7b && rawData[1] === 0x22) { // {" 开头认为是 json
+        try {
+          const body = JSON.parse(rawData.toString()) as IMessage<unknown>
+          server.handleClientRequest(this, body)
+        } catch (e) {
+          console.error('消息处理失败', e)
+          console.error('原始消息', rawData)
+        }
+      } else {
+        try {
+          // 特殊情况：上传图片
+          console.log(rawData)
+          server.handleClientRequest(this, { cmd: 'note/sendImageRaw', data: rawData })
+        } catch (e) {
+          console.error('消息处理失败', e)
+        }
       }
     })
 

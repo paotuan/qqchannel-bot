@@ -20,7 +20,7 @@ export class Wss {
   readonly config = new ConfigManager(this, this.plugin)
   private readonly _listeningChannels: string[] = []
 
-  constructor(port = 4174) {
+  constructor(port: number) {
     makeAutoObservable<this, 'server'>(this, { server: false, qApis: false })
     this.server = new WebSocketServer({ port })
     console.log('WebSocket 服务已启动，端口号 ' + port)

@@ -12,6 +12,7 @@
     <div class="my-2 flex gap-2">
       <textarea v-model="noteStore.textContent" class="textarea textarea-bordered flex-grow" placeholder="请输入重要笔记的内容" />
       <button class="btn btn-primary h-auto" :disabled="!noteStore.textContent" @click="noteStore.sendText()">发送！</button>
+      <send-image-dialog />
     </div>
     <div class="grid gap-4 p-2" style="grid-template-columns: repeat(auto-fill, 300px)">
       <div v-for="note in noteStore.notes" :key="note.msgId" class="card w-full bg-base-100 border border-base-300 hover:shadow-lg">
@@ -25,9 +26,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useNoteStore } from '../store/note'
+import { useNoteStore } from '../../store/note'
 import { XCircleIcon } from '@heroicons/vue/24/outline'
 import { computed } from 'vue'
+import SendImageDialog from './SendImageDialog.vue'
 
 const noteStore = useNoteStore()
 

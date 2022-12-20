@@ -6,7 +6,7 @@ import type {
   IChannelListResp,
   IListenToChannelReq,
   ILoginReq,
-  IMessage, INoteDeleteReq, INoteFetchReq, INoteSendReq, IUser, IUserListResp
+  IMessage, INoteDeleteReq, INoteFetchReq, INoteSendReq, IUser, IUserListResp, IPluginConfigDisplay
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -19,6 +19,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'note/send':
     handleSendNote(client, server, request.data as INoteSendReq)
+    break
+  case 'note/sendImageRaw':
+    handleSendImage(client, server, request.data as Buffer)
     break
   case 'note/sync':
     handleSyncNotes(client, server)
@@ -72,6 +75,8 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
       ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
     }
   })
+  // 5. 返回插件信息
+  client.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListForDisplay })
 }
 
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
@@ -122,6 +127,14 @@ function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
   const qApi = server.qApis.find(client.appid)
   if (qApi) {
     qApi.notes.sendNote(client, data)
+  }
+}
+
+function handleSendImage(client: WsClient, server: Wss, data: Buffer) {
+  if (!client.listenToChannelId) return
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    qApi.notes.sendRawImage(client, data)
   }
 }
 

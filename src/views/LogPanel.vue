@@ -1,11 +1,22 @@
 <template>
   <div class="flex-grow flex flex-row gap-4 overflow-hidden">
-    <div ref="sortableRef" class="card bg-base-100 shadow-lg px-8 py-4 overflow-y-auto" style="flex: 3 0 0">
-      <div v-for="log in logStore.logs" :key="log.msgId" class="group w-full flex items-center gap-2 leading-loose">
-        <Bars3Icon class="w-4 h-4 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
+    <div ref="sortableRef" class="card bg-base-100 shadow-lg px-4 py-4 overflow-y-auto" style="flex: 3 0 0">
+      <div v-for="log in logStore.logs" :key="`${log.msgId}-${log.msgType}`" class="group w-full px-4 flex items-start gap-2 leading-loose hover:bg-base-200">
+        <Bars3Icon class="w-4 h-8 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
         <span class="font-bold flex-none" :title="log.userId">{{ nickOf(log) }}</span>
-        <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
-        <XMarkIcon class="w-4 h-4 cursor-pointer invisible group-hover:visible text-error justify-self-end flex-none"
+        <template v-if="log.msgType === 'text'">
+          <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
+        </template>
+        <template v-else>
+          <div class="flex-grow">
+            <div class="w-1/2 h-40">
+              <a :href="`https://${log.content}`" target="_blank" rel="noopener noreferrer">
+                <img :src="`https://${log.content}`" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
+              </a>
+            </div>
+          </div>
+        </template>
+        <XMarkIcon class="w-4 h-8 cursor-pointer invisible group-hover:visible text-red-600 justify-self-end flex-none"
                    @click="logStore.removeLog(log)"/>
       </div>
     </div>

@@ -14,25 +14,36 @@ export class LogManager {
   }
 
   private handleLogPush(msg: IMessage) {
-    // 无视非文本消息 TODO 后面可以支持图片消息
+    // 是否有文本元素
     const content = msg.content?.trim()
-    if (!content) return
-
-    // 发送给客户端
-    this.pushToClients(msg.guild_id, msg.channel_id, {
-      msgId: msg.id,
-      msgType: 'text',
-      userId: msg.author.id,
-      username: msg.member.nick || msg.author.username,
-      content: content,
-      timestamp: msg.timestamp
-    })
+    if (content) {
+      this.pushToClients(msg.guild_id, msg.channel_id, {
+        msgId: msg.id,
+        msgType: 'text',
+        userId: msg.author.id,
+        username: msg.member.nick || msg.author.username,
+        content: content,
+        timestamp: msg.timestamp
+      })
+    }
+    // 是否有图片元素 // 分开判断，以拆分简单的图文混排消息
+    const url = msg.attachments?.[0]?.url
+    if (url) {
+      this.pushToClients(msg.guild_id, msg.channel_id, {
+        msgId: msg.id,
+        msgType: 'image',
+        userId: msg.author.id,
+        username: msg.member.nick || msg.author.username,
+        content: url,
+        timestamp: msg.timestamp
+      })
+    }
   }
 
   pushToClients(guildId: string, channelId: string, ...logs: ILog[]) {
     // log @ 替换
     logs.forEach(log => {
-      if (log.content) {
+      if (log.msgType === 'text' && log.content) {
         log.content = log.content.replace(/<@!(\d+)>/g, (_, userId: string) => {
           const user = this.api.guilds.findUser(userId, guildId)
           let name = user ? user.nick || user.username || user.id : userId
