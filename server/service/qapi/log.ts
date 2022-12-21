@@ -27,17 +27,19 @@ export class LogManager {
       })
     }
     // 是否有图片元素 // 分开判断，以拆分简单的图文混排消息
-    const url = msg.attachments?.[0]?.url
-    if (url) {
-      this.pushToClients(msg.guild_id, msg.channel_id, {
-        msgId: msg.id,
-        msgType: 'image',
-        userId: msg.author.id,
-        username: msg.member.nick || msg.author.username,
-        content: url,
-        timestamp: msg.timestamp
-      })
-    }
+    const attachments = msg.attachments || []
+    attachments.forEach((attach, i) => {
+      if (attach.url) {
+        this.pushToClients(msg.guild_id, msg.channel_id, {
+          msgId: `${msg.id}-${i}`, // 拼接 id 以防止 msgid 重复
+          msgType: 'image',
+          userId: msg.author.id,
+          username: msg.member.nick || msg.author.username,
+          content: attach.url,
+          timestamp: msg.timestamp
+        })
+      }
+    })
   }
 
   pushToClients(guildId: string, channelId: string, ...logs: ILog[]) {

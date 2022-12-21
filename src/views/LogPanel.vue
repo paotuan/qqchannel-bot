@@ -1,7 +1,7 @@
 <template>
   <div class="flex-grow flex flex-row gap-4 overflow-hidden">
     <div ref="sortableRef" class="card bg-base-100 shadow-lg px-4 py-4 overflow-y-auto" style="flex: 3 0 0">
-      <div v-for="log in logStore.logs" :key="`${log.msgId}-${log.msgType}`" class="group w-full px-4 flex items-start gap-2 leading-loose hover:bg-base-200">
+      <div v-for="log in logStore.logs" :key="log.msgId" class="group w-full px-4 flex items-start gap-2 leading-loose hover:bg-base-200">
         <Bars3Icon class="w-4 h-8 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
         <span class="font-bold flex-none" :title="log.userId">{{ nickOf(log) }}</span>
         <template v-if="log.msgType === 'text'">
