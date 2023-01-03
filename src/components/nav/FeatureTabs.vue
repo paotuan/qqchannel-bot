@@ -12,6 +12,7 @@ const tabs: { name: string, value: Tabs }[] = [
   { name: 'Log 录制', value: 'log' },
   { name: '重要笔记', value: 'note' },
   { name: '人物卡', value: 'card' },
+  { name: '场景', value: 'scene' },
   { name: '配置', value: 'config' }
 ]
 

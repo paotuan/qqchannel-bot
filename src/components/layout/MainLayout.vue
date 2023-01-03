@@ -15,6 +15,9 @@
     <keep-alive>
       <config-panel v-if="ui.activeTab === 'config'" />
     </keep-alive>
+    <keep-alive>
+      <scene-panel v-if="ui.activeTab === 'scene'" />
+    </keep-alive>
   </div>
 </template>
 <script setup lang="ts">
@@ -24,6 +27,7 @@ import NotePanel from '../../views/NotePanel/NotePanel.vue'
 import CardPanel from '../../views/CardPanel/CardPanel.vue'
 import ConnectionStatus from './ConnectionStatus.vue'
 import ConfigPanel from '../../views/ConfigPanel/ConfigPanel.vue'
+import ScenePanel from '../../views/ScenePanel/ScenePanel.vue'
 
 const ui = useUIStore()
 </script>
