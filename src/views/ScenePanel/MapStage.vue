@@ -5,9 +5,8 @@
     <!-- toolbar -->
     <div class="fixed bottom-0 mx-auto">
       <div>
-        <template v-if="toolbarItem === 'map'">
-          <MapTool :layer="layer" />
-        </template>
+        <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" />
+        <TokenTool v-show="toolbarItem === 'token'" :layer="contentLayer" />
       </div>
       <div class="flex gap-4">
         <button class="btn btn-square" :class="{ 'btn-outline': toolbarItem !== 'map' }" @click="selectToolbar('map')">
@@ -29,6 +28,7 @@ import { onMounted, ref, shallowRef } from 'vue'
 import Konva from 'konva'
 import { MapIcon, MapPinIcon, PencilIcon } from '@heroicons/vue/24/outline'
 import MapTool from './toolbar/MapTool.vue'
+import TokenTool from './toolbar/TokenTool.vue'
 
 // container elem
 const container = ref<HTMLDivElement>()
@@ -39,7 +39,8 @@ const toolbarItem = ref<ToolbarItem>(null)
 const selectToolbar = (item: ToolbarItem) => toolbarItem.value = item === toolbarItem.value ? null : item
 
 // init stage
-const layer = shallowRef(new Konva.Layer())
+const backgroundLayer = shallowRef(new Konva.Layer())
+const contentLayer = shallowRef(new Konva.Layer())
 onMounted(() => {
   const stage = new Konva.Stage({
     container: container.value!,
@@ -47,7 +48,8 @@ onMounted(() => {
     width: container.value!.clientWidth,
     height: 500 // todo
   })
-  stage.add(layer.value)
+  stage.add(backgroundLayer.value)
+  stage.add(contentLayer.value)
 })
 </script>
 

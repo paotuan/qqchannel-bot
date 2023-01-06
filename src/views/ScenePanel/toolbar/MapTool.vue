@@ -43,11 +43,12 @@ const handleFile = (e: Event) => {
         y: 0,
         scaleX: scale.value,
         scaleY: scale.value,
+        listening: false
         // draggable: true
       }
       node.setAttrs(attrs)
       // node.setAttr('data-src', imageUrl)
-      props.layer.removeChildren()
+      props.layer.destroyChildren()
       props.layer.add(node)
       background.value = node
     })
