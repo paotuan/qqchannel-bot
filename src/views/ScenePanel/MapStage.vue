@@ -7,6 +7,7 @@
       <div>
         <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" />
         <TokenTool v-show="toolbarItem === 'token'" :layer="contentLayer" />
+        <TextTool v-show="toolbarItem === 'text'" :layer="contentLayer" :selected="selectedTokens" />
       </div>
       <div class="flex gap-4">
         <button class="btn btn-square" :class="{ 'btn-outline': toolbarItem !== 'map' }" @click="selectToolbar('map')">
@@ -29,6 +30,7 @@ import Konva from 'konva'
 import { MapIcon, MapPinIcon, PencilIcon } from '@heroicons/vue/24/outline'
 import MapTool from './toolbar/MapTool.vue'
 import TokenTool from './toolbar/TokenTool.vue'
+import TextTool from './toolbar/TextTool.vue'
 
 // container elem
 const container = ref<HTMLDivElement>()
@@ -61,6 +63,7 @@ onMounted(() => {
   const selectToken = (arr: Konva.Node[]) => {
     transformer.nodes(arr)
     selectedTokens.value = arr
+    // todo 切换到对应的菜单
   }
 
   // clicks should select/deselect shapes
@@ -71,24 +74,31 @@ onMounted(() => {
       return
     }
 
+    // todo 实现一个通用的只选择 layer 直接子元素功能
+    let target: Konva.Node = e.target
+    if (target instanceof Konva.Text) {
+      target = e.target.getAncestors()[0]
+    }
+
+
     // do we press shift or ctrl?
     const metaPressed = e.evt.shiftKey // || e.evt.ctrlKey || e.evt.metaKey
-    const isSelected = transformer.nodes().indexOf(e.target) >= 0
+    const isSelected = transformer.nodes().indexOf(target) >= 0
 
     if (!metaPressed && !isSelected) {
       // if no key pressed and the node is not selected
       // select just one
-      selectToken([e.target])
+      selectToken([target])
     } else if (metaPressed && isSelected) {
       // if we pressed keys and node was selected
       // we need to remove it from selection:
       const nodes = transformer.nodes().slice() // use slice to have new copy of array
       // remove node from array
-      nodes.splice(nodes.indexOf(e.target), 1)
+      nodes.splice(nodes.indexOf(target), 1)
       selectToken(nodes)
     } else if (metaPressed && !isSelected) {
       // add the node into selection
-      const nodes = transformer.nodes().concat([e.target])
+      const nodes = transformer.nodes().concat([target])
       selectToken(nodes)
     }
   })

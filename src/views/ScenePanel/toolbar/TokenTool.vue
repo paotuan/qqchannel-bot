@@ -44,7 +44,8 @@ const createBasicShape = (shape: BasicShapes) => {
     fill: 'red',
     stroke: 'black',
     strokeWidth: 3,
-    draggable: true
+    draggable: true,
+    name: shape
   }
   switch (shape) {
   case 'circle':
