@@ -34,26 +34,28 @@ const scale = ref(0.5)
 
 const handleFile = (e: Event) => {
   const files = (e.target as HTMLInputElement).files
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const imageUrl = e.target!.result
-    Konva.Image.fromURL(imageUrl, (node: Konva.Image) => {
-      const attrs = {
-        x: 0,
-        y: 0,
-        scaleX: scale.value,
-        scaleY: scale.value,
-        listening: false
-        // draggable: true
-      }
-      node.setAttrs(attrs)
-      // node.setAttr('data-src', imageUrl)
-      props.layer.destroyChildren()
-      props.layer.add(node)
-      background.value = node
-    })
+  if (files && files.length > 0) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const imageUrl = e.target!.result
+      Konva.Image.fromURL(imageUrl, (node: Konva.Image) => {
+        const attrs = {
+          x: 0,
+          y: 0,
+          scaleX: scale.value,
+          scaleY: scale.value,
+          listening: false
+          // draggable: true
+        }
+        node.setAttrs(attrs)
+        // node.setAttr('data-src', imageUrl)
+        props.layer.destroyChildren()
+        props.layer.add(node)
+        background.value = node
+      })
+    }
+    reader.readAsDataURL(files![0])
   }
-  reader.readAsDataURL(files![0])
 }
 
 const onScaleChange = (e: Event) => {

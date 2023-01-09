@@ -6,6 +6,7 @@
       </label>
       <ul tabindex="0" class="dropdown-content menu menu-compact p-2 shadow bg-base-100 rounded-box w-30">
         <li><a @click="addBasicShape('circle')">圆形</a></li>
+        <li><a @click="addBasicShape('rect')">矩形</a></li>
         <li><a @click="addBasicShape('polygon')">多边形</a></li>
         <li><a @click="addBasicShape('wedge')">扇形</a></li>
         <li><a @click="addBasicShape('star')">星形</a></li>
@@ -27,7 +28,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-type BasicShapes = 'circle' | 'polygon' | 'wedge' | 'star' | 'arrow'
+type BasicShapes = 'circle' | 'rect' | 'polygon' | 'wedge' | 'star' | 'arrow'
 
 const addBasicShape = (shape: BasicShapes) => {
   const obj = createBasicShape(shape)
@@ -51,10 +52,16 @@ const createBasicShape = (shape: BasicShapes) => {
       ...commonConfig,
       radius: 30,
     })
+  case 'rect':
+    return new Konva.Rect({
+      ...commonConfig,
+      width: 60,
+      height: 60
+    })
   case 'polygon':
     return new Konva.RegularPolygon({
       ...commonConfig,
-      sides: 4,
+      sides: 6,
       radius: 30,
     })
   case 'wedge':
