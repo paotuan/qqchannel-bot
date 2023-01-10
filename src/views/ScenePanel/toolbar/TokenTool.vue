@@ -13,6 +13,28 @@
         <li><a @click="addBasicShape('arrow')">箭头</a></li>
       </ul>
     </div>
+    <div v-show="selectedToken">
+      <div class="flex items-center gap-2">
+        <label for="token-tool-fill">背景色</label>
+        <input :value="shapeData.fill" type="color" id="token-tool-fill" name="fill" @input="editFillColor">
+      </div>
+      <div class="flex items-center gap-2">
+        <label for="token-tool-stroke">边框色</label>
+        <input :value="shapeData.stroke" type="color" id="token-tool-stroke" name="stroke" @input="editStrokeColor">
+      </div>
+    </div>
+    <div v-show="selectedToken instanceof Konva.RegularPolygon">
+      <span>边数</span>
+      <input :value="shapeData.polygonSides" type="range" min="3" max="8" step="1" class="range range-xs" @input="editPolygonSides" />
+    </div>
+    <div v-show="selectedToken instanceof Konva.Wedge">
+      <span>角度</span>
+      <input :value="shapeData.wedgeAngle" type="range" min="10" max="360" step="1" class="range range-xs" @input="editWedgeAngle" />
+    </div>
+    <div v-show="selectedToken instanceof Konva.Star">
+      <span>角数</span>
+      <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs" @input="editStarPoints" />
+    </div>
     <button class="btn gap-2">
       <PhotoIcon class="w-6 h-6" />上传图片
     </button>
@@ -21,28 +43,67 @@
 <script setup lang="ts">
 import { StarIcon, PhotoIcon } from '@heroicons/vue/24/outline'
 import Konva from 'konva'
+import { computed, reactive, watch } from 'vue'
+import { BasicShape, basicShapes } from './utils'
 
 interface Props {
-  layer: Konva.Layer
+  layer: Konva.Layer,
+  selected: Konva.Node[]
 }
 
 const props = defineProps<Props>()
 
-type BasicShapes = 'circle' | 'rect' | 'polygon' | 'wedge' | 'star' | 'arrow'
+// 当前选中的 token
+const selectedToken = computed<Konva.Shape | null>(() => {
+  if (props.selected.length === 1) { // 只考虑选中单个节点的情况
+    const selected = props.selected[0]
+    for (const shape of basicShapes) {
+      if (selected.hasName(shape)) {
+        return selected as Konva.Shape
+      }
+    }
+  }
+  return null
+})
 
-const addBasicShape = (shape: BasicShapes) => {
+// shape 编辑数据
+const shapeData = reactive({
+  fill: '#ffff00',
+  stroke: '#000000',
+  polygonSides: 6,
+  wedgeAngle: 60,
+  starPoints: 5
+})
+
+// 当选中 shape 节点时进入编辑模式，代入当前的属性
+watch(() => selectedToken.value, node => {
+  if (node) {
+    shapeData.fill = node.fill()
+    shapeData.stroke = node.stroke()
+    if (node instanceof Konva.RegularPolygon) {
+      shapeData.polygonSides = node.sides()
+    } else if (node instanceof Konva.Wedge) {
+      shapeData.wedgeAngle = node.angle()
+    } else if (node instanceof Konva.Star) {
+      shapeData.starPoints = node.numPoints()
+    }
+  }
+})
+
+// region 创建 shape
+const addBasicShape = (shape: BasicShape) => {
   const obj = createBasicShape(shape)
   if (obj) {
     props.layer.add(obj)
   }
 }
 
-const createBasicShape = (shape: BasicShapes) => {
+const createBasicShape = (shape: BasicShape) => {
   const commonConfig = {
     x: 50,
     y: 50,
-    fill: 'red',
-    stroke: 'black',
+    fill: shapeData.fill,
+    stroke: shapeData.stroke,
     strokeWidth: 3,
     draggable: true,
     name: shape
@@ -62,19 +123,19 @@ const createBasicShape = (shape: BasicShapes) => {
   case 'polygon':
     return new Konva.RegularPolygon({
       ...commonConfig,
-      sides: 6,
+      sides: shapeData.polygonSides,
       radius: 30,
     })
   case 'wedge':
     return new Konva.Wedge({
       ...commonConfig,
       radius: 60,
-      angle: 60,
+      angle: shapeData.wedgeAngle,
     })
   case 'star':
     return new Konva.Star({
       ...commonConfig,
-      numPoints: 5,
+      numPoints: shapeData.starPoints,
       innerRadius: 15,
       outerRadius: 30,
     })
@@ -87,4 +148,47 @@ const createBasicShape = (shape: BasicShapes) => {
     })
   }
 }
+// endregion
+
+// region 编辑 shape
+const editStrokeColor = (ev: Event) => {
+  const color = (ev.target as HTMLTextAreaElement).value
+  shapeData.stroke = color
+  if (selectedToken.value) {
+    selectedToken.value!.stroke(color)
+  }
+}
+
+const editFillColor = (ev: Event) => {
+  const color = (ev.target as HTMLTextAreaElement).value
+  shapeData.fill = color
+  if (selectedToken.value) {
+    selectedToken.value!.fill(color)
+  }
+}
+
+const editPolygonSides = (ev: Event) => {
+  const value = Number((ev.target as HTMLInputElement).value)
+  shapeData.polygonSides = value
+  if (selectedToken.value instanceof Konva.RegularPolygon) {
+    selectedToken.value.sides(value)
+  }
+}
+
+const editWedgeAngle = (ev: Event) => {
+  const value = Number((ev.target as HTMLInputElement).value)
+  shapeData.wedgeAngle = value
+  if (selectedToken.value instanceof Konva.Wedge) {
+    selectedToken.value.angle(value)
+  }
+}
+
+const editStarPoints = (ev: Event) => {
+  const value = Number((ev.target as HTMLInputElement).value)
+  shapeData.starPoints = value
+  if (selectedToken.value instanceof Konva.Star) {
+    selectedToken.value.numPoints(value)
+  }
+}
+// endregion
 </script>
