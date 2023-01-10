@@ -52,6 +52,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{ (e: 'select', value: Konva.Node[]): void }>()
 
 // 当前选中的 token
 const selectedToken = computed<Konva.Shape | null>(() => {
@@ -95,6 +96,7 @@ const addBasicShape = (shape: BasicShape) => {
   const obj = createBasicShape(shape)
   if (obj) {
     props.layer.add(obj)
+    emit('select', [obj])
   }
 }
 

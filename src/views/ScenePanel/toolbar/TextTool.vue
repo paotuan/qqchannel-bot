@@ -26,6 +26,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{ (e: 'select', value: Konva.Node[]): void }>()
 
 const selectedNodeChildren = computed<Konva.Node[]>(() => {
   if (props.selected.length === 1) { // 只考虑选中单个节点的情况
@@ -86,6 +87,7 @@ const addText = () => {
   }))
 
   props.layer.add(label)
+  emit('select', [label])
 }
 
 const editText = (ev: Event) => {

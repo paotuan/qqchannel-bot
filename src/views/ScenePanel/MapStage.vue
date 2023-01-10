@@ -1,13 +1,12 @@
 <template>
   <div class="flex-grow py-4">
-<!--    <input type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" @change="handleFile" />-->
     <div ref="container" class="w-full h-full"></div>
     <!-- toolbar -->
     <div class="fixed bottom-0 mx-auto">
       <div>
         <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" />
-        <TokenTool v-show="toolbarItem === 'token'" :layer="contentLayer" :selected="selectedTokens" />
-        <TextTool v-show="toolbarItem === 'text'" :layer="contentLayer" :selected="selectedTokens" />
+        <TokenTool v-show="toolbarItem === 'token'" :layer="contentLayer" :selected="selectedTokens" @select="selectToken" />
+        <TextTool v-show="toolbarItem === 'text'" :layer="contentLayer" :selected="selectedTokens" @select="selectToken" />
       </div>
       <div class="flex gap-4">
         <button class="btn btn-square" :class="{ 'btn-outline': toolbarItem !== 'map' }" @click="selectToolbar('map')">
@@ -22,6 +21,13 @@
         <!-- todo save btn -->
       </div>
     </div>
+    <!-- context menu -->
+    <ul ref="contextMenuRef" class="menu menu-compact bg-base-100 w-28 p-2 rounded-box absolute hidden">
+      <li><a @click="cloneNode">克隆</a></li>
+      <li><a @click="moveToTop">置于顶层</a></li>
+      <li><a @click="moveToBottom">置于底层</a></li>
+      <li><a @click="destroyNode">删除</a></li>
+    </ul>
   </div>
 </template>
 <script setup lang="ts">
@@ -31,6 +37,7 @@ import { MapIcon, MapPinIcon, PencilIcon } from '@heroicons/vue/24/outline'
 import MapTool from './toolbar/MapTool.vue'
 import TokenTool from './toolbar/TokenTool.vue'
 import TextTool from './toolbar/TextTool.vue'
+import { basicShapes } from './toolbar/utils'
 
 // container elem
 const container = ref<HTMLDivElement>()
@@ -50,8 +57,24 @@ const selectedTokens = shallowRef<Konva.Node[]>([]) // 当前选中的 token
 const selectToken = (arr: Konva.Node[]) => {
   transformer.value.nodes(arr)
   selectedTokens.value = arr
-  // todo 切换到对应的菜单
+  // 选中单个元素时，切换到对应的菜单，以供编辑
+  if (arr.length === 1) {
+    if (arr[0].hasName('text')) {
+      toolbarItem.value = 'text'
+    } else {
+      for (const shape of basicShapes) {
+        if (arr[0].hasName(shape)) {
+          toolbarItem.value = 'token'
+        }
+      }
+    }
+  }
 }
+
+// 右键点击的元素
+const contextMenuToken = shallowRef<Konva.Node | null>(null)
+const contextMenuRef = ref<HTMLUListElement>()
+const hideContextMenu = () => contextMenuRef.value!.style.display = 'none'
 
 onMounted(() => {
   // stage 基础层级
@@ -102,6 +125,59 @@ onMounted(() => {
       selectToken(nodes)
     }
   })
+
+  // 右键菜单 https://konvajs.org/docs/sandbox/Canvas_Context_Menu.html
+  stage.on('contextmenu', (e) => {
+    // prevent default behavior
+    e.evt.preventDefault()
+    if (e.target === stage) {
+      // if we are on empty place of the stage we will do nothing
+      return
+    }
+
+    // todo 实现一个通用的只选择 layer 直接子元素功能
+    let target: Konva.Node = e.target
+    if (target instanceof Konva.Text) {
+      target = e.target.getAncestors()[0]
+    }
+
+    contextMenuToken.value = target
+    // show menu
+    contextMenuRef.value!.style.display = 'initial'
+    const containerRect = stage.container().getBoundingClientRect()
+    contextMenuRef.value!.style.top = containerRect.top + stage.getPointerPosition()!.y + 4 + 'px'
+    contextMenuRef.value!.style.left = containerRect.left + stage.getPointerPosition()!.x + 4 + 'px'
+  })
+
+  window.addEventListener('click', hideContextMenu)
 })
+
+// 通用右键事件
+const cloneNode = () => {
+  const node = contextMenuToken.value
+  if (!node) return
+  const clonedNode = node.clone({ x: node.x() + 10, y: node.y() + 10 })
+  contentLayer.value.add(clonedNode)
+  selectToken([clonedNode])
+}
+
+const moveToTop = () => {
+  const node = contextMenuToken.value
+  if (!node) return
+  node.moveToTop()
+}
+
+const moveToBottom = () => {
+  const node = contextMenuToken.value
+  if (!node) return
+  node.moveToBottom()
+}
+
+const destroyNode = () => {
+  const node = contextMenuToken.value
+  if (!node) return
+  node.destroy()
+  selectToken([])
+}
 </script>
 
