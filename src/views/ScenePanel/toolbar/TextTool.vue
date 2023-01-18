@@ -71,9 +71,10 @@ watch(() => selectedTagNode.value, (node) => {
 })
 
 const addText = () => {
+  const stage = props.layer.getParent()
   const label = new Konva.Label({
-    x: 50,
-    y: 50,
+    x: 50 - stage.x(),
+    y: 50 - stage.y(),
     draggable: true,
     name: 'text'
   })

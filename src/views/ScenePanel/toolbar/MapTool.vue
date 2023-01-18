@@ -39,12 +39,14 @@ const handleFile = (e: Event) => {
     reader.onload = (e) => {
       const imageUrl = e.target!.result
       Konva.Image.fromURL(imageUrl, (node: Konva.Image) => {
+        const stage = props.layer.getParent()
         const attrs = {
-          x: 0,
-          y: 0,
+          x: 0 - stage.x(),
+          y: 0 - stage.y(),
           scaleX: scale.value,
           scaleY: scale.value,
-          listening: false
+          listening: false,
+          name: 'map'
           // draggable: true
         }
         node.setAttrs(attrs)
