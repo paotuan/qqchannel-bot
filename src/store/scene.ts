@@ -9,6 +9,7 @@ import { nanoid } from 'nanoid/non-secure'
 export interface ISceneMap {
   id: string,
   name: string,
+  deleted: boolean, // 临时标记是否删除
   data?: unknown // stage.toObject()
 }
 
@@ -27,7 +28,7 @@ export const useSceneStore = defineStore('scene', () => {
   // 新建地图
   const createMap = () => {
     const id = nanoid()
-    mapMap[id] = { id, name: '未命名' }
+    mapMap[id] = { id, name: '未命名', deleted: false }
     return id
   }
 
@@ -54,6 +55,7 @@ export const useSceneStore = defineStore('scene', () => {
       currentMapId.value = null
     }
     // 2. 删除内存
+    map.deleted = true // 打上标记避免被切换地图逻辑再次保存
     delete mapMap[map.id]
     // 3. 删除 db
     deleteMapInDB(map)
@@ -86,12 +88,16 @@ export const useSceneStore = defineStore('scene', () => {
 })
 
 async function saveMapInDB(item: ISceneMap, stage: Konva.Stage) {
-  item.data = stage.toObject() // 放在这里执行，确保每次保存的是 stage 的最新状态，并减少 toObject 调用开销
+  // 放在这里执行，确保每次保存的是 stage 的最新状态，并减少 toObject 调用开销
+  // 缺点是 stage 的生命周期被延长了，严格来说大概能算内存泄露了
+  // 另外经测试，同步的地方调用时 toObject 会带上 container 的 dom 导致保存失败，此处调用倒还没出现这个情况
+  item.data = stage.toObject()
   try {
     const handler = await useIndexedDBStore<ISceneMap>('scene-map')
     await handler.put(toRaw(item)) // 要解包，不能传 proxy，否则无法保存
   } catch (e) {
     console.error('保存场景失败', item.name, e)
+    console.log(toRaw(item))
   }
 }
 

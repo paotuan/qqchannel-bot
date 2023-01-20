@@ -130,8 +130,12 @@ const { stage, backgroundLayer, contentLayer, transformer, loadStage } = useStag
 // 当切换地图时，加载 stage
 watch(currentMap, (newMap, oldMap) => {
   // 立即保存下旧地图，避免来回切换地图，旧地图还未触发 throttle 保存
-  if (oldMap && stage.value) {
+  if (oldMap && !oldMap.deleted && stage.value) {
     sceneStore.saveMap(oldMap, stage.value, true)
+  } else {
+    // 卸载旧地图
+    // 只在未触发保存时卸载。因为保存 throttle 还需要引用 stage
+    stage.value?.destroy()
   }
   // 加载新地图
   if (newMap) {

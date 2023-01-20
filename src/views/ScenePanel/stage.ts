@@ -137,7 +137,6 @@ export function useStage(eventHandlers: IStageEvents) {
   const transformer = shallowRef(new Konva.Transformer()) // 选择器
 
   const loadStage = (stageData: any, htmlElement: HTMLDivElement) => {
-    // todo 旧的 stage 是否会引发内存泄露，理论上应该不会
     // 1. 反序列化出对应的 Konva 结构
     const structure = loadOrCreateStage(stageData, htmlElement)
     // 2. 添加事件监听器
