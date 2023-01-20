@@ -25,8 +25,13 @@ interface Props {
   selected: Konva.Node[]
 }
 
+interface Emits {
+  (e: 'select', value: Konva.Node[]): void,
+  (e: 'save'): void
+}
+
 const props = defineProps<Props>()
-const emit = defineEmits<{ (e: 'select', value: Konva.Node[]): void }>()
+const emit = defineEmits<Emits>()
 
 const selectedNodeChildren = computed<Konva.Node[]>(() => {
   if (props.selected.length === 1) { // 只考虑选中单个节点的情况
@@ -89,6 +94,7 @@ const addText = () => {
 
   props.layer.add(label)
   emit('select', [label])
+  emit('save')
 }
 
 const editText = (ev: Event) => {
@@ -96,6 +102,7 @@ const editText = (ev: Event) => {
   textData.text = text
   if (selectedTextNode.value) {
     selectedTextNode.value!.text(text)
+    emit('save')
   }
 }
 
@@ -104,6 +111,7 @@ const editStrokeColor = (ev: Event) => {
   textData.stroke = color
   if (selectedTextNode.value) {
     selectedTextNode.value!.fill(color)
+    emit('save')
   }
 }
 
@@ -112,6 +120,7 @@ const editFillColor = (ev: Event) => {
   textData.fill = color
   if (selectedTagNode.value) {
     selectedTagNode.value!.fill(color)
+    emit('save')
   }
 }
 </script>

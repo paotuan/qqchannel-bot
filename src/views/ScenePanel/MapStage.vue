@@ -3,21 +3,23 @@
     <div ref="container" class="w-full h-full"></div>
     <template v-if="currentMap">
       <!-- toolbar -->
-      <MapBasicInfo class="absolute top-0 left-44 z-10" @save="autoSaveCurrentMap({ stage })" />
+      <MapBasicInfo class="absolute top-0 left-44 z-10" @save="autoSaveCurrentStage" />
       <div class="fixed bottom-0 mx-auto">
         <div>
-          <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" />
+          <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" @save="autoSaveCurrentStage" />
           <TokenTool
             v-show="toolbarItem === 'token'"
             :layer="contentLayer"
             :selected="selectedTokens"
             @select="selectToken({ transformer }, $event)"
+            @save="autoSaveCurrentStage"
           />
           <TextTool
             v-show="toolbarItem === 'text'"
             :layer="contentLayer"
             :selected="selectedTokens"
             @select="selectToken({ transformer }, $event)"
+            @save="autoSaveCurrentStage"
           />
         </div>
         <div class="flex gap-4">
@@ -145,6 +147,13 @@ watch(currentMap, (newMap, oldMap) => {
   selectToolbar(null)
 })
 
+// 以编程方式改变 stage 时，触发自动保存逻辑
+const autoSaveCurrentStage = () => {
+  if (stage.value) {
+    autoSaveCurrentMap({ stage: stage.value })
+  }
+}
+
 // 通用右键事件
 const cloneNode = () => {
   const node = contextMenuToken.value
@@ -152,24 +161,28 @@ const cloneNode = () => {
   const clonedNode = node.clone({ x: node.x() + 20, y: node.y() + 20 })
   contentLayer.value.add(clonedNode)
   selectToken({ transformer: transformer.value }, [clonedNode])
+  autoSaveCurrentStage()
 }
 
 const moveToTop = () => {
   const node = contextMenuToken.value
   if (!node) return
   node.moveToTop()
+  autoSaveCurrentStage()
 }
 
 const moveToBottom = () => {
   const node = contextMenuToken.value
   if (!node) return
   node.moveToBottom()
+  autoSaveCurrentStage()
 }
 
 const destroyNode = () => {
   const node = contextMenuToken.value
   if (!node) return
   node.destroy()
+  autoSaveCurrentStage()
   selectToken({ transformer: transformer.value }, [])
 }
 </script>

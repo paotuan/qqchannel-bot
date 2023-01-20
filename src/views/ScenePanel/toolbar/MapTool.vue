@@ -27,6 +27,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{ (e: 'save'): void }>()
 
 const realUploadBtn = ref<HTMLInputElement>()
 const background = shallowRef<Konva.Image | null>(null) // Konva.Image
@@ -54,6 +55,7 @@ const handleFile = (e: Event) => {
         props.layer.destroyChildren()
         props.layer.add(node)
         background.value = node
+        emit('save')
       })
     }
     reader.readAsDataURL(files![0])
@@ -63,6 +65,7 @@ const handleFile = (e: Event) => {
 const onScaleChange = (e: Event) => {
   scale.value = Number((e.target as HTMLInputElement).value)
   background.value?.scale({ x: scale.value, y: scale.value })
+  emit('save')
 }
 
 const uploadBackground = () => {
@@ -73,6 +76,7 @@ const clearBackground = () => {
   props.layer.removeChildren()
   background.value = null
   scale.value = 0.5
+  emit('save')
 }
 </script>
 

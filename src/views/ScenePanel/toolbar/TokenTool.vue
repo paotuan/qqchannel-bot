@@ -51,8 +51,13 @@ interface Props {
   selected: Konva.Node[]
 }
 
+interface Emits {
+  (e: 'select', value: Konva.Node[]): void,
+  (e: 'save'): void
+}
+
 const props = defineProps<Props>()
-const emit = defineEmits<{ (e: 'select', value: Konva.Node[]): void }>()
+const emit = defineEmits<Emits>()
 
 // 当前选中的 token
 const selectedToken = computed<Konva.Shape | null>(() => {
@@ -97,6 +102,7 @@ const addBasicShape = (shape: BasicShape) => {
   if (obj) {
     props.layer.add(obj)
     emit('select', [obj])
+    emit('save')
   }
 }
 
@@ -159,6 +165,7 @@ const editStrokeColor = (ev: Event) => {
   shapeData.stroke = color
   if (selectedToken.value) {
     selectedToken.value!.stroke(color)
+    emit('save')
   }
 }
 
@@ -167,6 +174,7 @@ const editFillColor = (ev: Event) => {
   shapeData.fill = color
   if (selectedToken.value) {
     selectedToken.value!.fill(color)
+    emit('save')
   }
 }
 
@@ -175,6 +183,7 @@ const editPolygonSides = (ev: Event) => {
   shapeData.polygonSides = value
   if (selectedToken.value instanceof Konva.RegularPolygon) {
     selectedToken.value.sides(value)
+    emit('save')
   }
 }
 
@@ -183,6 +192,7 @@ const editWedgeAngle = (ev: Event) => {
   shapeData.wedgeAngle = value
   if (selectedToken.value instanceof Konva.Wedge) {
     selectedToken.value.angle(value)
+    emit('save')
   }
 }
 
@@ -191,6 +201,7 @@ const editStarPoints = (ev: Event) => {
   shapeData.starPoints = value
   if (selectedToken.value instanceof Konva.Star) {
     selectedToken.value.numPoints(value)
+    emit('save')
   }
 }
 // endregion

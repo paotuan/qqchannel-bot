@@ -148,6 +148,8 @@ export function useStage(eventHandlers: IStageEvents) {
     transformer.value = structure.transformer
   }
 
+  // unload 就暂时不加了，顶多保持着一个被删除 stage 的引用，问题不是很大
+
   return {
     stage,
     backgroundLayer,
