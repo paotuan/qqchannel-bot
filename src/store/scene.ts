@@ -10,6 +10,7 @@ export interface ISceneMap {
   id: string,
   name: string,
   deleted: boolean, // 临时标记是否删除
+  createAt: number,
   data?: unknown // stage.toObject()
 }
 
@@ -28,7 +29,7 @@ export const useSceneStore = defineStore('scene', () => {
   // 新建地图
   const createMap = () => {
     const id = nanoid()
-    mapMap[id] = { id, name: '未命名', deleted: false }
+    mapMap[id] = { id, name: '未命名', deleted: false, createAt: Date.now() }
     return id
   }
 
@@ -67,6 +68,7 @@ export const useSceneStore = defineStore('scene', () => {
       const handler = await useIndexedDBStore<ISceneMap>('scene-map')
       const list = await handler.getAll() as ISceneMap[]
       if (list.length > 0) {
+        list.sort((a, b) => a.createAt - b.createAt)
         list.forEach(item => (mapMap[item.id] = item))
       }
     } catch (e) {
