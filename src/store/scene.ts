@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, toRaw } from 'vue'
 import Konva from 'konva'
 import { useIndexedDBStore } from '../utils/db'
 import { throttle } from 'lodash'
@@ -81,7 +81,7 @@ async function saveMapInDB(item: ISceneMap, stage: Konva.Stage) {
   item.data = stage.toObject() // 放在这里执行，确保每次保存的是 stage 的最新状态，并减少 toObject 调用开销
   try {
     const handler = await useIndexedDBStore<ISceneMap>('scene-map')
-    await handler.put(item)
+    await handler.put(toRaw(item)) // 要解包，不能传 proxy，否则无法保存
   } catch (e) {
     console.error('保存场景失败', item.name, e)
   }

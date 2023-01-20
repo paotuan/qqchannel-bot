@@ -88,7 +88,7 @@ onMounted(() => {
     container: container.value!,
     draggable: true,
     width: container.value!.clientWidth,
-    height: container.value!.clientHeight // todo
+    height: container.value!.clientHeight
   })
   stage.add(backgroundLayer.value)
   stage.add(contentLayer.value)
@@ -160,13 +160,12 @@ onMounted(() => {
 
   // 监听到用户操作，触发自动保存逻辑
   stage.on('dragend', (e) => {
-    console.log('drag end', e.target)
-    // sceneStore.saveMap()
+    sceneStore.saveMap(sceneStore.currentMap!, stage)
   })
 
   // transformend 经测试 stage 上监听不到
   transformer.value.on('transformend', (e) => {
-    console.log('transform end')
+    sceneStore.saveMap(sceneStore.currentMap!, stage)
   })
 })
 

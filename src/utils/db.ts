@@ -1,14 +1,22 @@
 const DATABASE_VERSION = 1
 
 const request = window.indexedDB.open('app', DATABASE_VERSION)
+
+// 处理升级逻辑
+request.onupgradeneeded = e => {
+  const db = (e.target as IDBOpenDBRequest).result
+  // 初始化 db
+  if (!db.objectStoreNames.contains('scene-map')) {
+    db.createObjectStore('scene-map', { keyPath: 'id' })
+  }
+  console.log('升级数据库 app 成功')
+}
+
+// 打开数据库
 const dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
-  request.onupgradeneeded = e => {
-    const db = (e.target as IDBOpenDBRequest).result
-    // 初始化 db
-    if (!db.objectStoreNames.contains('scene-map')) {
-      db.createObjectStore('scene-map', { keyPath: 'id' })
-    }
-    resolve(db)
+  request.onsuccess = (e) => {
+    console.log('打开数据库 app 成功')
+    resolve((e.target as IDBOpenDBRequest).result)
   }
   request.onerror = () => {
     reject(request.error)
