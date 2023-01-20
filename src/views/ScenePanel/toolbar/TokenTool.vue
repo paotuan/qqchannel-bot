@@ -103,8 +103,8 @@ const addBasicShape = (shape: BasicShape) => {
 const createBasicShape = (shape: BasicShape) => {
   const stage = props.layer.getParent()
   const commonConfig = {
-    x: 50 - stage.x(), // 由于 stage 可拖动，确保起始点相对于屏幕位置不变，而不是相对 stage
-    y: 50 - stage.y(), // 否则会出现 stage 拖动导致添加的图形不在可视范围内的情况
+    x: window.innerWidth / 2 - stage.x(), // 由于 stage 可拖动，确保起始点相对于屏幕位置不变，而不是相对 stage
+    y: window.innerHeight / 2 - stage.y(), // 否则会出现 stage 拖动导致添加的图形不在可视范围内的情况
     fill: shapeData.fill,
     stroke: shapeData.stroke,
     strokeWidth: 3,

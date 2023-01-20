@@ -50,7 +50,7 @@ const handleFile = (e: Event) => {
           // draggable: true
         }
         node.setAttrs(attrs)
-        // node.setAttr('data-src', imageUrl)
+        node.setAttr('data-src', imageUrl)
         props.layer.destroyChildren()
         props.layer.add(node)
         background.value = node

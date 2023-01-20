@@ -1,0 +1,38 @@
+<template>
+  <div v-if="currentScene">
+    <span class="text-sm font-bold">场景名称：</span>
+    <input
+      v-model="currentScene.name"
+      type="text"
+      class="input input-bordered input-xs w-40"
+      maxlength="20"
+      @focus="oldName = currentScene.name"
+      @blur="onEditName"
+    />
+    <button class="btn btn-xs btn-error ml-2" @click.stop="deleteScene">删除场景</button>
+  </div>
+</template>
+<script setup lang="ts">
+import { useSceneStore } from '../../store/scene'
+import { computed, ref } from 'vue'
+
+const emit = defineEmits<{ (e: 'save'): void }>()
+
+const sceneStore = useSceneStore()
+const currentScene = computed(() => sceneStore.currentMap)
+
+const oldName = ref('')
+const onEditName = (e: Event) => {
+  const newName = (e.target as HTMLInputElement).value.trim()
+  if (newName === oldName.value) return // 没改变
+  if (!newName) currentScene.value!.name = oldName.value // 置空，就还是恢复成老名字吧
+  emit('save')
+}
+
+const deleteScene = () => {
+  if (window.confirm('确定要删除场景吗？')) {
+    sceneStore.deleteMap(currentScene.value!)
+  }
+}
+</script>
+

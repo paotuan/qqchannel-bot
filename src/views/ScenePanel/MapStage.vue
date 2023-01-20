@@ -1,5 +1,6 @@
 <template>
-  <div class="flex-grow py-4">
+  <div class="flex-grow">
+    <MapBasicInfo class="absolute top-0 left-44 z-10" />
     <div ref="container" class="w-full h-full"></div>
     <!-- toolbar -->
     <div class="fixed bottom-0 mx-auto">
@@ -31,13 +32,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, shallowRef } from 'vue'
+import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import Konva from 'konva'
 import { MapIcon, MapPinIcon, PencilIcon } from '@heroicons/vue/24/outline'
 import MapTool from './toolbar/MapTool.vue'
 import TokenTool from './toolbar/TokenTool.vue'
 import TextTool from './toolbar/TextTool.vue'
 import { basicShapes } from './toolbar/utils'
+import { useSceneStore } from '../../store/scene'
+import MapBasicInfo from './MapBasicInfo.vue'
 
 // container elem
 const container = ref<HTMLDivElement>()
@@ -46,6 +49,9 @@ const container = ref<HTMLDivElement>()
 type ToolbarItem = 'map' | 'token' | 'text' | null
 const toolbarItem = ref<ToolbarItem>(null)
 const selectToolbar = (item: ToolbarItem) => toolbarItem.value = item === toolbarItem.value ? null : item
+
+// scene store
+const sceneStore = useSceneStore()
 
 // init stage
 const backgroundLayer = shallowRef(new Konva.Layer()) // 背景层
@@ -82,13 +88,14 @@ onMounted(() => {
     container: container.value!,
     draggable: true,
     width: container.value!.clientWidth,
-    height: 500 // todo
+    height: container.value!.clientHeight // todo
   })
   stage.add(backgroundLayer.value)
   stage.add(contentLayer.value)
   // 选择器 https://konvajs.org/docs/select_and_transform/Basic_demo.html
   contentLayer.value.add(transformer.value)
 
+  // 选择一个或多个 token 的逻辑
   // clicks should select/deselect shapes
   stage.on('click tap', (e) => {
     // if click on empty area - remove all selections
@@ -144,19 +151,34 @@ onMounted(() => {
     contextMenuToken.value = target
     // show menu
     contextMenuRef.value!.style.display = 'initial'
-    const containerRect = stage.container().getBoundingClientRect()
-    contextMenuRef.value!.style.top = containerRect.top + stage.getPointerPosition()!.y + 4 + 'px'
-    contextMenuRef.value!.style.left = containerRect.left + stage.getPointerPosition()!.x + 4 + 'px'
+    // 因为都是 absolute 了，直接取坐标
+    contextMenuRef.value!.style.top = stage.getPointerPosition()!.y + 4 + 'px'
+    contextMenuRef.value!.style.left = stage.getPointerPosition()!.x + 4 + 'px'
   })
 
   window.addEventListener('click', hideContextMenu)
+
+  // 监听到用户操作，触发自动保存逻辑
+  stage.on('dragend', (e) => {
+    console.log('drag end', e.target)
+    // sceneStore.saveMap()
+  })
+
+  // transformend 经测试 stage 上监听不到
+  transformer.value.on('transformend', (e) => {
+    console.log('transform end')
+  })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', hideContextMenu)
 })
 
 // 通用右键事件
 const cloneNode = () => {
   const node = contextMenuToken.value
   if (!node) return
-  const clonedNode = node.clone({ x: node.x() + 10, y: node.y() + 10 })
+  const clonedNode = node.clone({ x: node.x() + 20, y: node.y() + 20 })
   contentLayer.value.add(clonedNode)
   selectToken([clonedNode])
 }
