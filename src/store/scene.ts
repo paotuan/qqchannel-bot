@@ -33,11 +33,6 @@ export const useSceneStore = defineStore('scene', () => {
 
   // 切换地图
   const switchMap = (newMapId: string) => {
-    // if (currentMapId.value) {
-    //   // 来回切换地图，需要立即把旧地图数据序列化一下，这样如果马上切换回来才能读取到最新的数据
-    //   const oldMap = mapMap[currentMapId.value]
-    //   saveMap(oldMap, stage, true)
-    // }
     currentMapId.value = newMapId
   }
 
@@ -63,6 +58,19 @@ export const useSceneStore = defineStore('scene', () => {
     // 3. 删除 db
     deleteMapInDB(map)
   }
+
+  // 初始化读取 indexeddb 地图列表
+  ;(async () => {
+    try {
+      const handler = await useIndexedDBStore<ISceneMap>('scene-map')
+      const list = await handler.getAll() as ISceneMap[]
+      if (list.length > 0) {
+        list.forEach(item => (mapMap[item.id] = item))
+      }
+    } catch (e) {
+      console.error('获取场景列表失败', e)
+    }
+  })()
 
   return {
     mapList,
