@@ -1,7 +1,7 @@
 <template>
-  <div class="flex gap-2">
+  <div class="py-1 flex gap-2">
     <div class="dropdown dropdown-top">
-      <label tabindex="0" class="btn gap-2">
+      <label tabindex="0" class="btn btn-primary gap-2">
         <StarIcon class="w-6 h-6" />基本图形
       </label>
       <ul tabindex="0" class="dropdown-content menu menu-compact p-2 shadow bg-base-100 rounded-box w-30">
@@ -14,11 +14,11 @@
       </ul>
     </div>
     <div v-show="selectedToken">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 h-6">
         <label for="token-tool-fill">背景色</label>
         <input :value="shapeData.fill" type="color" id="token-tool-fill" name="fill" @input="editFillColor">
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 h-6">
         <label for="token-tool-stroke">边框色</label>
         <input :value="shapeData.stroke" type="color" id="token-tool-stroke" name="stroke" @input="editStrokeColor">
       </div>
@@ -35,7 +35,7 @@
       <span>角数</span>
       <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs" @input="editStarPoints" />
     </div>
-    <button class="btn gap-2">
+    <button class="btn btn-primary gap-2">
       <PhotoIcon class="w-6 h-6" />上传图片
     </button>
   </div>

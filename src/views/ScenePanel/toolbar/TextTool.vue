@@ -1,15 +1,15 @@
 <template>
-  <div class="flex gap-2">
-    <button class="btn" @click="addText">
+  <div class="py-1 flex gap-2">
+    <button class="btn btn-primary" @click="addText">
       添加文字
     </button>
-    <textarea :value="textData.text" class="textarea textarea-bordered" @input="editText" />
+    <textarea :value="textData.text" class="textarea textarea-bordered h-12" @input="editText" />
     <div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 h-6">
         <label for="text-tool-fill">背景色</label>
         <input :value="textData.fill" type="color" id="text-tool-fill" name="fill" @input="editFillColor">
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 h-6">
         <label for="text-tool-stroke">前景色</label>
         <input :value="textData.stroke" type="color" id="text-tool-stroke" name="stroke" @input="editStrokeColor">
       </div>

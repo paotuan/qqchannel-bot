@@ -1,17 +1,17 @@
 <template>
-  <div class="flex gap-2">
+  <div class="py-1 flex gap-2">
     <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />
     <template v-if="!background">
-      <button class="btn gap-2" @click="uploadBackground">
-        <PhotoIcon class="w-6 h-6" />上传图片
+      <button class="btn btn-primary gap-2" @click="uploadBackground">
+        <PhotoIcon class="w-6 h-6" />上传背景图片
       </button>
     </template>
     <template v-else>
-      <button class="btn btn-square" @click="uploadBackground">
+      <button class="btn btn-primary" @click="uploadBackground">
         <PhotoIcon class="w-6 h-6" />
       </button>
       <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs" @input="onScaleChange" />
-      <button class="btn btn-square" @click="clearBackground">
+      <button class="btn btn-primary" @click="clearBackground">
         <XMarkIcon class="w-6 h-6" />
       </button>
     </template>
@@ -30,7 +30,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{ (e: 'save'): void }>()
 
 const realUploadBtn = ref<HTMLInputElement>()
-const background = shallowRef<Konva.Image | null>(null) // Konva.Image
+const background = shallowRef<Konva.Image | null>(null) // Konva.Image TODO 加载场景时代入图片元素
 const scale = ref(0.5)
 
 const handleFile = (e: Event) => {

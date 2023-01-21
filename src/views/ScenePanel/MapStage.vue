@@ -4,34 +4,48 @@
     <template v-if="currentMap">
       <!-- toolbar -->
       <MapBasicInfo class="absolute top-0 left-44 z-10" @save="autoSaveCurrentStage" />
-      <div class="fixed bottom-0 mx-auto">
-        <div>
-          <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" @save="autoSaveCurrentStage" />
-          <TokenTool
-            v-show="toolbarItem === 'token'"
-            :layer="contentLayer"
-            :selected="selectedTokens"
-            @select="selectToken({ transformer }, $event)"
-            @save="autoSaveCurrentStage"
-          />
-          <TextTool
-            v-show="toolbarItem === 'text'"
-            :layer="contentLayer"
-            :selected="selectedTokens"
-            @select="selectToken({ transformer }, $event)"
-            @save="autoSaveCurrentStage"
-          />
-        </div>
-        <div class="flex gap-4">
-          <button class="btn btn-square" :class="{ 'btn-outline': toolbarItem !== 'map' }" @click="selectToolbar('map')">
-            <MapIcon class="h-6 w-6" />
-          </button>
-          <button class="btn btn-square" :class="{ 'btn-outline': toolbarItem !== 'token' }" @click="selectToolbar('token')">
-            <MapPinIcon class="h-6 w-6" />
-          </button>
-          <button class="btn btn-square" :class="{ 'btn-outline': toolbarItem !== 'text' }" @click="selectToolbar('text')">
-            <PencilIcon class="h-6 w-6" />
-          </button>
+      <div class="absolute bottom-0 w-full flex">
+        <div class="px-8 py-1 mx-auto bg-white/50 rounded-3xl">
+          <div>
+            <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" @save="autoSaveCurrentStage" />
+            <TokenTool
+                v-show="toolbarItem === 'token'"
+                :layer="contentLayer"
+                :selected="selectedTokens"
+                @select="selectToken({ transformer }, $event)"
+                @save="autoSaveCurrentStage"
+            />
+            <TextTool
+                v-show="toolbarItem === 'text'"
+                :layer="contentLayer"
+                :selected="selectedTokens"
+                @select="selectToken({ transformer }, $event)"
+                @save="autoSaveCurrentStage"
+            />
+          </div>
+          <div class="flex gap-4 justify-center">
+            <button
+                class="btn btn-circle border border-base-300"
+                :class="toolbarItem !== 'map' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+                @click="selectToolbar('map')"
+            >
+              <MapIcon class="h-6 w-6" />
+            </button>
+            <button
+                class="btn btn-circle border border-base-300"
+                :class="toolbarItem !== 'token' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+                @click="selectToolbar('token')"
+            >
+              <MapPinIcon class="h-6 w-6" />
+            </button>
+            <button
+                class="btn btn-circle border border-base-300"
+                :class="toolbarItem !== 'text' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+                @click="selectToolbar('text')"
+            >
+              <PencilIcon class="h-6 w-6" />
+            </button>
+          </div>
         </div>
       </div>
       <!-- context menu -->
