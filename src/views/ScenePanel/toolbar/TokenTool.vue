@@ -25,25 +25,26 @@
     </div>
     <div v-show="selectedToken instanceof Konva.RegularPolygon">
       <span>边数</span>
-      <input :value="shapeData.polygonSides" type="range" min="3" max="8" step="1" class="range range-xs" @input="editPolygonSides" />
+      <input :value="shapeData.polygonSides" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editPolygonSides" />
     </div>
     <div v-show="selectedToken instanceof Konva.Wedge">
       <span>角度</span>
-      <input :value="shapeData.wedgeAngle" type="range" min="10" max="360" step="1" class="range range-xs" @input="editWedgeAngle" />
+      <input :value="shapeData.wedgeAngle" type="range" min="10" max="360" step="1" class="range range-xs range-secondary" @input="editWedgeAngle" />
     </div>
     <div v-show="selectedToken instanceof Konva.Star">
       <span>角数</span>
-      <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs" @input="editStarPoints" />
+      <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editStarPoints" />
     </div>
-    <button class="btn btn-primary gap-2">
+    <button class="btn btn-secondary gap-2" @click.stop="uploadCustomToken">
       <PhotoIcon class="w-6 h-6" />上传图片
     </button>
+    <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />
   </div>
 </template>
 <script setup lang="ts">
 import { StarIcon, PhotoIcon } from '@heroicons/vue/24/outline'
 import Konva from 'konva'
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { BasicShape, basicShapes } from './utils'
 
 interface Props {
@@ -104,6 +105,10 @@ const addBasicShape = (shape: BasicShape) => {
     emit('select', [obj])
     emit('save')
   }
+  // 手动关闭 list
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  document.activeElement?.blur?.()
 }
 
 const createBasicShape = (shape: BasicShape) => {
@@ -205,4 +210,38 @@ const editStarPoints = (ev: Event) => {
   }
 }
 // endregion
+
+// region 上传自定义图片 token
+const realUploadBtn = ref<HTMLInputElement>()
+
+const handleFile = (e: Event) => {
+  const files = (e.target as HTMLInputElement).files
+  if (files && files.length > 0) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const imageUrl = e.target!.result
+      Konva.Image.fromURL(imageUrl, (node: Konva.Image) => {
+        const stage = props.layer.getParent()
+        const attrs = {
+          x: window.innerWidth / 2 - stage.x(),
+          y: window.innerHeight / 2 - stage.y(),
+          scaleX: 0.5,
+          scaleY: 0.5,
+          draggable: true,
+          name: 'custom-token'
+        }
+        node.setAttrs(attrs)
+        node.setAttr('data-src', imageUrl)
+        props.layer.add(node)
+        emit('select', [node])
+        emit('save')
+      })
+    }
+    reader.readAsDataURL(files![0])
+  }
+}
+
+const uploadCustomToken = () => {
+  realUploadBtn.value?.click()
+}
 </script>

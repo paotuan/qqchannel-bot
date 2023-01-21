@@ -11,7 +11,7 @@ export interface ISceneMap {
   name: string,
   deleted: boolean, // 临时标记是否删除
   createAt: number,
-  data?: unknown // stage.toObject()
+  data?: unknown // stage.toJSON()
 }
 
 export const useSceneStore = defineStore('scene', () => {
@@ -42,7 +42,7 @@ export const useSceneStore = defineStore('scene', () => {
   const saveMap = (map: ISceneMap, stage: Konva.Stage, saveMemorySync = false) => {
     // 是否同步序列化 stage data 到内存中
     if (saveMemorySync) {
-      map.data = stage.toObject()
+      map.data = stage.toJSON()
     }
     // 异步保存 db
     const throttledFunc = getThrottledSaveFunc(map.id)
@@ -90,10 +90,9 @@ export const useSceneStore = defineStore('scene', () => {
 })
 
 async function saveMapInDB(item: ISceneMap, stage: Konva.Stage) {
-  // 放在这里执行，确保每次保存的是 stage 的最新状态，并减少 toObject 调用开销
+  // 放在这里执行，确保每次保存的是 stage 的最新状态，并减少 toJSON 调用开销
   // 缺点是 stage 的生命周期被延长了，严格来说大概能算内存泄露了
-  // 另外经测试，同步的地方调用时 toObject 会带上 container 的 dom 导致保存失败，此处调用倒还没出现这个情况
-  item.data = stage.toObject()
+  item.data = stage.toJSON()
   try {
     const handler = await useIndexedDBStore<ISceneMap>('scene-map')
     await handler.put(toRaw(item)) // 要解包，不能传 proxy，否则无法保存

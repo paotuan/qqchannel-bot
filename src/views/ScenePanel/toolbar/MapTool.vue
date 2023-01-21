@@ -7,11 +7,14 @@
       </button>
     </template>
     <template v-else>
-      <button class="btn btn-primary" @click="uploadBackground">
+      <button class="btn btn-square btn-primary" @click="uploadBackground">
         <PhotoIcon class="w-6 h-6" />
       </button>
-      <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs" @input="onScaleChange" />
-      <button class="btn btn-primary" @click="clearBackground">
+      <div>
+        <span>缩放</span>
+        <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs range-secondary" @input="onScaleChange" />
+      </div>
+      <button class="btn btn-square btn-error" @click="clearBackground">
         <XMarkIcon class="w-6 h-6" />
       </button>
     </template>
