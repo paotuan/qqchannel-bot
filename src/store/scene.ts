@@ -21,10 +21,6 @@ export const useSceneStore = defineStore('scene', () => {
   // 当前打开的地图
   const currentMapId = ref<string | null>(null)
   const currentMap = computed(() => currentMapId.value ? mapMap[currentMapId.value] : null)
-  // 时间指示器
-  const timeIndicator = ref(0)
-  // 战斗轮指示器
-  const turn = ref(1)
 
   // 新建地图
   const createMap = () => {
@@ -75,6 +71,12 @@ export const useSceneStore = defineStore('scene', () => {
       console.error('获取场景列表失败', e)
     }
   })()
+
+  // 时间指示器
+  const timeIndicator = ref(new Date())
+  // 战斗轮指示器
+  const turn = ref(1)
+  // 人物列表
 
   return {
     mapList,
