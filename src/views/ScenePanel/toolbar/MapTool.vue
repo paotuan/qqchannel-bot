@@ -21,7 +21,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue'
+import { ref, shallowRef, watch } from 'vue'
 import Konva from 'konva'
 import { PhotoIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 
@@ -33,8 +33,18 @@ const props = defineProps<Props>()
 const emit = defineEmits<{ (e: 'save'): void }>()
 
 const realUploadBtn = ref<HTMLInputElement>()
-const background = shallowRef<Konva.Image | null>(null) // Konva.Image TODO 加载场景时代入图片元素
 const scale = ref(0.5)
+
+// 背景图片元素
+// 在同一个地图中操作时，由于 layer 引用不变，由自己维护 background
+// 切换地图时，由于 layer 引用变化，获取最新的 background
+const background = shallowRef<Konva.Image | null>(null)
+const updateBackgroundRef = () => {
+  const maybeImage = props.layer.getChildren()[0]
+  background.value = maybeImage instanceof Konva.Image ? maybeImage : null
+  scale.value = background.value?.scaleX() ?? 0.5 // 更新 scale
+}
+watch(() => props.layer, updateBackgroundRef, { immediate: true })
 
 const handleFile = (e: Event) => {
   const files = (e.target as HTMLInputElement).files
@@ -57,7 +67,7 @@ const handleFile = (e: Event) => {
         node.setAttr('data-src', imageUrl)
         props.layer.destroyChildren()
         props.layer.add(node)
-        background.value = node
+        updateBackgroundRef()
         emit('save')
       })
     }
@@ -77,8 +87,7 @@ const uploadBackground = () => {
 
 const clearBackground = () => {
   props.layer.removeChildren()
-  background.value = null
-  scale.value = 0.5
+  updateBackgroundRef()
   emit('save')
 }
 </script>
