@@ -182,6 +182,7 @@ const moveToTop = () => {
   const node = contextMenuToken.value
   if (!node) return
   node.moveToTop()
+  transformer.value.moveToTop() // transformer 也置于顶层，先放在这里吧
   autoSaveCurrentStage()
 }
 
