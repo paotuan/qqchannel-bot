@@ -14,6 +14,25 @@ export interface ISceneMap {
   data?: unknown // stage.toJSON()
 }
 
+// 先攻列表角色
+export interface ISceneActor {
+  type: 'actor'
+  userId: string // 用户 id
+  seq: number
+  seq2: number
+}
+
+export interface ISceneNpc {
+  type: 'npc'
+  name: string // npc 目前以 name 为唯一标识
+  seq: number
+  seq2: number
+  embedCard: {
+    hp: number
+    ext: string
+  }
+}
+
 export const useSceneStore = defineStore('scene', () => {
   // 地图列表
   const mapMap = reactive<Record<string, ISceneMap>>({})
@@ -76,7 +95,35 @@ export const useSceneStore = defineStore('scene', () => {
   const timeIndicator = ref(new Date())
   // 战斗轮指示器
   const turn = ref(1)
+
   // 人物列表
+  const characters = reactive<(ISceneActor | ISceneNpc)[]>([])
+  const charactersSorted = computed(
+    () => [...characters].sort((a, b) => {
+      const seq1Res = compareSeq(a.seq, b.seq)
+      return seq1Res === 0 ? compareSeq(a.seq2, b.seq2) : seq1Res
+    })
+  )
+  // 当前选择人物
+  const currentSelectedCharacter = ref<ISceneActor | ISceneNpc | null>(null)
+
+  // 添加人物，如果人物已存在，则改为选中该人物以提示用户
+  const addCharacter = (chara: ISceneActor | ISceneNpc) => {
+    const existCharacter = characters.find(exist => {
+      if (chara.type === 'actor' && exist.type === 'actor' && chara.userId === exist.userId) {
+        return true // 相同的 actor
+      } else if (chara.type === 'npc' && exist.type === 'npc' && chara.name === exist.name) {
+        return true // 相同的 npc
+      } else {
+        return false
+      }
+    })
+    if (existCharacter) {
+      currentSelectedCharacter.value = existCharacter
+    } else {
+      characters.push(chara)
+    }
+  }
 
   return {
     mapList,
@@ -87,7 +134,10 @@ export const useSceneStore = defineStore('scene', () => {
     createMap,
     switchMap,
     saveMap,
-    deleteMap
+    deleteMap,
+    charactersSorted,
+    currentSelectedCharacter,
+    addCharacter
   }
 })
 
@@ -122,4 +172,12 @@ async function deleteMapInDB(item: ISceneMap) {
   } catch (e) {
     console.error('删除场景失败', item.name, e)
   }
+}
+
+// 先攻值比较
+function compareSeq(a: number, b: number) {
+  if (isNaN(a) && isNaN(b)) return 0
+  if (isNaN(a)) return 1
+  if (isNaN(b)) return -1
+  return b - a
 }

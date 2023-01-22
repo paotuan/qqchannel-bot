@@ -1,7 +1,7 @@
 <template>
   <div class="flex gap-2 justify-between">
-    <button class="btn btn-sm btn-square btn-outline border-base-300">
-      <ChevronDoubleLeftIcon class="w-4 h-4" @click="prevTurn" />
+    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevTurn">
+      <ChevronDoubleLeftIcon class="w-4 h-4" />
     </button>
     <div>
       战斗轮
@@ -14,8 +14,8 @@
       />
       轮
     </div>
-    <button class="btn btn-sm btn-square btn-outline border-base-300">
-      <ChevronDoubleRightIcon class="w-4 h-4" @click="nextTurn" />
+    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextTurn">
+      <ChevronDoubleRightIcon class="w-4 h-4" />
     </button>
   </div>
 </template>
@@ -44,11 +44,11 @@ const onInput = (e: any) => {
 
 const prevTurn = () => {
   sceneStore.turn = Math.max(sceneStore.turn - 1, 1)
-  flushInput()
+  // flushInput()
 }
 
 const nextTurn = () => {
   sceneStore.turn++
-  flushInput()
+  // flushInput()
 }
 </script>

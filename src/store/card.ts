@@ -114,6 +114,15 @@ export const useCardStore = defineStore('card', () => {
     }
   }
 
+  // 根据用户 id 反查关联卡片
+  const getCardOfUser = (userId: string) => {
+    for (const cardName of Object.keys(cardLinkMap)) {
+      if (cardLinkMap[cardName] === userId) {
+        return cardMap[cardName]
+      }
+    }
+  }
+
   return {
     selectedCard,
     showAllCards,
@@ -132,7 +141,8 @@ export const useCardStore = defineStore('card', () => {
     isEdited,
     linkedUserOf,
     requestLinkUser,
-    linkUser
+    linkUser,
+    getCardOfUser
   }
 })
 

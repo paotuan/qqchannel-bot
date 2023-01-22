@@ -7,6 +7,7 @@
       <TimeIndicator />
       <div class="h-px bg-base-200 my-2" />
       <BattleTurnIndicator />
+      <UserSelector />
     </div>
 
     <button class="btn btn-sm btn-circle btn-outline border-base-300 bg-base-100 absolute -left-4 bottom-2" @click="collapse = !collapse">
@@ -20,6 +21,7 @@ import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 import TimeIndicator from './TimeIndicator.vue'
 import BattleTurnIndicator from './BattleTurnIndicator.vue'
+import UserSelector from './UserSelector.vue'
 
 const collapse = ref(false)
 </script>
