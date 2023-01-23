@@ -18,7 +18,7 @@
         <button class="btn btn-xs btn-outline btn-circle">
           <MapPinIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle btn-error">
+        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="sceneStore.deleteCharacter(props.chara)">
           <TrashIcon class="h-4 w-4" />
         </button>
       </span>
@@ -26,7 +26,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneActor } from '../../../store/scene'
+import { ISceneActor, useSceneStore } from '../../../store/scene'
 import { computed } from 'vue'
 import { useUserStore } from '../../../store/user'
 import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outline'
@@ -35,4 +35,6 @@ const props = defineProps<{ chara: ISceneActor }>()
 
 const userStore = useUserStore()
 const userInfo = computed(() => userStore.of(props.chara.userId))
+
+const sceneStore = useSceneStore()
 </script>

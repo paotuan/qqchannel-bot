@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, reactive, ref, toRaw } from 'vue'
 import Konva from 'konva'
 import { useIndexedDBStore } from '../utils/db'
-import { throttle } from 'lodash'
+import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
 
 // 场景地图
@@ -25,6 +25,7 @@ export interface ISceneActor {
 export interface ISceneNpc {
   type: 'npc'
   name: string // npc 目前以 name 为唯一标识
+  avatar?: string // npc 图片，可上传
   seq: number
   seq2: number
   embedCard: {
@@ -125,6 +126,43 @@ export const useSceneStore = defineStore('scene', () => {
     }
   }
 
+  // 删除人物
+  const deleteCharacter = (chara: ISceneActor | ISceneNpc) => {
+    const index = characters.indexOf(chara)
+    if (index >= 0) {
+      characters.splice(index, 1)
+      // 如果该人物正被选中，则移除选中态
+      if (currentSelectedCharacter.value === chara) {
+        currentSelectedCharacter.value = null
+      }
+      // 移除该人物在地图中的 token。只移除当前地图的，其他不管了
+      // todo
+    }
+  }
+
+  // 复制 npc
+  const duplicateNpc = (chara: ISceneNpc) => {
+    const dup = cloneDeep(chara)
+    // 改名，提取后面的数字
+    const matchNum = chara.name.match(/(\d+)$/)
+    const nameWithoutNum = matchNum ? chara.name.slice(0, matchNum.index) : chara.name // 去掉后面的数字
+    const pattern = new RegExp(`^${escapeRegExp(nameWithoutNum)}(\\d+)$`)
+    // 找到当前列表中符合 名字+数字 的 npc 中，最大的数字
+    let maxNum = 1
+    characters.forEach(exist => {
+      if (exist.type === 'npc') {
+        const match = exist.name.match(pattern)
+        if (match) {
+          const num = parseInt(match[1])
+          maxNum = Math.max(num, maxNum)
+        }
+      }
+    })
+    dup.name = nameWithoutNum + (maxNum + 1)
+    // 加入列表
+    characters.push(dup)
+  }
+
   return {
     mapList,
     currentMapId,
@@ -137,7 +175,9 @@ export const useSceneStore = defineStore('scene', () => {
     deleteMap,
     charactersSorted,
     currentSelectedCharacter,
-    addCharacter
+    addCharacter,
+    deleteCharacter,
+    duplicateNpc
   }
 })
 

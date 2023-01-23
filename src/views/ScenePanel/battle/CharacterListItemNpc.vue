@@ -19,10 +19,10 @@
         <button class="btn btn-xs btn-outline btn-circle">
           <MapPinIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle">
+        <button class="btn btn-xs btn-outline btn-circle" @click.stop="sceneStore.duplicateNpc(props.chara)">
           <Square2StackIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle btn-error">
+        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="sceneStore.deleteCharacter(props.chara)">
           <TrashIcon class="h-4 w-4" />
         </button>
       </span>
@@ -30,9 +30,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneNpc } from '../../../store/scene'
+import { ISceneNpc, useSceneStore } from '../../../store/scene'
 import { DocumentTextIcon, MapPinIcon, TrashIcon, Square2StackIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps<{ chara: ISceneNpc }>()
 
+const sceneStore = useSceneStore()
 </script>
