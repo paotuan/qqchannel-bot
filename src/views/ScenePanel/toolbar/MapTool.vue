@@ -15,7 +15,7 @@
         <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs range-secondary" @input="onScaleChange" />
       </div>
       <button class="btn btn-square btn-error" @click="clearBackground">
-        <XMarkIcon class="w-6 h-6" />
+        <TrashIcon class="w-6 h-6" />
       </button>
     </template>
   </div>
@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref, shallowRef, watch } from 'vue'
 import Konva from 'konva'
-import { PhotoIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { PhotoIcon, TrashIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
   layer: Konva.Layer

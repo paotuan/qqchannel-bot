@@ -3,6 +3,9 @@
     <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevTurn">
       <ChevronDoubleLeftIcon class="w-4 h-4" />
     </button>
+    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevChara">
+      <ChevronLeftIcon class="w-4 h-4" />
+    </button>
     <div>
       战斗轮
       <input
@@ -14,13 +17,16 @@
       />
       轮
     </div>
+    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextChara">
+      <ChevronRightIcon class="w-4 h-4" />
+    </button>
     <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextTurn">
       <ChevronDoubleRightIcon class="w-4 h-4" />
     </button>
   </div>
 </template>
 <script setup lang="ts">
-import { ChevronDoubleRightIcon, ChevronDoubleLeftIcon } from '@heroicons/vue/24/outline'
+import { ChevronDoubleRightIcon, ChevronDoubleLeftIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
 import { useSceneStore } from '../../../store/scene'
 import { ref } from 'vue'
 
@@ -50,5 +56,31 @@ const prevTurn = () => {
 const nextTurn = () => {
   sceneStore.turn++
   // flushInput()
+}
+
+const prevChara = () => {
+  const currentChara = sceneStore.currentSelectedCharacter
+  if (!currentChara || sceneStore.charactersSorted.length === 0) return
+  const index = sceneStore.charactersSorted.indexOf(currentChara)
+  if (index === 0) {
+    if (sceneStore.turn > 1) {
+      sceneStore.turn--
+      sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[sceneStore.charactersSorted.length - 1]
+    }
+  } else {
+    sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[index - 1]
+  }
+}
+
+const nextChara = () => {
+  const currentChara = sceneStore.currentSelectedCharacter
+  if (!currentChara || sceneStore.charactersSorted.length === 0) return
+  const index = sceneStore.charactersSorted.indexOf(currentChara)
+  if (index === sceneStore.charactersSorted.length - 1) {
+    sceneStore.turn++
+    sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[0]
+  } else {
+    sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[index + 1]
+  }
 }
 </script>

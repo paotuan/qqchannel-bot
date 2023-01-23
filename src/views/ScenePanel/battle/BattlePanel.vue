@@ -8,6 +8,7 @@
       <div class="h-px bg-base-200 my-2" />
       <BattleTurnIndicator />
       <UserSelector />
+      <CharacterList />
     </div>
 
     <button
@@ -25,6 +26,7 @@ import { ref } from 'vue'
 import TimeIndicator from './TimeIndicator.vue'
 import BattleTurnIndicator from './BattleTurnIndicator.vue'
 import UserSelector from './UserSelector.vue'
+import CharacterList from './CharacterList.vue'
 
 const panelCollapse = ref(false)
 </script>

@@ -61,7 +61,10 @@ const noCardUsersAfterSearch = computed(() => noCardUsers.value.filter(user => k
 // 点击选择玩家进入场景
 const sceneStore = useSceneStore()
 const select = (user: IUser) => {
-  sceneStore.addCharacter({ type: 'actor', userId: user.id, seq: NaN, seq2: NaN })
+  const userCard = cardStore.getCardOfUser(user.id)
+  // 如果是 coc 人物卡，自动代入敏捷值作为 seq；如果是 dnd 则代入 seq2
+  const seq = userCard ? userCard.props.敏捷 : NaN
+  sceneStore.addCharacter({ type: 'actor', userId: user.id, seq, seq2: NaN })
   blur()
 }
 

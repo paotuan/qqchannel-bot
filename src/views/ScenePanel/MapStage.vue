@@ -5,7 +5,7 @@
       <!-- toolbar -->
       <MapBasicInfo class="absolute top-0 left-44 z-10" @save="autoSaveCurrentStage" />
       <div class="absolute bottom-0 w-full flex">
-        <div class="px-8 py-1 mx-auto bg-white/50 rounded-3xl">
+        <div class="px-8 py-1 mx-auto bg-base-100/50 rounded-3xl">
           <div>
             <MapTool v-show="toolbarItem === 'map'" :layer="backgroundLayer" @save="autoSaveCurrentStage" />
             <TokenTool
