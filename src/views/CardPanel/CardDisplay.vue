@@ -204,9 +204,10 @@ const skills = computed(() => {
 
 // 删除人物卡二次确认
 const deleteCard = () => {
-  if (!card.value) return
-  if (window.confirm('确定要删除这张人物卡吗？')) {
-    cardStore.deleteCard(card.value)
+  if (card.value) {
+    if (window.confirm('确定要删除这张人物卡吗？')) {
+      cardStore.deleteCard(card.value)
+    }
   }
 }
 
