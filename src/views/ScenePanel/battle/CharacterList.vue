@@ -1,10 +1,10 @@
 <template>
-  <div>
-    <div>
+  <div class="flex-grow" style="height: calc(100% - 200px)">
+    <div class="-mx-4 overflow-y-auto" style="height: 100%">
       <div
         v-for="chara in charaList"
         :key="chara.userId || chara.name"
-        class="flex justify-between py-2 -mx-4 px-4 cursor-pointer"
+        class="flex justify-between py-2 px-4 cursor-pointer"
         :class="{ 'bg-secondary/50': sceneStore.currentSelectedCharacter === chara }"
         @click="sceneStore.currentSelectedCharacter = chara"
       >

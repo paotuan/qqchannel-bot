@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="flex flex-col justify-between">
-      <div class="font-bold">{{ props.chara.name }}</div>
+      <div class="font-bold max-w-[7rem] truncate">{{ props.chara.name }}</div>
       <span class="flex gap-1">
         <button class="btn btn-xs btn-outline btn-circle">
           <DocumentTextIcon class="h-4 w-4" />

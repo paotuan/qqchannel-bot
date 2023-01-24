@@ -30,6 +30,7 @@ export interface ISceneNpc {
   seq2: number
   embedCard: {
     hp: number
+    maxHp: number
     ext: string
   }
 }

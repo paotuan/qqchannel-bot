@@ -10,9 +10,9 @@
       </div>
     </div>
     <div class="flex flex-col justify-between">
-      <div class="font-bold">{{ userInfo.nick }}</div>
+      <div class="font-bold max-w-[7rem] truncate">{{ userInfo.nick }}</div>
       <span class="flex gap-1">
-        <button class="btn btn-xs btn-outline btn-circle">
+        <button class="btn btn-xs btn-outline btn-circle" :disabled="!userCard" @click.stop="selectCard">
           <DocumentTextIcon class="h-4 w-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle">
@@ -30,11 +30,24 @@ import { ISceneActor, useSceneStore } from '../../../store/scene'
 import { computed } from 'vue'
 import { useUserStore } from '../../../store/user'
 import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { useCardStore } from '../../../store/card'
+import { useUIStore } from '../../../store/ui'
 
 const props = defineProps<{ chara: ISceneActor }>()
 
 const userStore = useUserStore()
 const userInfo = computed(() => userStore.of(props.chara.userId))
+
+const cardStore = useCardStore()
+const userCard = computed(() => cardStore.getCardOfUser(props.chara.userId))
+
+// 跳转到人物卡页面
+const uiStore = useUIStore()
+const selectCard = () => {
+  if (!userCard.value) return
+  cardStore.selectCard(userCard.value)
+  uiStore.activeTab = 'card'
+}
 
 const sceneStore = useSceneStore()
 </script>

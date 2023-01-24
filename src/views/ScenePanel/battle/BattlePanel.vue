@@ -9,6 +9,10 @@
       <BattleTurnIndicator />
       <UserSelector />
       <CharacterList />
+      <div class="flex gap-2 justify-between">
+        <button class="btn btn-secondary flex-grow">发送地图</button>
+        <button class="btn btn-secondary flex-grow">发送战报</button>
+      </div>
     </div>
 
     <button

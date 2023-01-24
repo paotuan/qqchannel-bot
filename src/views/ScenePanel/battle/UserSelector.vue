@@ -4,7 +4,7 @@
       <input
         v-model="keyword"
         type="text"
-        placeholder="搜索玩家或创建敌人/NPC, 回车键确认"
+        placeholder="搜索玩家或输入名字创建敌人/NPC, 回车键确认"
         class="input input-bordered input-sm w-full"
         @keyup.enter="keydownEnter"
       />
@@ -74,7 +74,7 @@ const keydownEnter = () => {
   if (firstOption) {
     select(firstOption)
   } else {
-    sceneStore.addCharacter({ type: 'npc', name: keyword.value.trim(), seq: NaN, seq2: NaN, embedCard: { hp: NaN, ext: '' } })
+    sceneStore.addCharacter({ type: 'npc', name: keyword.value.trim(), seq: NaN, seq2: NaN, embedCard: { hp: NaN, maxHp: NaN, ext: '' } })
     blur()
   }
 }
