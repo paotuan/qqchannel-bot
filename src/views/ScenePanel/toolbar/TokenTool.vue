@@ -23,15 +23,15 @@
         <input :value="shapeData.stroke" type="color" id="token-tool-stroke" name="stroke" @input="editStrokeColor">
       </div>
     </div>
-    <div v-show="selectedToken instanceof Konva.RegularPolygon">
+    <div v-show="selectedToken && selectedToken.name === 'polygon'">
       <span>边数</span>
       <input :value="shapeData.polygonSides" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editPolygonSides" />
     </div>
-    <div v-show="selectedToken instanceof Konva.Wedge">
+    <div v-show="selectedToken && selectedToken.name === 'wedge'">
       <span>角度</span>
       <input :value="shapeData.wedgeAngle" type="range" min="10" max="360" step="1" class="range range-xs range-secondary" @input="editWedgeAngle" />
     </div>
-    <div v-show="selectedToken instanceof Konva.Star">
+    <div v-show="selectedToken && selectedToken.name === 'star'">
       <span>角数</span>
       <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editStarPoints" />
     </div>
@@ -43,30 +43,24 @@
 </template>
 <script setup lang="ts">
 import { StarIcon, PhotoIcon } from '@heroicons/vue/24/outline'
-import Konva from 'konva'
 import { computed, reactive, ref, watch } from 'vue'
 import { BasicShape, basicShapes } from './utils'
+import { useSceneStore } from '../../../store/scene'
+import type { IPolygonToken, IToken, IWedgeToken, IStarToken } from '../../../store/scene/map-types'
 
-interface Props {
-  layer: Konva.Layer,
-  selected: Konva.Node[]
-}
-
-interface Emits {
-  (e: 'select', value: Konva.Node[]): void,
-  (e: 'save'): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const sceneStore = useSceneStore()
+const currentMapData = computed(() => sceneStore.currentMap!.stage)
 
 // 当前选中的 token
-const selectedToken = computed<Konva.Shape | null>(() => {
-  if (props.selected.length === 1) { // 只考虑选中单个节点的情况
-    const selected = props.selected[0]
-    for (const shape of basicShapes) {
-      if (selected.hasName(shape)) {
-        return selected as Konva.Shape
+const selectedToken = computed<IToken | null>(() => {
+  if (currentMapData.value.selectNodeIds.length === 1) { // 只考虑选中单个节点的情况
+    const selectedId = currentMapData.value.selectNodeIds[0]
+    const selected = currentMapData.value.items.find(item => item.id === selectedId)
+    if (selected) {
+      for (const shape of basicShapes) {
+        if (selected.name === shape) {
+          return selected as IToken
+        }
       }
     }
   }
@@ -85,83 +79,27 @@ const shapeData = reactive({
 // 当选中 shape 节点时进入编辑模式，代入当前的属性
 watch(() => selectedToken.value, node => {
   if (node) {
-    shapeData.fill = node.fill()
-    shapeData.stroke = node.stroke()
-    if (node instanceof Konva.RegularPolygon) {
-      shapeData.polygonSides = node.sides()
-    } else if (node instanceof Konva.Wedge) {
-      shapeData.wedgeAngle = node.angle()
-    } else if (node instanceof Konva.Star) {
-      shapeData.starPoints = node.numPoints()
+    shapeData.fill = node.fill
+    shapeData.stroke = node.stroke
+    if (node.name === 'polygon') {
+      shapeData.polygonSides = (node as IPolygonToken).sides
+    } else if (node.name === 'wedge') {
+      shapeData.wedgeAngle = (node as IWedgeToken).angle
+    } else if (node.name === 'star') {
+      shapeData.starPoints = (node as IStarToken).numPoints
     }
   }
 })
 
 // region 创建 shape
 const addBasicShape = (shape: BasicShape) => {
-  const obj = createBasicShape(shape)
-  if (obj) {
-    props.layer.add(obj)
-    emit('select', [obj])
-    emit('save')
-  }
+  currentMapData.value.addToken(shape, shapeData)
   // 手动关闭 list
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   document.activeElement?.blur?.()
 }
 
-const createBasicShape = (shape: BasicShape) => {
-  const stage = props.layer.getParent()
-  const commonConfig = {
-    x: window.innerWidth / 2 - stage.x(), // 由于 stage 可拖动，确保起始点相对于屏幕位置不变，而不是相对 stage
-    y: window.innerHeight / 2 - stage.y(), // 否则会出现 stage 拖动导致添加的图形不在可视范围内的情况
-    fill: shapeData.fill,
-    stroke: shapeData.stroke,
-    strokeWidth: 3,
-    draggable: true,
-    name: shape
-  }
-  switch (shape) {
-  case 'circle':
-    return new Konva.Circle({
-      ...commonConfig,
-      radius: 30,
-    })
-  case 'rect':
-    return new Konva.Rect({
-      ...commonConfig,
-      width: 60,
-      height: 60
-    })
-  case 'polygon':
-    return new Konva.RegularPolygon({
-      ...commonConfig,
-      sides: shapeData.polygonSides,
-      radius: 30,
-    })
-  case 'wedge':
-    return new Konva.Wedge({
-      ...commonConfig,
-      radius: 60,
-      angle: shapeData.wedgeAngle,
-    })
-  case 'star':
-    return new Konva.Star({
-      ...commonConfig,
-      numPoints: shapeData.starPoints,
-      innerRadius: 15,
-      outerRadius: 30,
-    })
-  case 'arrow':
-    return new Konva.Arrow({
-      ...commonConfig,
-      points: [0, 0, 50, 50],
-      pointerLength: 10,
-      pointerWidth: 10,
-    })
-  }
-}
 // endregion
 
 // region 编辑 shape
@@ -169,8 +107,7 @@ const editStrokeColor = (ev: Event) => {
   const color = (ev.target as HTMLTextAreaElement).value
   shapeData.stroke = color
   if (selectedToken.value) {
-    selectedToken.value!.stroke(color)
-    emit('save')
+    selectedToken.value!.stroke = color
   }
 }
 
@@ -178,35 +115,31 @@ const editFillColor = (ev: Event) => {
   const color = (ev.target as HTMLTextAreaElement).value
   shapeData.fill = color
   if (selectedToken.value) {
-    selectedToken.value!.fill(color)
-    emit('save')
+    selectedToken.value!.fill = color
   }
 }
 
 const editPolygonSides = (ev: Event) => {
   const value = Number((ev.target as HTMLInputElement).value)
   shapeData.polygonSides = value
-  if (selectedToken.value instanceof Konva.RegularPolygon) {
-    selectedToken.value.sides(value)
-    emit('save')
+  if (selectedToken.value?.name === 'polygon') {
+    (selectedToken.value as IPolygonToken).sides = value
   }
 }
 
 const editWedgeAngle = (ev: Event) => {
   const value = Number((ev.target as HTMLInputElement).value)
   shapeData.wedgeAngle = value
-  if (selectedToken.value instanceof Konva.Wedge) {
-    selectedToken.value.angle(value)
-    emit('save')
+  if (selectedToken.value?.name === 'wedge') {
+    (selectedToken.value as IWedgeToken).angle = value
   }
 }
 
 const editStarPoints = (ev: Event) => {
   const value = Number((ev.target as HTMLInputElement).value)
   shapeData.starPoints = value
-  if (selectedToken.value instanceof Konva.Star) {
-    selectedToken.value.numPoints(value)
-    emit('save')
+  if (selectedToken.value?.name === 'star') {
+    (selectedToken.value as IStarToken).numPoints = value
   }
 }
 // endregion
@@ -219,23 +152,8 @@ const handleFile = (e: Event) => {
   if (files && files.length > 0) {
     const reader = new FileReader()
     reader.onload = (e) => {
-      const imageUrl = e.target!.result
-      Konva.Image.fromURL(imageUrl, (node: Konva.Image) => {
-        const stage = props.layer.getParent()
-        const attrs = {
-          x: window.innerWidth / 2 - stage.x(),
-          y: window.innerHeight / 2 - stage.y(),
-          scaleX: 0.5,
-          scaleY: 0.5,
-          draggable: true,
-          name: 'custom-token'
-        }
-        node.setAttrs(attrs)
-        node.setAttr('data-src', imageUrl)
-        props.layer.add(node)
-        emit('select', [node])
-        emit('save')
-      })
+      const imageUrl = e.target!.result as string
+      currentMapData.value.addCustomToken(imageUrl)
     }
     reader.readAsDataURL(files![0])
   }

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="currentScene">
+  <div>
     <span class="text-sm font-bold">场景名称：</span>
     <input
       v-model="currentScene.name"
@@ -16,8 +16,6 @@
 import { useSceneStore } from '../../store/scene'
 import { computed, ref } from 'vue'
 
-const emit = defineEmits<{ (e: 'save'): void }>()
-
 const sceneStore = useSceneStore()
 const currentScene = computed(() => sceneStore.currentMap)
 
@@ -26,7 +24,6 @@ const onEditName = (e: Event) => {
   const newName = (e.target as HTMLInputElement).value.trim()
   if (newName === oldName.value) return // 没改变
   if (!newName) currentScene.value!.name = oldName.value // 置空，就还是恢复成老名字吧
-  emit('save')
 }
 
 const deleteScene = () => {

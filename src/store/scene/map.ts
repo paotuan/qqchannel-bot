@@ -1,0 +1,172 @@
+import { reactive, ref, toRaw } from 'vue'
+import type {
+  IStageBackground,
+  IBaseStageItem,
+  ICircleToken,
+  IRectToken,
+  IPolygonToken,
+  IWedgeToken, IStarToken, IArrowToken, ITextLabel
+} from './map-types'
+import { ICustomToken, ITextEditConfig, IToken, ITokenEditConfig } from './map-types'
+import { nanoid } from 'nanoid/non-secure'
+
+export interface IStageData {
+  x: number
+  y: number
+  background: IStageBackground | null
+  items: IBaseStageItem[]
+}
+
+// initial value, 相当于构造函数
+export function useStage(data: IStageData = { x: 0, y: 0, background: null, items: [] }) {
+  const x = ref(data.x)
+  const y = ref(data.y)
+  const background = ref<IStageBackground | null>(data.background)
+  const items = reactive<IBaseStageItem[]>(data.items)
+  const selectNodeIds = ref<string[]>([]) // transformer 选中的 node id
+
+  // 设置场景背景
+  const setBackground = (src: string | null, scale = 0.5) => {
+    if (!src) {
+      background.value = null
+    } else {
+      background.value = {
+        name: 'map',
+        x: 0 - x.value,
+        y: 0 - y.value,
+        scaleX: scale,
+        scaleY: scale,
+        rotation: 0,
+        'data-src': src
+      }
+    }
+  }
+
+  // 设置背景缩放
+  const setBackgroundScale = (scale: number) => {
+    if (background.value) {
+      background.value.scaleX = scale
+      background.value.scaleY = scale
+    }
+  }
+
+  // 添加 token
+  const addToken = (type: string, config: ITokenEditConfig) => {
+    const token = createToken(type, x.value, y.value, config)
+    items.push(token)
+  }
+
+  // 添加自定义图片 token
+  const addCustomToken = (src: string) => {
+    const token: ICustomToken = {
+      id: nanoid(),
+      x: window.innerWidth / 2 - x.value,
+      y: window.innerHeight / 2 - y.value,
+      scaleX: 0.5,
+      scaleY: 0.5,
+      rotation: 0,
+      'data-src': src,
+      name: 'custom-token'
+    }
+    items.push(token)
+  }
+
+  // 添加文字标签
+  const addTextLabel = (config: ITextEditConfig) => {
+    const token: ITextLabel = {
+      id: nanoid(),
+      x: window.innerWidth / 2 - x.value,
+      y: window.innerHeight / 2 - y.value,
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+      name: 'text',
+      fill: config.fill,
+      stroke: config.stroke,
+      text: config.text,
+      fontFamily: 'Calibri',
+      fontSize: 18,
+      padding: 5
+    }
+    items.push(token)
+  }
+
+  const toJson = () => ({
+    x: x.value,
+    y: y.value,
+    background: background.value,
+    items: toRaw(items)
+  } as IStageData)
+
+  // 统一套一层 reactive 以获得正确的类型推断
+  // 不然在外面被 reactive 包裹后发生 ref 解包，导致 ReturnType<typeof useStage> 推断出的类型和实际不一致
+  return reactive({
+    x,
+    y,
+    background,
+    setBackground,
+    setBackgroundScale,
+    selectNodeIds,
+    items,
+    addToken,
+    addCustomToken,
+    addTextLabel,
+    toJson
+  })
+}
+
+function createToken(type: string, stageX: number, stageY: number, config: ITokenEditConfig) {
+  const commonConfig: IToken = {
+    id: nanoid(),
+    x: window.innerWidth / 2 - stageX, // 由于 stage 可拖动，确保起始点相对于屏幕位置不变，而不是相对 stage
+    y: window.innerHeight / 2 - stageY, // 否则会出现 stage 拖动导致添加的图形不在可视范围内的情况
+    scaleX: 1,
+    scaleY: 1,
+    rotation: 0,
+    fill: config.fill,
+    stroke: config.stroke,
+    strokeWidth: 3,
+    name: type,
+  }
+  switch (type) {
+  case 'circle':
+    return {
+      ...commonConfig,
+      radius: 30,
+    } as ICircleToken
+  case 'rect':
+    return {
+      ...commonConfig,
+      width: 60,
+      height: 60
+    } as IRectToken
+  case 'polygon':
+    return {
+      ...commonConfig,
+      sides: config.polygonSides,
+      radius: 30,
+    } as IPolygonToken
+  case 'wedge':
+    return {
+      ...commonConfig,
+      radius: 60,
+      angle: config.wedgeAngle,
+    } as IWedgeToken
+  case 'star':
+    return {
+      ...commonConfig,
+      numPoints: config.starPoints,
+      innerRadius: 15,
+      outerRadius: 30,
+    } as IStarToken
+  case 'arrow':
+    return {
+      ...commonConfig,
+      points: [0, 0, 50, 50],
+      pointerLength: 10,
+      pointerWidth: 10,
+    } as IArrowToken
+  default:
+    throw new Error('unknown token type: ' + type)
+  }
+}
