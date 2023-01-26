@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
-import { computed, reactive, ref, toRaw } from 'vue'
-import Konva from 'konva'
+import { computed, reactive, ref, watch } from 'vue'
 import { useIndexedDBStore } from '../../utils/db'
 import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
-import { useStage } from './map'
+import { IStageData, useStage } from './map'
 
 // 场景地图
 export interface ISceneMap {
@@ -12,8 +11,8 @@ export interface ISceneMap {
   name: string,
   deleted: boolean, // 临时标记是否删除
   createAt: number,
-  // data?: unknown // stage.toJSON()
-  stage: ReturnType<typeof useStage>
+  stage: ReturnType<typeof useStage>,
+  data?: unknown // stage.toJson() 临时保存数据库用
 }
 
 // 先攻列表角色
@@ -58,14 +57,10 @@ export const useSceneStore = defineStore('scene', () => {
   }
 
   // 保存地图
-  const saveMap = (map: ISceneMap, stage: Konva.Stage, saveMemorySync = false) => {
-    // // 是否同步序列化 stage data 到内存中
-    // if (saveMemorySync) {
-    //   map.data = stage.toJSON()
-    // }
-    // // 异步保存 db
-    // const throttledFunc = getThrottledSaveFunc(map.id)
-    // throttledFunc(map, stage)
+  const saveMap = (map: ISceneMap) => {
+    // 异步保存 db
+    const throttledFunc = getThrottledSaveFunc(map.id)
+    throttledFunc(map)
   }
 
   // 删除地图
@@ -88,12 +83,26 @@ export const useSceneStore = defineStore('scene', () => {
       const list = await handler.getAll() as ISceneMap[]
       if (list.length > 0) {
         list.sort((a, b) => a.createAt - b.createAt)
-        list.forEach(item => (mapMap[item.id] = item))
+        list.forEach(item => {
+          item.stage = useStage(item.data as IStageData) // 反序列化
+          item.data = undefined
+          mapMap[item.id] = item
+        })
       }
     } catch (e) {
       console.error('获取场景列表失败', e)
     }
   })()
+
+  // 自动保存逻辑，切换地图或地图内容变化时
+  watch(currentMap, (newMap, oldMap) => {
+    if (newMap && !newMap.deleted) {
+      saveMap(newMap)
+    }
+    if (oldMap && !oldMap.deleted) {
+      saveMap(oldMap)
+    }
+  }, { deep: true })
 
   // 时间指示器
   const timeIndicator = ref(new Date())
@@ -184,16 +193,16 @@ export const useSceneStore = defineStore('scene', () => {
   }
 })
 
-async function saveMapInDB(item: ISceneMap, stage: Konva.Stage) {
-  // 放在这里执行，确保每次保存的是 stage 的最新状态，并减少 toJSON 调用开销
-  // 缺点是 stage 的生命周期被延长了，严格来说大概能算内存泄露了
-  // item.data = stage.toJSON()
+async function saveMapInDB(item: ISceneMap) {
+  // 放在这里执行，确保每次保存的是 stage 的最新状态
+  const itemCopy = { ...item, stage: undefined, data: item.stage.toJson() }
   try {
     const handler = await useIndexedDBStore<ISceneMap>('scene-map')
-    await handler.put(toRaw(item)) // 要解包，不能传 proxy，否则无法保存
+    await handler.put(itemCopy) // 要解包，不能传 proxy，否则无法保存
+    console.log('保存场景', item.name)
   } catch (e) {
     console.error('保存场景失败', item.name, e)
-    console.log(toRaw(item))
+    console.log(itemCopy)
   }
 }
 
@@ -203,15 +212,20 @@ const throttledSaveMapMap: Record<string, ReturnType<typeof throttle<typeof save
 function getThrottledSaveFunc(id: string) {
   let func = throttledSaveMapMap[id]
   if (!func) {
-    func = throttledSaveMapMap[id] = throttle(saveMapInDB, 5000)
+    func = throttledSaveMapMap[id] = throttle(saveMapInDB, 5000, { leading: false })
   }
   return func
 }
 
 async function deleteMapInDB(item: ISceneMap) {
   try {
+    // 清除该地图定时保存的逻辑
+    const throttledFunc = getThrottledSaveFunc(item.id)
+    throttledFunc.cancel()
+    // 删除数据库
     const handler = await useIndexedDBStore<ISceneMap>('scene-map')
     await handler.delete(item.id)
+    console.log('删除场景', item.name)
   } catch (e) {
     console.error('删除场景失败', item.name, e)
   }

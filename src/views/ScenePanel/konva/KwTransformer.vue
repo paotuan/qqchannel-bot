@@ -15,7 +15,7 @@ const transformer = ref()
 watch(selectNodeIds, (ids) => {
   const transformerNode: Konva.Transformer = transformer.value.getNode()
   const stage = transformerNode.getStage()!
-  const selectNodes = ids.map(id => stage.find(`#${id}`)[0])
+  const selectNodes = ids.map(id => stage.find(`#${id}`)[0]).filter(node => !!node)
   transformerNode.nodes(selectNodes)
 })
 

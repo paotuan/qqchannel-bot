@@ -107,50 +107,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('click', hideContextMenu)
 })
 // // endregion 右键事件
-//
-// // scene store
-// const sceneStore = useSceneStore()
-// const currentMap = computed(() => sceneStore.currentMap)
-//
-// // 自动保存场景
-// const autoSaveCurrentMap = ({ stage }: { stage: Konva.Stage }, saveMemorySync = false) => {
-//   if (currentMap.value) {
-//     sceneStore.saveMap(currentMap.value, stage, saveMemorySync)
-//   }
-// }
-//
-// // 获取 stage 操作
-// const { stage, backgroundLayer, contentLayer, transformer, loadStage } = useStage({
-//   onSelect: selectToken,
-//   onContextMenu: onContextMenu,
-//   onAutoSave: autoSaveCurrentMap
-// })
-//
-// // 当切换地图时，加载 stage
-// watch(currentMap, (newMap, oldMap) => {
-//   // 立即保存下旧地图，避免来回切换地图，旧地图还未触发 throttle 保存
-//   if (oldMap && !oldMap.deleted && stage.value) {
-//     sceneStore.saveMap(oldMap, stage.value, true)
-//   } else {
-//     // 卸载旧地图
-//     // 只在未触发保存时卸载。因为保存 throttle 还需要引用 stage
-//     stage.value?.destroy()
-//   }
-//   // 加载新地图
-//   if (newMap) {
-//     loadStage(newMap.data, container.value!)
-//   }
-//   // 切换地图收起 toolbar，交互上比较合理
-//   selectToolbar(null)
-// })
-//
-// // 以编程方式改变 stage 时，触发自动保存逻辑
-// const autoSaveCurrentStage = () => {
-//   if (stage.value) {
-//     autoSaveCurrentMap({ stage: stage.value })
-//   }
-// }
-//
+
 // 通用右键事件
 const cloneNode = () => {
   const stage = currentMap.value?.stage

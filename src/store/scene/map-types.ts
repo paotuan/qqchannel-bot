@@ -78,16 +78,6 @@ export interface IStageBackground extends IBaseStageItem {
   // listening: false
 }
 
-// stage data
-// export interface IStageData {
-//   x: number
-//   y: number
-//   background: IStageBackground | null
-//   items: IBaseStageItem[]
-//   setBackground: (src: string | null, scale: number) => void
-//   setScale: (scale: number) => void
-// }
-
 // token 编辑所涉及的配置项
 export interface ITokenEditConfig {
   fill: string

@@ -135,7 +135,7 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
   const toJson = () => ({
     x: x.value,
     y: y.value,
-    background: background.value,
+    background: toRaw(background.value),
     items: toRaw(items)
   } as IStageData)
 
