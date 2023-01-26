@@ -13,7 +13,7 @@
     <div class="flex flex-col justify-between">
       <div class="font-bold max-w-[7rem] truncate">{{ props.chara.name }}</div>
       <span class="flex gap-1">
-        <button class="btn btn-xs btn-outline btn-circle">
+        <button class="btn btn-xs btn-outline btn-circle" @click.stop="showNpcCard">
           <DocumentTextIcon class="h-4 w-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle">
@@ -36,4 +36,5 @@ import { DocumentTextIcon, MapPinIcon, TrashIcon, Square2StackIcon } from '@hero
 const props = defineProps<{ chara: ISceneNpc }>()
 
 const sceneStore = useSceneStore()
+const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
 </script>

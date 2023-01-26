@@ -175,6 +175,15 @@ export const useSceneStore = defineStore('scene', () => {
     characters.push(dup)
   }
 
+  // 当前选中展示人物卡的 npc 名字
+  const currentCardNpcName = ref<string | null>(null)
+  const currentCardNpc = computed<ISceneNpc | null>({
+    get: () => currentCardNpcName.value
+      ? characters.find(chara => chara.type === 'npc' && chara.name === currentCardNpcName.value) as ISceneNpc
+      : null,
+    set: (value: ISceneNpc | null) => (currentCardNpcName.value = value ? value.name : null)
+  })
+
   return {
     mapList,
     currentMapId,
@@ -189,7 +198,9 @@ export const useSceneStore = defineStore('scene', () => {
     currentSelectedCharacter,
     addCharacter,
     deleteCharacter,
-    duplicateNpc
+    duplicateNpc,
+    currentCardNpcName,
+    currentCardNpc
   }
 })
 

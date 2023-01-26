@@ -20,7 +20,7 @@ const onInput = (e: any) => {
   if (num < 0) num = 0 // 不允许负数
   // 这里得手动赋值下，否则界面上不会变
   if (input.value) {
-    input.value.value = String(num)
+    input.value.value = isNaN(num) ? '' : String(num)
   }
   emit('update:modelValue', num)
 }
