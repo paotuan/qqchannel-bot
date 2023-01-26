@@ -5,9 +5,7 @@
         <img :src="userInfo.avatar" :alt="userInfo.nick" />
       </div>
       <!-- 血条 -->
-      <div class="absolute bottom-0 w-full h-2 border border-black bg-red-500">
-
-      </div>
+      <CharacterHpBar :hp="userCard ? userCard.basic.hp : NaN" :max-hp="maxHp" />
     </div>
     <div class="flex flex-col justify-between">
       <div class="font-bold max-w-[7rem] truncate">{{ userInfo.nick }}</div>
@@ -32,6 +30,7 @@ import { useUserStore } from '../../../store/user'
 import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../../store/card'
 import { useUIStore } from '../../../store/ui'
+import CharacterHpBar from './CharacterHpBar.vue'
 
 const props = defineProps<{ chara: ISceneActor }>()
 
@@ -40,6 +39,14 @@ const userInfo = computed(() => userStore.of(props.chara.userId))
 
 const cardStore = useCardStore()
 const userCard = computed(() => cardStore.getCardOfUser(props.chara.userId))
+// coc 规则的 max hp，姑且先放在这里
+const maxHp = computed(() => {
+  if (userCard.value) {
+    return Math.floor((userCard.value.props.体质 + userCard.value.props.体型) / 10)
+  } else {
+    return NaN
+  }
+})
 
 // 跳转到人物卡页面
 const uiStore = useUIStore()

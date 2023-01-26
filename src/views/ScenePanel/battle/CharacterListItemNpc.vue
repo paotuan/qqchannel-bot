@@ -6,9 +6,7 @@
         <span>{{ props.chara.name.slice(0, 2) }}</span>
       </div>
       <!-- 血条 -->
-      <div class="absolute bottom-0 w-full h-2 border border-black bg-red-500">
-
-      </div>
+      <CharacterHpBar :hp="props.chara.embedCard.hp" :max-hp="props.chara.embedCard.maxHp" />
     </div>
     <div class="flex flex-col justify-between">
       <div class="font-bold max-w-[7rem] truncate">{{ props.chara.name }}</div>
@@ -32,6 +30,7 @@
 <script setup lang="ts">
 import { ISceneNpc, useSceneStore } from '../../../store/scene'
 import { DocumentTextIcon, MapPinIcon, TrashIcon, Square2StackIcon } from '@heroicons/vue/24/outline'
+import CharacterHpBar from './CharacterHpBar.vue'
 
 const props = defineProps<{ chara: ISceneNpc }>()
 

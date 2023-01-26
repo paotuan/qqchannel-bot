@@ -1,6 +1,6 @@
 <template>
   <d-modal
-      :visible="sceneStore.currentCardNpc"
+      :visible="!!sceneStore.currentCardNpc"
       :title="`编辑【${currentNpcName}】的信息`"
       @update:visible="sceneStore.currentCardNpc = null"
   >
