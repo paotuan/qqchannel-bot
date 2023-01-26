@@ -1,5 +1,5 @@
 <template>
-  <KonvaStage :config="stageConfig" @dragend="onDragEnd" @click="onClick">
+  <KonvaStage :config="stageConfig" @dragend="onDragEnd" @click="onClick" @contextmenu="onContextMenu">
     <slot></slot>
   </KonvaStage>
 </template>
@@ -12,7 +12,12 @@ interface Props {
   size: { width: number, height: number }
 }
 
+interface Emits {
+  (e: 'token-menu', value: { id: string, x: number, y: number }): void
+}
+
 const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const sceneStore = useSceneStore()
 const currentMapData = computed(() => sceneStore.currentMap!.stage)
@@ -26,9 +31,19 @@ const stageConfig = computed(() => ({
 }))
 
 const onDragEnd = (e: Konva.KonvaEventObject<any>) => {
+  // 拖动结束后，需要受控地更新物体的坐标
   if (e.target instanceof Konva.Stage) {
     currentMapData.value.x = e.target.x()
     currentMapData.value.y = e.target.y()
+  } else {
+    const id = e.target.id()
+    if (id) {
+      const token = currentMapData.value.items.find(item => item.id === id)
+      if (token) {
+        token.x = e.target.x()
+        token.y = e.target.y()
+      }
+    }
   }
 }
 
@@ -70,5 +85,28 @@ const onClick = (e: Konva.KonvaEventObject<any>) => {
     const nodes = selectNodeIds.value.concat([targetId])
     selectNodeIds.value = nodes
   }
+}
+
+// 右键逻辑
+const onContextMenu = (e: Konva.KonvaEventObject<any>) => {
+  // prevent default behavior
+  e.evt.preventDefault()
+  if (e.target instanceof Konva.Stage) {
+    // if we are on empty place of the stage we will do nothing
+    return
+  }
+  // todo 实现一个通用的只选择 layer 直接子元素功能
+  let target: Konva.Node = e.target
+  if (target instanceof Konva.Text) {
+    target = e.target.getAncestors()[0]
+  }
+
+  const stage = e.target.getStage()
+  if (!target.id() || !stage) return // 理论上不会
+  emit('token-menu', {
+    id: target.id(),
+    x: stage.getPointerPosition()!.x,
+    y: stage.getPointerPosition()!.y
+  })
 }
 </script>

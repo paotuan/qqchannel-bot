@@ -1,4 +1,4 @@
-import { reactive, ref, toRaw } from 'vue'
+import { nextTick, reactive, ref, toRaw } from 'vue'
 import type {
   IStageBackground,
   IBaseStageItem,
@@ -9,6 +9,7 @@ import type {
 } from './map-types'
 import { ICustomToken, ITextEditConfig, IToken, ITokenEditConfig } from './map-types'
 import { nanoid } from 'nanoid/non-secure'
+import { cloneDeep } from 'lodash'
 
 export interface IStageData {
   x: number
@@ -91,6 +92,46 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
     items.push(token)
   }
 
+  // 复制 token
+  const duplicateToken = (id: string) => {
+    const old = items.find(item => item.id === id)
+    if (!old) return
+    const newItem = cloneDeep(old)
+    newItem.id = nanoid()
+    newItem.x = old.x + 20
+    newItem.y = old.y + 20
+    items.push(newItem)
+    // 选中新 item
+    nextTick(() => {
+      selectNodeIds.value = [newItem.id!]
+    })
+  }
+
+  // 移到顶层
+  const bringToFront = (id: string) => {
+    const targetIndex = items.findIndex(item => item.id === id)
+    if (targetIndex < 0) return
+    const deleted = items.splice(targetIndex, 1)
+    items.push(...deleted)
+  }
+
+  // 移到底层
+  const bringToBottom = (id: string) => {
+    const targetIndex = items.findIndex(item => item.id === id)
+    if (targetIndex < 0) return
+    const deleted = items.splice(targetIndex, 1)
+    items.unshift(...deleted)
+  }
+
+  // 删除元素
+  const destroyNode = (id: string) => {
+    const targetIndex = items.findIndex(item => item.id === id)
+    if (targetIndex < 0) return
+    items.splice(targetIndex, 1)
+    // 如果 transform 处于选中态也要一并移除
+    selectNodeIds.value = []
+  }
+
   const toJson = () => ({
     x: x.value,
     y: y.value,
@@ -111,6 +152,10 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
     addToken,
     addCustomToken,
     addTextLabel,
+    duplicateToken,
+    bringToFront,
+    bringToBottom,
+    destroyNode,
     toJson
   })
 }

@@ -1,6 +1,6 @@
 <template>
   <div ref="container" class="w-full h-full">
-    <KwStage :size="stageSize">
+    <KwStage :size="stageSize" v-bind="$attrs">
       <!-- background -->
       <KonvaLayer>
         <KwImage v-if="backgroundConfig" :config="backgroundConfig" />

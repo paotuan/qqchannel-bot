@@ -1,7 +1,7 @@
 <template>
   <div class="flex-grow">
     <template v-if="currentMap">
-      <MapContent />
+      <MapContent @token-menu="onContextMenu" />
       <!-- toolbar -->
       <MapBasicInfo class="absolute top-0 left-44 z-10" />
       <div class="absolute bottom-0 w-full flex">
@@ -36,18 +36,18 @@
           </div>
         </div>
       </div>
-<!--      &lt;!&ndash; context menu &ndash;&gt;-->
-<!--      <ul ref="contextMenuRef" class="menu menu-compact bg-base-100 w-28 p-2 rounded-box absolute hidden">-->
-<!--        <li><a @click="cloneNode">克隆</a></li>-->
-<!--        <li><a @click="moveToTop">置于顶层</a></li>-->
-<!--        <li><a @click="moveToBottom">置于底层</a></li>-->
-<!--        <li><a @click="destroyNode">删除</a></li>-->
-<!--      </ul>-->
+      <!-- context menu -->
+      <ul ref="contextMenuRef" class="menu menu-compact bg-base-100 w-28 p-2 rounded-box absolute hidden">
+        <li><a @click="cloneNode">克隆</a></li>
+        <li><a @click="moveToTop">置于顶层</a></li>
+        <li><a @click="moveToBottom">置于底层</a></li>
+        <li><a @click="destroyNode">删除</a></li>
+      </ul>
     </template>
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { MapIcon, MapPinIcon, PencilIcon } from '@heroicons/vue/24/outline'
 import MapTool from './toolbar/MapTool.vue'
 import TokenTool from './toolbar/TokenTool.vue'
@@ -82,30 +82,30 @@ watch(() => currentMap.value?.stage.selectNodeIds, ids => {
 // endregion 选择 token
 
 // // region 右键事件
-// const contextMenuToken = shallowRef<Konva.Node | null>(null) // 触发右键的 Konva Node
-// const contextMenuRef = ref<HTMLUListElement>() // 右键菜单 elem
-// // 点击右键显示菜单
-// const onContextMenu = ({ stage }: IStageStructure, target: Konva.Node) => {
-//   contextMenuToken.value = target
-//   // show menu
-//   contextMenuRef.value!.style.display = 'initial'
-//   // 因为都是 absolute 了，直接取坐标
-//   contextMenuRef.value!.style.top = stage.getPointerPosition()!.y + 4 + 'px'
-//   contextMenuRef.value!.style.left = stage.getPointerPosition()!.x + 4 + 'px'
-// }
-// // 隐藏右键菜单
-// const hideContextMenu = () => {
-//   if (contextMenuRef.value) {
-//     contextMenuRef.value.style.display = 'none'
-//   }
-// }
-//
-// onMounted(() => {
-//   window.addEventListener('click', hideContextMenu)
-// })
-// onBeforeUnmount(() => {
-//   window.removeEventListener('click', hideContextMenu)
-// })
+const contextMenuTokenId = ref<string | null>(null) // 触发右键的 Konva Node
+const contextMenuRef = ref<HTMLUListElement>() // 右键菜单 elem
+// 点击右键显示菜单
+const onContextMenu = ({ id, x, y }: { id: string, x: number, y: number }) => {
+  contextMenuTokenId.value = id
+  // show menu
+  contextMenuRef.value!.style.display = 'initial'
+  // 因为都是 absolute 了，直接取坐标
+  contextMenuRef.value!.style.top = y + 4 + 'px'
+  contextMenuRef.value!.style.left = x + 4 + 'px'
+}
+// 隐藏右键菜单
+const hideContextMenu = () => {
+  if (contextMenuRef.value) {
+    contextMenuRef.value.style.display = 'none'
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('click', hideContextMenu)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('click', hideContextMenu)
+})
 // // endregion 右键事件
 //
 // // scene store
@@ -151,36 +151,36 @@ watch(() => currentMap.value?.stage.selectNodeIds, ids => {
 //   }
 // }
 //
-// // 通用右键事件
-// const cloneNode = () => {
-//   const node = contextMenuToken.value
-//   if (!node) return
-//   const clonedNode = node.clone({ x: node.x() + 20, y: node.y() + 20 })
-//   contentLayer.value.add(clonedNode)
-//   selectToken({ transformer: transformer.value }, [clonedNode])
-//   autoSaveCurrentStage()
-// }
-//
-// const moveToTop = () => {
-//   const node = contextMenuToken.value
-//   if (!node) return
-//   node.moveToTop()
-//   transformer.value.moveToTop() // transformer 也置于顶层，先放在这里吧
-//   autoSaveCurrentStage()
-// }
-//
-// const moveToBottom = () => {
-//   const node = contextMenuToken.value
-//   if (!node) return
-//   node.moveToBottom()
-//   autoSaveCurrentStage()
-// }
-//
-// const destroyNode = () => {
-//   const node = contextMenuToken.value
-//   if (!node) return
-//   node.destroy()
-//   autoSaveCurrentStage()
-//   selectToken({ transformer: transformer.value }, [])
-// }
+// 通用右键事件
+const cloneNode = () => {
+  const stage = currentMap.value?.stage
+  const itemId = contextMenuTokenId.value
+  if (stage && itemId) {
+    stage.duplicateToken(itemId)
+  }
+}
+
+const moveToTop = () => {
+  const stage = currentMap.value?.stage
+  const itemId = contextMenuTokenId.value
+  if (stage && itemId) {
+    stage.bringToFront(itemId)
+  }
+}
+
+const moveToBottom = () => {
+  const stage = currentMap.value?.stage
+  const itemId = contextMenuTokenId.value
+  if (stage && itemId) {
+    stage.bringToBottom(itemId)
+  }
+}
+
+const destroyNode = () => {
+  const stage = currentMap.value?.stage
+  const itemId = contextMenuTokenId.value
+  if (stage && itemId) {
+    stage.destroyNode(itemId)
+  }
+}
 </script>
