@@ -38,7 +38,7 @@
       </div>
       <!-- context menu -->
       <ul ref="contextMenuRef" class="menu menu-compact bg-base-100 w-28 p-2 rounded-box absolute hidden">
-        <li><a @click="cloneNode">克隆</a></li>
+        <li v-if="contextMenuToken && contextMenuToken.name !== 'character'"><a @click="cloneNode">克隆</a></li>
         <li><a @click="moveToTop">置于顶层</a></li>
         <li><a @click="moveToBottom">置于底层</a></li>
         <li><a @click="destroyNode">删除</a></li>
@@ -83,6 +83,7 @@ watch(() => currentMap.value?.stage.selectNodeIds, ids => {
 
 // // region 右键事件
 const contextMenuTokenId = ref<string | null>(null) // 触发右键的 Konva Node
+const contextMenuToken = computed(() => contextMenuTokenId.value ? currentMap.value?.stage.items.find(item => item.id === contextMenuTokenId.value) : undefined)
 const contextMenuRef = ref<HTMLUListElement>() // 右键菜单 elem
 // 点击右键显示菜单
 const onContextMenu = ({ id, x, y }: { id: string, x: number, y: number }) => {
