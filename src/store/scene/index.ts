@@ -147,8 +147,10 @@ export const useSceneStore = defineStore('scene', () => {
       if (currentSelectedCharacter.value === chara) {
         currentSelectedCharacter.value = null
       }
-      // 移除该人物在地图中的 token。只移除当前地图的，其他不管了
-      // todo
+      // 移除该人物在地图中的 token
+      mapList.value.forEach(map => {
+        map.stage.removeCharacter(chara.type, chara.type === 'actor' ? chara.userId : chara.name)
+      })
     }
   }
 

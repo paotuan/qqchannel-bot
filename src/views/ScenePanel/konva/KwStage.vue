@@ -58,12 +58,8 @@ const onClick = (e: Konva.KonvaEventObject<any>) => {
     selectNodeIds.value = []
     return
   }
-  // 2. 获取 layer 的直接父元素
-  // todo 实现一个通用的只选择 layer 直接子元素功能
-  let target: Konva.Node = e.target
-  if (target instanceof Konva.Text) {
-    target = e.target.getAncestors()[0]
-  }
+  // 2. 获取 layer 的直接子元素
+  const target = getDirectLayerChild(e.target)
   const targetId = target.id()
   // 3. do we press shift or ctrl?
   const metaPressed = e.evt.shiftKey // || e.evt.ctrlKey || e.evt.metaKey
@@ -95,11 +91,7 @@ const onContextMenu = (e: Konva.KonvaEventObject<any>) => {
     // if we are on empty place of the stage we will do nothing
     return
   }
-  // todo 实现一个通用的只选择 layer 直接子元素功能
-  let target: Konva.Node = e.target
-  if (target instanceof Konva.Text) {
-    target = e.target.getAncestors()[0]
-  }
+  const target = getDirectLayerChild(e.target)
 
   const stage = e.target.getStage()
   if (!target.id() || !stage) return // 理论上不会
@@ -108,5 +100,18 @@ const onContextMenu = (e: Konva.KonvaEventObject<any>) => {
     x: stage.getPointerPosition()!.x,
     y: stage.getPointerPosition()!.y
   })
+}
+
+// 选择 layer 的直接子元素
+function getDirectLayerChild(node: Konva.Node) {
+  let target = node
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const ancestor = target.getAncestors()[0]
+    if (ancestor instanceof Konva.Layer) {
+      return target
+    }
+    target = ancestor
+  }
 }
 </script>

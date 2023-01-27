@@ -5,7 +5,7 @@ import type {
   ICircleToken,
   IRectToken,
   IPolygonToken,
-  IWedgeToken, IStarToken, IArrowToken, ITextLabel
+  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem
 } from './map-types'
 import { ICustomToken, ITextEditConfig, IToken, ITokenEditConfig } from './map-types'
 import { nanoid } from 'nanoid/non-secure'
@@ -55,6 +55,9 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
   const addToken = (type: string, config: ITokenEditConfig) => {
     const token = createToken(type, x.value, y.value, config)
     items.push(token)
+    nextTick(() => {
+      selectNodeIds.value = [token.id!]
+    })
   }
 
   // 添加自定义图片 token
@@ -70,6 +73,9 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
       name: 'custom-token'
     }
     items.push(token)
+    nextTick(() => {
+      selectNodeIds.value = [token.id!]
+    })
   }
 
   // 添加文字标签
@@ -90,6 +96,51 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
       padding: 5
     }
     items.push(token)
+    nextTick(() => {
+      selectNodeIds.value = [token.id!]
+    })
+  }
+
+  // 获取场景中的玩家或 npc
+  const findCharacter = (type: 'actor' | 'npc', idOrName: string) => {
+    return items.find(item =>
+      item.name === 'character' &&
+      (item as ICharacterItem)['data-chara-type'] === type &&
+      (item as ICharacterItem)['data-chara-id'] === idOrName
+    )
+  }
+
+  // 添加玩家或 npc 标志。如已经存在，则选中它
+  const addCharacter = (type: 'actor' | 'npc', idOrName: string) => {
+    // 判断是否已经存在了
+    const exist = findCharacter(type, idOrName)
+    if (exist) {
+      selectNodeIds.value = [exist.id!]
+    } else {
+      const token: ICharacterItem = {
+        id: nanoid(),
+        x: window.innerWidth / 2 - x.value,
+        y: window.innerHeight / 2 - y.value,
+        scaleX: 1,
+        scaleY: 1,
+        rotation: 0,
+        name: 'character',
+        'data-chara-type': type,
+        'data-chara-id': idOrName
+      }
+      items.push(token)
+      nextTick(() => {
+        selectNodeIds.value = [token.id!]
+      })
+    }
+  }
+
+  // 删除玩家或 npc
+  const removeCharacter = (type: 'actor' | 'npc', idOrName: string) => {
+    const exist = findCharacter(type, idOrName)
+    if (exist?.id) {
+      destroyNode(exist.id)
+    }
   }
 
   // 复制 token
@@ -152,6 +203,8 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
     addToken,
     addCustomToken,
     addTextLabel,
+    addCharacter,
+    removeCharacter,
     duplicateToken,
     bringToFront,
     bringToBottom,

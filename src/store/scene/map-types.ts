@@ -78,6 +78,13 @@ export interface IStageBackground extends IBaseStageItem {
   // listening: false
 }
 
+// 玩家/npc 标识
+export interface ICharacterItem extends IBaseStageItem {
+  name: 'character'
+  'data-chara-type': 'actor' | 'npc'
+  'data-chara-id': string
+}
+
 // token 编辑所涉及的配置项
 export interface ITokenEditConfig {
   fill: string

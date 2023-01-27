@@ -21,7 +21,7 @@
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="showNpcCard">
           <DocumentTextIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle">
+        <button class="btn btn-xs btn-outline btn-circle" @click.stop="addCharacterToken">
           <MapPinIcon class="h-4 w-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="sceneStore.duplicateNpc(props.chara)">
@@ -44,6 +44,7 @@ const props = defineProps<{ chara: ISceneNpc }>()
 
 const sceneStore = useSceneStore()
 const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
+const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.name)
 
 // 上传 npc 头像
 const realUploadBtn = ref<HTMLInputElement>()

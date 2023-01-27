@@ -20,11 +20,12 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useSceneStore } from '../../../store/scene'
 import KwImage from './KwImage.vue'
 import KwStage from './KwStage.vue'
 import KwText from './KwText.vue'
-import { useSceneStore } from '../../../store/scene'
 import KwTransformer from './KwTransformer.vue'
+import KwCharacter from './KwCharacter.vue'
 
 const sceneStore = useSceneStore()
 const currentMapData = computed(() => sceneStore.currentMap!.stage)
@@ -63,6 +64,8 @@ const getKonvaComponent = (type: string) => {
     return KwImage
   case 'text':
     return KwText
+  case 'character':
+    return KwCharacter
   default:
     throw new Error('unknown token type: ' + type)
   }
