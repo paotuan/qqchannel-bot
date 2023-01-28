@@ -1,6 +1,17 @@
 <template>
   <div class="flex-grow" style="height: calc(100% - 200px)">
-    <div class="-mx-4 overflow-y-auto" style="height: 100%">
+    <div class="flex justify-between -mx-4 list-header">
+      <div>角色信息</div>
+      <div class="w-32 flex items-start">
+        <span>先攻值</span>
+        <div class="tooltip tooltip-left font-medium h-5 -top-0.5" :data-tip="riDesc.join(`&#xa;`)">
+          <button class="btn btn-circle btn-xs btn-ghost">
+            <QuestionMarkCircleIcon class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="-mx-4 overflow-y-auto" style="height: calc(100% - 2.5rem)">
       <div
         v-for="chara in charaList"
         :key="chara.userId || chara.name"
@@ -21,6 +32,7 @@
 <script setup lang="ts">
 import { useSceneStore } from '../../../store/scene'
 import { computed } from 'vue'
+import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import CharacterListItemActor from './CharacterListItemActor.vue'
 import SeqInput from './SeqInput.vue'
 import CharacterListItemNpc from './CharacterListItemNpc.vue'
@@ -28,4 +40,25 @@ import CharacterListItemNpc from './CharacterListItemNpc.vue'
 const sceneStore = useSceneStore()
 const charaList = computed(() => sceneStore.charactersSorted)
 
+const riDesc = [
+  '先攻值用于决定角色在战斗中的行动顺序；',
+  '通常 COC 中使用敏捷，DND 中使用先攻检定；',
+  '若两个角色先攻值相同，可通过额外数值',
+  '（填写在第二列）进一步排序'
+]
 </script>
+<style scoped>
+.list-header {
+  padding: 0.5rem 1.5rem 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--b2, var(--b1)) / var(--tw-bg-opacity));
+  font-weight: 700;
+}
+
+.tooltip:before {
+  white-space: pre;
+  text-align: left;
+}
+</style>

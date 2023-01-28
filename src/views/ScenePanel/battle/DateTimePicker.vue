@@ -1,7 +1,7 @@
 <template>
   <span class="outline outline-base-300 rounded">
-    <input v-model="dateValue" type="date" class="outline-none" />
-    <input v-model="timeValue" type="time" class="outline-none" style="width: 130px" />
+    <input v-model="dateValue" type="date" class="outline-none bg-base-100 text-base-content pl-1" />
+    <input v-model="timeValue" type="time" class="outline-none bg-base-100 text-base-content" style="width: 130px" />
   </span>
 </template>
 <script setup lang="ts">
