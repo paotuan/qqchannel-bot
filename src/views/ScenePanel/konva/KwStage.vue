@@ -1,12 +1,15 @@
 <template>
-  <KonvaStage :config="stageConfig" @dragend="onDragEnd" @click="onClick" @contextmenu="onContextMenu">
+  <KonvaStage ref="stageRef" :config="stageConfig" @dragend="onDragEnd" @click="onClick" @contextmenu="onContextMenu">
     <slot></slot>
   </KonvaStage>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useSceneStore } from '../../../store/scene'
 import Konva from 'konva'
+import ws from '../../../api/ws'
+import type { ISceneSendMapImageReq } from '../../../../interface/common'
+import { gtagEvent } from '../../../utils'
 
 interface Props {
   size: { width: number, height: number }
@@ -114,4 +117,15 @@ function getDirectLayerChild(node: Konva.Node) {
     target = ancestor
   }
 }
+
+// 获取原始 stage 数据
+const stageRef = ref()
+watch(() => sceneStore.sendMapImageSignal, (value) => {
+  if (value) {
+    // 获取 stage 图片并发送消息 todo stage 范围是否可以展示全
+    const imgData = (stageRef.value.getNode() as Konva.Stage).toDataURL()
+    ws.send<ISceneSendMapImageReq>({ cmd: 'scene/sendMapImage', data: { data: imgData } })
+    gtagEvent('scene/sendMapImage')
+  }
+})
 </script>

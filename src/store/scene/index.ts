@@ -186,6 +186,9 @@ export const useSceneStore = defineStore('scene', () => {
     set: (value: ISceneNpc | null) => (currentCardNpcName.value = value ? value.name : null)
   })
 
+  // 发送地图图片指示器
+  const sendMapImageSignal = ref(false)
+
   return {
     mapList,
     currentMapId,
@@ -202,7 +205,8 @@ export const useSceneStore = defineStore('scene', () => {
     deleteCharacter,
     duplicateNpc,
     currentCardNpcName,
-    currentCardNpc
+    currentCardNpc,
+    sendMapImageSignal
   }
 })
 

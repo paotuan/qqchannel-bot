@@ -11,8 +11,15 @@
       <UserSelector />
       <CharacterList />
       <div class="flex gap-2 justify-between">
-        <button class="btn btn-secondary flex-grow">发送地图</button>
-        <button class="btn btn-secondary flex-grow">发送战报</button>
+        <button
+          class="btn btn-secondary w-1/2"
+          :class="{ loading: sceneStore.sendMapImageSignal }"
+          :disabled="!sceneStore.currentMap"
+          @click="sceneStore.sendMapImageSignal = true"
+        >
+          发送地图
+        </button>
+        <button class="btn btn-secondary w-1/2">发送战报</button>
       </div>
     </div>
     <!-- 折叠按钮 -->
@@ -35,6 +42,8 @@ import BattleTurnIndicator from './BattleTurnIndicator.vue'
 import UserSelector from './UserSelector.vue'
 import CharacterList from './CharacterList.vue'
 import NpcCardDialog from './NpcCardDialog.vue'
+import { useSceneStore } from '../../../store/scene'
 
 const panelCollapse = ref(false)
+const sceneStore = useSceneStore()
 </script>

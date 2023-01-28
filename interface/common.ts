@@ -11,7 +11,7 @@ export type Command =
   | 'user/list' // res
   | 'log/push' // res
   | 'note/send' // req/res
-  | 'note/sendImageRaw' // req
+  | 'note/sendImageRaw' // req/ res: note/send
   | 'note/sync' // req/res
   | 'note/fetch' // req/res
   | 'note/delete' // req
@@ -21,12 +21,16 @@ export type Command =
   | 'card/link'  // req/res
   | 'card/test' // res
   | 'plugin/list' // res
+  | 'scene/sendBattleLog' // req/ res: string
+  | 'scene/sendMapImage' // req/ res: string
 
 export interface IMessage<T> {
   cmd: Command
   success?: boolean
   data: T
 }
+
+export type MessageType = 'text' | 'image'
 
 // region bot
 export interface IBotInfo {
@@ -80,8 +84,6 @@ export type IUserListResp = IUser[]
 // endregion channel
 
 // region log
-export type MessageType = 'text' | 'image'
-
 export interface ILog {
   msgId: string
   msgType: MessageType
@@ -165,4 +167,15 @@ export interface IPluginConfigDisplay {
   customReply: IPluginItemConfig[]
   aliasRoll: IPluginItemConfig[]
   rollDecider: IPluginItemConfig[]
+}
+// endregion plugin
+
+// region scene
+export interface ISceneSendBattleLogReq {
+  msgType: MessageType
+  content: string
+}
+
+export interface ISceneSendMapImageReq {
+  data: string
 }

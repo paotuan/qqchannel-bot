@@ -18,6 +18,7 @@ import { useUserStore } from '../store/user'
 import { gtagEvent, Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
+import { useSceneStore } from '../store/scene'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -135,4 +136,14 @@ ws.on('plugin/list', data => {
   const res = data.data as IPluginConfigDisplay[]
   const pluginStore = usePluginStore()
   pluginStore.onGetPlugins(res)
+})
+
+ws.on('scene/sendMapImage', data => {
+  const sceneStore = useSceneStore()
+  sceneStore.sendMapImageSignal = false
+  if (data.success) {
+    Toast.success('发送成功！')
+  } else {
+    Toast.error('发送失败！')
+  }
 })
