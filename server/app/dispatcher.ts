@@ -1,12 +1,25 @@
 import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
 import type {
-  IBotInfoResp, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp,
-  IChannel, IChannelConfigReq, IChannelConfigResp,
+  IBotInfoResp,
+  ICardDeleteReq,
+  ICardImportReq,
+  ICardLinkReq,
+  ICardLinkResp,
+  IChannel,
+  IChannelConfigReq,
+  IChannelConfigResp,
   IChannelListResp,
   IListenToChannelReq,
   ILoginReq,
-  IMessage, INoteDeleteReq, INoteFetchReq, INoteSendReq, IUser, IUserListResp, IPluginConfigDisplay
+  IMessage,
+  INoteDeleteReq,
+  INoteFetchReq,
+  INoteSendReq,
+  IUser,
+  IUserListResp,
+  IPluginConfigDisplay,
+  INoteSendImageRawReq
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -21,7 +34,7 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     handleSendNote(client, server, request.data as INoteSendReq)
     break
   case 'note/sendImageRaw':
-    handleSendImage(client, server, request.data as Buffer)
+    handleSendImage(client, server, request.data as INoteSendImageRawReq)
     break
   case 'note/sync':
     handleSyncNotes(client, server)
@@ -130,7 +143,7 @@ function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
   }
 }
 
-function handleSendImage(client: WsClient, server: Wss, data: Buffer) {
+function handleSendImage(client: WsClient, server: Wss, data: INoteSendImageRawReq) {
   if (!client.listenToChannelId) return
   const qApi = server.qApis.find(client.appid)
   if (qApi) {

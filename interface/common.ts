@@ -11,7 +11,7 @@ export type Command =
   | 'user/list' // res
   | 'log/push' // res
   | 'note/send' // req/res
-  | 'note/sendImageRaw' // req*
+  | 'note/sendImageRaw' // req
   | 'note/sync' // req/res
   | 'note/fetch' // req/res
   | 'note/delete' // req
@@ -102,6 +102,10 @@ export interface INote {
 }
 
 export type INoteSendReq = Omit<INote, 'msgId'>
+
+export interface INoteSendImageRawReq {
+  data: string // 本地图片 base64
+}
 
 export interface INoteSendResp {
   msgType: MessageType

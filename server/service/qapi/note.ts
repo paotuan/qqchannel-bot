@@ -8,7 +8,7 @@ import type {
   INoteSyncResp,
   INote,
   INoteFetchResp,
-  INoteDeleteReq
+  INoteDeleteReq, INoteSendImageRawReq
 } from '../../../interface/common'
 import type { WsClient } from '../../app/wsclient'
 
@@ -63,7 +63,7 @@ export class NoteManager {
     }
   }
 
-  async sendRawImage(client: WsClient, img: Buffer) {
+  async sendRawImage(client: WsClient, req: INoteSendImageRawReq) {
     try {
       const channel = this.api.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
       if (!channel) throw { code: '子频道信息不存在' }
@@ -71,7 +71,7 @@ export class NoteManager {
       const channelLastMsgId = channel.lastMessage?.id
       if (!channelLastMsgId) throw { code: '频道不活跃' }
       // 1. 发消息
-      const respMsg = await channel.sendRawImageMessage(img, channelLastMsgId)
+      const respMsg = await channel.sendRawImageMessage(req.data, channelLastMsgId)
       if (!respMsg) throw { code: '消息发送失败' }
       // 2. 设为精华消息
       const { data } = await this.api.qqClient.pinsMessageApi.putPinsMessage(channel.id, respMsg.id)

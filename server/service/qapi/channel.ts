@@ -46,8 +46,7 @@ export class Channel {
   }
 
   // 发送本地图片到子频道
-  // todo img 改成 base64
-  async sendRawImageMessage(img: Buffer, replyMsgId?: string, recordLog = true) {
+  async sendRawImageMessage(imgData: string, replyMsgId?: string, recordLog = true) {
     // 如没有指定发某条被动消息，则尝试尽量发被动
     if (!replyMsgId) {
       replyMsgId = this.getLastMessageIdForReply()
@@ -55,6 +54,9 @@ export class Channel {
     try {
       const formData = new FormData()
       if (replyMsgId) formData.append('msg_id', replyMsgId)
+      // 根据 base64 解出 img buffer
+      // https://stackoverflow.com/questions/11335460/how-do-i-parse-a-data-url-in-node
+      const img = Buffer.from(imgData.split(',')[1], 'base64')
       formData.append('file_image', img, 'test.png') // 名字必须有以获取正确的 content-type, 但只要是图片就行
       // 1. 发消息
       // console.time('message')
