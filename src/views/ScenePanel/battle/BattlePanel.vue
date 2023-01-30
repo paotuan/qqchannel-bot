@@ -11,14 +11,16 @@
       <UserSelector />
       <CharacterList />
       <div class="flex gap-2 justify-between">
-        <button
-          class="btn btn-secondary w-1/2"
-          :class="{ loading: sceneStore.sendMapImageSignal }"
-          :disabled="!sceneStore.currentMap"
-          @click="sceneStore.sendMapImageSignal = true"
-        >
-          发送地图
-        </button>
+        <div class="tooltip tooltip-top w-1/2" data-tip="敬请期待，可先用截图代替">
+          <button
+            class="btn btn-secondary w-full"
+            :class="{ loading: sceneStore.sendMapImageSignal }"
+            :disabled="true"
+            @click="sceneStore.sendMapImageSignal = true"
+          >
+            发送地图
+          </button>
+        </div>
         <button class="btn btn-secondary w-1/2">发送战报</button>
       </div>
     </div>
