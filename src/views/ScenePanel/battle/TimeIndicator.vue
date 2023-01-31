@@ -6,6 +6,7 @@
         <ChevronDoubleRightIcon class="w-4 h-4" />
       </label>
       <ul tabindex="0" class="dropdown-content menu menu-compact p-2 shadow bg-base-100 rounded-box w-24">
+        <li><a @click="addTime(6)">+ 6s</a></li>
         <li><a @click="addTime(60)">+ 1m</a></li>
         <li><a @click="addTime(30 * 60)">+ 30m</a></li>
         <li><a @click="addTime(60 * 60)">+ 1h</a></li>

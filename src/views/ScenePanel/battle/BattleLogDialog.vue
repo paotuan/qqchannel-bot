@@ -1,9 +1,9 @@
 <template>
-  <d-modal :visible="props.visible" @update:visible="close">
+  <d-modal title="编辑战报" :visible="props.visible" @update:visible="close">
     <textarea v-model="text" class="textarea textarea-bordered w-full h-80" />
     <template #action>
       <button class="btn btn-accent" @click="close">取消</button>
-      <button class="btn btn-primary" @click="submit">确定</button>
+      <button class="btn btn-primary" @click="submit">发送！</button>
     </template>
   </d-modal>
 </template>
@@ -13,6 +13,8 @@ import { useSceneStore } from '../../../store/scene'
 import { ref, watch } from 'vue'
 import { useUserStore } from '../../../store/user'
 import { useCardStore } from '../../../store/card'
+import ws from '../../../api/ws'
+import type { ISceneSendBattleLogReq } from '../../../../interface/common'
 
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{ (e: 'update:visible', value: boolean): void }>()
@@ -29,8 +31,10 @@ const generateLog = () => {
     const userCard = chara.type === 'actor' ? cardStore.getCardOfUser(chara.userId) : undefined
     const userHp = (chara.type === 'actor' ? userCard?.basic.hp : chara.embedCard.hp) || '?'
     const userMaxHp = (chara.type === 'actor' ? (userCard ? Math.floor((userCard.props.体质 + userCard.props.体型) / 10) : '') : chara.embedCard.maxHp) || '?'
-    let line = sceneStore.currentSelectedCharacter === chara ? '▶' : '\u3000'
-    line += `${username} HP${userHp}/${userMaxHp}` // todo 先攻
+    const hasSeq = !isNaN(chara.seq) || !isNaN(chara.seq2)
+    let line = sceneStore.currentSelectedCharacter === chara ? '▶ ' : '\u3000'
+    line += `${username} HP${userHp}/${userMaxHp}`
+    if (hasSeq) line += ` 先攻${chara.seq || ''}` + (isNaN(chara.seq2) ? '' : `(${chara.seq2})`)
     return line
   }).join('\n')
   return log
@@ -45,6 +49,10 @@ watch(() => props.visible, value => {
 })
 
 const close = () => emit('update:visible', false)
+const submit = () => {
+  ws.send<ISceneSendBattleLogReq>({ cmd: 'scene/sendBattleLog', data: { content: text.value } })
+  close()
+}
 
 const formatDate = (date: Date) => {
   const year = date.getFullYear()

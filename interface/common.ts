@@ -172,7 +172,6 @@ export interface IPluginConfigDisplay {
 
 // region scene
 export interface ISceneSendBattleLogReq {
-  msgType: MessageType
   content: string
 }
 

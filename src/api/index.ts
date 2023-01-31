@@ -147,3 +147,11 @@ ws.on('scene/sendMapImage', data => {
     Toast.error('发送失败！')
   }
 })
+
+ws.on('scene/sendBattleLog', data => {
+  if (data.success) {
+    Toast.success('战报发送成功！')
+  } else {
+    Toast.error('战报发送失败！')
+  }
+})

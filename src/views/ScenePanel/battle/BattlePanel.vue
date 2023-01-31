@@ -21,7 +21,7 @@
             发送地图
           </button>
         </div>
-        <button class="btn btn-secondary w-1/2">发送战报</button>
+        <button class="btn btn-secondary w-1/2" @click="battleLogDialogVisible = true">发送战报</button>
       </div>
     </div>
     <!-- 折叠按钮 -->
@@ -34,6 +34,8 @@
     </button>
     <!-- NPC 编辑弹窗 -->
     <NpcCardDialog />
+    <!-- 发送战报弹窗 -->
+    <BattleLogDialog v-model:visible="battleLogDialogVisible" />
   </div>
 </template>
 <script setup lang="ts">
@@ -45,7 +47,10 @@ import UserSelector from './UserSelector.vue'
 import CharacterList from './CharacterList.vue'
 import NpcCardDialog from './NpcCardDialog.vue'
 import { useSceneStore } from '../../../store/scene'
+import BattleLogDialog from './BattleLogDialog.vue'
 
 const panelCollapse = ref(false)
 const sceneStore = useSceneStore()
+
+const battleLogDialogVisible = ref(false)
 </script>
