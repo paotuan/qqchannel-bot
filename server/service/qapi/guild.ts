@@ -170,7 +170,7 @@ export class GuildManager {
   async fetchGuilds() {
     this.guildsMap = {}
     try {
-      const resp = await this.api.qqClient.meApi.meGuilds({ limit: 1 }) // 先只拉一个
+      const resp = await this.api.qqClient.meApi.meGuilds({ limit: 10 }) // 先只拉一个
       runInAction(() => {
         const guilds = resp.data.map(info => new Guild(this.api, info.id, info.name))
         this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
