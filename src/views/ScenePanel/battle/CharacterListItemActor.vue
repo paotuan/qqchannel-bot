@@ -16,7 +16,7 @@
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="addCharacterToken">
           <MapPinIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="sceneStore.deleteCharacter(props.chara)">
+        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">
           <TrashIcon class="h-4 w-4" />
         </button>
       </span>
@@ -31,6 +31,8 @@ import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outli
 import { useCardStore } from '../../../store/card'
 import { useUIStore } from '../../../store/ui'
 import CharacterHpBar from './CharacterHpBar.vue'
+import ws from '../../../api/ws'
+import { IRiDeleteReq } from '../../../../interface/common'
 
 const props = defineProps<{ chara: ISceneActor }>()
 
@@ -58,4 +60,11 @@ const selectCard = () => {
 
 const sceneStore = useSceneStore()
 const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('actor', props.chara.userId)
+
+const deleteCharacter = () => {
+  sceneStore.deleteCharacter(props.chara)
+  // 同步服务端先攻列表
+  // 之所以放在这里，是为了避免放在 store deleteCharacter 中潜在的套娃风险
+  ws.send<IRiDeleteReq>({ cmd: 'ri/delete', data: { id: props.chara.userId, type: 'actor' } })
+}
 </script>

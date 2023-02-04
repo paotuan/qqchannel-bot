@@ -5,6 +5,8 @@ import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
 import { IStageData, useStage } from './map'
 import type { IRiItem } from '../../../interface/common'
+import ws from '../../api/ws'
+import type { IRiSetReq } from '../../../interface/common'
 
 // 场景地图
 export interface ISceneMap {
@@ -136,6 +138,8 @@ export const useSceneStore = defineStore('scene', () => {
       currentSelectedCharacter.value = existCharacter
     } else {
       characters.push(chara)
+      // 同步服务端
+      addCharaSyncRiList(chara)
     }
   }
 
@@ -200,6 +204,8 @@ export const useSceneStore = defineStore('scene', () => {
     dup.name = nameWithoutNum + (maxNum + 1)
     // 加入列表
     characters.push(dup)
+    // 同步服务端
+    addCharaSyncRiList(dup)
   }
 
   // 当前选中展示人物卡的 npc 名字
@@ -272,6 +278,19 @@ async function deleteMapInDB(item: ISceneMap) {
   } catch (e) {
     console.error('删除场景失败', item.name, e)
   }
+}
+
+// 添加角色同步到服务端先攻列表
+function addCharaSyncRiList(chara: ISceneActor | ISceneNpc) {
+  ws.send<IRiSetReq>({
+    cmd: 'ri/set',
+    data: {
+      type: chara.type,
+      id: chara.type === 'actor' ? chara.userId : chara.name,
+      seq: chara.seq,
+      seq2: chara.seq2
+    }
+  })
 }
 
 // 先攻值比较

@@ -25,6 +25,7 @@ export type Command =
   | 'scene/sendMapImage' // req/ res: string
   | 'ri/list' // res
   | 'ri/set' // req
+  | 'ri/delete' // req
 
 export interface IMessage<T> {
   cmd: Command
@@ -190,3 +191,7 @@ export interface IRiItem {
 
 export type IRiListResp = IRiItem[]
 export type IRiSetReq = IRiItem
+export interface IRiDeleteReq {
+  type: 'actor' | 'npc'
+  id: string
+}

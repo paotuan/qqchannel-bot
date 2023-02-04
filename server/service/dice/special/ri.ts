@@ -135,7 +135,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
           const seq1Res = compareSeq(a.seq, b.seq)
           return seq1Res === 0 ? compareSeq(a.seq2, b.seq2) : seq1Res
         })
-        .map((entry, i) => `${i + 1}. ${getRiName(entry.type, entry.id)} 🎲 ${entry.seq}${isNaN(entry.seq2) ? '' : `(${entry.seq2})`}`)
+        .map((entry, i) => `${i + 1}. ${getRiName(entry.type, entry.id)} 🎲 ${isNaN(entry.seq) ? '--' : entry.seq}${isNaN(entry.seq2) ? '' : `(${entry.seq2})`}`)
       const lines = ['当前先攻列表：', ...descList]
       if (this.clear) {
         lines.push('*先攻列表已清空')

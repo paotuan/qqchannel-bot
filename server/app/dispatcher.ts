@@ -19,7 +19,7 @@ import type {
   IUser,
   IUserListResp,
   IPluginConfigDisplay,
-  INoteSendImageRawReq, ISceneSendMapImageReq, ISceneSendBattleLogReq, IRiListResp,
+  INoteSendImageRawReq, ISceneSendMapImageReq, ISceneSendBattleLogReq, IRiListResp, IRiSetReq, IRiDeleteReq,
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -65,6 +65,12 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'scene/sendMapImage':
     handleSceneSendMapImage(client, server, request.data as ISceneSendMapImageReq)
+    break
+  case 'ri/set':
+    handleRiSet(client, server, request.data as IRiSetReq)
+    break
+  case 'ri/delete':
+    handleRiDelete(client, server, request.data as IRiDeleteReq)
     break
   }
 }
@@ -241,4 +247,31 @@ async function handleSceneSendMapImage(client: WsClient, server: Wss, data: ISce
     }
   }
   client.send<string>({ cmd: 'scene/sendMapImage', success: false, data: '发送失败' })
+}
+
+function handleRiSet(client: WsClient, server: Wss, data: IRiSetReq) {
+  data.seq = data.seq === null ? NaN : data.seq
+  data.seq2 = data.seq2 === null ? NaN : data.seq2
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const riList = qApi.dice.getRiListOfChannel(client.listenToChannelId)
+    const exist = riList.find(item => item.id === data.id && item.type === data.type)
+    if (exist) {
+      exist.seq = data.seq
+      exist.seq2 = data.seq2
+    } else {
+      riList.push(data)
+    }
+  }
+}
+
+function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const riList = qApi.dice.getRiListOfChannel(client.listenToChannelId)
+    const index = riList.findIndex(item => item.id === data.id && item.type === data.type)
+    if (index >= 0) {
+      riList.splice(index, 1)
+    }
+  }
 }

@@ -27,7 +27,7 @@
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="sceneStore.duplicateNpc(props.chara)">
           <Square2StackIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="sceneStore.deleteCharacter(props.chara)">
+        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">
           <TrashIcon class="h-4 w-4" />
         </button>
       </span>
@@ -39,6 +39,8 @@ import { ISceneNpc, useSceneStore } from '../../../store/scene'
 import { DocumentTextIcon, MapPinIcon, TrashIcon, Square2StackIcon } from '@heroicons/vue/24/outline'
 import CharacterHpBar from './CharacterHpBar.vue'
 import { ref } from 'vue'
+import ws from '../../../api/ws'
+import type { IRiDeleteReq } from '../../../../interface/common'
 
 const props = defineProps<{ chara: ISceneNpc }>()
 
@@ -64,5 +66,12 @@ const handleFile = (e: Event) => {
 
 const uploadAvatar = () => {
   realUploadBtn.value?.click()
+}
+
+const deleteCharacter = () => {
+  sceneStore.deleteCharacter(props.chara)
+  // 同步服务端先攻列表
+  // 之所以放在这里，是为了避免放在 store deleteCharacter 中潜在的套娃风险
+  ws.send<IRiDeleteReq>({ cmd: 'ri/delete', data: { id: props.chara.name, type: 'npc' } })
 }
 </script>

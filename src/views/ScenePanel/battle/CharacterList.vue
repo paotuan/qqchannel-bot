@@ -22,20 +22,22 @@
         <CharacterListItemActor v-if="chara.type === 'actor'" :chara="chara" />
         <CharacterListItemNpc v-if="chara.type === 'npc'" :chara="chara" />
         <div class="flex-none flex gap-2 items-center">
-          <SeqInput v-model="chara.seq" class="input input-bordered input-sm w-16" />
-          <SeqInput v-model="chara.seq2" class="input input-bordered input-sm w-16" />
+          <SeqInput v-model="chara.seq" class="input input-bordered input-sm w-16" @update:modelValue="updateSeq(chara, 'seq', $event)" />
+          <SeqInput v-model="chara.seq2" class="input input-bordered input-sm w-16" @update:modelValue="updateSeq(chara, 'seq2', $event)" />
         </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { useSceneStore } from '../../../store/scene'
+import { ISceneActor, ISceneNpc, useSceneStore } from '../../../store/scene'
 import { computed } from 'vue'
 import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import CharacterListItemActor from './CharacterListItemActor.vue'
 import SeqInput from './SeqInput.vue'
 import CharacterListItemNpc from './CharacterListItemNpc.vue'
+import ws from '../../../api/ws'
+import type { IRiSetReq } from '../../../../interface/common'
 
 const sceneStore = useSceneStore()
 const charaList = computed(() => sceneStore.charactersSorted)
@@ -46,6 +48,19 @@ const riDesc = [
   '若两个角色先攻值相同，可通过额外数值',
   '（填写在第二列）进一步排序'
 ]
+
+const updateSeq = (chara: ISceneActor | ISceneNpc, type: 'seq' | 'seq2', value: number) => {
+  ws.send<IRiSetReq>({
+    cmd: 'ri/set',
+    data: {
+      type: chara.type,
+      id: chara.type === 'actor' ? chara.userId : chara.name,
+      seq: chara.seq,
+      seq2: chara.seq2,
+      [type]: value
+    }
+  })
+}
 </script>
 <style scoped>
 .list-header {
