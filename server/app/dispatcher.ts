@@ -19,7 +19,7 @@ import type {
   IUser,
   IUserListResp,
   IPluginConfigDisplay,
-  INoteSendImageRawReq, ISceneSendMapImageReq, ISceneSendBattleLogReq,
+  INoteSendImageRawReq, ISceneSendMapImageReq, ISceneSendBattleLogReq, IRiListResp,
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -137,6 +137,15 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
     if (channelId) {
       const config = server.config.getChannelConfig(channelId).config
       ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
+    }
+  })
+  // watch ri list
+  client.autorun(ws => {
+    const channelId = ws.listenToChannelId
+    if (channelId) {
+      const qApi = server.qApis.find(ws.appid)
+      const list = qApi.dice.getRiListOfChannel(channelId)
+      ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
     }
   })
 }

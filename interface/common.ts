@@ -23,6 +23,8 @@ export type Command =
   | 'plugin/list' // res
   | 'scene/sendBattleLog' // req/ res: string
   | 'scene/sendMapImage' // req/ res: string
+  | 'ri/list' // res
+  | 'ri/set' // req
 
 export interface IMessage<T> {
   cmd: Command
@@ -178,3 +180,13 @@ export interface ISceneSendBattleLogReq {
 export interface ISceneSendMapImageReq {
   data: string
 }
+
+export interface IRiItem {
+  type: 'actor' | 'npc'
+  id: string
+  seq: number
+  seq2: number
+}
+
+export type IRiListResp = IRiItem[]
+export type IRiSetReq = IRiItem
