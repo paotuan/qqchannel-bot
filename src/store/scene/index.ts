@@ -4,6 +4,7 @@ import { useIndexedDBStore } from '../../utils/db'
 import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
 import { IStageData, useStage } from './map'
+import type { IRiItem } from '../../../interface/common'
 
 // 场景地图
 export interface ISceneMap {
@@ -154,6 +155,30 @@ export const useSceneStore = defineStore('scene', () => {
     }
   }
 
+  // 更新人物先攻列表
+  const updateCharacterRiList = (list: IRiItem[]) => {
+    // 1. 删除不存在的角色
+    const charas2delete = characters.filter(chara => {
+      const exist = list.find(ri => ri.type === chara.type && ri.id === (chara.type === 'actor' ? chara.userId : chara.name))
+      return !exist
+    })
+    charas2delete.forEach(chara => deleteCharacter(chara))
+    // 2. 更新或添加角色
+    list.forEach(ri => {
+      const exist = characters.find(chara => ri.type === chara.type && ri.id === (chara.type === 'actor' ? chara.userId : chara.name))
+      if (exist) {
+        exist.seq = ri.seq
+        exist.seq2 = ri.seq2
+      } else {
+        if (ri.type === 'actor') {
+          characters.push({ type: 'actor', userId: ri.id, seq: ri.seq, seq2: ri.seq2 })
+        } else {
+          characters.push({ type: 'npc', name: ri.id, seq: ri.seq, seq2: ri.seq2, embedCard: { hp: NaN, maxHp: NaN, ext: '' } })
+        }
+      }
+    })
+  }
+
   // 复制 npc
   const duplicateNpc = (chara: ISceneNpc) => {
     const dup = cloneDeep(chara)
@@ -203,6 +228,7 @@ export const useSceneStore = defineStore('scene', () => {
     currentSelectedCharacter,
     addCharacter,
     deleteCharacter,
+    updateCharacterRiList,
     duplicateNpc,
     currentCardNpcName,
     currentCardNpc,

@@ -6,7 +6,7 @@ import type {
   ILog,
   INoteFetchResp,
   INoteSendResp,
-  INoteSyncResp, IUser, IPluginConfigDisplay
+  INoteSyncResp, IUser, IPluginConfigDisplay, IRiListResp
 } from '../../interface/common'
 import type { ICard } from '../../interface/coc'
 import { useBotStore } from '../store/bot'
@@ -154,4 +154,14 @@ ws.on('scene/sendBattleLog', data => {
   } else {
     Toast.error('战报发送失败！')
   }
+})
+
+ws.on('ri/list', data => {
+  const res = data.data as IRiListResp
+  res.forEach(item => {
+    item.seq = item.seq === null ? NaN : item.seq
+    item.seq2 = item.seq2 === null ? NaN : item.seq2
+  })
+  const sceneStore = useSceneStore()
+  sceneStore.updateCharacterRiList(res)
 })
