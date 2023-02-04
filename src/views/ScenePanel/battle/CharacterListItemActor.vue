@@ -13,7 +13,7 @@
         <button class="btn btn-xs btn-outline btn-circle" :disabled="!userCard" @click.stop="selectCard">
           <DocumentTextIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle" @click.stop="addCharacterToken">
+        <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.currentMap" @click.stop="addCharacterToken">
           <MapPinIcon class="h-4 w-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">

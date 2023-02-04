@@ -21,7 +21,7 @@
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="showNpcCard">
           <DocumentTextIcon class="h-4 w-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle" @click.stop="addCharacterToken">
+        <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.currentMap" @click.stop="addCharacterToken">
           <MapPinIcon class="h-4 w-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="sceneStore.duplicateNpc(props.chara)">
