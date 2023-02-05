@@ -115,7 +115,7 @@ export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | 
   let exp = '', desc = rawExp.trim(), tempValue = NaN
   if (flag & ParseFlags.PARSE_EXP) {
     const index = desc.search(/[\p{Unified_Ideograph}\s]/u)
-    const [_exp, _desc = ''] = index < 0 ? [rawExp] : [rawExp.slice(0, index), rawExp.slice(index)]
+    const [_exp, _desc = ''] = index < 0 ? [desc] : [desc.slice(0, index), desc.slice(index)]
     exp = _exp
     desc = _desc.trim()
   }
