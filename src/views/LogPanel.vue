@@ -1,23 +1,29 @@
 <template>
   <div class="flex-grow flex flex-row gap-4 overflow-hidden">
-    <div ref="sortableRef" class="card bg-base-100 shadow-lg px-4 py-4 overflow-y-auto" style="flex: 3 0 0">
-      <div v-for="log in logStore.logs" :key="log.msgId" class="group w-full px-4 flex items-start gap-2 leading-loose hover:bg-base-200">
-        <Bars3Icon class="w-4 h-8 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
-        <span class="font-bold flex-none" :title="log.userId">{{ nickOf(log) }}</span>
-        <template v-if="log.msgType === 'text'">
-          <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
-        </template>
-        <template v-else>
-          <div class="flex-grow">
-            <div class="w-1/2 h-40">
-              <a :href="`https://${log.content}`" target="_blank" rel="noopener noreferrer">
-                <img :src="`https://${log.content}`" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
-              </a>
+    <div class="relative" style="flex: 3 0 0">
+      <div ref="sortableRef" class="card bg-base-100 shadow-lg px-4 py-4 overflow-y-auto h-full">
+        <div v-for="log in logStore.logs" :key="log.msgId" class="group w-full px-4 flex items-start gap-2 leading-loose hover:bg-base-200">
+          <Bars3Icon class="w-4 h-8 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
+          <span class="font-bold flex-none" :title="log.userId">{{ nickOf(log) }}</span>
+          <template v-if="log.msgType === 'text'">
+            <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
+          </template>
+          <template v-else>
+            <div class="flex-grow">
+              <div class="w-1/2 h-40">
+                <a :href="`https://${log.content}`" target="_blank" rel="noopener noreferrer">
+                  <img :src="`https://${log.content}`" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
+                </a>
+              </div>
             </div>
-          </div>
-        </template>
-        <XMarkIcon class="w-4 h-8 cursor-pointer invisible group-hover:visible text-red-600 justify-self-end flex-none"
-                   @click="logStore.removeLog(log)"/>
+          </template>
+          <XMarkIcon class="w-4 h-8 cursor-pointer invisible group-hover:visible text-red-600 justify-self-end flex-none"
+                     @click="logStore.removeLog(log)"/>
+        </div>
+      </div>
+      <div v-if="logStore.logs.length === 0" class="absolute top-0 left-0 right-0 bottom-0 flex flex-col gap-2 items-center justify-center text-base-content/50">
+        <ChatBubbleLeftRightIcon class="w-16 h-16" />
+        保持网页开启，频道消息的 Log 会显示在此处
       </div>
     </div>
     <div style="flex: 1 0 0">
@@ -51,7 +57,7 @@
 <script setup lang="ts">
 import { useLogStore } from '../store/log'
 import { computed, onMounted, ref } from 'vue'
-import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { Bars3Icon, XMarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline'
 import Sortable from 'sortablejs'
 import { useUserStore } from '../store/user'
 import type { ILog } from '../../interface/common'
