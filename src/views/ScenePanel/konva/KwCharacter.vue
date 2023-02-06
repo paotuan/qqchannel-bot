@@ -27,6 +27,7 @@ import { useCardStore } from '../../../store/card'
 import { ISceneNpc, useSceneStore } from '../../../store/scene'
 import KwImage from './KwImage.vue'
 import Konva from 'konva'
+import { clamp } from 'lodash'
 
 const props = defineProps<{ config: ICharacterItem }>()
 const charaType = computed(() => props.config['data-chara-type'])
@@ -103,7 +104,7 @@ const maxHp = computed(() => {
   }
 })
 const hasHpBar = computed(() => !isNaN(hp.value) && !isNaN(maxHp.value) && maxHp.value > 0)
-const hpPercentage = computed(() => hasHpBar.value ? hp.value / maxHp.value : 0)
+const hpPercentage = computed(() => hasHpBar.value ? clamp(hp.value / maxHp.value, 0, 1) : 0)
 const hpColor = computed(() => {
   if (hp.value <= maxHp.value / 5) {
     return '#dd524c'
