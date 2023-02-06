@@ -1,4 +1,4 @@
-import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket } from 'qq-guild-bot'
+import { AvailableIntentsEventsEnum, createOpenAPI, createWebsocket, IMessage } from 'qq-guild-bot'
 import type { IBotInfo } from '../../../interface/common'
 import { GuildManager } from './guild'
 import { action, makeAutoObservable } from 'mobx'
@@ -74,17 +74,21 @@ export class QApi {
     // 初始化骰子
     this.dice = new DiceManager(this)
 
-    // 初始化监听器 todo 初始化消息缓存
+    // 初始化监听器
     botConfig.intents.forEach(intent => {
       this.qqWs.on(intent, data => this.eventEmitter.emit(intent, data))
     })
 
     // 初始化串行监听器
     this.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, async (data: any) => {
+      const msg = data.msg as IMessage
       // 过滤掉未监听的频道消息
-      const channelId = data.msg.channel_id
+      const channelId = msg.channel_id
       if (!this.wss.listeningChannels.includes(channelId)) return
-      // 串行触发
+      // 最近一条消息缓存到 channel 对象中
+      const channel = this.guilds.findChannel(channelId, msg.guild_id)
+      channel && (channel.lastMessage = data.msg)
+      // 串行触发消息处理器
       for (const listener of this.guildMessageQueueListeners) {
         const consumed = await listener(data)
         if (consumed) return

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { INote, INoteDeleteReq, INoteFetchReq, INoteSendReq } from '../../interface/common'
+import type { INote, INoteDeleteReq, INoteFetchReq, INoteSendImageRawReq, INoteSendReq } from '../../interface/common'
 import ws from '../api/ws'
 import { gtagEvent, Toast } from '../utils'
 
@@ -35,8 +35,13 @@ export const useNoteStore = defineStore('note', {
         ws.send<INoteSendReq>({ cmd: 'note/send', data: { msgType: 'image', content: url } })
         gtagEvent('note/send')
       } else if (this.imageFile) {
-        ws.sendRaw(this.imageFile)
-        gtagEvent('note/send')
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const imageUrl = e.target!.result as string // base64
+          ws.send<INoteSendImageRawReq>({ cmd: 'note/sendImageRaw', data: { data: imageUrl } })
+          gtagEvent('note/send')
+        }
+        reader.readAsDataURL(this.imageFile)
       }
     },
     clearText() {

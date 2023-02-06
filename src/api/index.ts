@@ -6,7 +6,7 @@ import type {
   ILog,
   INoteFetchResp,
   INoteSendResp,
-  INoteSyncResp, IUser, IPluginConfigDisplay
+  INoteSyncResp, IUser, IPluginConfigDisplay, IRiListResp
 } from '../../interface/common'
 import type { ICard } from '../../interface/coc'
 import { useBotStore } from '../store/bot'
@@ -18,6 +18,7 @@ import { useUserStore } from '../store/user'
 import { gtagEvent, Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
+import { useSceneStore } from '../store/scene'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -118,10 +119,10 @@ ws.on('card/test', data => {
   const res = data.data as ICardTestResp
   if (res.success) {
     const cardStore = useCardStore()
-    const card = cardStore.of(res.cardName)
+    const targetCard = cardStore.of(res.cardName)
     // 只有 skill 能成长，要判断下成功的是不是 skill
-    if (!card || !card.skills[res.propOrSkill]) return
-    cardStore.markSkillGrowth(card, res.propOrSkill, true)
+    if (!targetCard || !targetCard.skills[res.propOrSkill]) return
+    cardStore.markSkillGrowth(targetCard, res.propOrSkill, true)
   }
 })
 
@@ -135,4 +136,32 @@ ws.on('plugin/list', data => {
   const res = data.data as IPluginConfigDisplay[]
   const pluginStore = usePluginStore()
   pluginStore.onGetPlugins(res)
+})
+
+ws.on('scene/sendMapImage', data => {
+  const sceneStore = useSceneStore()
+  sceneStore.sendMapImageSignal = false
+  if (data.success) {
+    Toast.success('发送成功！')
+  } else {
+    Toast.error('发送失败！')
+  }
+})
+
+ws.on('scene/sendBattleLog', data => {
+  if (data.success) {
+    Toast.success('战报发送成功！')
+  } else {
+    Toast.error('战报发送失败！')
+  }
+})
+
+ws.on('ri/list', data => {
+  const res = data.data as IRiListResp
+  res.forEach(item => {
+    item.seq = item.seq === null ? NaN : item.seq
+    item.seq2 = item.seq2 === null ? NaN : item.seq2
+  })
+  const sceneStore = useSceneStore()
+  sceneStore.updateCharacterRiList(res)
 })

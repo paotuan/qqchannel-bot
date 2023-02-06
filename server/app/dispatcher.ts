@@ -1,12 +1,25 @@
 import type { WsClient } from './wsclient'
 import type { Wss } from './wss'
 import type {
-  IBotInfoResp, ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp,
-  IChannel, IChannelConfigReq, IChannelConfigResp,
+  IBotInfoResp,
+  ICardDeleteReq,
+  ICardImportReq,
+  ICardLinkReq,
+  ICardLinkResp,
+  IChannel,
+  IChannelConfigReq,
+  IChannelConfigResp,
   IChannelListResp,
   IListenToChannelReq,
   ILoginReq,
-  IMessage, INoteDeleteReq, INoteFetchReq, INoteSendReq, IUser, IUserListResp, IPluginConfigDisplay
+  IMessage,
+  INoteDeleteReq,
+  INoteFetchReq,
+  INoteSendReq,
+  IUser,
+  IUserListResp,
+  IPluginConfigDisplay,
+  INoteSendImageRawReq, ISceneSendMapImageReq, ISceneSendBattleLogReq, IRiListResp, IRiSetReq, IRiDeleteReq,
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -21,7 +34,7 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     handleSendNote(client, server, request.data as INoteSendReq)
     break
   case 'note/sendImageRaw':
-    handleSendImage(client, server, request.data as Buffer)
+    handleSendImage(client, server, request.data as INoteSendImageRawReq)
     break
   case 'note/sync':
     handleSyncNotes(client, server)
@@ -46,6 +59,18 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'channel/config/reset':
     handleResetChannelConfig(client, server)
+    break
+  case 'scene/sendBattleLog':
+    handleSceneSendBattleLog(client, server, request.data as ISceneSendBattleLogReq)
+    break
+  case 'scene/sendMapImage':
+    handleSceneSendMapImage(client, server, request.data as ISceneSendMapImageReq)
+    break
+  case 'ri/set':
+    handleRiSet(client, server, request.data as IRiSetReq)
+    break
+  case 'ri/delete':
+    handleRiDelete(client, server, request.data as IRiDeleteReq)
     break
   }
 }
@@ -120,6 +145,15 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
     }
   })
+  // watch ri list
+  client.autorun(ws => {
+    const channelId = ws.listenToChannelId
+    if (channelId) {
+      const qApi = server.qApis.find(ws.appid)
+      const list = qApi.dice.getRiListOfChannel(channelId)
+      ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
+    }
+  })
 }
 
 function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
@@ -130,7 +164,7 @@ function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
   }
 }
 
-function handleSendImage(client: WsClient, server: Wss, data: Buffer) {
+function handleSendImage(client: WsClient, server: Wss, data: INoteSendImageRawReq) {
   if (!client.listenToChannelId) return
   const qApi = server.qApis.find(client.appid)
   if (qApi) {
@@ -183,4 +217,61 @@ function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfig
 function handleResetChannelConfig(client: WsClient, server: Wss) {
   if (!client.listenToChannelId) return
   server.config.resetChannelConfig(client)
+}
+
+async function handleSceneSendBattleLog(client: WsClient, server: Wss, data: ISceneSendBattleLogReq) {
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const channel = qApi.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
+    if (channel) {
+      const resp = await channel.sendMessage({ content: data.content })
+      if (resp) {
+        client.send<string>({ cmd: 'scene/sendBattleLog', success: true, data: '' })
+        return
+      }
+    }
+  }
+  client.send<string>({ cmd: 'scene/sendBattleLog', success: false, data: '发送失败' })
+}
+
+async function handleSceneSendMapImage(client: WsClient, server: Wss, data: ISceneSendMapImageReq) {
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const channel = qApi.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
+    if (channel) {
+      const resp = await channel.sendRawImageMessage(data.data)
+      if (resp) {
+        client.send<string>({ cmd: 'scene/sendMapImage', success: true, data: '' })
+        return
+      }
+    }
+  }
+  client.send<string>({ cmd: 'scene/sendMapImage', success: false, data: '发送失败' })
+}
+
+function handleRiSet(client: WsClient, server: Wss, data: IRiSetReq) {
+  data.seq = data.seq === null ? NaN : data.seq
+  data.seq2 = data.seq2 === null ? NaN : data.seq2
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const riList = qApi.dice.getRiListOfChannel(client.listenToChannelId)
+    const exist = riList.find(item => item.id === data.id && item.type === data.type)
+    if (exist) {
+      exist.seq = data.seq
+      exist.seq2 = data.seq2
+    } else {
+      riList.push(data)
+    }
+  }
+}
+
+function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const riList = qApi.dice.getRiListOfChannel(client.listenToChannelId)
+    const index = riList.findIndex(item => item.id === data.id && item.type === data.type)
+    if (index >= 0) {
+      riList.splice(index, 1)
+    }
+  }
 }

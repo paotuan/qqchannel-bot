@@ -75,9 +75,9 @@ export const useCardStore = defineStore('card', () => {
   const selectCard = (card: ICard) => selectedCardId.value = card.basic.name
 
   // 标记某个技能成长
-  const markSkillGrowth = (card: ICard, skill: string, value?: boolean) => {
-    card.meta.skillGrowth[skill] = typeof value === 'boolean' ? value : !card.meta.skillGrowth[skill]
-    markCardEdited(card)
+  const markSkillGrowth = (targetCard: ICard, skill: string, value?: boolean) => {
+    targetCard.meta.skillGrowth[skill] = typeof value === 'boolean' ? value : !targetCard.meta.skillGrowth[skill]
+    markCardEdited(targetCard)
   }
 
   // 标记某张卡片被编辑
@@ -114,6 +114,15 @@ export const useCardStore = defineStore('card', () => {
     }
   }
 
+  // 根据用户 id 反查关联卡片
+  const getCardOfUser = (userId: string) => {
+    for (const cardName of Object.keys(cardLinkMap)) {
+      if (cardLinkMap[cardName] === userId) {
+        return cardMap[cardName]
+      }
+    }
+  }
+
   return {
     selectedCard,
     showAllCards,
@@ -132,7 +141,8 @@ export const useCardStore = defineStore('card', () => {
     isEdited,
     linkedUserOf,
     requestLinkUser,
-    linkUser
+    linkUser,
+    getCardOfUser
   }
 })
 

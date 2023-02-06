@@ -5,6 +5,8 @@ import * as LRUCache from 'lru-cache'
 import { convertRoleIds, createDiceRoll, UserRole } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
+import type { IRiItem } from '../../../interface/common'
+import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
 
 interface IMessageCache {
   text?: string
@@ -16,6 +18,7 @@ export class DiceManager {
   private get wss() { return this.api.wss }
   private readonly msgCache: LRUCache<string, IMessageCache>
   private readonly opposedRollCache: LRUCache<string, StandardDiceRoll> // 对抗检定缓存 msgid => roll
+  private readonly riListCache: Record<string, IRiItem[]> // 先攻列表缓存 channelId => ri list
 
   constructor(api: QApi) {
     makeAutoObservable<this, 'api' | 'wss'>(this, { api: false, wss: false })
@@ -30,6 +33,7 @@ export class DiceManager {
       }
     })
     this.opposedRollCache = new LRUCache({ max: 50 })
+    this.riListCache = {}
     this.initListeners()
   }
 
@@ -177,6 +181,10 @@ export class DiceManager {
       updatedCards.forEach(card => {
         this.wss.cards.saveCard(card)
       })
+      // 特殊：保存先攻列表
+      if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
+        roller.applyToRiList(this.riListCache)
+      }
       return roller
     } catch (e: any) {
       // 表达式不合法，无视之
@@ -185,6 +193,16 @@ export class DiceManager {
     } finally {
       // console.timeEnd('dice')
     }
+  }
+
+  /**
+   * 获取某个子频道先攻列表
+   */
+  getRiListOfChannel(channelId: string) {
+    if (!this.riListCache[channelId]) {
+      this.riListCache[channelId] = []
+    }
+    return this.riListCache[channelId]
   }
 
   private initListeners() {
