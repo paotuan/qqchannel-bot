@@ -14,7 +14,7 @@
     <div class="-mx-4 overflow-y-auto" style="height: calc(100% - 2.5rem)">
       <div
         v-for="chara in charaList"
-        :key="chara.userId || chara.name"
+        :key="chara.type === 'actor' ? chara.userId : chara.name"
         class="flex justify-between py-2 px-4 cursor-pointer"
         :class="{ 'bg-secondary/50': sceneStore.currentSelectedCharacter === chara }"
         @click="sceneStore.currentSelectedCharacter = chara"
