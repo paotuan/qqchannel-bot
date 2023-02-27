@@ -154,6 +154,7 @@ const handleFile = (e: Event) => {
     reader.onload = (e) => {
       const imageUrl = e.target!.result as string
       currentMapData.value.addCustomToken(imageUrl)
+      realUploadBtn.value!.value = ''
     }
     reader.readAsDataURL(files![0])
   }
