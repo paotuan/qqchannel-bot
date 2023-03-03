@@ -29,21 +29,36 @@
       </section>
       <!-- 自定义回复 -->
       <section id="customreply" class="mt-4">
-        <div class="flex items-center"><h2>自定义回复：</h2><custom-reply-help /></div>
+        <div class="flex items-center">
+          <h2>自定义回复：</h2>
+          <button class="btn btn-circle btn-xs btn-ghost" @click="openHelpDoc('/config/customreply/')">
+            <QuestionMarkCircleIcon class="w-4 h-4" />
+          </button>
+        </div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <custom-reply-list />
         </div>
       </section>
       <!-- 自定义规则 -->
       <section id="rolldecider" class="mt-4">
-        <div class="flex items-center"><h2>检定规则：</h2><roll-decider-help /></div>
+        <div class="flex items-center">
+          <h2>检定规则：</h2>
+          <button class="btn btn-circle btn-xs btn-ghost" @click="openHelpDoc('/config/rule/')">
+            <QuestionMarkCircleIcon class="w-4 h-4" />
+          </button>
+        </div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <roll-decider-list />
         </div>
       </section>
       <!-- 别名指令 -->
       <section id="aliasroll" class="mt-4">
-        <div class="flex items-center"><h2>别名指令：</h2><alias-roll-help /></div>
+        <div class="flex items-center">
+          <h2>别名指令：</h2>
+          <button class="btn btn-circle btn-xs btn-ghost" @click="openHelpDoc('/config/alias/')">
+            <QuestionMarkCircleIcon class="w-4 h-4" />
+          </button>
+        </div>
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <alias-roll-list />
         </div>
@@ -71,15 +86,13 @@
   </div>
 </template>
 <script setup lang="ts">
+import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../store/config'
 import { computed } from 'vue'
 import CustomReplyList from './CustomReplyList.vue'
-import CustomReplyHelp from './CustomReplyHelp.vue'
 import RollDeciderList from './RollDeciderList.vue'
-import RollDeciderHelp from './RollDeciderHelp.vue'
 import AliasRollList from './AliasRollList.vue'
 import SpecialDiceList from './SpecialDiceList.vue'
-import AliasRollHelp from './AliasRollHelp.vue'
 import { Toast } from '../../utils'
 
 const configStore = useConfigStore()
@@ -101,6 +114,10 @@ const dndDesc = [
 const quickSet = (mode: 'coc' | 'dnd') => {
   configStore.quickSet(mode)
   Toast.success('设置成功')
+}
+
+const openHelpDoc = (path: string) => {
+  window.open('https://paotuan.io' + path)
 }
 </script>
 <style scoped>
