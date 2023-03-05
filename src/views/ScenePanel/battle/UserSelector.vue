@@ -9,7 +9,7 @@
         @keyup.enter="keydownEnter"
       />
     </label>
-    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 max-h-96 -ml-1 mt-2 overflow-y-auto">
+    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 max-h-96 -ml-1 mt-2 overflow-y-auto flex-nowrap">
       <li class="menu-title"><span>已关联人物卡</span></li>
       <li v-for="user in haveCardUsersAfterSearch" :key="user.id">
         <a @click="select(user)">
