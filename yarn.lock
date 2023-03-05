@@ -978,10 +978,10 @@ csstype@^2.6.8:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.20.tgz#9229c65ea0b260cf4d3d997cb06288e36a8d6dda"
   integrity sha512-/WwNkdXfckNgw6S5R125rrW8ez139lBHWouiBvX8dfMFtcn6V81REDqnH7+CRpRipfYlyU1CmOnOxrmGcFOjeA==
 
-daisyui@^2.27.0:
-  version "2.27.0"
-  resolved "https://registry.yarnpkg.com/daisyui/-/daisyui-2.27.0.tgz#145e75e17529f81a113c84e86cc5312e01799f88"
-  integrity sha512-AhFGhTore1Kdnae+5RGc2PGESSXOjAQDHJfvryP+KY41gxMcNErtuaGZG+nOmvOzNKgxViSDSaOn/VZq6H8kxA==
+daisyui@^2.51.3:
+  version "2.51.3"
+  resolved "https://registry.npmmirror.com/daisyui/-/daisyui-2.51.3.tgz#95dd0444f27f55326845db80076e76dcf8d31a92"
+  integrity sha512-AQa9exq/DsnvjyDi6bwOqHExQr9LJJag0iKRXNvRRtHXPo1gaAQ3ASJWylUB8J8KMH2M9zIpr7cvPHc7yGckyQ==
   dependencies:
     color "^4.2"
     css-selector-tokenizer "^0.8.0"

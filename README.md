@@ -10,11 +10,7 @@
 
 请访问我们的官方网站 [paotuan.io](https://paotuan.io) 查看最新的使用文档。
 
-也可以通过以下视频了解工具的部分功能演示：todo 看能否放合集链接
-
-[【bilibili】功能演示](https://www.bilibili.com/video/BV1hY4y1N7Ko/)
-
-[【bilibili】搭建流程](https://docs.qq.com/doc/DR3R6bFRNZWdsYUxt)
+也可以通过以下视频了解工具的部分功能演示：[【bilibili】QQ频道跑团机器人合集](https://space.bilibili.com/688429881/channel/collectiondetail?sid=1162902)
 
 欢迎 [加入我们的官方频道](https://pd.qq.com/s/gv78r06x1) 体验机器人各项指令功能
 
@@ -38,11 +34,12 @@ yarn run dev:client
 ```
 
 ## 功能展示
-- 无缝集成 QQ，支持各种常用骰子规则
+- 无缝集成 QQ，支持各种常用骰子规则和指令
 - 自动记录跑团 Log，支持多种格式导出
 - 发布和管理重要笔记，置顶跑团关键线索
 - 导入文本/Excel 人物卡，在线编辑和托管，人物卡关联频道用户
 - 骰子根据人物卡自动判断成功等级，记录技能成长
+- 可视化地图编辑器与战斗面板，优雅主持战斗轮
 - 多种主题一键切换
 
 
