@@ -11,6 +11,7 @@ import ThemePicker from './components/nav/ThemePicker.vue'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { Toast } from './utils'
 import { VERSION_NAME } from '../interface/version'
+import AiAssistant from './components/nav/AiAssistant.vue'
 
 const bot = useBotStore()
 const channel = useChannelStore()
@@ -75,6 +76,7 @@ const checkUpdate = async () => {
     </div>
     <div class="navbar-end">
       <bot-info />
+      <ai-assistant />
       <theme-picker />
     </div>
   </div>
