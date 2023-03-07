@@ -10,7 +10,7 @@
           <button class="btn btn-sm btn-circle btn-ghost" @click="chatStore.clearHistory()"><ArrowPathRoundedSquareIcon class="w-4 h-4" /></button>
         </span>
         <span class="tooltip tooltip-left" data-tip="高级设置">
-          <button class="btn btn-sm btn-circle btn-ghost" @click="panelVisible = false"><Cog6ToothIcon class="w-4 h-4" /></button>
+          <button class="btn btn-sm btn-circle btn-ghost" @click="settingDialogVisible = true"><Cog6ToothIcon class="w-4 h-4" /></button>
         </span>
         <span class="tooltip tooltip-left" data-tip="关闭窗口">
           <button class="btn btn-sm btn-circle btn-ghost" @click="panelVisible = false"><XMarkIcon class="w-4 h-4" /></button>
@@ -50,6 +50,17 @@
         </ul>
       </div>
     </div>
+    <!-- setting dialog -->
+    <d-modal v-model:visible="settingDialogVisible" title="高级设置">
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text">OpenAI Key</span></label>
+        <input v-model="chatStore.apiKey" type="text" placeholder="sk-xxxxx" class="input input-bordered w-full" />
+      </div>
+      <div class="form-control">
+        <label class="label"><span class="label-text">系统指令（System Prompt）</span></label>
+        <textarea v-model="chatStore.systemPrompt" class="textarea textarea-bordered h-24" placeholder="请输入"></textarea>
+      </div>
+    </d-modal>
   </div>
 </template>
 <script setup lang="ts">
@@ -60,6 +71,7 @@ import { useDraggable, useWindowSize } from '@vueuse/core'
 import { useChannelStore } from '../../store/channel'
 import { useChatStore } from '../../store/chat'
 import { clamp } from 'lodash'
+import DModal from '../../dui/modal/DModal.vue'
 
 const channel = useChannelStore()
 const chatStore = useChatStore()
@@ -112,6 +124,9 @@ const presets = [
   { key: '总结对话', content: '请总结上述对话的内容，实现减少token的同时，保证对话的质量' },
   { key: '继续', content: 'continue' }
 ]
+
+// 高级设置
+const settingDialogVisible = ref(false)
 </script>
 <style scoped>
 .panel-card {

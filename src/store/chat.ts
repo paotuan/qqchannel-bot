@@ -72,9 +72,9 @@ export const useChatStore = defineStore('chat', () => {
       //     resolve('')
       //   }, 2000)
       // })
-    } catch (e) {
+    } catch (e: any) {
       console.log(e)
-      history.push({ role: 'assistant', content: '发生了错误', id: nanoid(), isError: true })
+      history.push({ role: 'assistant', content: `Error: ${e?.message}`, id: nanoid(), isError: true })
     } finally {
       chatLoading.value = false
     }
@@ -95,7 +95,7 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  return { systemPrompt, history, chatLoading, request, clearHistory, clearSingle }
+  return { systemPrompt, history, chatLoading, apiKey, request, clearHistory, clearSingle }
 })
 
 function auth(data: string) {
