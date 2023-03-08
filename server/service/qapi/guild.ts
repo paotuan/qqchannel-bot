@@ -10,6 +10,7 @@ import { User } from './user'
 export class Guild {
   readonly id: string
   name: string
+  icon: string
   private channelsMap: Record<string, Channel> = {}
   private usersMap: Record<string, User> = {}
   private readonly api: QApi
@@ -22,11 +23,12 @@ export class Guild {
     return Object.values(this.usersMap)
   }
 
-  constructor(api: QApi, id: string, name: string) {
+  constructor(api: QApi, id: string, name: string, icon: string) {
     makeAutoObservable<this, 'api'>(this, { id: false, api: false })
     this.api = api
     this.id = id
     this.name = name
+    this.icon = icon
     this.fetchChannels(api)
     this.fetchUsers(api)
   }
@@ -37,8 +39,8 @@ export class Guild {
       const { data } = await api.qqClient.channelApi.channels(this.id)
       runInAction(() => {
         const channels = data
-          .filter(channel => channel.type === Channel.TYPE_TEXT)
-          .map(channel => new Channel(this.api, channel.id, this.id, channel.name))
+          .filter(channel => Channel.VALID_TYPES.includes(channel.type))
+          .map(channel => new Channel(this.api, channel.id, this.id, channel.name, channel.type))
         this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
       })
     } catch (e) {
@@ -76,7 +78,7 @@ export class Guild {
   }
 
   addChannel(channel: IChannel) {
-    this.channelsMap[channel.id] = new Channel(this.api, channel.id, this.id, channel.name)
+    this.channelsMap[channel.id] = new Channel(this.api, channel.id, this.id, channel.name, channel.type)
   }
 
   updateChannel(channel: IChannel) {
@@ -170,9 +172,9 @@ export class GuildManager {
   async fetchGuilds() {
     this.guildsMap = {}
     try {
-      const resp = await this.api.qqClient.meApi.meGuilds({ limit: 10 }) // 先只拉一个
+      const resp = await this.api.qqClient.meApi.meGuilds({ limit: 10 }) // 私域应该最多能加入 10 个频道
       runInAction(() => {
-        const guilds = resp.data.map(info => new Guild(this.api, info.id, info.name))
+        const guilds = resp.data.map(info => new Guild(this.api, info.id, info.name, info.icon))
         this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
       })
     } catch (e) {
@@ -180,13 +182,14 @@ export class GuildManager {
     }
   }
 
-  addGuild({ id, name }: { id: string, name: string }) {
-    this.guildsMap[id] = new Guild(this.api, id, name)
+  addGuild({ id, name, icon }: { id: string, name: string, icon: string }) {
+    this.guildsMap[id] = new Guild(this.api, id, name, icon)
   }
 
-  updateGuild({ id, name }: { id: string, name: string }) {
+  updateGuild({ id, name, icon }: { id: string, name: string, icon: string }) {
     if (this.guildsMap[id]) {
       this.guildsMap[id].name = name
+      this.guildsMap[id].icon = icon
     }
   }
 
@@ -195,7 +198,7 @@ export class GuildManager {
   }
 
   addChannel(channel: IChannel) {
-    if (channel.type !== Channel.TYPE_TEXT) return // 只支持文字子频道
+    if (!Channel.VALID_TYPES.includes(channel.type)) return // 不支持的子频道类型
     const guild = this.guildsMap[channel.guild_id]
     if (guild) {
       guild.addChannel(channel)
@@ -203,7 +206,7 @@ export class GuildManager {
   }
 
   updateChannel(channel: IChannel) {
-    if (channel.type !== Channel.TYPE_TEXT) return // 只支持文字子频道
+    if (!Channel.VALID_TYPES.includes(channel.type)) return // 不支持的子频道类型
     const guild = this.guildsMap[channel.guild_id]
     if (guild) {
       guild.updateChannel(channel)
@@ -211,7 +214,7 @@ export class GuildManager {
   }
 
   deleteChannel(channel: IChannel) {
-    if (channel.type !== Channel.TYPE_TEXT) return // 只支持文字子频道
+    if (!Channel.VALID_TYPES.includes(channel.type)) return // 不支持的子频道类型
     const guild = this.guildsMap[channel.guild_id]
     if (guild) {
       guild.deleteChannel(channel.id)

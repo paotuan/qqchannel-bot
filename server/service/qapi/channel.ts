@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import type { QApi } from './index'
-import type { IMessage, MessageToCreate } from 'qq-guild-bot'
+import type { ChannelType, IMessage, MessageToCreate } from 'qq-guild-bot'
 import type { MessageType } from '../../../interface/common'
 import * as FormData from 'form-data'
 import fetch from 'node-fetch'
@@ -9,18 +9,20 @@ import fetch from 'node-fetch'
  * 子频道实例
  */
 export class Channel {
-  static TYPE_TEXT = 0
+  static VALID_TYPES = [0, 2, 10005] // 只支持文字、音频、视频子频道
   readonly id: string
   readonly guildId: string
   name: string
+  type: 0 | 2 | 10005
   lastMessage?: IMessage // 子频道最新一条消息
   private readonly api: QApi
 
-  constructor(api: QApi, id: string, guildId: string, name: string) {
+  constructor(api: QApi, id: string, guildId: string, name: string, type: ChannelType) {
     makeAutoObservable<this, 'api'>(this, { id: false, guildId: false, api: false })
     this.id = id
     this.guildId = guildId
     this.name = name
+    this.type = type as 0 | 2 | 10005 // 外部已经过滤过了
     this.api = api
   }
 

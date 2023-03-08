@@ -95,7 +95,12 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
     const qApi = server.qApis.find(ws.appid)
     if (qApi) {
       const channels: IChannel[] = qApi.guilds.all.map(guild => guild.allChannels.map(channel => ({
-        id: channel.id, name: channel.name, guildId: channel.guildId, guildName: guild.name
+        id: channel.id,
+        name: channel.name,
+        type: channel.type,
+        guildId: channel.guildId,
+        guildName: guild.name,
+        guildIcon: guild.icon
       }))).flat()
       ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
     }
