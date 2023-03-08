@@ -5,7 +5,10 @@
     </template>
     <template v-else-if="channelStore.list">
       <div class="card bg-base-100 px-12 py-8 shadow-lg">
-        <div class="label-text mb-4 font-bold">请选择机器人工作的子频道</div>
+        <div class="flex justify-between">
+          <div class="label-text mb-4 font-bold">请选择机器人工作的子频道</div>
+          <a class="link text-sm inline-flex" @click="openMultiWindow">我要多开<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a>
+        </div>
         <div class="grid grid-cols-2 gap-2 w-96">
           <label v-for="channel in channelStore.list" :key="channel.id"
                  class="label cursor-pointer p-2 rounded-xl border border-base-300">
@@ -25,10 +28,16 @@
 import { useChannelStore } from '../../store/channel'
 import { computed, ref } from 'vue'
 import type { IChannel } from '../../../interface/common'
+import { groupBy } from 'lodash'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 
 const channelStore = useChannelStore()
+const channelsGroupByGuild = computed(() => groupBy(channelStore.list || [], channel => channel.guildId))
+
 const checkedChannel = ref<IChannel | null>(null)
 const checkedChannelId = computed(() => checkedChannel.value?.id || null)
 
 const listenTo = (channel: IChannel | null) => channelStore.listenTo(channel!)
+
+const openMultiWindow = () => window.open(location.href)
 </script>
