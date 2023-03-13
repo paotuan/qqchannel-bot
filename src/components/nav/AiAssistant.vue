@@ -72,6 +72,7 @@ import { useChannelStore } from '../../store/channel'
 import { useChatStore } from '../../store/chat'
 import { clamp } from 'lodash'
 import DModal from '../../dui/modal/DModal.vue'
+import { gtagEvent } from '../../utils'
 
 const channel = useChannelStore()
 const chatStore = useChatStore()
@@ -115,6 +116,7 @@ const send = () => {
   if (!inputArea.value.trim()) return
   chatStore.request(inputArea.value)
   inputArea.value = ''
+  gtagEvent('ai/send')
 }
 
 // 预设
