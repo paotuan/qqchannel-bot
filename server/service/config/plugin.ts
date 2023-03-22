@@ -12,6 +12,7 @@ import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
+import type { CocCard } from '../card/coc'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -32,7 +33,19 @@ export class PluginManager {
     return {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
-      roll: exp => new DiceRoll(exp).total
+      roll: exp => new DiceRoll(exp).total,
+      getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
+      saveCard: (card: CocCard) => this.wss.cards.saveCard(card),
+      sendMessageToChannel: ({ channelId, guildId, botId }, msg, msgType = 'text') => {
+        const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)
+        if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
+        return channel.sendMessage({ [msgType === 'text' ? 'content' : 'image']: msg })
+      },
+      sendMessageToUser: ({ guildId, botId, userId }, msg, msgType = 'text') => {
+        const user = this.wss.qApis.find(botId)?.guilds.findUser(userId, guildId)
+        if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
+        return user.sendMessage({ [msgType === 'text' ? 'content' : 'image']: msg })
+      }
     } // todo: getItem/setItem
   }
 

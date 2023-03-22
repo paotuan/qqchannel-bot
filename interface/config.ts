@@ -1,7 +1,21 @@
+import type { CocCard } from '../server/service/card/coc'
+import type { UserRole } from '../server/service/dice/utils'
+import type { IMessage } from 'qq-guild-bot'
+
 // region 自定义回复
+export interface ICustomReplyEnv {
+  botId: string
+  guildId: string
+  channelId: string
+  userId: string
+  nick: string
+  at: string
+  userRole: UserRole
+}
+
 export interface ICustomReplyConfigItem {
   weight: number // 权重
-  reply: string | ((env: Record<string, string>, matchGroup: Record<string, string>) => string)
+  reply: string | ((env: ICustomReplyEnv, matchGroup: Record<string, string>) => string | Promise<string>)
 }
 
 export interface ICustomReplyConfig {
@@ -49,6 +63,10 @@ export interface IPluginRegisterContext {
   versionName: string
   versionCode: number
   roll: (exp: string) => number
+  getCard: (env: ICustomReplyEnv) => CocCard | null
+  saveCard: (card: CocCard) => void
+  sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
 }
 
 export interface IPluginConfig {
