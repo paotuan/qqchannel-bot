@@ -239,7 +239,8 @@ export class DiceManager {
   }
 
   private filtered(channelId: string) {
-    return !this.wss.listeningChannels.includes(channelId)
+    // return !this.wss.listeningChannels.includes(channelId)
+    return false
   }
 }
 

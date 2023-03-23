@@ -84,7 +84,7 @@ export class QApi {
       const msg = data.msg as IMessage
       // 过滤掉未监听的频道消息
       const channelId = msg.channel_id
-      if (!this.wss.listeningChannels.includes(channelId)) return
+      // if (!this.wss.listeningChannels.includes(channelId)) return
       // 最近一条消息缓存到 channel 对象中
       const channel = this.guilds.findChannel(channelId, msg.guild_id)
       channel && (channel.lastMessage = data.msg)
