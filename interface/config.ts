@@ -13,9 +13,11 @@ export interface ICustomReplyEnv {
   userRole: UserRole
 }
 
+export type CustomReplyHandler = (env: ICustomReplyEnv, matchGroup: Record<string, string>) => string | Promise<string>
+
 export interface ICustomReplyConfigItem {
   weight: number // 权重
-  reply: string | ((env: ICustomReplyEnv, matchGroup: Record<string, string>) => string | Promise<string>)
+  reply: string | CustomReplyHandler
 }
 
 export interface ICustomReplyConfig {
@@ -24,7 +26,8 @@ export interface ICustomReplyConfig {
   description?: string
   command: string // 触发词
   trigger: 'exact' | 'startWith' | 'include' | 'regex'
-  items: ICustomReplyConfigItem[]
+  items?: ICustomReplyConfigItem[] // 给 gui 使用
+  handler?: CustomReplyHandler // 给插件使用，简化声明
 }
 // endregion
 

@@ -70,16 +70,16 @@ export class CustomReplyManager {
 
   private async parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, msg: IMessage) {
     try {
-      const item = randomReplyItem(processor.items)
+      if (!processor.items && !processor.handler) throw new Error('没有处理自定义回复的方法')
+      const handler = processor.handler ?? randomReplyItem(processor.items!).reply
       // 替换模板
       const username = msg.member.nick || msg.author.username || msg.author.id
       const userId = msg.author.id
       const channelId = msg.channel_id
-      const replyFunc = typeof item.reply === 'function' ? item.reply : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
-        const replyString = item.reply as string // 不是 function 必然是 string
-        if (!replyString) return ''
+      const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
+        if (!handler) return '' // 不是 function 必然是 string
         // 正则的逻辑和 inline roll 一致，但不支持嵌套，没必要
-        return replyString.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
+        return handler.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
           if (_matchGroup[key]) {
             return _matchGroup[key]
           } else if (key in env) {
