@@ -1,6 +1,7 @@
 import type { CocCard } from '../server/service/card/coc'
 import type { UserRole } from '../server/service/dice/utils'
 import type { IMessage } from 'qq-guild-bot'
+import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
 
 // region 自定义回复
 export interface ICustomReplyEnv {
@@ -65,7 +66,7 @@ export interface IRollDeciderConfig {
 export interface IPluginRegisterContext {
   versionName: string
   versionCode: number
-  roll: (exp: string) => number
+  roll: (exp: string) => DiceRoll
   getCard: (env: ICustomReplyEnv) => CocCard | null
   saveCard: (card: CocCard) => void
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
