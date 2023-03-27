@@ -14,7 +14,7 @@ module.exports = (apis) => {
         // 自定义回复命令名称，用于展示
         name: '测试命令',
         // 自定义回复命令描述，用于展示，可以在此处介绍用法
-        description: '测试',
+        description: '使用【.test 技能】进行检定',
         // 自定义回复匹配规则，这个例子匹配所有 .testXXXX 格式的消息
         command: '^test(?<content>.*)',
         trigger: 'regex',
