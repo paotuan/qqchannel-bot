@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { MapIcon, MapPinIcon, PencilIcon } from '@heroicons/vue/24/outline'
-import MapTool from './toolbar/MapTool.vue'
+import MapTool from './toolbar/map/MapTool.vue'
 import TokenTool from './toolbar/TokenTool.vue'
 import TextTool from './toolbar/TextTool.vue'
 import { BasicShape, basicShapes } from './toolbar/utils'
