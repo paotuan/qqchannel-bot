@@ -10,6 +10,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   protected times = 1
   hidden = false
   protected quiet = false
+  protected vsFlag = false
   expression = ''
   description = ''
   protected isAlias = false
@@ -63,11 +64,12 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   private parseFlags(expression: string) {
-    const match = expression.match(/^(h|q|x\d+|\s)*/)
+    const match = expression.match(/^(h|q|v|x\d+|\s)*/)
     if (match) {
       const flags = match[0]
       if (flags.includes('h')) this.hidden = true
       if (flags.includes('q')) this.quiet = true
+      if (flags.includes('v')) this.vsFlag = true
       const timesMatch = flags.match(/x(\d+)/)
       if (timesMatch) {
         const times = parseInt(timesMatch[1], 10)
@@ -133,11 +135,17 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       }
     }
     // 判断是否是展示在一行
+    let result
     if (lines.length === 1 && rollLines.length === 1) {
-      return `${lines[0]} ${rollLines[0]}`
+      result = `${lines[0]} ${rollLines[0]}`
     } else {
-      return [...lines, ...rollLines].join('\n')
+      result = [...lines, ...rollLines].join('\n')
     }
+    // 判断是否需要对抗标记
+    if (this.vsFlag && this.eligibleForOpposedRoll) {
+      result += '\n> 回复本条消息以进行对抗'
+    }
+    return result
   }
 
   override applyToCard(): CocCard[] {
@@ -146,10 +154,13 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const inlineSkills2growth = this.inlineRolls.map(inlineRoll => inlineRoll.skills2growth).flat()
     const uniqSkills = Array.from(new Set([...inlineSkills2growth, ...this.skills2growth]))
     let needUpdate = false
-    uniqSkills.forEach(skill => {
-      const updated = card.markSkillGrowth(skill)
-      needUpdate ||= updated
-    })
+    // 如标记了对抗骰，则根据规则书不标记技能成长
+    if (!this.vsFlag) {
+      uniqSkills.forEach(skill => {
+        const updated = card.markSkillGrowth(skill)
+        needUpdate ||= updated
+      })
+    }
     return needUpdate ? [card] : []
   }
 
@@ -157,7 +168,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   get eligibleForOpposedRoll() {
     if (this.hidden) return false
     if (this.times !== 1) return false
-    return this.decideResults.length !== 0 && this.decideResults[0]
+    return !!(this.decideResults.length !== 0 && this.decideResults[0])
   }
 
   // 用于对抗检定的数据
