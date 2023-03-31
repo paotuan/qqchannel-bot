@@ -35,7 +35,6 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const _requestInner = (body: IMessageForRequest[]) => {
-    // todo report
     const bot = useBotStore()
     return fetch('https://chatapi.paotuan.io/channel-bot', {
       method: 'POST',

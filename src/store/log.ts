@@ -67,6 +67,7 @@ const CSS_TEMPLATE = `
 .chat-item-name { font-weight: bold; }
 .chat-item-time { margin-left: 0.5em; }
 .chat-item-img { max-width: 50% }
+.chat-item .content { white-space: pre-line }
 ${PATTLE.map((colors, i) => `.chat-user-${i} { background: ${colors[0]}; border-left: 4px solid ${colors[1]}; }`).join('\n')}
 `
 
