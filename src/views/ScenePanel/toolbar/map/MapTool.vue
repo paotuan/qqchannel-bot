@@ -41,6 +41,7 @@ const handleFile = (e: Event) => {
     reader.onload = (e) => {
       const imageUrl = e.target!.result as string
       sceneStore.currentMap!.stage.setBackground(imageUrl, scale.value)
+      realUploadBtn.value!.value = ''
     }
     reader.readAsDataURL(files![0])
   }
