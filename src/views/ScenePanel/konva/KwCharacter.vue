@@ -28,6 +28,7 @@ import { ISceneNpc, useSceneStore } from '../../../store/scene'
 import KwImage from './KwImage.vue'
 import Konva from 'konva'
 import { clamp } from 'lodash'
+import { imageUrlToBase64 } from '../../../utils'
 
 const props = defineProps<{ config: ICharacterItem }>()
 const charaType = computed(() => props.config['data-chara-type'])
@@ -63,6 +64,18 @@ const actorInfo = computed(() => {
   }
 })
 
+// 如果是玩家，需要把玩家头像保存为 base64 以供图片导出，否则会有跨域问题
+const userAvatarBase64 = ref('')
+watch(() => userInfo.value?.avatar, async avatarUrl => {
+  if (avatarUrl) {
+    try {
+      userAvatarBase64.value = await imageUrlToBase64(avatarUrl)
+    } catch (e) {
+      console.error('玩家头像获取失败', e)
+    }
+  }
+}, { immediate: true })
+
 // 是 npc 吗
 const npcInfo = computed(() => {
   if (charaType.value === 'npc') {
@@ -77,7 +90,7 @@ const npcInfo = computed(() => {
 // 共通信息
 const avatarUrl = computed(() => {
   if (userInfo.value) {
-    return userInfo.value!.avatar
+    return userAvatarBase64.value
   } else if (npcInfo.value) {
     return npcInfo.value!.avatar
   } else {
