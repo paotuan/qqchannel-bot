@@ -14,7 +14,7 @@
     <div class="-mx-4 overflow-y-auto" style="height: calc(100% - 2.5rem)">
       <div
         v-for="chara in charaList"
-        :key="chara.type === 'actor' ? chara.userId : chara.name"
+        :key="chara.userId"
         class="flex justify-between py-2 px-4 cursor-pointer"
         :class="{ 'bg-secondary/50': sceneStore.currentSelectedCharacter === chara }"
         @click="sceneStore.currentSelectedCharacter = chara"
@@ -54,7 +54,7 @@ const updateSeq = (chara: ISceneActor | ISceneNpc, type: 'seq' | 'seq2', value: 
     cmd: 'ri/set',
     data: {
       type: chara.type,
-      id: chara.type === 'actor' ? chara.userId : chara.name,
+      id: chara.userId,
       seq: chara.seq,
       seq2: chara.seq2,
       [type]: value

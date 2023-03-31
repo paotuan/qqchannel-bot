@@ -67,7 +67,7 @@ const actorInfo = computed(() => {
 const npcInfo = computed(() => {
   if (charaType.value === 'npc') {
     return sceneStore.charactersSorted.find(
-      chara => chara.type === 'npc' && chara.name === charaId.value
+      chara => chara.type === 'npc' && chara.userId === charaId.value
     ) as ISceneNpc | undefined
   } else {
     return null

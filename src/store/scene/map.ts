@@ -102,18 +102,18 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
   }
 
   // 获取场景中的玩家或 npc
-  const findCharacter = (type: 'actor' | 'npc', idOrName: string) => {
+  const findCharacter = (type: 'actor' | 'npc', userId: string) => {
     return items.find(item =>
       item.name === 'character' &&
       (item as ICharacterItem)['data-chara-type'] === type &&
-      (item as ICharacterItem)['data-chara-id'] === idOrName
+      (item as ICharacterItem)['data-chara-id'] === userId
     )
   }
 
   // 添加玩家或 npc 标志。如已经存在，则选中它
-  const addCharacter = (type: 'actor' | 'npc', idOrName: string) => {
+  const addCharacter = (type: 'actor' | 'npc', userId: string) => {
     // 判断是否已经存在了
-    const exist = findCharacter(type, idOrName)
+    const exist = findCharacter(type, userId)
     if (exist) {
       selectNodeIds.value = [exist.id!]
     } else {
@@ -126,7 +126,7 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
         rotation: 0,
         name: 'character',
         'data-chara-type': type,
-        'data-chara-id': idOrName
+        'data-chara-id': userId
       }
       items.push(token)
       nextTick(() => {
@@ -136,8 +136,8 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
   }
 
   // 删除玩家或 npc
-  const removeCharacter = (type: 'actor' | 'npc', idOrName: string) => {
-    const exist = findCharacter(type, idOrName)
+  const removeCharacter = (type: 'actor' | 'npc', userId: string) => {
+    const exist = findCharacter(type, userId)
     if (exist?.id) {
       destroyNode(exist.id)
     }
