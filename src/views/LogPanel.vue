@@ -6,7 +6,7 @@
           <Bars3Icon class="w-4 h-8 cursor-move invisible group-hover:visible flex-none sortable-handle"/>
           <span class="font-bold flex-none" :title="log.userId">{{ nickOf(log) }}</span>
           <template v-if="log.msgType === 'text'">
-            <span class="flex-grow" :title="log.timestamp">{{ log.content }}</span>
+            <span class="flex-grow whitespace-pre-line" :title="log.timestamp">{{ log.content }}</span>
           </template>
           <template v-else>
             <div class="flex-grow">
