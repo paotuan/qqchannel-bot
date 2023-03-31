@@ -18,12 +18,14 @@
         <TrashIcon class="w-6 h-6" />
       </button>
     </template>
+    <MapGenerate @generate="onGenerateMap" />
   </div>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { PhotoIcon, TrashIcon } from '@heroicons/vue/24/outline'
-import { useSceneStore } from '../../../store/scene'
+import { useSceneStore } from '../../../../store/scene'
+import MapGenerate from './MapGenerate.vue'
 
 const realUploadBtn = ref<HTMLInputElement>()
 const scale = ref(0.5)
@@ -56,5 +58,9 @@ const uploadBackground = () => {
 const clearBackground = () => {
   sceneStore.currentMap!.stage.setBackground(null)
   scale.value = 0.5
+}
+
+const onGenerateMap = (value: string) => {
+  sceneStore.currentMap!.stage.setBackground(value, scale.value)
 }
 </script>
