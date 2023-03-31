@@ -74,7 +74,7 @@ const keydownEnter = () => {
   if (firstOption) {
     select(firstOption)
   } else {
-    sceneStore.addCharacter({ type: 'npc', name: keyword.value.trim(), seq: NaN, seq2: NaN, embedCard: { hp: NaN, maxHp: NaN, ext: '' } })
+    sceneStore.addCharacter({ type: 'npc', userId: keyword.value.trim(), seq: NaN, seq2: NaN, embedCard: { hp: NaN, maxHp: NaN, ext: '' } })
     blur()
   }
 }

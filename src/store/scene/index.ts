@@ -28,7 +28,7 @@ export interface ISceneActor {
 
 export interface ISceneNpc {
   type: 'npc'
-  name: string // npc 目前以 name 为唯一标识
+  userId: string // npc 唯一标识，同时也用作展示
   avatar?: string // npc 图片，可上传
   seq: number
   seq2: number
@@ -125,15 +125,7 @@ export const useSceneStore = defineStore('scene', () => {
 
   // 添加人物，如果人物已存在，则改为选中该人物以提示用户
   const addCharacter = (chara: ISceneActor | ISceneNpc) => {
-    const existCharacter = characters.find(exist => {
-      if (chara.type === 'actor' && exist.type === 'actor' && chara.userId === exist.userId) {
-        return true // 相同的 actor
-      } else if (chara.type === 'npc' && exist.type === 'npc' && chara.name === exist.name) {
-        return true // 相同的 npc
-      } else {
-        return false
-      }
-    })
+    const existCharacter = characters.find(exist => chara.type === exist.type && chara.userId === exist.userId)
     if (existCharacter) {
       currentSelectedCharacter.value = existCharacter
     } else {
@@ -154,7 +146,7 @@ export const useSceneStore = defineStore('scene', () => {
       }
       // 移除该人物在地图中的 token
       mapList.value.forEach(map => {
-        map.stage.removeCharacter(chara.type, chara.type === 'actor' ? chara.userId : chara.name)
+        map.stage.removeCharacter(chara.type, chara.userId)
       })
     }
   }
@@ -163,13 +155,13 @@ export const useSceneStore = defineStore('scene', () => {
   const updateCharacterRiList = (list: IRiItem[]) => {
     // 1. 删除不存在的角色
     const charas2delete = characters.filter(chara => {
-      const exist = list.find(ri => ri.type === chara.type && ri.id === (chara.type === 'actor' ? chara.userId : chara.name))
+      const exist = list.find(ri => ri.type === chara.type && ri.id === chara.userId)
       return !exist
     })
     charas2delete.forEach(chara => deleteCharacter(chara))
     // 2. 更新或添加角色
     list.forEach(ri => {
-      const exist = characters.find(chara => ri.type === chara.type && ri.id === (chara.type === 'actor' ? chara.userId : chara.name))
+      const exist = characters.find(chara => ri.type === chara.type && ri.id === chara.userId)
       if (exist) {
         exist.seq = ri.seq
         exist.seq2 = ri.seq2
@@ -177,7 +169,7 @@ export const useSceneStore = defineStore('scene', () => {
         if (ri.type === 'actor') {
           characters.push({ type: 'actor', userId: ri.id, seq: ri.seq, seq2: ri.seq2 })
         } else {
-          characters.push({ type: 'npc', name: ri.id, seq: ri.seq, seq2: ri.seq2, embedCard: { hp: NaN, maxHp: NaN, ext: '' } })
+          characters.push({ type: 'npc', userId: ri.id, seq: ri.seq, seq2: ri.seq2, embedCard: { hp: NaN, maxHp: NaN, ext: '' } })
         }
       }
     })
@@ -187,21 +179,21 @@ export const useSceneStore = defineStore('scene', () => {
   const duplicateNpc = (chara: ISceneNpc) => {
     const dup = cloneDeep(chara)
     // 改名，提取后面的数字
-    const matchNum = chara.name.match(/(\d+)$/)
-    const nameWithoutNum = matchNum ? chara.name.slice(0, matchNum.index) : chara.name // 去掉后面的数字
+    const matchNum = chara.userId.match(/(\d+)$/)
+    const nameWithoutNum = matchNum ? chara.userId.slice(0, matchNum.index) : chara.userId // 去掉后面的数字
     const pattern = new RegExp(`^${escapeRegExp(nameWithoutNum)}(\\d+)$`)
     // 找到当前列表中符合 名字+数字 的 npc 中，最大的数字
     let maxNum = 1
     characters.forEach(exist => {
       if (exist.type === 'npc') {
-        const match = exist.name.match(pattern)
+        const match = exist.userId.match(pattern)
         if (match) {
           const num = parseInt(match[1])
           maxNum = Math.max(num, maxNum)
         }
       }
     })
-    dup.name = nameWithoutNum + (maxNum + 1)
+    dup.userId = nameWithoutNum + (maxNum + 1)
     // 加入列表
     characters.push(dup)
     // 同步服务端
@@ -212,9 +204,9 @@ export const useSceneStore = defineStore('scene', () => {
   const currentCardNpcName = ref<string | null>(null)
   const currentCardNpc = computed<ISceneNpc | null>({
     get: () => currentCardNpcName.value
-      ? characters.find(chara => chara.type === 'npc' && chara.name === currentCardNpcName.value) as ISceneNpc
+      ? characters.find(chara => chara.type === 'npc' && chara.userId === currentCardNpcName.value) as ISceneNpc
       : null,
-    set: (value: ISceneNpc | null) => (currentCardNpcName.value = value ? value.name : null)
+    set: (value: ISceneNpc | null) => (currentCardNpcName.value = value ? value.userId : null)
   })
 
   // 发送地图图片指示器
@@ -286,7 +278,7 @@ function addCharaSyncRiList(chara: ISceneActor | ISceneNpc) {
     cmd: 'ri/set',
     data: {
       type: chara.type,
-      id: chara.type === 'actor' ? chara.userId : chara.name,
+      id: chara.userId,
       seq: chara.seq,
       seq2: chara.seq2
     }

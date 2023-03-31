@@ -3,12 +3,12 @@
     <div class="avatar" :class="{ 'placeholder': !props.chara.avatar }" @click.stop="uploadAvatar">
       <template v-if="props.chara.avatar">
         <div class="w-12 rounded-full">
-          <img :src="props.chara.avatar" :alt="props.chara.name" />
+          <img :src="props.chara.avatar" :alt="props.chara.userId" />
         </div>
       </template>
       <template v-else>
         <div class="w-12 rounded-full bg-neutral-focus text-neutral-content">
-          <span>{{ props.chara.name.slice(0, 2) }}</span>
+          <span>{{ props.chara.userId.slice(0, 2) }}</span>
         </div>
       </template>
       <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />
@@ -16,7 +16,7 @@
       <CharacterHpBar :hp="props.chara.embedCard.hp" :max-hp="props.chara.embedCard.maxHp" />
     </div>
     <div class="flex flex-col justify-between">
-      <div class="font-bold max-w-[7rem] truncate">{{ props.chara.name }}</div>
+      <div class="font-bold max-w-[7rem] truncate">{{ props.chara.userId }}</div>
       <span class="flex gap-1">
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="showNpcCard">
           <DocumentTextIcon class="h-4 w-4" />
@@ -46,7 +46,7 @@ const props = defineProps<{ chara: ISceneNpc }>()
 
 const sceneStore = useSceneStore()
 const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
-const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.name)
+const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.userId)
 
 // 上传 npc 头像
 const realUploadBtn = ref<HTMLInputElement>()
@@ -72,6 +72,6 @@ const deleteCharacter = () => {
   sceneStore.deleteCharacter(props.chara)
   // 同步服务端先攻列表
   // 之所以放在这里，是为了避免放在 store deleteCharacter 中潜在的套娃风险
-  ws.send<IRiDeleteReq>({ cmd: 'ri/delete', data: { id: props.chara.name, type: 'npc' } })
+  ws.send<IRiDeleteReq>({ cmd: 'ri/delete', data: { id: props.chara.userId, type: 'npc' } })
 }
 </script>

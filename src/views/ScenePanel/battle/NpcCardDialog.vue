@@ -22,6 +22,6 @@ import { computed } from 'vue'
 import SeqInput from './SeqInput.vue'
 
 const sceneStore = useSceneStore()
-const currentNpcName = computed(() => sceneStore.currentCardNpc?.name || '')
+const currentNpcName = computed(() => sceneStore.currentCardNpc?.userId || '')
 const currentNpcnn = computed(() => sceneStore.currentCardNpc!)
 </script>
