@@ -19,3 +19,18 @@ export function gtagEvent(eventName: string, params: Record<string, any> = {}, g
     gtag('event', eventName, params)
   }
 }
+
+// https://stackoverflow.com/questions/44698967/requesting-blob-images-and-transforming-to-base64-with-fetch-api
+export async function imageUrlToBase64(url: string) {
+  const response = await fetch(url)
+  const blob = await response.blob()
+  return new Promise<string>((onSuccess, onError) => {
+    try {
+      const reader = new FileReader()
+      reader.onload = e => onSuccess(e.target!.result as string)
+      reader.readAsDataURL(blob)
+    } catch(e) {
+      onError(e)
+    }
+  })
+}
