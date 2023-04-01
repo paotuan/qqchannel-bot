@@ -12,7 +12,7 @@
       <CharacterList />
       <div class="flex gap-2 justify-between">
         <button
-            class="btn btn-secondary w-full"
+            class="btn btn-secondary w-1/2"
             :class="{ loading: sceneStore.sendMapImageSignal }"
             @click="sceneStore.sendMapImageSignal = true"
         >
