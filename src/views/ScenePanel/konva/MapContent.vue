@@ -15,6 +15,10 @@
         />
         <KwTransformer />
       </KonvaLayer>
+      <!-- grid -->
+      <KonvaLayer>
+        <KwGrid :size="stageSize" />
+      </KonvaLayer>
     </KwStage>
   </div>
 </template>
@@ -26,6 +30,7 @@ import KwStage from './KwStage.vue'
 import KwText from './KwText.vue'
 import KwTransformer from './KwTransformer.vue'
 import KwCharacter from './KwCharacter.vue'
+import KwGrid from './KwGrid.vue'
 
 const sceneStore = useSceneStore()
 const currentMapData = computed(() => sceneStore.currentMap!.stage)
