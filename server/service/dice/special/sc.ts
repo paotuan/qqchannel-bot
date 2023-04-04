@@ -35,7 +35,8 @@ export class ScDiceRoll extends BasePtDiceRoll {
       this.rollScResult = this.decide(this.rollSc.total, scEntry)
       if (this.rollScResult) {
         if (this.rollScResult.level === SuccessLevel.WORST) {
-          this.rollLoss = new DiceRoll('99')
+          const maxLoss = new DiceRoll(this.expression2).maxTotal
+          this.rollLoss = new DiceRoll(String(maxLoss))
         } else {
           this.rollLoss = new DiceRoll(this.rollScResult.success ? this.expression1 : this.expression2)
         }
