@@ -28,11 +28,18 @@ import { useSceneStore } from '../../../../store/scene'
 import MapGenerate from './MapGenerate.vue'
 
 const realUploadBtn = ref<HTMLInputElement>()
-const scale = ref(0.5)
 
 // 背景图片数据
 const sceneStore = useSceneStore()
 const backgroundData = computed(() => sceneStore.currentMap!.stage.background)
+const scale = computed({
+  get() {
+    return backgroundData.value?.scaleX ?? 0.5 // background 的 scaleX 和 scaleY 是相等的
+  },
+  set(value) {
+    sceneStore.currentMap!.stage.setBackgroundScale(value)
+  }
+})
 
 const handleFile = (e: Event) => {
   const files = (e.target as HTMLInputElement).files
@@ -49,7 +56,6 @@ const handleFile = (e: Event) => {
 
 const onScaleChange = (e: Event) => {
   scale.value = Number((e.target as HTMLInputElement).value)
-  sceneStore.currentMap!.stage.setBackgroundScale(scale.value)
 }
 
 const uploadBackground = () => {
@@ -58,10 +64,9 @@ const uploadBackground = () => {
 
 const clearBackground = () => {
   sceneStore.currentMap!.stage.setBackground(null)
-  scale.value = 0.5
 }
 
 const onGenerateMap = (value: string) => {
-  sceneStore.currentMap!.stage.setBackground(value, scale.value)
+  sceneStore.currentMap!.stage.setBackground(value)
 }
 </script>
