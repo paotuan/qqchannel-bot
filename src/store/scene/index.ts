@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useIndexedDBStore } from '../../utils/db'
 import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
-import { IStageData, useStage } from './map'
+import { getDefaultStageData, IStageData, useStage } from './map'
 import type { IRiItem } from '../../../interface/common'
 import ws from '../../api/ws'
 import type { IRiSetReq } from '../../../interface/common'
@@ -83,7 +83,7 @@ export const useSceneStore = defineStore('scene', () => {
   ;(async () => {
     try {
       const handler = await useIndexedDBStore<ISceneMap>('scene-map')
-      const list = await handler.getAll() as ISceneMap[]
+      const list = handleSceneMapUpgrade(await handler.getAll()) // 处理版本升级逻辑
       if (list.length > 0) {
         list.sort((a, b) => a.createAt - b.createAt)
         list.forEach(item => {
@@ -233,6 +233,17 @@ export const useSceneStore = defineStore('scene', () => {
     sendMapImageSignal
   }
 })
+
+// map 数据结构版本升级逻辑。理论上放这里和放 db 层都行。这里的话更内聚一点吧
+function handleSceneMapUpgrade(data: any[]): ISceneMap[] {
+  return data.map(item => {
+    // 1. stageData 增加 grid
+    if (!item.data.grid) {
+      item.data.grid = getDefaultStageData().grid
+    }
+    return item
+  })
+}
 
 async function saveMapInDB(item: ISceneMap) {
   // 放在这里执行，确保每次保存的是 stage 的最新状态

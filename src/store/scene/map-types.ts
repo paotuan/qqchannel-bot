@@ -100,3 +100,12 @@ export interface ITextEditConfig {
   fill: string
   stroke: string
 }
+
+// 网格数据兼配置项
+export interface IGridConfig {
+  show: boolean
+  gap: number
+  stroke: string
+  xOffset: number
+  yOffset: number
+}
