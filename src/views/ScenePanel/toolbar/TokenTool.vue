@@ -15,24 +15,24 @@
     </div>
     <div v-show="selectedToken">
       <div class="flex items-center gap-2 h-6">
-        <label for="token-tool-fill">背景色</label>
+        <label for="token-tool-fill" class="label-text font-bold">背景色</label>
         <input :value="shapeData.fill" type="color" id="token-tool-fill" name="fill" @input="editFillColor">
       </div>
       <div class="flex items-center gap-2 h-6">
-        <label for="token-tool-stroke">边框色</label>
+        <label for="token-tool-stroke" class="label-text font-bold">边框色</label>
         <input :value="shapeData.stroke" type="color" id="token-tool-stroke" name="stroke" @input="editStrokeColor">
       </div>
     </div>
     <div v-show="selectedToken && selectedToken.name === 'polygon'">
-      <span>边数</span>
+      <span class="label-text font-bold">边数</span>
       <input :value="shapeData.polygonSides" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editPolygonSides" />
     </div>
     <div v-show="selectedToken && selectedToken.name === 'wedge'">
-      <span>角度</span>
+      <span class="label-text font-bold">角度</span>
       <input :value="shapeData.wedgeAngle" type="range" min="10" max="360" step="1" class="range range-xs range-secondary" @input="editWedgeAngle" />
     </div>
     <div v-show="selectedToken && selectedToken.name === 'star'">
-      <span>角数</span>
+      <span class="label-text font-bold">角数</span>
       <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editStarPoints" />
     </div>
     <button class="btn btn-secondary gap-2" @click.stop="uploadCustomToken">
