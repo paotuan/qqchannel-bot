@@ -5,7 +5,7 @@ import type {
   ICircleToken,
   IRectToken,
   IPolygonToken,
-  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem
+  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem, IGridConfig
 } from './map-types'
 import { ICustomToken, ITextEditConfig, IToken, ITokenEditConfig } from './map-types'
 import { nanoid } from 'nanoid/non-secure'
@@ -16,15 +16,31 @@ export interface IStageData {
   y: number
   background: IStageBackground | null
   items: IBaseStageItem[]
+  grid: IGridConfig
 }
 
+export const getDefaultStageData: () => IStageData = () => ({
+  x: 0,
+  y: 0,
+  background: null,
+  items: [],
+  grid: {
+    show: false,
+    gap: 40,
+    stroke: '#ffff00',
+    xOffset: 0,
+    yOffset: 0
+  }
+})
+
 // initial value, 相当于构造函数
-export function useStage(data: IStageData = { x: 0, y: 0, background: null, items: [] }) {
+export function useStage(data: IStageData = getDefaultStageData()) {
   const x = ref(data.x)
   const y = ref(data.y)
   const background = ref<IStageBackground | null>(data.background)
   const items = reactive<IBaseStageItem[]>(data.items)
   const selectNodeIds = ref<string[]>([]) // transformer 选中的 node id
+  const grid = reactive<IGridConfig>(data.grid)
 
   // 设置场景背景
   const setBackground = (src: string | null, scale = 0.5) => {
@@ -183,12 +199,13 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
     selectNodeIds.value = []
   }
 
-  const toJson = () => ({
+  const toJson: () => IStageData = () => ({
     x: x.value,
     y: y.value,
     background: toRaw(background.value),
-    items: toRaw(items)
-  } as IStageData)
+    items: toRaw(items),
+    grid: toRaw(grid)
+  })
 
   // 统一套一层 reactive 以获得正确的类型推断
   // 不然在外面被 reactive 包裹后发生 ref 解包，导致 ReturnType<typeof useStage> 推断出的类型和实际不一致
@@ -200,6 +217,7 @@ export function useStage(data: IStageData = { x: 0, y: 0, background: null, item
     setBackgroundScale,
     selectNodeIds,
     items,
+    grid,
     addToken,
     addCustomToken,
     addTextLabel,
