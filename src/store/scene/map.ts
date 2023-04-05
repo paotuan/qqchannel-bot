@@ -27,7 +27,7 @@ export const getDefaultStageData: () => IStageData = () => ({
   grid: {
     show: false,
     gap: 40,
-    stroke: '#ffff00',
+    stroke: '#f5f5f5',
     xOffset: 0,
     yOffset: 0
   }

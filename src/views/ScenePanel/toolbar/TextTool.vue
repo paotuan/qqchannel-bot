@@ -6,11 +6,11 @@
     <textarea :value="textData.text" class="textarea textarea-bordered h-12" @input="editText" />
     <div>
       <div class="flex items-center gap-2 h-6">
-        <label for="text-tool-fill">背景色</label>
+        <label for="text-tool-fill" class="label-text font-bold">背景色</label>
         <input :value="textData.fill" type="color" id="text-tool-fill" name="fill" @input="editFillColor">
       </div>
       <div class="flex items-center gap-2 h-6">
-        <label for="text-tool-stroke">前景色</label>
+        <label for="text-tool-stroke" class="label-text font-bold">前景色</label>
         <input :value="textData.stroke" type="color" id="text-tool-stroke" name="stroke" @input="editStrokeColor">
       </div>
     </div>

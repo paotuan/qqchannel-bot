@@ -11,7 +11,7 @@
         <PhotoIcon class="w-6 h-6" />
       </button>
       <div>
-        <span>缩放</span>
+        <span class="label-text font-bold">缩放</span>
         <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs range-secondary" @input="onScaleChange" />
       </div>
       <button class="btn btn-square btn-error" @click="clearBackground">

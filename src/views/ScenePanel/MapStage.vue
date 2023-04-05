@@ -8,6 +8,7 @@
         <div class="px-8 py-1 mx-auto bg-base-100/50 rounded-3xl">
           <div>
             <MapTool v-show="toolbarItem === 'map'" />
+            <GridTool v-show="toolbarItem === 'grid'" />
             <TokenTool v-show="toolbarItem === 'token'" />
             <TextTool v-show="toolbarItem === 'text'" />
           </div>
@@ -18,6 +19,13 @@
               @click="selectToolbar('map')"
             >
               <MapIcon class="h-6 w-6" />
+            </button>
+            <button
+                class="btn btn-circle border border-base-300"
+                :class="toolbarItem !== 'grid' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+                @click="selectToolbar('grid')"
+            >
+              <HashtagIcon class="h-6 w-6" />
             </button>
             <button
               class="btn btn-circle border border-base-300"
@@ -48,7 +56,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { MapIcon, MapPinIcon, PencilIcon } from '@heroicons/vue/24/outline'
+import { MapIcon, MapPinIcon, PencilIcon, HashtagIcon } from '@heroicons/vue/24/outline'
 import MapTool from './toolbar/map/MapTool.vue'
 import TokenTool from './toolbar/TokenTool.vue'
 import TextTool from './toolbar/TextTool.vue'
@@ -56,13 +64,14 @@ import { BasicShape, basicShapes } from './toolbar/utils'
 import { useSceneStore } from '../../store/scene'
 import MapBasicInfo from './MapBasicInfo.vue'
 import MapContent from './konva/MapContent.vue'
+import GridTool from './toolbar/grid/GridTool.vue'
 
 // scene store
 const sceneStore = useSceneStore()
 const currentMap = computed(() => sceneStore.currentMap)
 
 // 当前选中的 toolbar item
-type ToolbarItem = 'map' | 'token' | 'text' | null
+type ToolbarItem = 'map' | 'token' | 'text' | 'grid' | null
 const toolbarItem = ref<ToolbarItem>(null)
 const selectToolbar = (item: ToolbarItem | null) => toolbarItem.value = item === toolbarItem.value ? null : item
 
