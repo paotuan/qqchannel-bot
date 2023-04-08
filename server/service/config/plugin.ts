@@ -12,6 +12,7 @@ import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
+import type { CocCard } from '../card/coc'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -32,7 +33,19 @@ export class PluginManager {
     return {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
-      roll: exp => new DiceRoll(exp).total
+      roll: exp => new DiceRoll(exp),
+      getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
+      saveCard: (card: CocCard) => this.wss.cards.saveCard(card),
+      sendMessageToChannel: ({ channelId, guildId, botId }, msg, msgType = 'text') => {
+        const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)
+        if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
+        return channel.sendMessage({ [msgType === 'text' ? 'content' : 'image']: msg })
+      },
+      sendMessageToUser: ({ guildId, botId, userId }, msg, msgType = 'text') => {
+        const user = this.wss.qApis.find(botId)?.guilds.findUser(userId, guildId)
+        if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
+        return user.sendMessage({ [msgType === 'text' ? 'content' : 'image']: msg })
+      }
     } // todo: getItem/setItem
   }
 
@@ -44,10 +57,10 @@ export class PluginManager {
       fs.mkdirSync(PLUGIN_DIR)
     }
     // 读取当前已有插件列表
-    const pluginNames = fs
+    const pluginNames = new Set(fs
       .readdirSync(PLUGIN_DIR, { withFileTypes: true })
       .filter(d => d.isDirectory())
-      .map(d => d.name)
+      .map(d => d.name))
     // 内置插件列表
     // 此处 ncc 打包时会智能地打到 dist/server/plugins 下，pkg 打包时通过 assets 配置保留文件，因此路径比较 tricky 地保持了一致
     const internalPluginNames = fs
@@ -55,13 +68,14 @@ export class PluginManager {
       .filter(d => d.isDirectory())
       .map(d => d.name)
     // 如有新的内置插件不在已有插件列表，则复制过去
+    // 不每次复制是为了可以保留用户对已有插件的魔改。但 development 时每次都复制以提升开发体验
     internalPluginNames.forEach(pluginName => {
-      if (!pluginNames.includes(pluginName)) {
+      if (!pluginNames.has(pluginName) || process.env.NODE_ENV === 'development') {
         copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, pluginName), path.join(PLUGIN_DIR, pluginName))
-        pluginNames.push(pluginName) // 记录到插件列表里去
+        pluginNames.add(pluginName) // 记录到插件列表里去
       }
     })
-    return pluginNames
+    return Array.from(pluginNames)
   }
 
   private loadPlugins(pluginNames: string[]) {
