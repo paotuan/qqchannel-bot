@@ -137,9 +137,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     // 判断是否是展示在一行
     let result
     if (lines.length === 1 && rollLines.length === 1) {
-      result = `${lines[0]} ${rollLines[0]}`
+      result = `${lines[0]} ${rollLines[0]}`.trim()
     } else {
-      result = [...lines, ...rollLines].join('\n')
+      result = [...lines, ...rollLines].map(line => line.trim()).join('\n')
     }
     // 判断是否需要对抗标记
     if (this.vsFlag && this.eligibleForOpposedRoll) {
