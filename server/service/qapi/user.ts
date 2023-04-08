@@ -37,11 +37,13 @@ export class User {
       if (!userGuildId) {
         userGuildId = await this.fetchUserGuildId()
       }
-      await this.api.qqClient.directMessageApi.postDirectMessage(userGuildId, msg)
+      const res = await this.api.qqClient.directMessageApi.postDirectMessage(userGuildId, msg)
       console.log('[Message] 私信发送成功 ' + msg.content)
       this.userGuildId = userGuildId // 测试多次调用返回结果是一样的，可以缓存
+      return res.data
     } catch (e) {
       console.error('[Message] 私信消息发送失败', e)
+      return null
     }
   }
 

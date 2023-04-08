@@ -10,7 +10,7 @@ import { StDiceRoll } from './special/st'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
-export enum SuccessLevel {
+export const enum SuccessLevel {
   WORST = -2,
   FAIL = -1,
   REGULAR_SUCCESS = 1,

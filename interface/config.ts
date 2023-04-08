@@ -1,7 +1,24 @@
+import type { CocCard } from '../server/service/card/coc'
+import type { UserRole } from '../server/service/dice/utils'
+import type { IMessage } from 'qq-guild-bot'
+import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
+
 // region 自定义回复
+export interface ICustomReplyEnv {
+  botId: string
+  guildId: string
+  channelId: string
+  userId: string
+  nick: string
+  at: string
+  userRole: UserRole
+}
+
+export type CustomReplyHandler = (env: ICustomReplyEnv, matchGroup: Record<string, string>) => string | Promise<string>
+
 export interface ICustomReplyConfigItem {
   weight: number // 权重
-  reply: string | ((env: Record<string, string>, matchGroup: Record<string, string>) => string)
+  reply: string | CustomReplyHandler
 }
 
 export interface ICustomReplyConfig {
@@ -10,7 +27,8 @@ export interface ICustomReplyConfig {
   description?: string
   command: string // 触发词
   trigger: 'exact' | 'startWith' | 'include' | 'regex'
-  items: ICustomReplyConfigItem[]
+  items?: ICustomReplyConfigItem[] // 给 gui 使用
+  handler?: CustomReplyHandler // 给插件使用，简化声明
 }
 // endregion
 
@@ -48,7 +66,11 @@ export interface IRollDeciderConfig {
 export interface IPluginRegisterContext {
   versionName: string
   versionCode: number
-  roll: (exp: string) => number
+  roll: (exp: string) => DiceRoll
+  getCard: (env: ICustomReplyEnv) => CocCard | null
+  saveCard: (card: CocCard) => void
+  sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
 }
 
 export interface IPluginConfig {

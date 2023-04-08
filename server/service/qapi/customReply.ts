@@ -4,6 +4,7 @@ import type { IMessage } from 'qq-guild-bot'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
 import { convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
+import { ICustomReplyEnv } from '../../../interface/config'
 
 export class CustomReplyManager {
   private readonly api: QApi
@@ -56,7 +57,7 @@ export class CustomReplyManager {
     for (const processor of processors) {
       const matchGroups = isMatch(processor, fullExp)
       if (!matchGroups) continue
-      const reply = this.parseMessage(processor, matchGroups, msg)
+      const reply = await this.parseMessage(processor, matchGroups, msg)
       // 发消息
       if (reply) {
         channel.sendMessage({ content: reply, msg_id: msg.id })
@@ -67,33 +68,33 @@ export class CustomReplyManager {
     return false
   }
 
-  private parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, msg: IMessage) {
+  private async parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, msg: IMessage) {
     try {
-      const item = randomReplyItem(processor.items)
+      if (!processor.items && !processor.handler) throw new Error('没有处理自定义回复的方法')
+      const handler = processor.handler ?? randomReplyItem(processor.items!).reply
       // 替换模板
       const username = msg.member.nick || msg.author.username || msg.author.id
       const userId = msg.author.id
       const channelId = msg.channel_id
-      const replyFunc = typeof item.reply === 'function' ? item.reply : ((env: Record<string, string>, _matchGroup: Record<string, string>) => {
-        const replyString = item.reply as string // 不是 function 必然是 string
-        if (!replyString) return ''
+      const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
+        if (!handler) return '' // 不是 function 必然是 string
         // 正则的逻辑和 inline roll 一致，但不支持嵌套，没必要
-        return replyString.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
+        return handler.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
           if (_matchGroup[key]) {
             return _matchGroup[key]
-          } else if (env[key]) {
-            return env[key]
+          } else if (key in env) {
+            return env[key as keyof ICustomReplyEnv]
           } else {
             return key
           }
         })
       })
-      const env: Record<string, string> = { nick: username, at: `<@!${msg.author.id}>` }
-      const template = replyFunc(env, matchGroups)
+      const userRole = convertRoleIds(msg.member.roles)
+      const env: ICustomReplyEnv = { botId: this.api.appid, channelId: msg.channel_id, guildId: msg.guild_id, userId: msg.author.id, userRole, nick: username, at: `<@!${msg.author.id}>` }
+      const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
       const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
       const config = this.wss.config.getChannelConfig(channelId)
-      const userRole = convertRoleIds(msg.member.roles)
       const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
       return parseTemplate(template, context, [])
     } catch (e: any) {
