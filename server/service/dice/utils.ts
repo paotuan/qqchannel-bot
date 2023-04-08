@@ -53,8 +53,8 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
     if (abilityExpression) {
       debug(depth, '递归解析 ability:', key, '=', abilityExpression)
       const parsedAbility = parseTemplate(abilityExpression, context, history, depth + 1)
-      const dice = new InlineDiceRoll(parsedAbility.trim(), context).roll()
-      dice.description = key // 将 key 作为 inline dice 的 description，优化 output 展示
+      // 将 key 拼接到表达式后面，这样 key 就会自然地被解析为 description 输出，优化 output 展示
+      const dice = new InlineDiceRoll(`${parsedAbility.trim()} ${key}`, context).roll()
       debug(depth, '求值 ability:', dice.total)
       history.push(dice) // 计入 history
       return dice.hidden ? '' : String(dice.total)
@@ -126,6 +126,20 @@ export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | 
     tempValue = parseInt(_tempValue, 10) // tempValue 不存在返回 NaN
   }
   return [exp, desc, tempValue]
+}
+
+export function parseDescriptions2(rawExp: string) {
+  // parse exp & desc
+  let exp = '', desc = rawExp.trim()
+  const index = desc.search(/[\p{Unified_Ideograph}\s]/u)
+  const [_exp, _desc = ''] = index < 0 ? [desc] : [desc.slice(0, index), desc.slice(index)]
+  exp = _exp
+  desc = _desc.trim()
+  // parse (multi) skills and tempValue from desc
+  const regex = /(?<skill>[^0-9\s,，;；]+)((?<tempValue>\d+)|[\s,，;；]+)/g
+  const matchResult = [...desc.matchAll(regex)].map(entry => ({ skill: entry.groups!.skill, tempValue: Number(entry.groups!.tempValue) }))
+  // todo undefined -> NaN
+  return { exp, skills: matchResult }
 }
 
 /**
