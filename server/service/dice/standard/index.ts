@@ -151,8 +151,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   override applyToCard(): CocCard[] {
     const card = this.selfCard
     if (!card) return []
-    const inlineSkills2growth = this.inlineRolls.map(inlineRoll => inlineRoll.skills2growth).flat()
-    const uniqSkills = Array.from(new Set([...inlineSkills2growth, ...this.skills2growth]))
+    // const inlineSkills2growth = this.inlineRolls.map(inlineRoll => inlineRoll.skills2growth).flat()
+    // const uniqSkills = Array.from(new Set([...inlineSkills2growth, ...this.skills2growth]))
+    const uniqSkills = Array.from(new Set(this.skills2growth))
     let needUpdate = false
     // 如标记了对抗骰，则根据规则书不标记技能成长
     if (!this.vsFlag) {
