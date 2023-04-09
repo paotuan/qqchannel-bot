@@ -136,9 +136,8 @@ export function parseDescriptions2(rawExp: string) {
   exp = _exp
   desc = _desc.trim()
   // parse (multi) skills and tempValue from desc
-  const regex = /(?<skill>[^0-9\s,，;；]+)((?<tempValue>\d+)|[\s,，;；]+)/g
-  const matchResult = [...desc.matchAll(regex)].map(entry => ({ skill: entry.groups!.skill, tempValue: Number(entry.groups!.tempValue) }))
-  // todo undefined -> NaN
+  const regex = /(?<skill>[^0-9\s,，;；]+)\s*((?<tempValue>\d+)|[\s,，;；]*)/g
+  const matchResult = [...desc.matchAll(regex)].map(entry => ({ skill: entry.groups!.skill, tempValue: Number(entry.groups!.tempValue) })) // NaN 代表没设
   return { exp, skills: matchResult }
 }
 

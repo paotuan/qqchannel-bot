@@ -16,12 +16,8 @@ function initClass() {
   return class InlineDiceRoll extends StandardDiceRoll {
 
     private get diceRoll() {
-      return this.rolls[0]
+      return this.rolls[0].roll
     }
-
-    // private get decideResult() {
-    //   return this.decideResults[0]
-    // }
 
     get total() {
       return this.diceRoll!.total // 如果单骰（times===1）就是结果。如果多连骰，则取第一个结果

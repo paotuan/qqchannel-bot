@@ -8,9 +8,9 @@ export class OpposedDiceRoll extends StandardDiceRoll {
 
   override parseDescriptions(expression: string) {
     super.parseDescriptions(expression)
-    // 回复消息进行对抗检定时，如果没有技能名描述，就认为是取相同的技能进行对抗
-    if (!this.description) {
-      this.description = this.context.opposedRoll!.description
+    // 回复消息进行对抗检定时，如果没有指定技能名描述，就认为是取相同的技能进行对抗
+    if (this.skillsForTest.length === 0) {
+      this.skillsForTest.push(this.context.opposedRoll!.skillsForTest[0])
     }
   }
 

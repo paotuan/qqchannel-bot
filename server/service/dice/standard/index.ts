@@ -1,9 +1,20 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { parseDescriptions, SuccessLevel, parseTemplate } from '../utils'
+import { SuccessLevel, parseTemplate, parseDescriptions2 } from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { ICocCardEntry, CocCard } from '../../card/coc'
 import { calculateTargetValueWithDifficulty } from '../../card/coc'
 import type { IRollDecideResult } from '../../config/helpers/decider'
+
+interface IRollResult {
+  roll: DiceRoll
+  // 一次 roll 可能同时检定多个技能，也可能没有
+  tests: {
+    skill: string
+    tempValue: number // NaN 代表无
+    cardEntry?: ICocCardEntry
+    result?: IRollDecideResult
+  }[]
+}
 
 export class StandardDiceRoll extends BasePtDiceRoll {
 
@@ -11,32 +22,45 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   hidden = false
   protected quiet = false
   protected vsFlag = false
-  expression = ''
-  description = ''
   protected isAlias = false
-  protected tempValue = NaN // 临时检定值
+  protected expression = ''
 
-  protected rolls: DiceRoll[] = []
-  protected cardEntry?: ICocCardEntry | null
-  protected decideResults: (IRollDecideResult | undefined)[] = []
+  // 当次请求检定的技能和临时值
+  /*protected*/ readonly skillsForTest: { skill: string, tempValue: number }[] = []
+
+  // 掷骰描述
+  get description() {
+    return this.skillsForTest.map(item => item.skill).join('，')
+  }
+
+  // 掷骰结果
+  protected readonly rolls: IRollResult[] = []
+
   // side effects
   protected skills2growth: string[] = []
 
   override roll() {
     this.skills2growth.length = 0
-    this.decideResults.length = 0
+    this.skillsForTest.length = 0
+    this.rolls.length = 0
     this.parse()
-    this.rolls = new Array(this.times).fill(this.expression).map(exp => new DiceRoll(exp))
-    // 收集副作用
-    // 是否是人物卡某项属性的检定
-    const entry = this.cardEntry = this.get(this.description, this.tempValue)
-    if (entry) {
-      this.decideResults = this.rolls.map(roll => {
-        const decideResult = this.decide(roll.total, entry)
-        if (!entry.isTemp && entry.type === 'skills' && decideResult?.success) {
-          this.skills2growth.push(entry.name) // 非临时值且检定成功，记录人物卡技能成长
-        }
-        return decideResult
+    // 掷骰
+    for (let i = 0; i < this.times; i++) {
+      const roll = new DiceRoll(this.expression)
+      this.rolls.push({
+        roll,
+        tests: this.skillsForTest.map(({ skill, tempValue }) => {
+          const cardEntry = this.get(skill, tempValue) ?? undefined
+          let result: IRollDecideResult | undefined = undefined
+          if (cardEntry) {
+            result = this.decide(roll.total, cardEntry)
+            // 非临时值且检定成功，记录人物卡技能成长
+            if (!cardEntry.isTemp && cardEntry.type === 'skills' && result?.success) {
+              this.skills2growth.push(cardEntry.name)
+            }
+          }
+          return { skill, tempValue, cardEntry, result }
+        })
       })
     }
     return this
@@ -49,7 +73,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const removeFlags = this.parseFlags(removeR).trim()
     this.parseDescriptions(removeFlags)
     this.detectDefaultRoll()
-    console.log('[Dice] 原始指令', this.rawExpression, '解析指令', this.expression, '描述', this.description, '临时值', this.tempValue, '暗骰', this.hidden, '省略', this.quiet, '次数', this.times)
+    console.log('[Dice] 原始指令', this.rawExpression, '|解析指令', this.expression, '|描述', JSON.stringify(this.skillsForTest), '|暗骰', this.hidden, '|省略', this.quiet, '|对抗', this.vsFlag, '|次数', this.times)
   }
 
   // 解析别名指令
@@ -81,28 +105,26 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   protected parseDescriptions(expression: string) {
-    const [exp, desc, tempValue] = parseDescriptions(expression)
+    // const [exp, desc, tempValue] = parseDescriptions(expression)
+    const { exp, skills } = parseDescriptions2(expression)
     // 如果是 alias dice，则认为 expression 已经由 config 指定，无视解析出的 exp
     if (this.isAlias) {
-      this.description = desc
-      this.tempValue = tempValue
+      this.skillsForTest.push(...skills)
       return
     }
-    // 如果只有 desc，没有 exp，判断一下是否是直接调用人物卡的表达式
+    // 如果只有单独的一条 description，没有 exp，判断一下是否是直接调用人物卡的表达式
     // 例如【.徒手格斗】直接替换成【.1d3+$db】. 而【.$徒手格斗】走通用逻辑，求值后【.const】
-    if (desc && !exp) {
-      const ability = this.selfCard?.getAbility(desc)
+    if (!exp && skills.length === 1 && isNaN(skills[0].tempValue)) {
+      const ability = this.selfCard?.getAbility(skills[0].skill)
       if (ability) {
         this.expression = parseTemplate(ability.value, this.context, this.inlineRolls)
-        this.description = desc
-        this.tempValue = tempValue
+        this.skillsForTest.push(skills[0])
         return
       }
     }
     // 默认情况，分别代入即可
     this.expression = exp
-    this.description = desc
-    this.tempValue = tempValue
+    this.skillsForTest.push(...skills)
   }
 
   private detectDefaultRoll() {
@@ -122,10 +144,19 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       lines.push(...inlineLines)
     }
     // 普通骰
-    const rollLines = this.rolls.map((roll, i) => {
-      const decideResult = this.decideResults[i]?.desc || ''
-      return `${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output} ${decideResult}`
-    })
+    const rollLines = this.rolls.map((rollResult) => {
+      const roll = rollResult.roll
+      if (rollResult.tests.length === 0) {
+        // 未携带描述或进行检定
+        return `${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`
+      } else {
+        // 拼接检定结果，由于可能存在组合技能检定，检定结果可能有多行
+        return rollResult.tests.map(test => {
+          const testResult = test.result?.desc ?? ''
+          return `${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output} ${testResult}`
+        })
+      }
+    }).flat()
     // 有中间骰且没有 quiet 的情况下，普通骰也增加前缀，以便与中间骰对应起来
     if (this.hasInlineRolls && !this.quiet) {
       if (rollLines.length === 1) {
@@ -168,16 +199,20 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   // 是否可以用于对抗
   get eligibleForOpposedRoll() {
     if (this.hidden) return false
-    if (this.times !== 1) return false
-    return !!(this.decideResults.length !== 0 && this.decideResults[0])
+    // 单轮投骰 & 有且仅有一个技能检定 & 技能检定有结果
+    return this.rolls.length === 1 && this.rolls[0].tests.length === 1 && !!this.rolls[0].tests[0].result
   }
 
   // 用于对抗检定的数据
   /* protected */ getSuccessLevelForOpposedRoll(refineSuccessLevels = true) {
-    const rollValue = this.rolls[0].total
-    const decideResult = this.decideResults[0]! // eligibleForOpposedRoll 确保了检定结果存在
-    const baseValue = this.cardEntry!.baseValue
-    const res = { username: this.context.username, skill: this.cardEntry!.name, baseValue }
+    // eligibleForOpposedRoll 确保了 rollResult 和 test 有且仅有一个
+    const rollResult = this.rolls[0]
+    const test = rollResult.tests[0]
+    // 组装对抗检定数据
+    const rollValue = rollResult.roll.total
+    const decideResult = test.result!
+    const baseValue = test.cardEntry!.baseValue
+    const res = { username: this.context.username, skill: test.cardEntry!.name, baseValue }
     if (decideResult.level === SuccessLevel.REGULAR_SUCCESS) {
       // 成功的检定，如设置 refineSuccessLevels，要比较成功等级哪个更高
       if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {
