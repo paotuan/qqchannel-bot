@@ -118,6 +118,26 @@ describe('未关联人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 组合 3d%kl1 = 2')
   })
 
+  test('对抗标记', () => {
+    const roller = createDiceRoll('v侦察50', context)
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 ≤ 50 成功\n> 回复本条消息以进行对抗')
+  })
+
+  test('对抗标记+检定别名', () => {
+    const roller = createDiceRoll('rav侦察50', context)
+    expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 ≤ 50 成功\n> 回复本条消息以进行对抗')
+  })
+
+  test('对抗标记无效', () => {
+    const roller = createDiceRoll('v侦察', context)
+    expect(roller.output).not.toMatch(/回复本条消息以进行对抗$/)
+  })
+
+  test('对抗标记无效2', () => {
+    const roller = createDiceRoll('vx2侦察50', context)
+    expect(roller.output).not.toMatch(/回复本条消息以进行对抗$/)
+  })
+
   test('inline', () => {
     const roller = createDiceRoll('d[[d100]]', context)
     expect(roller.output).toBe('Maca 🎲\n先是 🎲 d100: [2] = 2\n最后 🎲 d2: [2] = 2')
@@ -136,6 +156,21 @@ describe('未关联人物卡', () => {
   test('inline 嵌套 flags', () => {
     const roller = createDiceRoll('rx[[d4]]', context)
     expect(roller.output).toBe('Maca 🎲\n先是 🎲 d4: [2] = 2\n最后 🎲\nd100: [2] = 2\nd100: [2] = 2')
+  })
+
+  test('组合检定', () => {
+    const roller = createDiceRoll('侦察60聆听70', context)
+    expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2\n侦察 2 ≤ 60 成功\n聆听 2 ≤ 70 成功')
+  })
+
+  test('组合检定无效', () => {
+    const roller = createDiceRoll('侦察，聆听', context)
+    expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2')
+  })
+
+  test('组合检定部分', () => {
+    const roller = createDiceRoll('侦察60聆听', context)
+    expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2\n侦察 2 ≤ 60 成功')
   })
 })
 
@@ -197,6 +232,11 @@ describe('已关联人物卡', () => {
   test('表达式内嵌', () => {
     const roller = createDiceRoll('$徒手格斗+1d6+1', context)
     expect(roller.output).toBe('Maca 🎲\n先是 🎲 db 0: 0 = 0\n然后 🎲 徒手格斗 1d3+0: [2]+0 = 2\n最后 🎲 2+1d6+1: 2+[2]+1 = 5')
+  })
+
+  test('组合检定', () => {
+    const roller = createDiceRoll('侦察 图书馆', context)
+    expect(roller.output).toBe('Maca 🎲 侦察，图书馆 d100: [2] = 2\n侦察 2 ≤ 40 成功\n图书馆 2 ≤ 70 成功')
   })
 })
 
