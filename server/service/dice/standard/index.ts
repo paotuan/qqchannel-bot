@@ -105,7 +105,6 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   protected parseDescriptions(expression: string) {
-    // const [exp, desc, tempValue] = parseDescriptions(expression)
     const { exp, skills } = parseDescriptions2(expression)
     // 如果是 alias dice，则认为 expression 已经由 config 指定，无视解析出的 exp
     if (this.isAlias) {
@@ -134,49 +133,55 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
+    // 第一行
     const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
-    const lines = [`${this.context.username} 🎲${descriptionStr}`]
+    const headLine = `${this.context.username} 🎲${descriptionStr}`
     // 是否有中间骰
+    const inlineRollLines = []
     if (this.hasInlineRolls && !this.quiet) {
       const inlineLines = this.inlineRolls.map((roll, i) => {
         return `${i === 0 ? '先是' : '然后' } ${roll.output}`
       })
-      lines.push(...inlineLines)
+      inlineRollLines.push(...inlineLines, '最后 🎲')
     }
-    // 普通骰
+    // 普通骰 [多轮掷骰][组合检定结果]
     const rollLines = this.rolls.map((rollResult) => {
       const roll = rollResult.roll
-      if (rollResult.tests.length === 0) {
-        // 未携带描述或进行检定
-        return `${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`
+      // 掷骰过程
+      const lines = [`${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`]
+      // 拼接检定结果
+      if (rollResult.tests.length === 1) {
+        // 单条描述或技能检定，直接拼在后面
+        const testResult = rollResult.tests[0].result?.desc ?? ''
+        lines[0] += ` ${testResult}`
       } else {
-        // 拼接检定结果，由于可能存在组合技能检定，检定结果可能有多行
-        return rollResult.tests.map(test => {
+        // 组合技能检定，回显技能名，且过滤掉没有检定的行，减少冗余信息
+        rollResult.tests.forEach(test => {
           const testResult = test.result?.desc ?? ''
-          return `${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output} ${testResult}`
+          if (testResult) {
+            lines.push(`${test.skill} ${roll.total} ${testResult}`)
+          }
         })
       }
-    }).flat()
-    // 有中间骰且没有 quiet 的情况下，普通骰也增加前缀，以便与中间骰对应起来
-    if (this.hasInlineRolls && !this.quiet) {
-      if (rollLines.length === 1) {
-        rollLines[0] = '最后 🎲 ' + rollLines[0]
-      } else {
-        rollLines.unshift('最后 🎲 ')
-      }
-    }
-    // 判断是否是展示在一行
-    let result
-    if (lines.length === 1 && rollLines.length === 1) {
-      result = `${lines[0]} ${rollLines[0]}`.trim()
+      return lines
+    })
+    // 组装结果，根据条件判断是否换行
+    const lines = [headLine, ...inlineRollLines]
+    if (rollLines.length === 1) {
+      // 没有多轮投骰，将两个部分首位相连
+      const lastLine = lines[lines.length - 1]
+      const [first, ...rest] = rollLines[0]
+      lines[lines.length - 1] = `${lastLine} ${first}`
+      lines.push(...rest)
     } else {
-      result = [...lines, ...rollLines].map(line => line.trim()).join('\n')
+      // 有多轮投骰，就简单按行显示
+      lines.push(...rollLines.flat())
     }
     // 判断是否需要对抗标记
     if (this.vsFlag && this.eligibleForOpposedRoll) {
-      result += '\n> 回复本条消息以进行对抗'
+      lines.push('> 回复本条消息以进行对抗')
     }
-    return result
+    return lines.map(line => line.trim()).join('\n')
   }
 
   override applyToCard(): CocCard[] {

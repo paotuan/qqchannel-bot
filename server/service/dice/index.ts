@@ -1,11 +1,10 @@
 import type { IDiceRollContext } from './utils'
-import type { InlineDiceRoll } from './standard/inline'
 import { calculateTargetValueWithDifficulty, CocCard, ICocCardEntry, parseDifficulty } from '../card/coc'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
   protected readonly context: IDiceRollContext
-  protected readonly inlineRolls: InlineDiceRoll[]
+  protected readonly inlineRolls: any[] // InlineDiceRoll[]
 
   protected get selfCard() {
     return this.context.getCard(this.context.userId)
