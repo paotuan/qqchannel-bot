@@ -44,3 +44,8 @@ yarn run dev:client
 
 
 任何意见建议，欢迎 issue，pr 或加群 115699014 讨论。
+
+## 协议
+随机地图功能原作者 drow，使用 [CC BY-NC 3.0](http://creativecommons.org/licenses/by-nc/3.0/) 协议开源.
+
+其余代码未经特殊说明均使用 MIT 协议。
