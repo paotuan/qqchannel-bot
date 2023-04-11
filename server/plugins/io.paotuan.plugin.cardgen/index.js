@@ -3,7 +3,7 @@
 module.exports = ({ roll }) => ({
   id: 'io.paotuan.plugin.cardgen',
   name: '人物作成',
-  version: 1,
+  version: 2,
   customReply: [
     {
       id: 'coc',
@@ -44,13 +44,13 @@ module.exports = ({ roll }) => ({
 
 
 function randCoc(roll) {
-  const list = ['3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '(2d6+6)*5', '3d6*5'].map(roll)
+  const list = ['3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '(2d6+6)*5', '3d6*5'].map(exp => roll(exp).total)
   const total = list.reduce((a, b) => a + b, 0)
   return `力量${list[0]} 体质${list[1]} 体型${list[2]} 敏捷${list[3]} 外貌${list[4]} 智力${list[5]} 意志${list[6]} 教育${list[7]} 幸运${list[8]} (总计${total})`
 }
 
 function randDnd(roll) {
-  const list = new Array(6).fill('').map(() => roll('4d6kh3'))
+  const list = new Array(6).fill('').map(() => roll('4d6kh3').total)
   const total = list.reduce((a, b) => a + b, 0)
   return list.join(', ') + ` (总计${total})`
 }

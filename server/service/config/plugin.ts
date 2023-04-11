@@ -92,14 +92,17 @@ export class PluginManager {
     })
   }
 
-  // 如果版本号有更新，则删除旧文件(已加载到内存中，不影响本次使用)，并提示下次打开后更新
+  // 如果版本号有更新，则删除旧文件，加载新的文件
   private checkOfficialPluginsUpdate() {
     Object.entries(officialPluginsVersions).forEach(([name, version]) => {
       const currentVersion = this.pluginMap[name]?.version
       if (!currentVersion) return
       if (version > currentVersion) {
-        console.log(`[Plugin] 检测到插件 ${name} 有更新，将在下次启动时生效`)
+        console.log(`[Plugin] 检测到插件 ${name} 有更新，即将进行更新。若更新后功能异常，请尝试重新启动软件。`)
         fs.rmdirSync(path.join(PLUGIN_DIR, name), { recursive: true })
+        copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
+        // 再次加载插件。这里的问题是如果插件有副作用则有重复执行或内存泄露的风险，但一般不会有问题
+        this.loadPlugins([name])
       }
     })
   }
@@ -166,6 +169,6 @@ export class PluginManager {
 const officialPluginsVersions = {
   'io.paotuan.plugin.namegen': 1,
   'io.paotuan.plugin.insane': 1,
-  'io.paotuan.plugin.cardgen': 1,
+  'io.paotuan.plugin.cardgen': 2,
   'io.paotuan.plugin.cocrules': 1,
 }
