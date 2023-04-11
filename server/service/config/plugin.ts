@@ -81,15 +81,30 @@ export class PluginManager {
   private loadPlugins(pluginNames: string[]) {
     pluginNames.forEach(pluginName => {
       try {
-        const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName)
+        const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const plugin = require(fullPath)(this.pluginRegisterContext) as IPluginConfig
-        console.log('[Plugin] 加载插件', pluginName, '->',plugin.id)
+        console.log('[Plugin] 加载插件', pluginName, '->', plugin.id)
         this.pluginMap[plugin.id] = plugin
       } catch (e) {
         console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
       }
     })
+  }
+
+  private reloadPlugin(pluginName: string) {
+    try {
+      // require.cache 的 key 是带 index.js 的，因此组装路径时也要带上
+      const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
+      // 注意不能完全避免问题，仍然有副作用重复执行或内存泄露的风险
+      delete require.cache[fullPath]
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const plugin = require(fullPath)(this.pluginRegisterContext) as IPluginConfig
+      console.log('[Plugin] 重新加载插件', pluginName, '->',plugin.id)
+      this.pluginMap[plugin.id] = plugin
+    } catch (e) {
+      console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
+    }
   }
 
   // 如果版本号有更新，则删除旧文件，加载新的文件
@@ -101,8 +116,8 @@ export class PluginManager {
         console.log(`[Plugin] 检测到插件 ${name} 有更新，即将进行更新。若更新后功能异常，请尝试重新启动软件。`)
         fs.rmdirSync(path.join(PLUGIN_DIR, name), { recursive: true })
         copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
-        // 再次加载插件。这里的问题是如果插件有副作用则有重复执行或内存泄露的风险，但一般不会有问题
-        this.loadPlugins([name])
+        // 再次加载插件
+        this.reloadPlugin(name)
       }
     })
   }
