@@ -15,13 +15,13 @@ export interface ICardAbility {
 
 export interface ICard<T extends ICardEntry = ICardEntry, K extends ICardAbility = ICardAbility> {
   type: CardType
-  version: number
-  id: string
+  // id: string 目前还是 name 做唯一标识
   name: string
   defaultRoll?: string
   // hp/maxHp 用于地图中的展示
-  hp?: number
-  maxHp?: number
+  HP?: number
+  MAXHP?: number
+  lastModified: number // 用于目前前后端同步判断
   getEntry(input: string): T | undefined
   setEntry(name: string, value: number): boolean
   removeEntry(name: string): boolean

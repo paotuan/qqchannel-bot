@@ -3,11 +3,11 @@ import type { ICard } from './index'
 export interface IGeneralCardData {
   type: 'general'
   version: number
-  id: string
   name: string
   ext: string
   skills: Record<string, number>
   abilities: Record<string, string>
+  lastModified: number
 }
 
 export class GeneralCard implements ICard {
@@ -17,24 +17,20 @@ export class GeneralCard implements ICard {
     return this.data.type
   }
 
-  get version() {
-    return this.data.version
-  }
-
-  get id() {
-    return this.data.id
-  }
-
   get name() {
     return this.data.name
   }
 
-  get hp() {
+  get HP() {
     return this.getEntry('HP')?.value
   }
 
-  get maxHp() {
+  get MAXHP() {
     return this.getEntry('MAXHP')?.value
+  }
+
+  get lastModified() {
+    return this.data.lastModified
   }
 
   constructor(data: IGeneralCardData) {
@@ -52,14 +48,20 @@ export class GeneralCard implements ICard {
   }
 
   setAbility(name: string, value: string) {
-    this.data.abilities[name.toUpperCase()] = value
-    return true
+    const key = name.toUpperCase()
+    if (this.data.abilities[key] !== value) {
+      this.data.abilities[key] = value
+      this.data.lastModified = Date.now()
+      return true
+    }
+    return false
   }
 
   removeAbility(name: string) {
     const key = name.toUpperCase()
     if (typeof this.data.abilities[key] !== 'undefined') {
       delete this.data.abilities[key]
+      this.data.lastModified = Date.now()
       return true
     } else {
       return false
@@ -77,14 +79,20 @@ export class GeneralCard implements ICard {
   }
 
   setEntry(name: string, value: number) {
-    this.data.skills[name.toUpperCase()] = value
-    return true
+    const key = name.toUpperCase()
+    if (this.data.skills[key] !== value) {
+      this.data.skills[key] = value
+      this.data.lastModified = Date.now()
+      return true
+    }
+    return false
   }
 
   removeEntry(name: string) {
     const key = name.toUpperCase()
     if (typeof this.data.skills[key] !== 'undefined') {
       delete this.data.skills[key]
+      this.data.lastModified = Date.now()
       return true
     } else {
       return false
