@@ -28,4 +28,5 @@ export interface ICard<T extends ICardEntry = ICardEntry, K extends ICardAbility
   getAbility(input: string): K | undefined
   setAbility(name: string, value: string): boolean
   removeAbility(name: string): boolean
+  getSummary(): string // 用于骰子指令展示人物卡信息
 }

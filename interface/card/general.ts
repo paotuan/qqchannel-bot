@@ -98,4 +98,10 @@ export class GeneralCard implements ICard {
       return false
     }
   }
+
+  getSummary() {
+    const skills = Object.entries(this.data.skills).map(([k ,v]) => `${k}：${v}`).join(' ')
+    const abilities = Object.entries(this.data.abilities).map(([k ,v]) => `${k}：${v}`).join('\n')
+    return '角色：' + this.name + '\n' + skills + '\n' + abilities
+  }
 }
