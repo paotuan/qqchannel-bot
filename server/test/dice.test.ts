@@ -3,8 +3,8 @@ import type { IDiceRollContext } from '../service/dice/utils'
 import { createDiceRoll } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
-import type { ICard } from '../../interface/coc'
 import { CocCard } from '../service/card/coc'
+import type { ICocCardData } from '../../interface/card/coc'
 
 // use a custom engine
 NumberGenerator.generator.engine = {
@@ -240,7 +240,7 @@ describe('已关联人物卡', () => {
   })
 })
 
-function getCardProto(): ICard {
+function getCardProto(): ICocCardData {
   return {
     type: 'coc',
     version: 16,

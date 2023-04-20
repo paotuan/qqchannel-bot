@@ -4,10 +4,11 @@ import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 import XLSX from 'xlsx'
 import { gtagEvent } from '../utils'
-import { ICard, skillAliasMap } from '../../interface/coc'
+import { skillAliasMap } from '../../interface/coc'
+import type { ICocCardData } from '../../interface/card/coc'
 
 export const useCardStore = defineStore('card', () => {
-  const cardMap = reactive<Record<string, ICard>>({})
+  const cardMap = reactive<Record<string, ICocCardData>>({})
   const cardEditedMap = reactive<Record<string, boolean>>({}) // 标识卡片是否有编辑未保存
   const cardLinkMap = reactive<Record<string, string>>({}) // 卡片名 -> 用户 id
   const selectedCardId = ref('')
@@ -24,18 +25,18 @@ export const useCardStore = defineStore('card', () => {
 
   const of = (cardName: string) => cardMap[cardName]
 
-  const importCard = (card: ICard) => {
+  const importCard = (card: ICocCardData) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
     gtagEvent('card/import')
   }
 
   // 请求保存卡片（其实后端和导入的逻辑是一样的）
-  const requestSaveCard = (card: ICard) => {
+  const requestSaveCard = (card: ICocCardData) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
   }
 
   // 全量更新人物卡
-  const updateCards = (cards: ICard[]) => {
+  const updateCards = (cards: ICocCardData[]) => {
     // 1. 不存在的 card 本地要删掉
     const newExistNames = cards.map(card => card.basic.name)
     const name2delete = existNames.value.filter(name => !newExistNames.includes(name))
@@ -60,7 +61,7 @@ export const useCardStore = defineStore('card', () => {
   }
 
   // 删除人物卡
-  const deleteCard = (card: ICard) => {
+  const deleteCard = (card: ICocCardData) => {
     const cardName = card.basic.name
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     gtagEvent('card/delete')
@@ -72,26 +73,26 @@ export const useCardStore = defineStore('card', () => {
   }
 
   // 选择某张人物卡
-  const selectCard = (card: ICard) => selectedCardId.value = card.basic.name
+  const selectCard = (card: ICocCardData) => selectedCardId.value = card.basic.name
 
   // 标记某个技能成长
-  const markSkillGrowth = (targetCard: ICard, skill: string, value?: boolean) => {
+  const markSkillGrowth = (targetCard: ICocCardData, skill: string, value?: boolean) => {
     targetCard.meta.skillGrowth[skill] = typeof value === 'boolean' ? value : !targetCard.meta.skillGrowth[skill]
     markCardEdited(targetCard)
   }
 
   // 标记某张卡片被编辑
-  const markCardEdited = (card: ICard) => {
+  const markCardEdited = (card: ICocCardData) => {
     card.meta.lastModified = Date.now()
     cardEditedMap[card.basic.name] = true
   }
 
   // 人物卡是否有编辑未保存
-  const isEdited = (card: ICard) => !!cardEditedMap[card.basic.name]
+  const isEdited = (card: ICocCardData) => !!cardEditedMap[card.basic.name]
 
   // 关联玩家相关
-  const linkedUserOf = (card: ICard) => cardLinkMap[card.basic.name]
-  const requestLinkUser = (card: ICard, userId: string | null | undefined) => {
+  const linkedUserOf = (card: ICocCardData) => cardLinkMap[card.basic.name]
+  const requestLinkUser = (card: ICocCardData, userId: string | null | undefined) => {
     const cardName = card.basic.name
     ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
     gtagEvent('card/link')
@@ -146,7 +147,7 @@ export const useCardStore = defineStore('card', () => {
   }
 })
 
-function getCardProto(): ICard {
+function getCardProto(): ICocCardData {
   return {
     type: 'coc',
     version: 16,
@@ -183,9 +184,9 @@ function getCardProto(): ICard {
 }
 
 class CardSetter {
-  data: ICard
+  data: ICocCardData
 
-  constructor(data: ICard) {
+  constructor(data: ICocCardData) {
     this.data = data
   }
 
@@ -224,7 +225,7 @@ class CardSetter {
   }
 }
 
-export function parseText(name: string, rawText: string): ICard {
+export function parseText(name: string, rawText: string): ICocCardData {
   const card = getCardProto()
   card.basic.name = name.trim()
   return addAttributesBatch(card, rawText)
@@ -317,7 +318,7 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
   return user
 }
 
-export function addAttributesBatch(card: ICard, rawText: string): ICard {
+export function addAttributesBatch(card: ICocCardData, rawText: string): ICocCardData {
   const setter = new CardSetter(card)
   Array.from(rawText.trim().matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
     const index = entry.search(/\d/) // 根据数字分隔

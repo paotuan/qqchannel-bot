@@ -53,8 +53,8 @@ import { PlusCircleIcon, DocumentTextIcon, ExclamationCircleIcon } from '@heroic
 import { computed, ref } from 'vue'
 import * as XLSX from 'xlsx'
 import { parseCoCXlsx, parseText, useCardStore } from '../../store/card'
-import type { ICard } from '../../../interface/coc'
 import { Toast } from '../../utils'
+import type { ICocCardData } from '../../../interface/card/coc'
 
 const tab = ref<'text' | 'excel'>('text')
 const closeBtn = ref<HTMLElement>()
@@ -62,7 +62,7 @@ const closeModal = () => closeBtn.value?.click() // 这种 modal 没双向绑定
 
 const textName = ref('')
 const textareaContent = ref('')
-const xlsxCard = ref<ICard | null>(null)
+const xlsxCard = ref<ICocCardData | null>(null)
 const fileChooser = ref()
 
 const cardStore = useCardStore()

@@ -170,16 +170,16 @@ import { computed, ref, watch } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import TextInput from './TextInput.vue'
 import NumberInput from './NumberInput.vue'
-import type { ICard } from '../../../interface/coc'
 import { getDBAndBuild } from '../../../interface/coc'
 import CardAddAttribute from './CardAddAttribute.vue'
+import type { ICocCardData } from '../../../interface/card/coc'
 
 const cardStore = useCardStore()
 const card = computed(() => cardStore.selectedCard)
 
 // region 给模板用的，因为 ts 不认识 v-if
 const cardnn = computed(() => card.value!)
-const propKeyOf = (card: ICard) => {
+const propKeyOf = (card: ICocCardData) => {
   return Object.keys(card.props) as Array<keyof typeof card.props>
 }
 const dbAndBuild = computed(() => getDBAndBuild(cardnn.value))
@@ -187,7 +187,7 @@ const dbAndBuild = computed(() => getDBAndBuild(cardnn.value))
 
 // 技能按数值排序。缓存一下选择卡片时的技能值顺序，避免编辑过程中实时数值改变导致排序跳动
 const skillsSortList = ref<string[]>([])
-const updateSortList = (cardValue: ICard | null) => {
+const updateSortList = (cardValue: ICocCardData | null) => {
   if (cardValue) {
     skillsSortList.value = Object.keys(cardValue.skills).sort((s1, s2) => cardValue.skills[s2] - cardValue.skills[s1])
   } else {

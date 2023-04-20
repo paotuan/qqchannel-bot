@@ -1,5 +1,5 @@
-import type { ICard } from '../../interface/coc'
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
+import type { ICocCardData } from '../../interface/card/coc'
 import * as fs from 'fs'
 import * as glob from 'glob'
 import { makeAutoObservable } from 'mobx'
@@ -37,7 +37,7 @@ export class CardManager {
       files.forEach(filename => {
         const str = fs.readFileSync(filename, 'utf8')
         try {
-          const card = JSON.parse(str) as ICard
+          const card = JSON.parse(str) as ICocCardData
           this.cardMap[card.basic.name] = new CocCard(handleCardUpgrade(card))
         } catch (e) {
           console.log(`[Card] ${filename} 解析失败`)
@@ -128,7 +128,7 @@ export class CardManager {
 }
 
 // card 版本升级逻辑
-function handleCardUpgrade(card: ICard) {
+function handleCardUpgrade(card: ICocCardData) {
   if (card.version === 1) {
     card.meta.lastModified = 0
     card.version = 2

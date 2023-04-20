@@ -1,8 +1,8 @@
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { CocCard } from '../service/card/coc'
-import type { ICard } from '../../interface/coc'
 import { getInitialDefaultConfig } from '../service/config/default'
 import { ChannelConfig } from '../service/config/config'
+import type { ICocCardData } from '../../interface/card/coc'
 
 const list1 = [
   'd100',                  // 基础指令
@@ -97,18 +97,21 @@ list2.forEach(exp => {
   console.log('========================')
 })
 
-function getCardProto(): ICard {
+function getCardProto(): ICocCardData {
   return {
+    type: 'coc',
     version: 3,
     basic: {
       name: '铃木翼',
       job: '学生',
-      age: 24,
+      AGE: 24,
       gender: '秀吉',
-      hp: 10,
-      san: 30,
-      luck: 50,
-      mp: 10
+      HP: 10,
+      SAN: 30,
+      LUCK: 50,
+      MP: 10,
+      CM: 0,
+      '信用': 0
     },
     props: {
       '力量': 60,

@@ -1,6 +1,7 @@
-import type { ICard, IAbility } from '../../../interface/coc'
+import type { IAbility } from '../../../interface/coc'
 import { makeAutoObservable } from 'mobx'
 import { getDBAndBuild, skillAliasMap } from '../../../interface/coc'
+import type { ICocCardData } from '../../../interface/card/coc'
 
 type Difficulty = 'normal' | 'hard' | 'ex'
 type EntryType = 'basic' | 'props' | 'skills'
@@ -24,9 +25,9 @@ export interface ICocCardAbility {
 }
 
 export class CocCard {
-  data: ICard
+  data: ICocCardData
 
-  constructor(data: ICard) {
+  constructor(data: ICocCardData) {
     makeAutoObservable(this)
     this.data = data
   }

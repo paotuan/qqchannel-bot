@@ -8,7 +8,7 @@ import type {
   INoteSendResp,
   INoteSyncResp, IUser, IPluginConfigDisplay, IRiListResp
 } from '../../interface/common'
-import type { ICard } from '../../interface/coc'
+import type { ICocCardData } from '../../interface/card/coc'
 import { useBotStore } from '../store/bot'
 import { useChannelStore } from '../store/channel'
 import { useLogStore } from '../store/log'
@@ -107,7 +107,7 @@ ws.on('card/import', data => {
 
 ws.on('card/list', data => {
   const cardStore = useCardStore()
-  cardStore.updateCards(data.data as ICard[])
+  cardStore.updateCards(data.data as ICocCardData[])
 })
 
 ws.on('card/link', data => {
