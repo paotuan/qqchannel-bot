@@ -83,10 +83,10 @@ export class StDiceRoll extends BasePtDiceRoll {
     } else {
       // 不指定展示哪个，就默认展示全部
       const data = this.targetUserCard!.data
-      this.shows.push({ name: '生命', value: data.basic.hp })
-      this.shows.push({ name: '理智', value: data.basic.san })
-      this.shows.push({ name: '幸运', value: data.basic.luck })
-      this.shows.push({ name: '魔法', value: data.basic.mp })
+      this.shows.push({ name: '生命', value: data.basic.HP })
+      this.shows.push({ name: '理智', value: data.basic.SAN })
+      this.shows.push({ name: '幸运', value: data.basic.LUCK })
+      this.shows.push({ name: '魔法', value: data.basic.MP })
       Object.entries(data.props).forEach(([name, value]) => {
         this.shows.push({ name, value })
       })

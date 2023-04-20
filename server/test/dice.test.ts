@@ -242,16 +242,19 @@ describe('已关联人物卡', () => {
 
 function getCardProto(): ICard {
   return {
-    version: 3,
+    type: 'coc',
+    version: 16,
     basic: {
       name: '铃木翼',
       job: '学生',
-      age: 24,
+      AGE: 24,
       gender: '秀吉',
-      hp: 10,
-      san: 30,
-      luck: 50,
-      mp: 10
+      HP: 10,
+      SAN: 30,
+      LUCK: 50,
+      MP: 10,
+      CM: 0,
+      '信用': 0
     },
     props: {
       '力量': 60,

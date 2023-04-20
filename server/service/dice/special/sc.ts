@@ -4,7 +4,7 @@ import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import type { CocCard } from '../../card/coc'
 
-const SC_CARD_ENTRY_NAME = 'san' // sc 在人物卡中的字段名
+const SC_CARD_ENTRY_NAME = 'SAN' // sc 在人物卡中的字段名
 
 export class ScDiceRoll extends BasePtDiceRoll {
   private noModify = false

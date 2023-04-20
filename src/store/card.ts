@@ -148,16 +148,19 @@ export const useCardStore = defineStore('card', () => {
 
 function getCardProto(): ICard {
   return {
-    version: 3,
+    type: 'coc',
+    version: 16,
     basic: {
       name: '',
       job: '学生',
-      age: 24,
+      AGE: 24,
       gender: '秀吉',
-      hp: 0,
-      san: 0,
-      luck: 0,
-      mp: 0
+      HP: 0,
+      SAN: 0,
+      LUCK: 0,
+      MP: 0,
+      CM: 0,
+      '信用': 0
     },
     props: {
       '力量': 0,
@@ -237,7 +240,7 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
     // 是否是 CY 卡
     user.basic.name = sheet['E3']?.v || '未命名'
     user.basic.job = sheet['E5']?.v || ''
-    user.basic.age = sheet['E6']?.v || 0
+    user.basic.AGE = sheet['E6']?.v || 0
     user.basic.gender = sheet['M6']?.v || ''
     // 其他属性直接读导入表达式
     const exps: string = cySheet['B40']?.v || ''
@@ -264,12 +267,14 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
     user.basic = {
       name: sheet['D3']?.v || '未命名',
       job: sheet['D5']?.v || '',
-      age: sheet['D6']?.v || 0,
+      AGE: sheet['D6']?.v || 0,
       gender: sheet['L6']?.v || '',
-      hp: sheet['F10']?.v || 0,
-      san: sheet['N10']?.v || 0,
-      luck: sheet['V10']?.v || 0,
-      mp: (sheet['AD10'] || sheet['AF10'])?.v || 0
+      HP: sheet['F10']?.v || 0,
+      SAN: sheet['N10']?.v || 0,
+      LUCK: sheet['V10']?.v || 0,
+      MP: (sheet['AD10'] || sheet['AF10'])?.v || 0,
+      CM: 0, // todo
+      '信用': 0 // todo
     }
     // read props
     user.props = {

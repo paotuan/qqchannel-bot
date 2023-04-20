@@ -2,16 +2,20 @@
  * coc 人物卡定义
  */
 export interface ICard {
-  version: number // 3
+  type: 'coc'
+  version: number // todo 修改为跟随主版本的 version code
   basic: {
     name: string
     job: string
-    age: number
     gender: string
-    hp: number
-    san: number
-    luck: number
-    mp: number
+    AGE: number
+    HP: number
+    SAN: number
+    LUCK: number
+    MP: number
+    // todo 版本升级
+    CM: number
+    '信用': number
   },
   props: {
     '力量': number
@@ -23,7 +27,7 @@ export interface ICard {
     '意志': number
     '教育': number
   },
-  skills: { [key: string]: number },
+  skills: Record<string, number>,
   abilities: {
     name: string
     expression: string
@@ -31,7 +35,7 @@ export interface ICard {
   }[],
   ext: string
   meta: {
-    skillGrowth: { [key: string]: boolean },
+    skillGrowth: Record<string, boolean>,
     lastModified: number // ms
   }
 }

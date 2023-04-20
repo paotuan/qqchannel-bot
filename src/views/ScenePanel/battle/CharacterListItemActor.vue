@@ -5,7 +5,7 @@
         <img :src="userInfo.avatar" :alt="userInfo.nick" />
       </div>
       <!-- 血条 -->
-      <CharacterHpBar :hp="userCard ? userCard.basic.hp : NaN" :max-hp="maxHp" />
+      <CharacterHpBar :hp="userCard ? userCard.basic.HP : NaN" :max-hp="maxHp" />
     </div>
     <div class="flex flex-col justify-between">
       <div class="font-bold max-w-[7rem] truncate">{{ userInfo.nick }}</div>

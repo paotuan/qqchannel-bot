@@ -106,7 +106,7 @@ const charaName = computed(() => {
   }
 })
 
-const hp = computed(() => userCard.value?.basic.hp ?? npcInfo.value?.embedCard.hp ?? NaN)
+const hp = computed(() => userCard.value?.basic.HP ?? npcInfo.value?.embedCard.hp ?? NaN)
 const maxHp = computed(() => {
   if (userCard.value) {
     return Math.floor((userCard.value.props.体质 + userCard.value.props.体型) / 10)

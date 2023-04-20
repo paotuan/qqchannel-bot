@@ -5,7 +5,7 @@
       <span class="text-sm font-bold">{{ cardnn.basic.name }}</span>
       <text-input v-model="cardnn.basic.gender" placeholder="性别" class="input input-bordered input-xs w-14"/>
       <span class="inline-flex items-center gap-0.5">
-          <number-input v-model="cardnn.basic.age" placeholder="年龄" class="input input-bordered input-xs w-14"/>
+          <number-input v-model="cardnn.basic.AGE" placeholder="年龄" class="input input-bordered input-xs w-14"/>
           <span class="text-sm">岁</span>
         </span>
       <span class="inline-flex items-center gap-0.5">
@@ -34,16 +34,16 @@
             <tbody>
             <tr>
               <td>
-                <number-input v-model="cardnn.basic.hp" class="input input-ghost input-xs text-sm w-14"/>
+                <number-input v-model="cardnn.basic.HP" class="input input-ghost input-xs text-sm w-14"/>
               </td>
               <td>
-                <number-input v-model="cardnn.basic.san" class="input input-ghost input-xs text-sm w-14"/>
+                <number-input v-model="cardnn.basic.SAN" class="input input-ghost input-xs text-sm w-14"/>
               </td>
               <td>
-                <number-input v-model="cardnn.basic.luck" class="input input-ghost input-xs text-sm w-14"/>
+                <number-input v-model="cardnn.basic.LUCK" class="input input-ghost input-xs text-sm w-14"/>
               </td>
               <td>
-                <number-input v-model="cardnn.basic.mp" class="input input-ghost input-xs text-sm w-14"/>
+                <number-input v-model="cardnn.basic.MP" class="input input-ghost input-xs text-sm w-14"/>
               </td>
             </tr>
             </tbody>

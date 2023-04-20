@@ -138,5 +138,29 @@ function handleCardUpgrade(card: ICard) {
     card.abilities = []
     card.version = 3
   }
+  if (card.version === 3) {
+    const oldCard = card as any
+    card.basic.AGE = oldCard.basic.age
+    delete oldCard.basic.age
+    card.basic.HP = oldCard.basic.hp
+    delete oldCard.basic.hp
+    card.basic.SAN = oldCard.basic.san
+    delete oldCard.basic.san
+    card.basic.LUCK = oldCard.basic.luck
+    delete oldCard.basic.luck
+    card.basic.MP = oldCard.basic.mp
+    delete oldCard.basic.mp
+    card.basic.CM = oldCard.skills.克苏鲁 ?? oldCard.skills.克苏鲁神话 ?? oldCard.skills.CM ?? oldCard.skills.cm ?? 0
+    delete oldCard.skills.克苏鲁
+    delete oldCard.skills.克苏鲁神话
+    delete oldCard.skills.CM
+    delete oldCard.skills.cm
+    card.basic.信用 = oldCard.skills.信用 ?? oldCard.skills.信誉 ?? oldCard.skills.信用评级 ?? 0
+    delete oldCard.skills.信用
+    delete oldCard.skills.信誉
+    delete oldCard.skills.信用评级
+    card.type = 'coc'
+    card.version = 16 // 1.3.0
+  }
   return card
 }
