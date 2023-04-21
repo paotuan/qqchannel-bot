@@ -1,9 +1,10 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { SuccessLevel, parseTemplate, parseDescriptions2 } from '../utils'
 import { BasePtDiceRoll } from '../index'
-import type { ICocCardEntry, ServerCocCard } from '../../card/coc'
-import { calculateTargetValueWithDifficulty } from '../../card/coc'
+import type { ServerCocCard } from '../../card/coc'
+import { calculateTargetValueWithDifficulty } from '../../../../interface/card/coc'
 import type { IRollDecideResult } from '../../config/helpers/decider'
+import type { ICocCardEntry } from '../../../../interface/card/coc'
 
 interface IRollResult {
   roll: DiceRoll
@@ -56,7 +57,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
             result = this.decide(roll.total, cardEntry)
             // 非临时值且检定成功，记录人物卡技能成长
             if (!cardEntry.isTemp && cardEntry.type === 'skills' && result?.success) {
-              this.skills2growth.push(cardEntry.name)
+              this.skills2growth.push(cardEntry.key)
             }
           }
           return { skill, tempValue, cardEntry, result }
@@ -217,7 +218,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const rollValue = rollResult.roll.total
     const decideResult = test.result!
     const baseValue = test.cardEntry!.baseValue
-    const res = { username: this.context.username, skill: test.cardEntry!.name, baseValue }
+    const res = { username: this.context.username, skill: test.cardEntry!.key, baseValue }
     if (decideResult.level === SuccessLevel.REGULAR_SUCCESS) {
       // 成功的检定，如设置 refineSuccessLevels，要比较成功等级哪个更高
       if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {

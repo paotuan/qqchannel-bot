@@ -414,7 +414,7 @@ const SKILL_ALIAS: Record<string, string[]> = _SKILL_ALIAS
 /**
  * coc 难度等级解析
  */
-function parseDifficulty(expression: string): [string, Difficulty] {
+export function parseDifficulty(expression: string): [string, Difficulty] {
   let difficulty: Difficulty = 'normal'
   if (expression.includes('困难')) {
     difficulty = 'hard'
@@ -429,7 +429,7 @@ function parseDifficulty(expression: string): [string, Difficulty] {
  * 根据难度等级计算目标值
  * 也可以传 reverse 反向计算
  */
-function calculateTargetValueWithDifficulty(baseValue: number, difficulty: Difficulty, reverse = false) {
+export function calculateTargetValueWithDifficulty(baseValue: number, difficulty: Difficulty, reverse = false) {
   if (difficulty === 'hard') {
     return reverse ? baseValue * 2 : Math.floor(baseValue / 2)
   } else if (difficulty === 'ex') {
