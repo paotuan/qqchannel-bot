@@ -1,6 +1,6 @@
 import { StandardDiceRoll } from './index'
 import { SuccessLevel } from '../utils'
-import type { CocCard } from '../../card/coc'
+import type { ServerCocCard } from '../../card/coc'
 
 // 对抗检定
 // this.context.opposedRoll 代表要和本次对抗的 roll
@@ -23,7 +23,7 @@ export class OpposedDiceRoll extends StandardDiceRoll {
     }
   }
 
-  override applyToCard(): CocCard[] {
+  override applyToCard(): ServerCocCard[] {
     // 对抗检定不标记成长
     return []
   }

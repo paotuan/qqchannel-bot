@@ -4,7 +4,7 @@
 
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import type { CocCard } from '../../card/coc'
+import type { ServerCocCard } from '../../card/coc'
 
 interface IGrowthDecideResult {
   firstRoll: DiceRoll // 首次 d% 结果
@@ -95,7 +95,7 @@ export class EnDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  override applyToCard(): CocCard[] {
+  override applyToCard(): ServerCocCard[] {
     const card = this.selfCard
     if (!card) return []
     let updated = false

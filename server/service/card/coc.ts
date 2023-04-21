@@ -24,7 +24,7 @@ export interface ICocCardAbility {
   // entry?: ICocCardEntry | null // 是否对应了某个技能 // 暂不做，增加额外复杂度且并不完全通用
 }
 
-export class CocCard {
+export class ServerCocCard {
   data: ICocCardData
 
   constructor(data: ICocCardData) {

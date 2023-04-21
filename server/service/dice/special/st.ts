@@ -1,6 +1,6 @@
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import type { CocCard } from '../../card/coc'
+import type { ServerCocCard } from '../../card/coc'
 import { IDiceRollContext, parseTemplate } from '../utils'
 
 const AtUserPattern = /^<@!(\d+)>/ // todo 后续配置注入
@@ -12,7 +12,7 @@ export class StDiceRoll extends BasePtDiceRoll {
   private show = false
   private targetUserId = ''
   private exp = ''
-  private targetUserCard?: CocCard
+  private targetUserCard?: ServerCocCard
   private readonly rolls: { name: string, roll: DiceRoll }[] = []
   private readonly shows: { name: string, value: number }[] = []
 
@@ -124,7 +124,7 @@ export class StDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  override applyToCard(): CocCard[] {
+  override applyToCard(): ServerCocCard[] {
     if (this.show) return []
     if (!this.targetUserCard) return []
     if (this.rolls.length === 0) return []

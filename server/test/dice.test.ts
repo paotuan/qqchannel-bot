@@ -3,7 +3,7 @@ import type { IDiceRollContext } from '../service/dice/utils'
 import { createDiceRoll } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
-import { CocCard } from '../service/card/coc'
+import { ServerCocCard } from '../service/card/coc'
 import type { ICocCardData } from '../../interface/card/coc'
 
 // use a custom engine
@@ -181,7 +181,7 @@ describe('已关联人物卡', () => {
     username: 'Maca',
     userRole: 'admin',
     config: new ChannelConfig(getInitialDefaultConfig()),
-    getCard: () => new CocCard(getCardProto())
+    getCard: () => new ServerCocCard(getCardProto())
   }
 
   test('检定', () => {

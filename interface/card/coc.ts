@@ -8,7 +8,7 @@ export type Difficulty = 'normal' | 'hard' | 'ex'
  */
 export interface ICocCardData {
   type: 'coc'
-  version: number // todo 修改为跟随主版本的 version code
+  version: number
   basic: {
     name: string
     job: string
@@ -18,7 +18,6 @@ export interface ICocCardData {
     SAN: number
     LUCK: number
     MP: number
-    // todo 版本升级
     CM: number
     '信用': number
   },
@@ -63,7 +62,7 @@ export interface ICocCardAbility extends ICardAbility {
  * coc 人物卡
  */
 export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
-  private readonly data: ICocCardData
+  /*private readonly */data: ICocCardData // todo 后续直接用类实现替换人物卡
   readonly defaultRoll = 'd%'
 
   get type() {

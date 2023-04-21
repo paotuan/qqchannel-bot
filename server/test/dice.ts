@@ -1,5 +1,5 @@
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
-import { CocCard } from '../service/card/coc'
+import { ServerCocCard } from '../service/card/coc'
 import { getInitialDefaultConfig } from '../service/config/default'
 import { ChannelConfig } from '../service/config/config'
 import type { ICocCardData } from '../../interface/card/coc'
@@ -88,7 +88,7 @@ list1.forEach(exp => {
   console.log('========================')
 })
 
-const mockCard = new CocCard(getCardProto())
+const mockCard = new ServerCocCard(getCardProto())
 context.getCard = () => mockCard
 console.log('========== 指定人物卡 =========')
 list2.forEach(exp => {

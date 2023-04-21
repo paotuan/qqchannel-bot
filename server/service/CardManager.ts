@@ -5,7 +5,7 @@ import * as glob from 'glob'
 import { makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
-import { CocCard } from './card/coc'
+import { ServerCocCard } from './card/coc'
 
 const dir = './cards'
 
@@ -16,7 +16,7 @@ type LinkMap = Record<string, string> // userId => cardName
  */
 export class CardManager {
   private readonly wss: Wss
-  private readonly cardMap: Record<string, CocCard> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
+  private readonly cardMap: Record<string, ServerCocCard> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
   private readonly channelLinkMap: Record<string, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
 
   get cardList() { return Object.values(this.cardMap).map(card => card.data) }
@@ -38,7 +38,7 @@ export class CardManager {
         const str = fs.readFileSync(filename, 'utf8')
         try {
           const card = JSON.parse(str) as ICocCardData
-          this.cardMap[card.basic.name] = new CocCard(handleCardUpgrade(card))
+          this.cardMap[card.basic.name] = new ServerCocCard(handleCardUpgrade(card))
         } catch (e) {
           console.log(`[Card] ${filename} 解析失败`)
         }
@@ -55,13 +55,13 @@ export class CardManager {
     if (this.cardMap[cardName]) {
       this.cardMap[cardName].data = card
     } else {
-      this.cardMap[cardName] = new CocCard(card)
+      this.cardMap[cardName] = new ServerCocCard(card)
     }
     this.saveCard(this.cardMap[cardName])
     this.wss.sendToChannel<null>(client.listenToChannelId, { cmd: 'card/import', success: true, data: null })
   }
 
-  saveCard(card: CocCard) {
+  saveCard(card: ServerCocCard) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
     }

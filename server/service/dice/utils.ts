@@ -1,4 +1,4 @@
-import type { CocCard } from '../card/coc'
+import type { ServerCocCard } from '../card/coc'
 import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
 import { EnDiceRoll } from './special/en'
@@ -27,7 +27,7 @@ export interface IDiceRollContext {
   username: string
   userRole: UserRole
   config: ChannelConfig
-  getCard: (userId: string) => CocCard | null | undefined
+  getCard: (userId: string) => ServerCocCard | null | undefined
   opposedRoll?: StandardDiceRoll | null
 }
 
@@ -43,13 +43,12 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
   const selfCard = context.getCard(context.userId)
   const getEntry = (key: string) => selfCard?.getEntry(key)?.value || ''
   const getAbility = (key: string) => selfCard?.getAbility(key)?.value || ''
-  const dbAndBuild = selfCard?.dbAndBuild || [] // db 和 体格要特殊处理下，因为是计算属性，不能修改，而且是必有的。todo 思考如何通用
   const InlineDiceRoll = getInlineDiceRollKlass()
   // 1. 如检测到 ability or attribute，则求值并替换
   expression = expression.replace(ENTRY_REGEX, (_, key1?: string, key2?: string) => {
     const key = key1 ?? key2 ?? ''
     // 1.1 是否是 ability？ability 替换为的表达式可能也含有其他的 ability、attribute or inline dice，因此需递归地求值
-    const abilityExpression = ['DB', 'db'].includes(key) ? dbAndBuild[0] : getAbility(key)
+    const abilityExpression = getAbility(key)
     if (abilityExpression) {
       debug(depth, '递归解析 ability:', key, '=', abilityExpression)
       const parsedAbility = parseTemplate(abilityExpression, context, history, depth + 1)
@@ -60,7 +59,7 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
       return dice.hidden ? '' : String(dice.total)
     }
     // 1.2 是否是 attribute，如是，则替换为值
-    const skillValue = key === '体格' ? dbAndBuild[1] : getEntry(key)
+    const skillValue = getEntry(key)
     debug(depth, '解析 attribute:', key, '=', skillValue)
     return String(skillValue ?? '')
   })
