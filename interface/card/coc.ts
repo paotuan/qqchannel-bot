@@ -62,7 +62,7 @@ export interface ICocCardAbility extends ICardAbility {
  * coc 人物卡
  */
 export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
-  /*private readonly */data: ICocCardData // todo 后续直接用类实现替换人物卡
+  readonly data: ICocCardData
   readonly defaultRoll = 'd%'
 
   get type() {

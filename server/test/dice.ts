@@ -1,8 +1,8 @@
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
-import { ServerCocCard } from '../service/card/coc'
 import { getInitialDefaultConfig } from '../service/config/default'
 import { ChannelConfig } from '../service/config/config'
 import type { ICocCardData } from '../../interface/card/coc'
+import { CocCard } from '../../interface/card/coc'
 
 const list1 = [
   'd100',                  // 基础指令
@@ -88,7 +88,7 @@ list1.forEach(exp => {
   console.log('========================')
 })
 
-const mockCard = new ServerCocCard(getCardProto())
+const mockCard = new CocCard(getCardProto())
 context.getCard = () => mockCard
 console.log('========== 指定人物卡 =========')
 list2.forEach(exp => {

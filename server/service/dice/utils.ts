@@ -1,4 +1,3 @@
-import type { ServerCocCard } from '../card/coc'
 import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
 import { EnDiceRoll } from './special/en'
@@ -7,6 +6,7 @@ import { OpposedDiceRoll } from './standard/oppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
 import { StDiceRoll } from './special/st'
+import type { CocCard } from '../../../interface/card/coc'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -27,7 +27,7 @@ export interface IDiceRollContext {
   username: string
   userRole: UserRole
   config: ChannelConfig
-  getCard: (userId: string) => ServerCocCard | null | undefined
+  getCard: (userId: string) => CocCard | null | undefined
   opposedRoll?: StandardDiceRoll | null
 }
 

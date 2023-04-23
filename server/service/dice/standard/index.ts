@@ -1,7 +1,6 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { SuccessLevel, parseTemplate, parseDescriptions2 } from '../utils'
 import { BasePtDiceRoll } from '../index'
-import type { ServerCocCard } from '../../card/coc'
 import { calculateTargetValueWithDifficulty } from '../../../../interface/card/coc'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import type { ICocCardEntry } from '../../../../interface/card/coc'
@@ -185,7 +184,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     return lines.map(line => line.trim()).join('\n')
   }
 
-  override applyToCard(): ServerCocCard[] {
+  override applyToCard() {
     const card = this.selfCard
     if (!card) return []
     // const inlineSkills2growth = this.inlineRolls.map(inlineRoll => inlineRoll.skills2growth).flat()

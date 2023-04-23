@@ -3,8 +3,8 @@ import type { IDiceRollContext } from '../service/dice/utils'
 import { createDiceRoll } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
-import { ServerCocCard } from '../service/card/coc'
 import type { ICocCardData } from '../../interface/card/coc'
+import { CocCard } from '../../interface/card/coc'
 
 // use a custom engine
 NumberGenerator.generator.engine = {
@@ -181,7 +181,7 @@ describe('已关联人物卡', () => {
     username: 'Maca',
     userRole: 'admin',
     config: new ChannelConfig(getInitialDefaultConfig()),
-    getCard: () => new ServerCocCard(getCardProto())
+    getCard: () => new CocCard(getCardProto())
   }
 
   test('检定', () => {

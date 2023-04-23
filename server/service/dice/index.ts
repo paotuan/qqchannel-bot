@@ -1,7 +1,6 @@
 import type { IDiceRollContext } from './utils'
 import type { ICocCardEntry } from '../../../interface/card/coc'
-import type { ServerCocCard } from '../card/coc'
-import { calculateTargetValueWithDifficulty, parseDifficulty } from '../../../interface/card/coc'
+import { calculateTargetValueWithDifficulty, CocCard, parseDifficulty } from '../../../interface/card/coc'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -48,7 +47,7 @@ export abstract class BasePtDiceRoll {
   abstract get output(): string
 
   // 应用副作用修改人物卡，返回被真正修改的人物卡列表
-  applyToCard(): ServerCocCard[] {
+  applyToCard(): CocCard[] {
     return []
   }
 
