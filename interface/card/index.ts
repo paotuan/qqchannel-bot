@@ -1,32 +1,14 @@
-export type CardType = 'general' | 'coc' | 'dnd'
+import type { ICardData, ICard } from './types'
+import { CocCard, ICocCardData } from './coc'
+import { GeneralCard, IGeneralCardData } from './general'
 
-export interface ICardEntry {
-  input: string // 原始输入名
-  key: string // 字段名
-  value: number // 字段数值
-  isTemp: boolean // 是否是临时数值
-}
-
-export interface ICardAbility {
-  input: string // 原始输入名
-  key: string // 字段名
-  value: string // 对应的表达式
-}
-
-export interface ICard<T extends ICardEntry = ICardEntry, K extends ICardAbility = ICardAbility> {
-  type: CardType
-  // id: string 目前还是 name 做唯一标识
-  name: string
-  defaultRoll?: string
-  // hp/maxHp 用于地图中的展示
-  HP?: number
-  MAXHP?: number
-  lastModified: number // 用于目前前后端同步判断
-  getEntry(input: string): T | undefined
-  setEntry(name: string, value: number): boolean
-  removeEntry(name: string): boolean
-  getAbility(input: string): K | undefined
-  setAbility(name: string, value: string): boolean
-  removeAbility(name: string): boolean
-  getSummary(): string // 用于骰子指令展示人物卡信息
+export function createCard(data: ICardData): ICard {
+  switch (data.type) {
+  case 'coc':
+    return new CocCard(data as ICocCardData)
+  case 'general':
+    return new GeneralCard(data as IGeneralCardData)
+  default:
+    throw new Error('Invalid card type!')
+  }
 }

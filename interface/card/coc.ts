@@ -1,4 +1,4 @@
-import type { ICard, ICardAbility, ICardEntry } from './index'
+import type { ICard, ICardAbility, ICardData, ICardEntry } from './types'
 
 export type EntryType = 'basic' | 'props' | 'skills'
 export type Difficulty = 'normal' | 'hard' | 'ex'
@@ -6,11 +6,9 @@ export type Difficulty = 'normal' | 'hard' | 'ex'
 /**
  * coc 人物卡定义
  */
-export interface ICocCardData {
+export interface ICocCardData extends ICardData {
   type: 'coc'
-  version: number
   basic: {
-    name: string
     job: string
     gender: string
     AGE: number
@@ -39,8 +37,7 @@ export interface ICocCardData {
   }[],
   ext: string
   meta: {
-    skillGrowth: Record<string, boolean>,
-    lastModified: number // ms
+    skillGrowth: Record<string, boolean>
   }
 }
 
@@ -70,11 +67,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
   }
 
   get name() {
-    return this.data.basic.name
-  }
-
-  get lastModified() {
-    return this.data.meta.lastModified
+    return this.data.name
   }
 
   get HP() {
@@ -183,14 +176,14 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
       const ability = this.data.abilities.find(item => item.name === abilityRet.key)!
       if (ability.expression !== expression) {
         ability.expression = expression
-        this.data.meta.lastModified = Date.now()
+        this.data.lastModified = Date.now()
         return true
       } else {
         return false
       }
     } else {
       this.data.abilities.push({ name, expression, ext: '' })
-      this.data.meta.lastModified = Date.now()
+      this.data.lastModified = Date.now()
       return true
     }
   }
@@ -201,7 +194,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
       const index = this.data.abilities.findIndex(item => item.name === abilityRet.key)
       if (index >= 0) { // must
         this.data.abilities.splice(index, 1)
-        this.data.meta.lastModified = Date.now()
+        this.data.lastModified = Date.now()
         return true
       }
     }
@@ -257,7 +250,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
         const newValue = this[keyAsSpecialSetters]
         // 判断是否是真的改变了，因为可能被 setter 拦下来，实际未改变
         if (oldValue !== newValue) {
-          this.data.meta.lastModified = Date.now()
+          this.data.lastModified = Date.now()
           return true
         } else {
           return false
@@ -271,7 +264,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
       if (rawEntry.readonly) return false
       if (targetValue !== rawEntry.baseValue) {
         (this.data[rawEntry.type] as Record<string, number>)[rawEntry.key] = targetValue
-        this.data.meta.lastModified = Date.now()
+        this.data.lastModified = Date.now()
         return true
       } else {
         return false
@@ -279,7 +272,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
     } else {
       // 新增条目，认为是 skill，且统一大写
       this.data.skills[_input] = targetValue
-      this.data.meta.lastModified = Date.now()
+      this.data.lastModified = Date.now()
       return true
     }
   }
@@ -290,7 +283,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
     const entry = this.getRawEntry(skillWithoutDifficulty)
     if (entry && entry.type === 'skills' && !entry.readonly) {
       delete this.data.skills[entry.key]
-      this.data.meta.lastModified = Date.now()
+      this.data.lastModified = Date.now()
       return true
     } else {
       return false
@@ -308,7 +301,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
       return false // 已经标记为成长了，无需额外的更新
     } else {
       this.data.meta.skillGrowth[key] = true
-      this.data.meta.lastModified = Date.now()
+      this.data.lastModified = Date.now()
       return true // 返回有更新
     }
   }
@@ -346,7 +339,7 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
         this.data.skills[key] = value
       }
     })
-    this.data.meta.lastModified = Date.now() // 强制认为有更新吧
+    this.data.lastModified = Date.now() // 强制认为有更新吧
   }
 
   getSummary() {

@@ -1,3 +1,5 @@
+import type { ICocCardData } from './card/coc'
+
 /**
  * coc 人物卡定义
  */
@@ -45,7 +47,7 @@ export type IAbility = ICard['abilities'][number]
 /**
  * 计算伤害加成和体格
  */
-export function getDBAndBuild(card: ICard): [string, number] {
+export function getDBAndBuild(card: ICocCardData): [string, number] {
   const sum = card.props['力量'] + card.props['体型'] // str+siz
   if (sum < 65) {
     return ['-2', -2]

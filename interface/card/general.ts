@@ -1,13 +1,10 @@
-import type { ICard } from './index'
+import type { ICard, ICardData } from './types'
 
-export interface IGeneralCardData {
+export interface IGeneralCardData extends ICardData {
   type: 'general'
-  version: number
-  name: string
   ext: string
   skills: Record<string, number>
   abilities: Record<string, string>
-  lastModified: number
 }
 
 export class GeneralCard implements ICard {
@@ -27,10 +24,6 @@ export class GeneralCard implements ICard {
 
   get MAXHP() {
     return this.getEntry('MAXHP')?.value
-  }
-
-  get lastModified() {
-    return this.data.lastModified
   }
 
   constructor(data: IGeneralCardData) {

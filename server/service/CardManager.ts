@@ -38,8 +38,8 @@ export class CardManager {
       files.forEach(filename => {
         const str = fs.readFileSync(filename, 'utf8')
         try {
-          const card = JSON.parse(str) as ICocCardData
-          this.cardMap[card.basic.name] = handleCardUpgrade(card)
+          const card = handleCardUpgrade(JSON.parse(str) as ICocCardData)
+          this.cardMap[card.name] = card
         } catch (e) {
           console.log(`[Card] ${filename} 解析失败`)
         }
@@ -51,7 +51,7 @@ export class CardManager {
 
   importCard(client: WsClient, req: ICardImportReq) {
     const { card } = req
-    const cardName = card.basic.name
+    const cardName = card.name
     console.log('[Card] 保存人物卡', cardName)
     this.cardMap[cardName] = card
     delete this.cardCache[cardName] // 由于 card 引用变化，清除 cache，避免还引用到旧的 card data
@@ -67,7 +67,7 @@ export class CardManager {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
     }
-    const cardName = cardData.basic.name
+    const cardName = cardData.name
     fs.writeFile(`${dir}/${cardName}.json`, JSON.stringify(cardData), (e) => {
       if (e) {
         console.error('[Card] 人物卡写文件失败', e)
@@ -136,7 +136,7 @@ export class CardManager {
 }
 
 // card 版本升级逻辑
-function handleCardUpgrade(card: ICocCardData) {
+function handleCardUpgrade(card: any) {
   if (card.version === 1) {
     card.meta.lastModified = 0
     card.version = 2
@@ -147,28 +147,31 @@ function handleCardUpgrade(card: ICocCardData) {
     card.version = 3
   }
   if (card.version === 3) {
-    const oldCard = card as any
-    card.basic.AGE = oldCard.basic.age
-    delete oldCard.basic.age
-    card.basic.HP = oldCard.basic.hp
-    delete oldCard.basic.hp
-    card.basic.SAN = oldCard.basic.san
-    delete oldCard.basic.san
-    card.basic.LUCK = oldCard.basic.luck
-    delete oldCard.basic.luck
-    card.basic.MP = oldCard.basic.mp
-    delete oldCard.basic.mp
-    card.basic.CM = oldCard.skills.克苏鲁 ?? oldCard.skills.克苏鲁神话 ?? oldCard.skills.CM ?? oldCard.skills.cm ?? 0
-    delete oldCard.skills.克苏鲁
-    delete oldCard.skills.克苏鲁神话
-    delete oldCard.skills.CM
-    delete oldCard.skills.cm
-    card.basic.信用 = oldCard.skills.信用 ?? oldCard.skills.信誉 ?? oldCard.skills.信用评级 ?? 0
-    delete oldCard.skills.信用
-    delete oldCard.skills.信誉
-    delete oldCard.skills.信用评级
+    card.basic.AGE = card.basic.age
+    delete card.basic.age
+    card.basic.HP = card.basic.hp
+    delete card.basic.hp
+    card.basic.SAN = card.basic.san
+    delete card.basic.san
+    card.basic.LUCK = card.basic.luck
+    delete card.basic.luck
+    card.basic.MP = card.basic.mp
+    delete card.basic.mp
+    card.basic.CM = card.skills.克苏鲁 ?? card.skills.克苏鲁神话 ?? card.skills.CM ?? card.skills.cm ?? 0
+    delete card.skills.克苏鲁
+    delete card.skills.克苏鲁神话
+    delete card.skills.CM
+    delete card.skills.cm
+    card.basic.信用 = card.skills.信用 ?? card.skills.信誉 ?? card.skills.信用评级 ?? 0
+    delete card.skills.信用
+    delete card.skills.信誉
+    delete card.skills.信用评级
+    card.name = card.basic.name
+    delete card.basic.name
+    card.lastModified = card.meta.lastModified
+    delete card.meta.lastModified
     card.type = 'coc'
-    card.version = 16 // 1.3.0
+    card.version = 17 // 1.3.0
   }
   return card
 }

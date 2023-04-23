@@ -2,7 +2,7 @@
   <div v-if="card">
     <!-- basic -->
     <div class="flex gap-2 items-center flex-wrap mb-2">
-      <span class="text-sm font-bold">{{ cardnn.basic.name }}</span>
+      <span class="text-sm font-bold">{{ cardnn.name }}</span>
       <text-input v-model="cardnn.basic.gender" placeholder="性别" class="input input-bordered input-xs w-14"/>
       <span class="inline-flex items-center gap-0.5">
           <number-input v-model="cardnn.basic.AGE" placeholder="年龄" class="input input-bordered input-xs w-14"/>

@@ -244,8 +244,9 @@ function getCardProto(): ICocCardData {
   return {
     type: 'coc',
     version: 16,
+    name: '铃木翼',
+    lastModified: Date.now(),
     basic: {
-      name: '铃木翼',
       job: '学生',
       AGE: 24,
       gender: '秀吉',
@@ -279,8 +280,7 @@ function getCardProto(): ICocCardData {
     ],
     ext: '',
     meta: {
-      skillGrowth: {},
-      lastModified: Date.now()
+      skillGrowth: {}
     }
   }
 }

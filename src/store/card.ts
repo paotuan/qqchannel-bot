@@ -18,10 +18,10 @@ export const useCardStore = defineStore('card', () => {
   const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : null)
   const allCards = computed(() => Object.values(cardMap))
   // 已存在的人物卡文件名
-  const existNames = computed(() => allCards.value.map(card => card.basic.name))
+  const existNames = computed(() => allCards.value.map(card => card.name))
   const linkedUsers = computed(() => Object.values(cardLinkMap))
   // 当前应该展示的人物卡列表
-  const displayCardList = computed(() => showAllCards.value ? allCards.value : allCards.value.filter(card => !!cardLinkMap[card.basic.name]))
+  const displayCardList = computed(() => showAllCards.value ? allCards.value : allCards.value.filter(card => !!cardLinkMap[card.name]))
 
   const of = (cardName: string) => cardMap[cardName]
 
@@ -38,7 +38,7 @@ export const useCardStore = defineStore('card', () => {
   // 全量更新人物卡
   const updateCards = (cards: ICocCardData[]) => {
     // 1. 不存在的 card 本地要删掉
-    const newExistNames = cards.map(card => card.basic.name)
+    const newExistNames = cards.map(card => card.name)
     const name2delete = existNames.value.filter(name => !newExistNames.includes(name))
     name2delete.forEach(cardName => {
       delete cardMap[cardName]
@@ -50,10 +50,10 @@ export const useCardStore = defineStore('card', () => {
     })
     // 2. 存在的 card 根据条件更新
     cards.forEach(card => {
-      const cardName = card.basic.name
+      const cardName = card.name
       const oldCard = cardMap[cardName]
       // 本地没这张卡片，或服务端的卡片修改时间更新，才覆盖，否则以本地的为准
-      if (!oldCard || oldCard.meta.lastModified <= card.meta.lastModified) {
+      if (!oldCard || oldCard.lastModified <= card.lastModified) {
         cardMap[cardName] = card
         cardEditedMap[cardName] = false
       }
@@ -62,7 +62,7 @@ export const useCardStore = defineStore('card', () => {
 
   // 删除人物卡
   const deleteCard = (card: ICocCardData) => {
-    const cardName = card.basic.name
+    const cardName = card.name
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     gtagEvent('card/delete')
     // 不管后端删除有没有成功，前端直接删除吧
@@ -73,7 +73,7 @@ export const useCardStore = defineStore('card', () => {
   }
 
   // 选择某张人物卡
-  const selectCard = (card: ICocCardData) => selectedCardId.value = card.basic.name
+  const selectCard = (card: ICocCardData) => selectedCardId.value = card.name
 
   // 标记某个技能成长
   const markSkillGrowth = (targetCard: ICocCardData, skill: string, value?: boolean) => {
@@ -83,17 +83,17 @@ export const useCardStore = defineStore('card', () => {
 
   // 标记某张卡片被编辑
   const markCardEdited = (card: ICocCardData) => {
-    card.meta.lastModified = Date.now()
-    cardEditedMap[card.basic.name] = true
+    card.lastModified = Date.now()
+    cardEditedMap[card.name] = true
   }
 
   // 人物卡是否有编辑未保存
-  const isEdited = (card: ICocCardData) => !!cardEditedMap[card.basic.name]
+  const isEdited = (card: ICocCardData) => !!cardEditedMap[card.name]
 
   // 关联玩家相关
-  const linkedUserOf = (card: ICocCardData) => cardLinkMap[card.basic.name]
+  const linkedUserOf = (card: ICocCardData) => cardLinkMap[card.name]
   const requestLinkUser = (card: ICocCardData, userId: string | null | undefined) => {
-    const cardName = card.basic.name
+    const cardName = card.name
     ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
     gtagEvent('card/link')
   }
@@ -151,8 +151,9 @@ function getCardProto(): ICocCardData {
   return {
     type: 'coc',
     version: 16,
+    name: '',
+    lastModified: Date.now(),
     basic: {
-      name: '',
       job: '学生',
       AGE: 24,
       gender: '秀吉',
@@ -177,8 +178,7 @@ function getCardProto(): ICocCardData {
     abilities: [],
     ext: '',
     meta: {
-      skillGrowth: {},
-      lastModified: Date.now()
+      skillGrowth: {}
     }
   }
 }
@@ -227,7 +227,7 @@ class CardSetter {
 
 export function parseText(name: string, rawText: string): ICocCardData {
   const card = getCardProto()
-  card.basic.name = name.trim()
+  card.name = name.trim()
   return addAttributesBatch(card, rawText)
 }
 
@@ -239,7 +239,7 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
   const cySheet = workbook.Sheets['简化卡 骰娘导入']
   if (cySheet) {
     // 是否是 CY 卡
-    user.basic.name = sheet['E3']?.v || '未命名'
+    user.name = sheet['E3']?.v || '未命名'
     user.basic.job = sheet['E5']?.v || ''
     user.basic.AGE = sheet['E6']?.v || 0
     user.basic.gender = sheet['M6']?.v || ''
@@ -265,8 +265,8 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
     }
   } else {
     // read basic info
+    user.name = sheet['D3']?.v || '未命名'
     user.basic = {
-      name: sheet['D3']?.v || '未命名',
       job: sheet['D5']?.v || '',
       AGE: sheet['D6']?.v || 0,
       gender: sheet['L6']?.v || '',

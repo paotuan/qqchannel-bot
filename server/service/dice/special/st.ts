@@ -100,7 +100,7 @@ export class StDiceRoll extends BasePtDiceRoll {
     if (!this.targetUserCard) {
       return `${at(this.targetUserId)}没有关联人物卡`
     }
-    const cardName = this.targetUserCard.data.basic.name
+    const cardName = this.targetUserCard.data.name
     if (this.show) {
       // 展示
       const list = this.shows.map(item => item.name + (isNaN(item.value) ? '-' : item.value)).join(' ')

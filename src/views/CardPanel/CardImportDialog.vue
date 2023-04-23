@@ -70,7 +70,7 @@ const nameExist = computed(() => {
   if (tab.value === 'text') {
     return cardStore.existNames.includes(textName.value)
   } else if (tab.value === 'excel' && xlsxCard.value) {
-    return cardStore.existNames.includes(xlsxCard.value.basic.name)
+    return cardStore.existNames.includes(xlsxCard.value.name)
   } else {
     return false
   }
