@@ -4,8 +4,8 @@ import ws from '../api/ws'
 import { computed, reactive, ref } from 'vue'
 import XLSX from 'xlsx'
 import { gtagEvent } from '../utils'
-import { skillAliasMap } from '../../interface/coc'
 import type { ICocCardData } from '../../interface/card/coc'
+import { CocCard } from '../../interface/card/coc'
 
 export const useCardStore = defineStore('card', () => {
   const cardMap = reactive<Record<string, ICocCardData>>({})
@@ -183,46 +183,18 @@ function getCardProto(): ICocCardData {
   }
 }
 
-class CardSetter {
-  data: ICocCardData
-
-  constructor(data: ICocCardData) {
-    this.data = data
+function _unifiedKey(key: string) {
+  let unifiedKey = key
+  if (unifiedKey.startsWith('计算机')) {
+    unifiedKey = '计算机'
+  } else if (unifiedKey.startsWith('图书馆')) {
+    unifiedKey = '图书馆'
+  } else if (unifiedKey.startsWith('电子学')) {
+    unifiedKey = '电子学'
+  } else if (unifiedKey.startsWith('母语')) {
+    unifiedKey = '母语'
   }
-
-  set(name: string, value: number, types = ['basic', 'props', 'skills']) {
-    const unifiedName = CardSetter._unifiedKey(name)
-    const entry = this.getEntry(unifiedName, types)
-    const card = this.data as any
-    card[entry.type][entry.name] = value
-  }
-
-  private getEntry(rawSkillName: string, types: string[]) {
-    const possibleSkills = skillAliasMap[rawSkillName] ?? [rawSkillName] // 处理属性别名
-    for (const skill of possibleSkills) {
-      for (const type of types) {
-        const target = (this.data as any)[type][skill]
-        if (typeof target === 'number') {
-          return { name: skill, type } // 返回真实存在的那个别名
-        }
-      }
-    }
-    return { name: rawSkillName, type: 'skills' } // 以前不存在 entry，就认为是 skill
-  }
-
-  private static _unifiedKey(key: string) {
-    let unifiedKey = key
-    if (unifiedKey.startsWith('计算机')) {
-      unifiedKey = '计算机'
-    } else if (unifiedKey.startsWith('图书馆')) {
-      unifiedKey = '图书馆'
-    } else if (unifiedKey.startsWith('电子学')) {
-      unifiedKey = '电子学'
-    } else if (unifiedKey.startsWith('母语')) {
-      unifiedKey = '母语'
-    }
-    return unifiedKey
-  }
+  return unifiedKey
 }
 
 export function parseText(name: string, rawText: string): ICocCardData {
@@ -233,7 +205,7 @@ export function parseText(name: string, rawText: string): ICocCardData {
 
 export function parseCoCXlsx(workbook: XLSX.WorkBook) {
   const user = getCardProto()
-  const setter = new CardSetter(user)
+  const setter = new CocCard(user)
   // 解析 excel
   const sheet = workbook.Sheets['人物卡']
   const cySheet = workbook.Sheets['简化卡 骰娘导入']
@@ -250,7 +222,7 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
       const name = entry.slice(0, index).trim()
       const value = parseInt(entry.slice(index), 10)
       if (!name || isNaN(value)) return // 理论不可能
-      setter.set(name, value)
+      setter.setEntry(_unifiedKey(name), value)
     })
     // 读武器列表
     for (let i = 53; i <= 58; i++) {
@@ -293,14 +265,14 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
     for (let i = 15; i <= 46; i++) {
       const name = sheet[(E_LINES.includes(i) ? 'E' : 'C') + i]
       if (!name) continue // 自选技能，玩家没选的情况
-      setter.set(name.v, sheet['P' + i].v, ['skills'])
+      setter.setEntry(_unifiedKey(name.v), sheet['P' + i].v)
     }
     // read second column
     const Y_LINES = [26, 30, 31, 32, 36, 40]
     for (let i = 15; i <= 40; i++) {
       const name = sheet[(Y_LINES.includes(i) ? 'Y' : 'W') + i]
       if (!name) continue // 自选技能，玩家没选的情况
-      setter.set(name.v, sheet['AJ' + i].v, ['skills'])
+      setter.setEntry(_unifiedKey(name.v), sheet['AJ' + i].v)
     }
     // 读武器列表
     for (let i = 50; i <= 55; i++) {
@@ -319,13 +291,13 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
 }
 
 export function addAttributesBatch(card: ICocCardData, rawText: string): ICocCardData {
-  const setter = new CardSetter(card)
+  const setter = new CocCard(card)
   Array.from(rawText.trim().matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
     const index = entry.search(/\d/) // 根据数字分隔
     const name = entry.slice(0, index).replace(/[:：]/g, '').trim()
     const value = parseInt(entry.slice(index), 10)
     if (!name || isNaN(value)) return // 理论不可能
-    setter.set(name, value)
+    setter.setEntry(name, value)
   })
   return card
 }

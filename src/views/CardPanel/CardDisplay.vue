@@ -170,9 +170,9 @@ import { computed, ref, watch } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import TextInput from './TextInput.vue'
 import NumberInput from './NumberInput.vue'
-import { getDBAndBuild } from '../../../interface/coc'
 import CardAddAttribute from './CardAddAttribute.vue'
 import type { ICocCardData } from '../../../interface/card/coc'
+import { CocCard } from '../../../interface/card/coc'
 
 const cardStore = useCardStore()
 const card = computed(() => cardStore.selectedCard)
@@ -182,7 +182,12 @@ const cardnn = computed(() => card.value!)
 const propKeyOf = (card: ICocCardData) => {
   return Object.keys(card.props) as Array<keyof typeof card.props>
 }
-const dbAndBuild = computed(() => getDBAndBuild(cardnn.value))
+const dbAndBuild = computed(() => {
+  const cardObj = new CocCard(cardnn.value)
+  const db = cardObj.getAbility('DB')?.value ?? '0'
+  const build = cardObj.getEntry('体格')?.value ?? 0
+  return [db, build]
+})
 // endregion 给模板用的
 
 // 技能按数值排序。缓存一下选择卡片时的技能值顺序，避免编辑过程中实时数值改变导致排序跳动
