@@ -17,6 +17,7 @@ export const useChatStore = defineStore('chat', () => {
   const history = reactive<IMessage[]>([])
   const chatLoading = ref(false)
   const apiKey = ref('')
+  const apiProxy = ref('')
 
   const _getBodyAndRecord = (content: string) => {
     // 如果有失败的消息，则过滤掉
@@ -44,7 +45,8 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const _requestOfficial = (body: IMessageForRequest[]) => {
-    return fetch('https://api.openai.com/v1/chat/completions', {
+    const apiAddress = apiProxy.value.trim() || 'https://api.openai.com/v1/chat/completions'
+    return fetch(apiAddress, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey.value.trim()}` },
       body: JSON.stringify({ model: 'gpt-3.5-turbo', messages: body })
@@ -56,7 +58,8 @@ export const useChatStore = defineStore('chat', () => {
     const body = _getBodyAndRecord(content)
     try {
       chatLoading.value = true
-      const response = await (apiKey.value.trim() ? _requestOfficial : _requestInner)(body)
+      const useOfficialApi = apiKey.value.trim() && apiProxy.value.trim()
+      const response = await (useOfficialApi ? _requestOfficial : _requestInner)(body)
       if (response.status !== 200) {
         const body = await response.text()
         history.push({ role: 'assistant', content: `Failed to send message. HTTP ${response.status} - ${body}`, id: nanoid(), isError: true })
