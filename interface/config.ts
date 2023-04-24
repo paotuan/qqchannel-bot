@@ -1,7 +1,8 @@
-import type { UserRole } from '../server/service/dice/utils'
 import type { IMessage } from 'qq-guild-bot'
 import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { CocCard } from './card/coc'
+
+export type UserRole = 'admin' | 'manager' | 'user'
 
 // region 自定义回复
 export interface ICustomReplyEnv {

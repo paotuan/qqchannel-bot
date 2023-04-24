@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev:client": "vite",
-    "build:client": "rimraf dist/client/* && vue-tsc --noEmit --project src/tsconfig.json && vite build",
+    "build:client": "rimraf dist/client/* && vue-tsc --noEmit && vite build",
     "preview:client": "vite preview",
     "dev:server": "cross-env NODE_ENV=development npx nodemon --watch server server/index.ts",
     "build:server": "rimraf dist/server/* && rimraf plugins/* && ncc build ./server/index.ts -o dist/server",
