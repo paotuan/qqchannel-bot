@@ -78,7 +78,7 @@ const context: IDiceRollContext = {
   username: 'Maca',
   userRole: 'admin',
   config: new ChannelConfig(getInitialDefaultConfig()),
-  getCard: () => null,
+  getCard: () => undefined,
 }
 
 console.log('========== 未指定人物卡 =========')

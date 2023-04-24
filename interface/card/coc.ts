@@ -1,4 +1,5 @@
-import type { ICard, ICardAbility, ICardData, ICardEntry } from './types'
+import type { ICardAbility, ICardData, ICardEntry } from './types'
+import { BaseCard } from './types'
 
 export type EntryType = 'basic' | 'props' | 'skills'
 export type Difficulty = 'normal' | 'hard' | 'ex'
@@ -58,17 +59,8 @@ export interface ICocCardAbility extends ICardAbility {
 /**
  * coc 人物卡
  */
-export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
-  readonly data: ICocCardData
+export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbility> {
   readonly defaultRoll = 'd%'
-
-  get type() {
-    return this.data.type
-  }
-
-  get name() {
-    return this.data.name
-  }
 
   get HP() {
     return this.data.basic.HP
@@ -141,10 +133,6 @@ export class CocCard implements ICard<ICocCardEntry, ICocCardAbility> {
 
   private get 体格() {
     return this.dbAndBuild[1]
-  }
-
-  constructor(data: ICocCardData) {
-    this.data = data
   }
 
   getAbility(input: string) {

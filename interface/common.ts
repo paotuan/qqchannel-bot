@@ -1,5 +1,5 @@
 import type { IChannelConfig } from './config'
-import type { ICocCardData } from './card/coc'
+import type { ICardData } from './card/types'
 
 export type Command =
   | 'bot/login' // req/res
@@ -134,12 +134,12 @@ export interface INoteDeleteReq {
 
 // region card
 export interface ICardImportReq {
-  card: ICocCardData
+  card: ICardData
 }
 
 // export type ICardImportResp = ICardImportReq
 
-export type ICardListResp = ICocCardData[]
+export type ICardListResp = ICardData[]
 
 export interface ICardDeleteReq {
   cardName: string

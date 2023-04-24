@@ -170,7 +170,7 @@ export class DiceManager {
     try {
       // console.time('dice')
       // 是否有人物卡
-      const getCard = (userId: string) => channelId ? this.wss.cards.getCard(channelId, userId) : null
+      const getCard = (userId: string) => channelId ? this.wss.cards.getCard(channelId, userId) : undefined
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
       // 配置

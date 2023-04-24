@@ -1,4 +1,5 @@
-import type { ICard, ICardData } from './types'
+import type { ICardData } from './types'
+import { BaseCard } from './types'
 
 export interface IGeneralCardData extends ICardData {
   type: 'general'
@@ -7,27 +8,13 @@ export interface IGeneralCardData extends ICardData {
   abilities: Record<string, string>
 }
 
-export class GeneralCard implements ICard {
-  private readonly data: IGeneralCardData
-
-  get type() {
-    return this.data.type
-  }
-
-  get name() {
-    return this.data.name
-  }
-
+export class GeneralCard extends BaseCard<IGeneralCardData> {
   get HP() {
     return this.getEntry('HP')?.value
   }
 
   get MAXHP() {
     return this.getEntry('MAXHP')?.value
-  }
-
-  constructor(data: IGeneralCardData) {
-    this.data = data
   }
 
   getAbility(input: string) {

@@ -1,7 +1,7 @@
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { IDiceRollContext, parseTemplate } from '../utils'
-import type { CocCard } from '../../../../interface/card/coc'
+import type { ICard } from '../../../../interface/card/types'
 
 const AtUserPattern = /^<@!(\d+)>/ // todo 后续配置注入
 
@@ -12,9 +12,9 @@ export class StDiceRoll extends BasePtDiceRoll {
   private show = false
   private targetUserId = ''
   private exp = ''
-  private targetUserCard?: CocCard
+  private targetUserCard?: ICard
   private readonly rolls: { name: string, roll: DiceRoll }[] = []
-  private readonly shows: { name: string, value: number }[] = []
+  private readonly shows: { name: string, value: number | string }[] = []
 
   override roll() {
     this.exp = this.rawExpression.slice(2).trim()
@@ -32,7 +32,7 @@ export class StDiceRoll extends BasePtDiceRoll {
       this.targetUserId = this.context.userId
     }
     // 是否有人物卡，如没有直接结束
-    this.targetUserCard = this.context.getCard(this.targetUserId) ?? undefined
+    this.targetUserCard = this.context.getCard(this.targetUserId)
     if (!this.targetUserCard) return this
     if (this.show) {
       this.rollShow()
@@ -82,17 +82,7 @@ export class StDiceRoll extends BasePtDiceRoll {
       }))
     } else {
       // 不指定展示哪个，就默认展示全部
-      const data = this.targetUserCard!.data
-      this.shows.push({ name: '生命', value: data.basic.HP })
-      this.shows.push({ name: '理智', value: data.basic.SAN })
-      this.shows.push({ name: '幸运', value: data.basic.LUCK })
-      this.shows.push({ name: '魔法', value: data.basic.MP })
-      Object.entries(data.props).forEach(([name, value]) => {
-        this.shows.push({ name, value })
-      })
-      Object.entries(data.skills).forEach(([name, value]) => {
-        this.shows.push({ name, value })
-      })
+      this.shows.push({ name: '\n', value: this.targetUserCard!.getSummary() })
     }
   }
 
@@ -103,7 +93,7 @@ export class StDiceRoll extends BasePtDiceRoll {
     const cardName = this.targetUserCard.data.name
     if (this.show) {
       // 展示
-      const list = this.shows.map(item => item.name + (isNaN(item.value) ? '-' : item.value)).join(' ')
+      const list = this.shows.map(item => item.name + (typeof item.value === 'number' && isNaN(item.value) ? '-' : item.value)).join(' ')
       return `${at(this.targetUserId)}(${cardName}):${this.shows.length > 1 ? '\n' : ' '}${list}`
     } else {
       // 设置

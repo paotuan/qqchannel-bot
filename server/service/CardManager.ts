@@ -1,11 +1,11 @@
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
-import type { ICocCardData } from '../../interface/card/coc'
 import * as fs from 'fs'
 import * as glob from 'glob'
 import { makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
-import { CocCard } from '../../interface/card/coc'
+import type { ICard, ICardData } from '../../interface/card/types'
+import { createCard } from '../../interface/card'
 
 const dir = './cards'
 
@@ -16,8 +16,8 @@ type LinkMap = Record<string, string> // userId => cardName
  */
 export class CardManager {
   private readonly wss: Wss
-  private readonly cardMap: Record<string, ICocCardData> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
-  private readonly cardCache: Record<string, CocCard> = {} // 由于 mobx 不会把类实例变为响应式，我们只把 plain data 作为响应性，类只用于缓存，手动管理
+  private readonly cardMap: Record<string, ICardData> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
+  private readonly cardCache: Record<string, ICard> = {} // 由于 mobx 不会把类实例变为响应式，我们只把 plain data 作为响应性，类只用于缓存，手动管理
   private readonly channelLinkMap: Record<string, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
 
   get cardList() { return Object.values(this.cardMap) }
@@ -38,7 +38,7 @@ export class CardManager {
       files.forEach(filename => {
         const str = fs.readFileSync(filename, 'utf8')
         try {
-          const card = handleCardUpgrade(JSON.parse(str) as ICocCardData)
+          const card = handleCardUpgrade(JSON.parse(str) as ICardData)
           this.cardMap[card.name] = card
         } catch (e) {
           console.log(`[Card] ${filename} 解析失败`)
@@ -59,11 +59,11 @@ export class CardManager {
     this.wss.sendToChannel<null>(client.listenToChannelId, { cmd: 'card/import', success: true, data: null })
   }
 
-  saveCard(card: CocCard) {
+  saveCard(card: ICard) {
     this._saveCardData(card.data)
   }
 
-  private _saveCardData(cardData: ICocCardData) {
+  private _saveCardData(cardData: ICardData) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
     }
@@ -123,13 +123,13 @@ export class CardManager {
   }
 
   // 根据子频道和用户 id，获取该用户关联的人物卡
-  getCard(channelId: string, userId: string): CocCard | null {
+  getCard(channelId: string, userId: string): ICard | undefined {
     const linkMap = this.getLinkMap(channelId)
     const cardName = linkMap[userId]
     const cardData = this.cardMap[cardName]
-    if (!cardData) return null
+    if (!cardData) return undefined
     if (!this.cardCache[cardName]) {
-      this.cardCache[cardName] = new CocCard(cardData)
+      this.cardCache[cardName] = createCard(cardData)
     }
     return this.cardCache[cardName]
   }

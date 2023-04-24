@@ -20,7 +20,7 @@ describe('未关联人物卡', () => {
     username: 'Maca',
     userRole: 'admin',
     config: new ChannelConfig(getInitialDefaultConfig()),
-    getCard: () => null,
+    getCard: () => undefined,
   }
 
   test('基础指令', () => {

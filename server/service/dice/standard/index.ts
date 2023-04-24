@@ -40,9 +40,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   protected skills2growth: string[] = []
 
   override roll() {
-    this.skills2growth.length = 0
-    this.skillsForTest.length = 0
-    this.rolls.length = 0
+    // this.skills2growth.length = 0
+    // this.skillsForTest.length = 0
+    // this.rolls.length = 0
     this.parse()
     // 掷骰
     for (let i = 0; i < this.times; i++) {
@@ -50,7 +50,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       this.rolls.push({
         roll,
         tests: this.skillsForTest.map(({ skill, tempValue }) => {
-          const cardEntry = this.get(skill, tempValue) ?? undefined
+          const cardEntry = this.get(skill, tempValue)
           let result: IRollDecideResult | undefined = undefined
           if (cardEntry) {
             result = this.decide(roll.total, cardEntry)

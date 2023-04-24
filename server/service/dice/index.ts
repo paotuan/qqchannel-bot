@@ -1,6 +1,6 @@
 import type { IDiceRollContext } from './utils'
-import type { ICocCardEntry } from '../../../interface/card/coc'
-import { calculateTargetValueWithDifficulty, CocCard, parseDifficulty } from '../../../interface/card/coc'
+import type { ICard, ICardEntry } from '../../../interface/card/types'
+import type { IRollDecideContext } from '../config/helpers/decider'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -11,17 +11,15 @@ export abstract class BasePtDiceRoll {
     return this.context.getCard(this.context.userId)
   }
 
-  protected get(key: string, tempValue = NaN): ICocCardEntry | null {
-    const entry = this.selfCard?.getEntry(key) ?? null
+  protected get(key: string, tempValue = NaN): ICardEntry | undefined {
+    const entry = this.selfCard?.getEntry(key)
     if (entry) {
       return entry
     } else if (!isNaN(tempValue)) {
-      // 如果人物卡中没这项，但用户指定了临时值，就组装一个临时的 entry。临时 entry 的 type 不重要
-      const [skillWithoutDifficulty, difficulty] = parseDifficulty(key)
-      const value = calculateTargetValueWithDifficulty(tempValue, difficulty)
-      return { input: key, type: 'skills', key: skillWithoutDifficulty, difficulty, value, baseValue: tempValue, isTemp: true, readonly: true }
+      // 如果人物卡中没这项，但用户指定了临时值，就组装一个临时的 entry
+      return { input: key, key, value: tempValue, isTemp: true } // todo
     } else {
-      return null
+      return undefined
     }
   }
 
@@ -47,16 +45,12 @@ export abstract class BasePtDiceRoll {
   abstract get output(): string
 
   // 应用副作用修改人物卡，返回被真正修改的人物卡列表
-  applyToCard(): CocCard[] {
+  applyToCard(): ICard[] {
     return []
   }
 
   // 根据配置判断成功等级
-  protected decide(value: number, target: ICocCardEntry) {
-    return this.context.config.decideRoll({
-      baseValue: target.baseValue,
-      targetValue: target.value,
-      roll: value
-    })
+  protected decide(value: number, target: IRollDecideContext) {
+    return this.context.config.decideRoll(target)
   }
 }
