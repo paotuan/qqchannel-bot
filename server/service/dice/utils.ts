@@ -7,6 +7,7 @@ import { OpposedDiceRoll } from './standard/oppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
 import { StDiceRoll } from './special/st'
+import type { UserRole } from '../../../interface/config'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -18,8 +19,6 @@ export const enum SuccessLevel {
   EX_SUCCESS = 3,
   BEST = 4
 }
-
-export type UserRole = 'admin' | 'manager' | 'user'
 
 export interface IDiceRollContext {
   channelId?: string

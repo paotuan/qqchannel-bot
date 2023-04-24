@@ -2,11 +2,12 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import { convertRoleIds, createDiceRoll, UserRole } from '../dice/utils'
+import { convertRoleIds, createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 import type { IRiItem } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
+import type { UserRole } from '../../../interface/config'
 
 interface IMessageCache {
   text?: string

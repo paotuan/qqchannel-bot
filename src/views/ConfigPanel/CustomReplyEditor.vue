@@ -34,7 +34,7 @@
               <d-number-input v-model="item.weight" class="input-sm input-bordered w-20" />
             </label>
             <textarea v-model="item.reply as string" class="textarea textarea-bordered w-full custom-reply" placeholder="请输入回复内容" />
-            <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: processor.items.length <= 1 }" @click="deleteReplyItem(i)">
+            <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: (processor.items || []).length <= 1 }" @click="deleteReplyItem(i)">
               <XMarkIcon class="w-4 h-4" />
             </button>
           </div>
@@ -79,10 +79,18 @@ const deleteSelf = () => emit('delete', item.value.id)
 const editSelf = () => emit('edit', { id: item.value.id, name: processor.value.name, desc: processor.value.description || '' })
 
 // 删除一条回复条目
-const deleteReplyItem = (index: number) => processor.value.items.splice(index, 1)
+const deleteReplyItem = (index: number) => {
+  const items = processor.value.items
+  if (!items) return // 理论不可能
+  items.splice(index, 1)
+}
 
 // 新增一条回复条目
-const newReplyItem = () => processor.value.items.push({ weight: 1, reply: '' })
+const newReplyItem = () => {
+  const items = processor.value.items
+  if (!items) return // 理论不可能
+  items.push({ weight: 1, reply: '' })
+}
 
 // 匹配方式
 type MatchOptions = { label: string, value: ICustomReplyConfig['trigger'] }
