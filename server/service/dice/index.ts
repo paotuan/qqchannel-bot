@@ -1,5 +1,5 @@
 import type { IDiceRollContext } from './utils'
-import type { ICard, ICardEntry } from '../../../interface/card/types'
+import type { ICard } from '../../../interface/card/types'
 import type { IRollDecideContext } from '../config/helpers/decider'
 
 export abstract class BasePtDiceRoll {
@@ -9,18 +9,6 @@ export abstract class BasePtDiceRoll {
 
   protected get selfCard() {
     return this.context.getCard(this.context.userId)
-  }
-
-  protected get(key: string, tempValue = NaN): ICardEntry | undefined {
-    const entry = this.selfCard?.getEntry(key)
-    if (entry) {
-      return entry
-    } else if (!isNaN(tempValue)) {
-      // 如果人物卡中没这项，但用户指定了临时值，就组装一个临时的 entry
-      return { input: key, key, value: tempValue, isTemp: true } // todo
-    } else {
-      return undefined
-    }
   }
 
   protected get defaultRoll() {
@@ -50,7 +38,7 @@ export abstract class BasePtDiceRoll {
   }
 
   // 根据配置判断成功等级
-  protected decide(value: number, target: IRollDecideContext) {
-    return this.context.config.decideRoll(target)
+  protected decide(context: IRollDecideContext) {
+    return this.context.config.decideRoll(context)
   }
 }

@@ -4,6 +4,8 @@
 
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
+import { CocCard } from '../../../../interface/card/coc'
+import { getCocTempEntry } from '../utils'
 
 interface IGrowthDecideResult {
   firstRoll: DiceRoll // 首次 d% 结果
@@ -20,12 +22,19 @@ export class EnDiceRoll extends BasePtDiceRoll {
   // 先 d100 判断是否能成长，再 0/d10
   private readonly skill2Growth: Record<string, IGrowthDecideResult> = {}
 
-  get allSkillsCanEn() {
-    const cardData = this.selfCard?.data
+  // 如果关联了非 coc 人物卡，就提示不支持（如果无人物卡还是可以通过临时值来使用的）
+  // 另外不直接在外面解析前缀的时候拦掉，是为了进来的时候可以有不支持的提示
+  private get isCardUnsupported() {
+    return this.selfCard && !(this.selfCard instanceof CocCard)
+  }
+
+  private get allSkillsCanEn() {
+    const cardData = (this.selfCard as CocCard | undefined)?.data
     return cardData ? Object.keys(cardData.meta.skillGrowth).filter(name => cardData.meta.skillGrowth[name]) : [] // 过滤掉值为 false 的
   }
 
   override roll() {
+    if (this.isCardUnsupported) return this
     const removeEn = this.rawExpression.slice(2).trim()
     this.parseMain(removeEn)
     this.realRoll()
@@ -53,7 +62,10 @@ export class EnDiceRoll extends BasePtDiceRoll {
   private realRoll() {
     if (this.listMode) return
     this.enSkillNames.forEach(skill => {
-      const entry = this.get(skill, this.tempValue)
+      let entry = (this.selfCard as CocCard | undefined)?.getEntry(skill)
+      if (!entry && !isNaN(this.tempValue)) {
+        entry = getCocTempEntry(skill, this.tempValue)
+      }
       if (!entry) return // 没有人物卡，也没有临时值，就忽略
       const firstRoll = new DiceRoll('d%')
       const canGrowth = firstRoll.total > Math.min(95, entry.baseValue) // 大于技能数值才能增长
@@ -67,6 +79,10 @@ export class EnDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
+    // 不支持的人物卡
+    if (this.isCardUnsupported) {
+      return `${this.context.username} 当前的人物卡类型不支持成长检定`
+    }
     // 列出技能模式
     if (this.listMode) {
       if (this.allSkillsCanEn.length > 0) {
@@ -95,11 +111,12 @@ export class EnDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard() {
-    const card = this.selfCard
+    if (this.isCardUnsupported) return []
+    const card = this.selfCard as CocCard | undefined
     if (!card) return []
     let updated = false
     Object.keys(this.skill2Growth).forEach(skill => {
-      const entry = this.get(skill)
+      const entry = card.getEntry(skill)
       if (!entry) return // 没有 entry，说明可能用的是临时值
       // 成长
       const growthResult = this.skill2Growth[skill]

@@ -1,9 +1,10 @@
 import { StandardDiceRoll } from './index'
 import { SuccessLevel } from '../utils'
+import { CocDiceRoll } from './coc'
 
 // 对抗检定
 // this.context.opposedRoll 代表要和本次对抗的 roll
-export class OpposedDiceRoll extends StandardDiceRoll {
+export class OpposedDiceRoll extends CocDiceRoll {
 
   override parseDescriptions(expression: string) {
     super.parseDescriptions(expression)
@@ -29,6 +30,7 @@ export class OpposedDiceRoll extends StandardDiceRoll {
 
   // 判断对抗检定结果
   private opposedRoll(other: StandardDiceRoll) {
+    if (!(other instanceof CocDiceRoll)) return '' // todo 先简单粗暴拦截，后面处理签名
     if (!this.eligibleForOpposedRoll || !other.eligibleForOpposedRoll) return ''
     // 1. 判断各自成功等级 大失败-2 失败-1 成功1 困难成功2 极难成功3 大成功4
     // const refineSuccessLevels = this.context.config.specialDice.opposeDice.refineSuccessLevels

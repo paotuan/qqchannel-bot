@@ -1,4 +1,5 @@
 import { StandardDiceRoll } from './index'
+import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 
 export type InlineDiceRoll = InstanceType<ReturnType<typeof getInlineDiceRollKlass>>
 
@@ -14,21 +15,28 @@ export function getInlineDiceRollKlass() {
 
 function initClass() {
   return class InlineDiceRoll extends StandardDiceRoll {
+    private diceRoll: DiceRoll | undefined = undefined
 
-    private get diceRoll() {
-      return this.rolls[0].roll
+    override roll() {
+      super.parse()
+      // inline roll 只取第一个，不考虑其他花里胡哨的因素
+      this.diceRoll = new DiceRoll(this.expression)
+      return this
     }
 
     get total() {
-      return this.diceRoll!.total // 如果单骰（times===1）就是结果。如果多连骰，则取第一个结果
+      return this.diceRoll!.total
     }
 
     override get output() {
       const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
       const roll = this.diceRoll!
-      // const decideResult = this.decideResult?.desc || ''
-      // return `🎲${descriptionStr} ${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output} ${decideResult}`.trim()
+      // inline roll 通常只用于中间结果，不参与检定，只回显 description
       return `🎲${descriptionStr} ${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`.trim()
+    }
+
+    override applyToCard() {
+      return []
     }
   }
 }

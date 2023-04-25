@@ -28,10 +28,14 @@ export class ScDiceRoll extends BasePtDiceRoll {
     this.rollLoss = undefined
     this.rollScResult = undefined
     this.rollSc = new DiceRoll('d%')
-    // 2. 理智损失
-    const scEntry = this.get(SC_CARD_ENTRY_NAME, this.tempValue)
+    // 2. 理智损失. 由于不涉及难度等逻辑，直接使用父类的 ICardEntry 即可
+    let scEntry = this.selfCard?.getEntry(SC_CARD_ENTRY_NAME)
+    if (!scEntry && !isNaN(this.tempValue)) {
+      scEntry = { input: SC_CARD_ENTRY_NAME, key: SC_CARD_ENTRY_NAME, value: this.tempValue, isTemp: true }
+    }
     if (scEntry) {
-      this.rollScResult = this.decide(this.rollSc.total, scEntry)
+      this.rollSc.total
+      this.rollScResult = this.decide({ baseValue: scEntry.value, targetValue: scEntry.value, roll: this.rollSc.total })
       if (this.rollScResult) {
         if (this.rollScResult.level === SuccessLevel.WORST) {
           const maxLoss = new DiceRoll(this.expression2).maxTotal
@@ -78,7 +82,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
 
   private detectDefaultRoll() {
     if (this.expression1 === '' || this.expression1 === 'd') {
-      this.expression1 = this.defaultRoll
+      this.expression1 = '0'
     }
     if (this.expression2 === '' || this.expression2 === 'd') {
       this.expression2 = this.defaultRoll
@@ -88,7 +92,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   override get output() {
     const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
     const scRollValue = this.rollSc!.total
-    const resultDesc = this.rollScResult?.desc ?? '……成功了吗？'
+    const resultDesc = this.rollScResult?.desc ?? '……未指定理智值，成功了吗？'
     let line = `${this.context.username} 🎲${descriptionStr} d% = ${scRollValue} ${resultDesc}`
     if (!this.rollScResult) return line // 没有人物卡
     line += `\n${this.context.username} 🎲 理智损失 ${this.rollLoss!.output}`
@@ -101,9 +105,6 @@ export class ScDiceRoll extends BasePtDiceRoll {
     const oldSan = card.getEntry(SC_CARD_ENTRY_NAME)
     if (!oldSan) return []
     const newSan = Math.max(0, oldSan.value - this.scLoss)
-    if (this.scLoss < 0) {
-      console.warn('[Dice] 您试图通过负数回 san，系统将不会校验 san 值小于 99-克苏鲁神话 的限制')
-    }
     const updated = card.setEntry(SC_CARD_ENTRY_NAME, newSan)
     return updated? [card] : []
   }

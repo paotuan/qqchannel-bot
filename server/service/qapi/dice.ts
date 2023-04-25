@@ -8,6 +8,7 @@ import { unescapeHTML } from '../../utils'
 import type { IRiItem } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
 import type { UserRole } from '../../../interface/config'
+import { CocDiceRoll } from '../dice/standard/coc'
 
 interface IMessageCache {
   text?: string
@@ -82,7 +83,7 @@ export class DiceManager {
       } else {
         const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: msg.id })
         // 如果是可供对抗的投骰，记录下缓存
-        if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
+        if (replyMsg && roll instanceof CocDiceRoll && roll.eligibleForOpposedRoll) {
           this.opposedRollCache.set(replyMsg.id, roll)
         }
       }
@@ -151,7 +152,7 @@ export class DiceManager {
       if (!channel) return // channel 信息不存在
       const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
       // 如果是可供对抗的投骰，记录下缓存
-      if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
+      if (replyMsg && roll instanceof CocDiceRoll && roll.eligibleForOpposedRoll) {
         this.opposedRollCache.set(replyMsg.id, roll)
       }
     }
