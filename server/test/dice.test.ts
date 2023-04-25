@@ -5,6 +5,9 @@ import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
 import type { ICocCardData } from '../../interface/card/coc'
 import { CocCard } from '../../interface/card/coc'
+import type { IRiItem } from '../../interface/common'
+import { RiDiceRoll, RiListDiceRoll } from '../service/dice/special/ri'
+import { ICard } from '../../interface/card/types'
 
 // use a custom engine
 NumberGenerator.generator.engine = {
@@ -13,10 +16,13 @@ NumberGenerator.generator.engine = {
   }
 }
 
+const MockChannelId = '__mock_channel_id__'
+const MockUserId = '__mock_user_id__'
+
 describe('未关联人物卡', () => {
   const context: IDiceRollContext = {
-    channelId: 'abc123',
-    userId: 'abc456',
+    channelId: MockChannelId,
+    userId: MockUserId,
     username: 'Maca',
     userRole: 'admin',
     config: new ChannelConfig(getInitialDefaultConfig()),
@@ -172,12 +178,89 @@ describe('未关联人物卡', () => {
     const roller = createDiceRoll('侦察60聆听', context)
     expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2\n侦察 2 ≤ 60 成功')
   })
+
+  test('coc理智检定 无人物卡', () => {
+    const roller = createDiceRoll('sc', context)
+    expect(roller.output).toBe('Maca 🎲 d% = 2 ……未指定理智值，成功了吗？')
+  })
+
+  test('coc理智检定 数值作为表达式', () => {
+    const roller = createDiceRoll('sc 60', context)
+    expect(roller.output).toBe('Maca 🎲 d% = 2 ……未指定理智值，成功了吗？')
+  })
+
+  test('coc理智检定 临时值', () => {
+    const roller = createDiceRoll('sc0/1d10 60', context)
+    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 60 成功\nMaca 🎲 理智损失 0: 0 = 0')
+  })
+
+  test('coc成长检定 列出', () => {
+    const roller = createDiceRoll('en list', context)
+    expect(roller.output).toBe('Maca 当前暂无可成长的技能')
+  })
+
+  test('coc成长检定 临时值', () => {
+    const roller = createDiceRoll('en图书馆60', context)
+    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 图书馆 d% = 2 ≤ 60 失败')
+  })
+
+  test('先攻', () => {
+    const roller = createDiceRoll('ri', context)
+    expect(roller.output).toBe('Maca 🎲 先攻 d20: [2] = 2')
+  })
+
+  test('先攻调整值', () => {
+    const roller = createDiceRoll('ri+d4', context)
+    expect(roller.output).toBe('Maca 🎲 先攻 d20+d4: [2]+[2] = 4')
+  })
+
+  test('先攻指定值', () => {
+    const roller = createDiceRoll('rid10', context)
+    expect(roller.output).toBe('Maca 🎲 先攻 d10: [2] = 2')
+  })
+
+  test('先攻多条', () => {
+    const roller = createDiceRoll('ri人物a,20人物b,d20', context)
+    expect(roller.output).toBe('人物a 🎲 先攻 d20: [2] = 2\n人物b 🎲 先攻 20: 20 = 20\nMaca 🎲 先攻 d20: [2] = 2')
+  })
+
+  test('先攻列表', () => {
+    const riListCache: Record<string, IRiItem[]> = { [MockChannelId]: [] }
+    const initList = createDiceRoll('ri人物a,20人物b,d20', context) as RiDiceRoll
+    initList.applyToRiList(riListCache)
+    const roller = createDiceRoll('init', context) as RiListDiceRoll
+    roller.applyToRiList(riListCache)
+    expect(roller.output).toBe(`当前先攻列表：\n1. 人物b 🎲 20\n2. 人物a 🎲 2\n3. <@!${MockUserId}> 🎲 2`)
+  })
+
+  test('先攻删除', () => {
+    const riListCache: Record<string, IRiItem[]> = { [MockChannelId]: [] }
+    const initList = createDiceRoll('ri人物a,20人物b,d20', context) as RiDiceRoll
+    initList.applyToRiList(riListCache)
+    const roller = createDiceRoll('init del 人物a', context) as RiListDiceRoll
+    roller.applyToRiList(riListCache)
+    expect(roller.output).toBe('Maca 删除先攻：人物a')
+  })
+
+  test('先攻清空', () => {
+    const riListCache: Record<string, IRiItem[]> = { [MockChannelId]: [] }
+    const initList = createDiceRoll('ri人物a,20人物b,d20', context) as RiDiceRoll
+    initList.applyToRiList(riListCache)
+    const roller = createDiceRoll('init clr', context) as RiListDiceRoll
+    roller.applyToRiList(riListCache)
+    expect(roller.output).toBe(`当前先攻列表：\n1. 人物b 🎲 20\n2. 人物a 🎲 2\n3. <@!${MockUserId}> 🎲 2\n*先攻列表已清空`)
+  })
+
+  test('st 无人物卡', () => {
+    const roller = createDiceRoll('st', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>没有关联人物卡`)
+  })
 })
 
 describe('已关联人物卡', () => {
   const context: IDiceRollContext = {
-    channelId: 'abc123',
-    userId: 'abc456',
+    channelId: MockChannelId,
+    userId: MockUserId,
     username: 'Maca',
     userRole: 'admin',
     config: new ChannelConfig(getInitialDefaultConfig()),
@@ -238,6 +321,62 @@ describe('已关联人物卡', () => {
     const roller = createDiceRoll('侦察 图书馆', context)
     expect(roller.output).toBe('Maca 🎲 侦察，图书馆 d100: [2] = 2\n侦察 2 ≤ 40 成功\n图书馆 2 ≤ 70 成功')
   })
+
+  test('coc理智检定 默认骰', () => {
+    const roller = createDiceRoll('sc', context)
+    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
+  })
+
+  test('coc理智检定', () => {
+    const roller = createDiceRoll('sc 0/d10', context)
+    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
+  })
+
+  test('coc理智检定 inline 嵌套', () => {
+    const roller = createDiceRoll('sc[[1d10]]/[[$1+1]]', context)
+    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 30 成功\nMaca 🎲 理智损失 2: 2 = 2')
+  })
+
+  test('coc成长检定 列出', () => {
+    const context = createContext(new CocCard(getCardProto()))
+    const initRoll = createDiceRoll('侦查', context)
+    initRoll.applyToCard()
+    const roller = createDiceRoll('enl', context)
+    expect(roller.output).toBe('Maca 当前可成长的技能：\n侦查')
+  })
+
+  test('coc成长检定 全部', () => {
+    const context = createContext(new CocCard(getCardProto()))
+    const initRoll = createDiceRoll('侦查', context)
+    initRoll.applyToCard()
+    const roller = createDiceRoll('en', context)
+    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 侦查 d% = 2 ≤ 40 失败')
+  })
+
+  test('coc成长检定 指定技能', () => {
+    const roller = createDiceRoll('en图书馆', context)
+    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 图书馆 d% = 2 ≤ 70 失败')
+  })
+
+  test('st 展示指定技能', () => {
+    const roller = createDiceRoll('st show 侦查', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 侦查40`)
+  })
+
+  test('st 未指定', () => {
+    const roller = createDiceRoll('st', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>请指定想要设置的属性名与属性值`)
+  })
+
+  test('st 修改', () => {
+    const roller = createDiceRoll('st 侦查+10', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置 侦查 40+10: 40+10 = 50`)
+  })
+
+  test('st 批量新增', () => {
+    const roller = createDiceRoll('st 拉拉20，打架30', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n拉拉=20 打架=30`)
+  })
 })
 
 function getCardProto(): ICocCardData {
@@ -283,6 +422,18 @@ function getCardProto(): ICocCardData {
       skillGrowth: {}
     }
   }
+}
+
+function createContext(card: ICard) {
+  const context: IDiceRollContext = {
+    channelId: MockChannelId,
+    userId: MockUserId,
+    username: 'Maca',
+    userRole: 'admin',
+    config: new ChannelConfig(getInitialDefaultConfig()),
+    getCard: () => card
+  }
+  return context
 }
 
 export {}
