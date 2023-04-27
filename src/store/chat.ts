@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import { useBotStore } from './bot'
 
@@ -12,14 +12,25 @@ interface IMessage {
 
 type IMessageForRequest = Omit<IMessage, 'id'>
 
+// ai 设置
+interface IChatSetting {
+  useOfficialApi: boolean
+  apiKey: string
+  apiProxy: string
+  useStream: boolean
+  model: string
+}
+
 export const useChatStore = defineStore('chat', () => {
   const systemPrompt = ref('')
   const history = reactive<IMessage[]>([])
   const chatLoading = ref(false)
-  const useOfficialApi = ref(true)
-  const apiKey = ref('')
-  const apiProxy = ref('')
-  const useStream = ref(true)
+  const settings = loadChatSettings()
+  const useOfficialApi = ref(settings?.useOfficialApi ?? false)
+  const apiKey = ref(settings?.apiKey ?? '')
+  const apiProxy = ref(settings?.apiProxy ?? '')
+  const useStream = ref(settings?.useStream ?? true)
+  const model = ref(settings?.model ?? 'gpt-3.5-turbo')
 
   const _getBodyAndRecord = (content: string) => {
     // 如果有失败的消息，则过滤掉
@@ -51,7 +62,7 @@ export const useChatStore = defineStore('chat', () => {
     return fetch(apiAddress, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey.value.trim()}` },
-      body: JSON.stringify({ model: 'gpt-3.5-turbo', messages: body, stream: useStream.value })
+      body: JSON.stringify({ model: model.value, messages: body, stream: useStream.value })
     })
   }
 
@@ -125,8 +136,31 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  return { systemPrompt, history, chatLoading, apiKey, request, clearHistory, clearSingle }
+  // 记忆设置
+  const settingsAsJson = computed<IChatSetting>(() => ({
+    useOfficialApi: useOfficialApi.value,
+    apiKey: apiKey.value,
+    apiProxy: apiProxy.value,
+    useStream: useStream.value,
+    model: model.value
+  }))
+
+  watch(settingsAsJson, obj => {
+    localStorage.setItem('chat-settings', JSON.stringify(obj))
+  })
+
+  return { systemPrompt, history, chatLoading, useOfficialApi, apiKey, apiProxy, useStream, model, request, clearHistory, clearSingle }
 })
+
+function loadChatSettings(): IChatSetting | undefined {
+  const settings = localStorage.getItem('chat-settings')
+  if (!settings) return undefined
+  try {
+    return JSON.parse(settings) as IChatSetting
+  } catch (e) {
+    return undefined
+  }
+}
 
 function auth(data: string) {
   const key = 'paotuan.io'

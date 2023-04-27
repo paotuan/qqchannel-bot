@@ -47,10 +47,36 @@
     </div>
     <!-- setting dialog -->
     <d-modal v-model:visible="settingDialogVisible" title="高级设置">
-      <div class="form-control w-full">
-        <label class="label"><span class="label-text">OpenAI Key</span></label>
-        <input v-model="chatStore.apiKey" type="text" placeholder="sk-xxxxx" class="input input-bordered w-full" />
+      <div class="form-control w-60">
+        <label class="cursor-pointer label">
+          <span class="label-text">使用共享 Key</span>
+          <input v-model="chatStore.useOfficialApi" type="checkbox" class="toggle toggle-primary" />
+          <span class="label-text">使用自有 Key</span>
+        </label>
       </div>
+      <template v-if="chatStore.useOfficialApi">
+        <div class="form-control w-full">
+          <label class="label"><span class="label-text">OpenAI Key</span></label>
+          <input v-model="chatStore.apiKey" type="text" placeholder="sk-xxxxx" class="input input-bordered w-full" />
+        </div>
+        <div class="form-control w-full">
+          <label class="label"><span class="label-text">API 代理地址（可选）</span></label>
+          <input v-model="chatStore.apiProxy" type="text" placeholder="https://api.openai.com/v1/chat/completions" class="input input-bordered w-full" />
+        </div>
+        <div class="flex items-center justify-between mt-2 mb-4">
+          <div class="flex items-center gap-4">
+            <span class="label-text flex-none pl-1">模型</span>
+            <select v-model="chatStore.model" class="select select-bordered select-sm w-full max-w-xs">
+              <option>gpt-3.5-turbo</option>
+              <option>gpt-4</option>
+            </select>
+          </div>
+          <label class="label cursor-pointer">
+            <span class="label-text pr-4">流式输出</span>
+            <input v-model="chatStore.useStream" type="checkbox" class="toggle" />
+          </label>
+        </div>
+      </template>
       <div class="form-control">
         <label class="label"><span class="label-text">系统指令（System Prompt）</span></label>
         <textarea v-model="chatStore.systemPrompt" class="textarea textarea-bordered h-24" placeholder="请输入"></textarea>
