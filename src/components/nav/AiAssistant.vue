@@ -32,11 +32,6 @@
             </span>
           </div>
         </div>
-        <Transition appear name="slide-fade">
-          <div v-if="chatStore.chatLoading" class="chat chat-start">
-            <div class="chat-bubble chat-bubble-accent">AI 助手思考中…</div>
-          </div>
-        </Transition>
       </div>
       <div class="form-control flex-none w-full p-4 pt-0 dropdown dropdown-hover dropdown-top dropdown-end">
         <div class="input-group input-group-sm">

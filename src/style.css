@@ -44,17 +44,3 @@ code {
 input[type=color] {
   background: none;
 }
-
-.slide-fade-enter-active {
-  transition: all 0.5s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: none;
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(20px);
-  opacity: 0;
-}

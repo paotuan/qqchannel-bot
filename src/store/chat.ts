@@ -16,8 +16,10 @@ export const useChatStore = defineStore('chat', () => {
   const systemPrompt = ref('')
   const history = reactive<IMessage[]>([])
   const chatLoading = ref(false)
+  const useOfficialApi = ref(true)
   const apiKey = ref('')
   const apiProxy = ref('')
+  const useStream = ref(true)
 
   const _getBodyAndRecord = (content: string) => {
     // 如果有失败的消息，则过滤掉
@@ -49,24 +51,49 @@ export const useChatStore = defineStore('chat', () => {
     return fetch(apiAddress, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey.value.trim()}` },
-      body: JSON.stringify({ model: 'gpt-3.5-turbo', messages: body })
+      body: JSON.stringify({ model: 'gpt-3.5-turbo', messages: body, stream: useStream.value })
     })
   }
 
   const request = async (content: string) => {
     if (chatLoading.value) return // loading 中不允许请求
     const body = _getBodyAndRecord(content)
+    // 开始请求
+    chatLoading.value = true
+    const replyMessage: IMessage = { role: 'assistant', content: 'AI 助手思考中…', id: nanoid() }
+    history.push(replyMessage) // 先放一条假消息
     try {
-      chatLoading.value = true
-      const useOfficialApi = apiKey.value.trim() && apiProxy.value.trim()
-      const response = await (useOfficialApi ? _requestOfficial : _requestInner)(body)
+      const response = await (useOfficialApi.value ? _requestOfficial : _requestInner)(body)
       if (response.status !== 200) {
         const body = await response.text()
-        history.push({ role: 'assistant', content: `Failed to send message. HTTP ${response.status} - ${body}`, id: nanoid(), isError: true })
+        replyMessage.content = `Failed to send message. HTTP ${response.status} - ${body}`
+        replyMessage.isError = true
       } else {
-        const res = await response.json()
-        const content = res.choices[0].message.content.trim()
-        history.push({ role: 'assistant', content, id: nanoid() })
+        if (useOfficialApi.value && useStream.value && response.body) {
+          // stream mode
+          replyMessage.content = ''
+          for await (const chunk of streamAsyncIterable(response.body)) {
+            const str = new TextDecoder().decode(chunk)
+            const segment = str.split('\n\n').map(line => {
+              const body = line.replace(/^data:/, '').trim()
+              if (body === '[DONE]') {
+                return ''
+              } else {
+                try {
+                  const obj = JSON.parse(body)
+                  return obj.choices[0].delta?.content ?? ''
+                } catch (e) {
+                  return ''
+                }
+              }
+            }).join('')
+            // 这里试验下来必须这么赋值才有响应
+            history.at(-1)!.content += segment
+          }
+        } else {
+          const res = await response.json()
+          replyMessage.content = res.choices[0].message.content.trim()
+        }
       }
       // await new Promise(resolve => {
       //   setTimeout(() => {
@@ -76,7 +103,8 @@ export const useChatStore = defineStore('chat', () => {
       // })
     } catch (e: any) {
       console.log(e)
-      history.push({ role: 'assistant', content: `Error: ${e?.message}`, id: nanoid(), isError: true })
+      replyMessage.content = `Error: ${e?.message}`
+      replyMessage.isError = true
     } finally {
       chatLoading.value = false
     }
@@ -107,4 +135,19 @@ function auth(data: string) {
     message += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length))
   }
   return btoa(message)
+}
+
+async function* streamAsyncIterable(stream: ReadableStream) {
+  const reader = stream.getReader()
+  try {
+    while (true) {
+      const {done, value} = await reader.read()
+      if (done) {
+        return
+      }
+      yield value
+    }
+  } finally {
+    reader.releaseLock()
+  }
 }
