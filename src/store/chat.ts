@@ -29,7 +29,7 @@ export const useChatStore = defineStore('chat', () => {
   const useOfficialApi = ref(settings?.useOfficialApi ?? false)
   const apiKey = ref(settings?.apiKey ?? '')
   const apiProxy = ref(settings?.apiProxy ?? '')
-  const useStream = ref(settings?.useStream ?? true)
+  const useStream = ref(settings?.useStream ?? false)
   const model = ref(settings?.model ?? 'gpt-3.5-turbo')
 
   const _getBodyAndRecord = (content: string) => {
