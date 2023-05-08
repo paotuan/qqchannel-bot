@@ -25,6 +25,7 @@ export interface ICard<D extends ICardData = ICardData, E extends ICardEntry = I
   // id: string 目前还是 name 做唯一标识
   readonly name: string
   readonly defaultRoll?: string
+  readonly riDefaultRoll?: string
   readonly data: D
   // hp/maxHp 用于地图中的展示
   HP?: number

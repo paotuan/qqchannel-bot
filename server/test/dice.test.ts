@@ -377,6 +377,11 @@ describe('已关联人物卡', () => {
     const roller = createDiceRoll('st 拉拉20，打架30', context)
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n拉拉=20 打架=30`)
   })
+
+  test('coc 先攻默认骰', () => {
+    const roller = createDiceRoll('ri', context)
+    expect(roller.output).toBe('Maca 🎲 先攻 60: 60 = 60')
+  })
 })
 
 function getCardProto(): ICocCardData {

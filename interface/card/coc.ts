@@ -61,6 +61,7 @@ export interface ICocCardAbility extends ICardAbility {
  */
 export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbility> {
   readonly defaultRoll = 'd%'
+  readonly riDefaultRoll = '$敏捷'
 
   get HP() {
     return this.data.basic.HP
