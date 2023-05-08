@@ -1,8 +1,8 @@
 import { StandardDiceRoll } from './index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import { calculateTargetValueWithDifficulty, CocCard, ICocCardEntry } from '../../../../interface/card/coc'
-import { getCocTempEntry, SuccessLevel } from '../utils'
+import { getCocTempEntry, calculateTargetValueWithDifficulty, CocCard, ICocCardEntry } from '../../../../interface/card/coc'
+import { SuccessLevel } from '../utils'
 
 export class CocDiceRoll extends StandardDiceRoll {
   // 标记技能检定列表

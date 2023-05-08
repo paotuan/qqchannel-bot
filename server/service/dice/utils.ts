@@ -10,7 +10,6 @@ import type { UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
 import { GeneralCard } from '../../../interface/card/general'
 import { CocDiceRoll } from './standard/coc'
-import { calculateTargetValueWithDifficulty, ICocCardEntry, parseDifficulty } from '../../../interface/card/coc'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -188,11 +187,4 @@ export function convertRoleIds(ids: string[]): UserRole {
   } else {
     return 'user'
   }
-}
-
-// 获取 coc 人物卡的临时 entry
-export function getCocTempEntry(key: string, tempValue: number): ICocCardEntry {
-  const [skillWithoutDifficulty, difficulty] = parseDifficulty(key)
-  const value = calculateTargetValueWithDifficulty(tempValue, difficulty)
-  return { input: key, type: 'skills', key: skillWithoutDifficulty, difficulty, value, baseValue: tempValue, isTemp: true, readonly: true }
 }

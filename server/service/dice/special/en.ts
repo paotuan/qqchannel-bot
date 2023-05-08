@@ -4,8 +4,7 @@
 
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { CocCard } from '../../../../interface/card/coc'
-import { getCocTempEntry } from '../utils'
+import { CocCard, getCocTempEntry } from '../../../../interface/card/coc'
 
 interface IGrowthDecideResult {
   firstRoll: DiceRoll // 首次 d% 结果

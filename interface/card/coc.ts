@@ -396,7 +396,7 @@ const SKILL_ALIAS: Record<string, string[]> = _SKILL_ALIAS
 /**
  * coc 难度等级解析
  */
-export function parseDifficulty(expression: string): [string, Difficulty] {
+function parseDifficulty(expression: string): [string, Difficulty] {
   let difficulty: Difficulty = 'normal'
   if (expression.includes('困难')) {
     difficulty = 'hard'
@@ -419,6 +419,15 @@ export function calculateTargetValueWithDifficulty(baseValue: number, difficulty
   } else {
     return baseValue
   }
+}
+
+/**
+ * 获取 coc 人物卡的临时 entry
+ */
+export function getCocTempEntry(key: string, tempValue: number): ICocCardEntry {
+  const [skillWithoutDifficulty, difficulty] = parseDifficulty(key)
+  const value = calculateTargetValueWithDifficulty(tempValue, difficulty)
+  return { input: key, type: 'skills', key: skillWithoutDifficulty, difficulty, value, baseValue: tempValue, isTemp: true, readonly: true }
 }
 
 /**
