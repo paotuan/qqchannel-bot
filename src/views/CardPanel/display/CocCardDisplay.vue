@@ -5,18 +5,19 @@
       <span class="text-sm font-bold">{{ cardnn.name }}</span>
       <text-input v-model="cardnn.basic.gender" placeholder="性别" class="input input-bordered input-xs w-14"/>
       <span class="inline-flex items-center gap-0.5">
-          <number-input v-model="cardnn.basic.AGE" placeholder="年龄" class="input input-bordered input-xs w-14"/>
-          <span class="text-sm">岁</span>
-        </span>
+        <number-input v-model="cardnn.basic.AGE" placeholder="年龄" class="input input-bordered input-xs w-14"/>
+        <span class="text-sm">岁</span>
+      </span>
       <span class="inline-flex items-center gap-0.5">
-          <span class="text-sm">是</span>
-          <text-input v-model="cardnn.basic.job" placeholder="职业" class="input input-bordered input-xs w-20"/>
-        </span>
-      <card-add-attribute @submit="addSkillsBatch" />
-      <button class="btn btn-xs btn-primary" :disabled="!cardStore.isEdited(cardnn.name)"
-              @click="cardStore.requestSaveCard(cardnn)">保存修改
-      </button>
-      <button class="btn btn-xs btn-error" @click="deleteCard">删除人物卡</button>
+        <span class="text-sm">是</span>
+        <text-input v-model="cardnn.basic.job" placeholder="职业" class="input input-bordered input-xs w-20"/>
+      </span>
+      <CardToolbar />
+<!--      <card-add-attribute @submit="addSkillsBatch" />-->
+<!--      <button class="btn btn-xs btn-primary" :disabled="!cardStore.isEdited(cardnn.name)"-->
+<!--              @click="cardStore.requestSaveCard(cardnn)">保存修改-->
+<!--      </button>-->
+<!--      <button class="btn btn-xs btn-error" @click="deleteCard">删除人物卡</button>-->
     </div>
     <div class="flex gap-2">
       <div style="flex: 1 1 0">
@@ -165,29 +166,29 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useCardStore } from '../../store/card'
-import { computed, ref, watch } from 'vue'
+import { useCardStore } from '../../../store/card'
+import { computed, inject, ref, watch } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
-import TextInput from './TextInput.vue'
-import NumberInput from './NumberInput.vue'
-import CardAddAttribute from './CardAddAttribute.vue'
-import type { ICocCardData } from '../../../interface/card/coc'
-import { CocCard } from '../../../interface/card/coc'
-import { addAttributesBatch } from '../../store/card/importer/utils'
+import TextInput from '../TextInput.vue'
+import NumberInput from '../NumberInput.vue'
+import type { ICocCardData } from '../../../../interface/card/coc'
+import { CocCard } from '../../../../interface/card/coc'
+import CardToolbar from '../CardToolbar.vue'
+import { SELECTED_CARD } from '../utils'
 
 const cardStore = useCardStore()
-const cardObj = computed(() => cardStore.selectedCard as CocCard | null)
-const card = computed(() => cardObj.value?.data ?? null)
+const cardObj = inject<CocCard>(SELECTED_CARD) // 此处可以确保是 coc card
+const card = computed(() => cardObj?.data ?? null)
 
 // region 给模板用的，因为 ts 不认识 v-if
 const cardnn = computed(() => card.value!)
-const cardObjnn = computed(() => cardObj.value!)
+const cardObjnn = computed(() => cardObj!)
 const propKeyOf = (card: ICocCardData) => {
   return Object.keys(card.props) as Array<keyof typeof card.props>
 }
 const dbAndBuild = computed(() => {
-  const db = cardObj.value?.getAbility('DB')?.value ?? '0'
-  const build = cardObj.value?.getEntry('体格')?.value ?? 0
+  const db = cardObj?.getAbility('DB')?.value ?? '0'
+  const build = cardObj?.getEntry('体格')?.value ?? 0
   return [db, build]
 })
 // endregion 给模板用的
@@ -210,13 +211,13 @@ const skills = computed(() => {
 })
 
 // 删除人物卡二次确认
-const deleteCard = () => {
-  if (card.value) {
-    if (window.confirm('确定要删除这张人物卡吗？')) {
-      cardStore.deleteCard(card.value!.name)
-    }
-  }
-}
+// const deleteCard = () => {
+//   if (card.value) {
+//     if (window.confirm('确定要删除这张人物卡吗？')) {
+//       cardStore.deleteCard(card.value!.name)
+//     }
+//   }
+// }
 
 // 技能成长标记/取消
 const markSkillGrowth = (targetCard: CocCard, skill: string, value: boolean) => {
@@ -228,10 +229,8 @@ const markSkillGrowth = (targetCard: CocCard, skill: string, value: boolean) => 
 
 // 标记人物卡被编辑
 const markEdited = () => {
-  if (cardObj.value) {
-    cardObj.value.data.lastModified = Date.now()
-    cardStore.markCardEdited(cardObj.value!.name)
-  }
+  cardObj!.data.lastModified = Date.now()
+  cardStore.markCardEdited(cardObj!.name)
 }
 
 // 新增一条 ability
@@ -263,13 +262,13 @@ const deleteSkill = (name: string) => {
   }
 }
 
-const addSkillsBatch = (rawText: string) => {
-  if (card.value) {
-    addAttributesBatch(card.value, rawText)
-    updateSortList(card.value)
-    markEdited()
-  }
-}
+// const addSkillsBatch = (rawText: string) => {
+//   if (card.value) {
+//     addAttributesBatch(card.value, rawText)
+//     updateSortList(card.value)
+//     markEdited()
+//   }
+// }
 </script>
 <style scoped>
 .table-compact :where(td) {

@@ -15,7 +15,7 @@ export const useCardStore = defineStore('card', () => {
   const showAllCards = ref(true)
 
   // 当前选中的人物卡
-  const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : null)
+  const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : undefined)
   const allCards = computed(() => Object.values(cardMap))
   // 已存在的人物卡文件名
   const existNames = computed(() => allCards.value.map(card => card.name))

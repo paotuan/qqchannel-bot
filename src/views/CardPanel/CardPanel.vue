@@ -18,18 +18,20 @@
         <h3 class="font-bold">人物卡列表：</h3>
         <div v-for="card in cardStore.displayCardList" :key="card.name" class="flex gap-2">
           <button class="btn w-40 gap-2 justify-start flex-nowrap"
-                  :class="cardStore.selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
+                  :class="selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
             <DocumentTextIcon class="w-6 h-6 flex-none"/>
             <span class="truncate">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
-            <CheckCircleIcon v-show="cardStore.selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
+            <CheckCircleIcon v-show="selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
           </button>
           <user-selector :user-id="cardStore.linkedUserOf(card.name) || null" @select="cardStore.requestLinkUser(card.name, $event?.id)" />
         </div>
       </div>
       <div class="flex-grow">
-        <card-display />
+        <template v-if="selectedCardType === 'coc'">
+          <CocCardDisplay />
+        </template>
       </div>
     </div>
   </div>
@@ -38,8 +40,13 @@
 import CardImportDialog from './CardImportDialog.vue'
 import { EyeSlashIcon, EyeIcon, DocumentTextIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../store/card'
-import CardDisplay from './CardDisplay.vue'
 import UserSelector from './UserSelector.vue'
+import { computed, provide } from 'vue'
+import { SELECTED_CARD } from './utils'
+import CocCardDisplay from './display/CocCardDisplay.vue'
 
 const cardStore = useCardStore()
+const selectedCard = computed(() => cardStore.selectedCard)
+const selectedCardType = computed(() => selectedCard.value?.type)
+provide(SELECTED_CARD, selectedCard)
 </script>
