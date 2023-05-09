@@ -136,7 +136,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     return this.dbAndBuild[1]
   }
 
-  getAbility(input: string) {
+  override getAbility(input: string) {
     const _input = input.toUpperCase()
     // 获取所有可能的别名
     const possibleNames = SKILL_ALIAS[_input] ?? [_input]
@@ -157,7 +157,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     return undefined
   }
 
-  setAbility(name: string, expression: string) {
+  override setAbility(name: string, expression: string) {
     const abilityRet = this.getAbility(name)
     if (abilityRet) {
       if (abilityRet.readonly) return false
@@ -177,7 +177,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     }
   }
 
-  removeAbility(name: string) {
+  override removeAbility(name: string) {
     const abilityRet = this.getAbility(name)
     if (abilityRet && !abilityRet.readonly) {
       const index = this.data.abilities.findIndex(item => item.name === abilityRet.key)
@@ -213,7 +213,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     return undefined
   }
 
-  getEntry(input: string) {
+  override getEntry(input: string) {
     const [skillWithoutDifficulty, difficulty] = parseDifficulty(input)
     if (!skillWithoutDifficulty) return undefined
     const target = this.getRawEntry(skillWithoutDifficulty)
@@ -225,7 +225,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     }
   }
 
-  setEntry(name: string, value: number) {
+  override setEntry(name: string, value: number) {
     const [skillWithoutDifficulty, difficulty] = parseDifficulty(name)
     if (!skillWithoutDifficulty) return false
     // 是否是特殊的 setter，不直接调用 data，而是通过 setter 修改
@@ -266,7 +266,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     }
   }
 
-  removeEntry(name: string) {
+  override removeEntry(name: string) {
     const [skillWithoutDifficulty] = parseDifficulty(name)
     if (!skillWithoutDifficulty) return false
     const entry = this.getRawEntry(skillWithoutDifficulty)
@@ -331,7 +331,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     this.data.lastModified = Date.now() // 强制认为有更新吧
   }
 
-  getSummary() {
+  override getSummary() {
     const basic = [
       `生命：${this.HP}/${this.MAXHP}`,
       `理智：${this.SAN}/${this.MAXSAN}`,
@@ -340,9 +340,10 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
       `克苏鲁神话：${this.CM}`,
       `信用评级：${this.data.basic.信用}`
     ].join(' ')
+    const props = Object.entries(this.data.props).map(([k ,v]) => `${k}：${v}`).join(' ')
     const skills = Object.entries(this.data.skills).map(([k ,v]) => `${k}：${v}`).join(' ')
     const abilities = this.data.abilities.map(item => `${item.name}：${item.expression}`).join('\n')
-    return '角色：' + this.name + '\n' + basic + '\n' + skills + '\n' + abilities
+    return '角色：' + this.name + '\n' + basic + '\n' + props + '\n' + skills + '\n' + abilities
   }
 }
 
