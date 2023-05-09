@@ -175,7 +175,7 @@ import type { ICocCardData } from '../../../interface/card/coc'
 import { CocCard } from '../../../interface/card/coc'
 
 const cardStore = useCardStore()
-const card = computed(() => cardStore.selectedCard)
+const card = computed(() => cardStore.selectedCard as ICocCardData | null)
 
 // region 给模板用的，因为 ts 不认识 v-if
 const cardnn = computed(() => card.value!)

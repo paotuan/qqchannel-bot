@@ -6,9 +6,11 @@ import XLSX from 'xlsx'
 import { gtagEvent } from '../utils'
 import type { ICocCardData } from '../../interface/card/coc'
 import { CocCard } from '../../interface/card/coc'
+import type { ICardData } from '../../interface/card/types'
+import { createCard } from '../../interface/card'
 
 export const useCardStore = defineStore('card', () => {
-  const cardMap = reactive<Record<string, ICocCardData>>({})
+  const cardMap = reactive<Record<string, ICardData>>({})
   const cardEditedMap = reactive<Record<string, boolean>>({}) // 标识卡片是否有编辑未保存
   const cardLinkMap = reactive<Record<string, string>>({}) // 卡片名 -> 用户 id
   const selectedCardId = ref('')
@@ -25,18 +27,18 @@ export const useCardStore = defineStore('card', () => {
 
   const of = (cardName: string) => cardMap[cardName]
 
-  const importCard = (card: ICocCardData) => {
+  const importCard = (card: ICardData) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
     gtagEvent('card/import')
   }
 
   // 请求保存卡片（其实后端和导入的逻辑是一样的）
-  const requestSaveCard = (card: ICocCardData) => {
+  const requestSaveCard = (card: ICardData) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
   }
 
   // 全量更新人物卡
-  const updateCards = (cards: ICocCardData[]) => {
+  const updateCards = (cards: ICardData[]) => {
     // 1. 不存在的 card 本地要删掉
     const newExistNames = cards.map(card => card.name)
     const name2delete = existNames.value.filter(name => !newExistNames.includes(name))
@@ -61,7 +63,7 @@ export const useCardStore = defineStore('card', () => {
   }
 
   // 删除人物卡
-  const deleteCard = (card: ICocCardData) => {
+  const deleteCard = (card: ICardData) => {
     const cardName = card.name
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     gtagEvent('card/delete')
@@ -73,26 +75,26 @@ export const useCardStore = defineStore('card', () => {
   }
 
   // 选择某张人物卡
-  const selectCard = (card: ICocCardData) => selectedCardId.value = card.name
+  const selectCard = (card: ICardData) => selectedCardId.value = card.name
 
-  // 标记某个技能成长
+  // 标记某个技能成长( coc only )
   const markSkillGrowth = (targetCard: ICocCardData, skill: string, value?: boolean) => {
     targetCard.meta.skillGrowth[skill] = typeof value === 'boolean' ? value : !targetCard.meta.skillGrowth[skill]
     markCardEdited(targetCard)
   }
 
   // 标记某张卡片被编辑
-  const markCardEdited = (card: ICocCardData) => {
+  const markCardEdited = (card: ICardData) => {
     card.lastModified = Date.now()
     cardEditedMap[card.name] = true
   }
 
   // 人物卡是否有编辑未保存
-  const isEdited = (card: ICocCardData) => !!cardEditedMap[card.name]
+  const isEdited = (card: ICardData) => !!cardEditedMap[card.name]
 
   // 关联玩家相关
-  const linkedUserOf = (card: ICocCardData) => cardLinkMap[card.name]
-  const requestLinkUser = (card: ICocCardData, userId: string | null | undefined) => {
+  const linkedUserOf = (card: ICardData) => cardLinkMap[card.name]
+  const requestLinkUser = (card: ICardData, userId: string | null | undefined) => {
     const cardName = card.name
     ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
     gtagEvent('card/link')
@@ -290,8 +292,8 @@ export function parseCoCXlsx(workbook: XLSX.WorkBook) {
   return user
 }
 
-export function addAttributesBatch(card: ICocCardData, rawText: string): ICocCardData {
-  const setter = new CocCard(card)
+export function addAttributesBatch<T extends ICardData>(card: T, rawText: string): T {
+  const setter = createCard(card)
   Array.from(rawText.trim().matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
     const index = entry.search(/\d/) // 根据数字分隔
     const name = entry.slice(0, index).replace(/[:：]/g, '').trim()

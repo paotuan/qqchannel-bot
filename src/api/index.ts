@@ -8,7 +8,6 @@ import type {
   INoteSendResp,
   INoteSyncResp, IUser, IPluginConfigDisplay, IRiListResp
 } from '../../interface/common'
-import type { ICocCardData } from '../../interface/card/coc'
 import { useBotStore } from '../store/bot'
 import { useChannelStore } from '../store/channel'
 import { useLogStore } from '../store/log'
@@ -19,6 +18,8 @@ import { gtagEvent, Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
+import type { ICardData } from '../../interface/card/types'
+import type { ICocCardData } from '../../interface/card/coc'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -107,7 +108,7 @@ ws.on('card/import', data => {
 
 ws.on('card/list', data => {
   const cardStore = useCardStore()
-  cardStore.updateCards(data.data as ICocCardData[])
+  cardStore.updateCards(data.data as ICardData[])
 })
 
 ws.on('card/link', data => {
@@ -120,9 +121,12 @@ ws.on('card/test', data => {
   if (res.success) {
     const cardStore = useCardStore()
     const targetCard = cardStore.of(res.cardName)
-    // 只有 skill 能成长，要判断下成功的是不是 skill
-    if (!targetCard || !targetCard.skills[res.propOrSkill]) return
-    cardStore.markSkillGrowth(targetCard, res.propOrSkill, true)
+    // 只有 coc 卡片的 skill 能成长，要判断下成功的是不是 skill
+    if (targetCard?.type === 'coc') {
+      const card = targetCard as ICocCardData
+      if (!card.skills[res.propOrSkill]) return
+      cardStore.markSkillGrowth(card, res.propOrSkill, true)
+    }
   }
 })
 
