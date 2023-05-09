@@ -19,7 +19,6 @@ import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
 import type { ICardData } from '../../interface/card/types'
-import type { CocCard } from '../../interface/card/coc'
 
 ws.on('bot/login', message => {
   console.log('login success')
@@ -120,13 +119,7 @@ ws.on('card/test', data => {
   const res = data.data as ICardTestResp
   if (res.success) {
     const cardStore = useCardStore()
-    const targetCard = cardStore.of(res.cardName)
-    // 只有 coc 卡片的 skill 能成长，要判断下成功的是不是 skill. todo 放到 store 里
-    if (targetCard?.type === 'coc') {
-      const card = targetCard as CocCard
-      if (!card.data.skills[res.propOrSkill]) return
-      cardStore.markSkillGrowth(card, res.propOrSkill, true)
-    }
+    cardStore.onTestSuccess(res.cardName, res.propOrSkill)
   }
 })
 

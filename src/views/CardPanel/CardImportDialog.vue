@@ -52,7 +52,8 @@
 import { PlusCircleIcon, DocumentTextIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 import * as XLSX from 'xlsx'
-import { parseCoCXlsx, parseText, useCardStore } from '../../store/card'
+import { useCardStore } from '../../store/card'
+import { parseCocXlsx, parseCocText } from '../../store/card/importer/coc'
 import { Toast } from '../../utils'
 import type { ICocCardData } from '../../../interface/card/coc'
 
@@ -79,7 +80,7 @@ const nameExist = computed(() => {
 const submit = () => {
   if (tab.value === 'text') {
     if (!textName.value || !textareaContent.value) return
-    const card = parseText(textName.value, textareaContent.value)
+    const card = parseCocText(textName.value, textareaContent.value)
     cardStore.importCard(card)
     // manual close and clear
     closeModal()
@@ -101,7 +102,7 @@ const handleFile = (e: Event) => {
     try {
       const data = new Uint8Array(e.target!.result as ArrayBuffer)
       const workbook = XLSX.read(data, { type: 'array' })
-      xlsxCard.value = parseCoCXlsx(workbook)
+      xlsxCard.value = parseCocXlsx(workbook)
     } catch (e) {
       console.log(e)
       Toast.error('文件解析失败！')

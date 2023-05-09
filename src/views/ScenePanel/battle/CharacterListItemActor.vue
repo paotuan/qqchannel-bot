@@ -48,7 +48,7 @@ const maxHp = computed(() => userCard.value?.MAXHP ?? NaN)
 const uiStore = useUIStore()
 const selectCard = () => {
   if (!userCard.value) return
-  cardStore.selectCard(userCard.value)
+  cardStore.selectCard(userCard.value!.name)
   uiStore.activeTab = 'card'
 }
 

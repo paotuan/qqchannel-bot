@@ -20,7 +20,7 @@
           <button class="btn w-40 gap-2 justify-start flex-nowrap"
                   :class="cardStore.selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
                   :title="card.name"
-                  @click="cardStore.selectCard(card)">
+                  @click="cardStore.selectCard(card.name)">
             <DocumentTextIcon class="w-6 h-6 flex-none"/>
             <span class="truncate">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
             <CheckCircleIcon v-show="cardStore.selectedCard === card" class="w-6 h-6 ml-auto flex-none" />

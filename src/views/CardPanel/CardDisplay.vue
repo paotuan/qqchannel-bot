@@ -95,7 +95,7 @@
               <template v-if="skill">
                 <td :key="`name-${j}`" :class="{ highlight: !!cardnn.meta.skillGrowth[skill] }">
                   <button class="btn btn-xs btn-ghost font-medium"
-                          @click="cardStore.markSkillGrowth(cardObjnn, skill)">
+                          @click="markSkillGrowth(cardObjnn, skill, !cardnn.meta.skillGrowth[skill])">
                     {{ skill }}
                   </button>
                 </td>
@@ -165,7 +165,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { addAttributesBatch, useCardStore } from '../../store/card'
+import { useCardStore } from '../../store/card'
 import { computed, ref, watch } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import TextInput from './TextInput.vue'
@@ -173,6 +173,7 @@ import NumberInput from './NumberInput.vue'
 import CardAddAttribute from './CardAddAttribute.vue'
 import type { ICocCardData } from '../../../interface/card/coc'
 import { CocCard } from '../../../interface/card/coc'
+import { addAttributesBatch } from '../../store/card/importer/utils'
 
 const cardStore = useCardStore()
 const cardObj = computed(() => cardStore.selectedCard as CocCard | null)
@@ -217,10 +218,19 @@ const deleteCard = () => {
   }
 }
 
+// 技能成长标记/取消
+const markSkillGrowth = (targetCard: CocCard, skill: string, value: boolean) => {
+  const updated = value ? targetCard.markSkillGrowth(skill) : targetCard.cancelSkillGrowth(skill)
+  if (updated) {
+    cardStore.markCardEdited(targetCard.name)
+  }
+}
+
 // 标记人物卡被编辑
 const markEdited = () => {
   if (cardObj.value) {
-    cardStore.markCardEdited(cardObj.value)
+    cardObj.value.data.lastModified = Date.now()
+    cardStore.markCardEdited(cardObj.value!.name)
   }
 }
 
