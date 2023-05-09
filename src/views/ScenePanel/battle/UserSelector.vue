@@ -63,7 +63,10 @@ const sceneStore = useSceneStore()
 const select = (user: IUser) => {
   const userCard = cardStore.getCardOfUser(user.id)
   // 如果是 coc 人物卡，自动代入敏捷值作为 seq；如果是 dnd 则代入 seq2
-  const seq = userCard ? userCard.props.敏捷 : NaN
+  let seq = NaN
+  if (userCard?.type === 'coc') {
+    seq = userCard.getEntry('敏捷')?.value ?? NaN
+  }
   sceneStore.addCharacter({ type: 'actor', userId: user.id, seq, seq2: NaN })
   blur()
 }

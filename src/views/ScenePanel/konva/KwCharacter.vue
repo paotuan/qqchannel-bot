@@ -49,7 +49,7 @@ const userCard = computed(() => {
   if (charaType.value === 'actor') {
     return cardStore.getCardOfUser(charaId.value)
   } else {
-    return null
+    return undefined
   }
 })
 
@@ -106,10 +106,10 @@ const charaName = computed(() => {
   }
 })
 
-const hp = computed(() => userCard.value?.basic.HP ?? npcInfo.value?.embedCard.hp ?? NaN)
+const hp = computed(() => userCard.value?.HP ?? npcInfo.value?.embedCard.hp ?? NaN)
 const maxHp = computed(() => {
   if (userCard.value) {
-    return Math.floor((userCard.value.props.体质 + userCard.value.props.体型) / 10)
+    return userCard.value!.MAXHP ?? NaN
   } else if (npcInfo.value) {
     return npcInfo.value!.embedCard.maxHp
   } else {

@@ -29,8 +29,8 @@ const generateLog = () => {
   log += sceneStore.charactersSorted.map(chara => {
     const username = chara.type === 'actor' ? userStore.of(chara.userId)?.username ?? '' : chara.userId
     const userCard = chara.type === 'actor' ? cardStore.getCardOfUser(chara.userId) : undefined
-    const userHp = (chara.type === 'actor' ? userCard?.basic.HP : chara.embedCard.hp) || '?'
-    const userMaxHp = (chara.type === 'actor' ? (userCard ? Math.floor((userCard.props.体质 + userCard.props.体型) / 10) : '') : chara.embedCard.maxHp) || '?'
+    const userHp = (chara.type === 'actor' ? userCard?.HP : chara.embedCard.hp) || '?'
+    const userMaxHp = (chara.type === 'actor' ? userCard?.MAXHP : chara.embedCard.maxHp) || '?'
     const hasSeq = !isNaN(chara.seq) || !isNaN(chara.seq2)
     let line = sceneStore.currentSelectedCharacter === chara ? '▶ ' : '\u3000'
     line += `${username} HP${userHp}/${userMaxHp}`

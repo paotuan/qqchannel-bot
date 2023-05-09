@@ -22,10 +22,10 @@
                   :title="card.name"
                   @click="cardStore.selectCard(card)">
             <DocumentTextIcon class="w-6 h-6 flex-none"/>
-            <span class="truncate">{{ card.name }}{{ cardStore.isEdited(card) ? ' *' : '' }}</span>
+            <span class="truncate">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
             <CheckCircleIcon v-show="cardStore.selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
           </button>
-          <user-selector :user-id="cardStore.linkedUserOf(card) || null" @select="cardStore.requestLinkUser(card, $event?.id)" />
+          <user-selector :user-id="cardStore.linkedUserOf(card.name) || null" @select="cardStore.requestLinkUser(card.name, $event?.id)" />
         </div>
       </div>
       <div class="flex-grow">

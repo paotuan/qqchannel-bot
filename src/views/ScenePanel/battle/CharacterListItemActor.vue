@@ -5,7 +5,7 @@
         <img :src="userInfo.avatar" :alt="userInfo.nick" />
       </div>
       <!-- 血条 -->
-      <CharacterHpBar :hp="userCard ? userCard.basic.HP : NaN" :max-hp="maxHp" />
+      <CharacterHpBar :hp="hp" :max-hp="maxHp" />
     </div>
     <div class="flex flex-col justify-between">
       <div class="font-bold max-w-[7rem] truncate">{{ userInfo.nick }}</div>
@@ -41,14 +41,8 @@ const userInfo = computed(() => userStore.of(props.chara.userId))
 
 const cardStore = useCardStore()
 const userCard = computed(() => cardStore.getCardOfUser(props.chara.userId))
-// coc 规则的 max hp，姑且先放在这里
-const maxHp = computed(() => {
-  if (userCard.value) {
-    return Math.floor((userCard.value.props.体质 + userCard.value.props.体型) / 10)
-  } else {
-    return NaN
-  }
-})
+const hp = computed(() => userCard.value?.HP ?? NaN)
+const maxHp = computed(() => userCard.value?.MAXHP ?? NaN)
 
 // 跳转到人物卡页面
 const uiStore = useUIStore()

@@ -13,7 +13,7 @@
           <text-input v-model="cardnn.basic.job" placeholder="职业" class="input input-bordered input-xs w-20"/>
         </span>
       <card-add-attribute @submit="addSkillsBatch" />
-      <button class="btn btn-xs btn-primary" :disabled="!cardStore.isEdited(cardnn)"
+      <button class="btn btn-xs btn-primary" :disabled="!cardStore.isEdited(cardnn.name)"
               @click="cardStore.requestSaveCard(cardnn)">保存修改
       </button>
       <button class="btn btn-xs btn-error" @click="deleteCard">删除人物卡</button>
@@ -95,7 +95,7 @@
               <template v-if="skill">
                 <td :key="`name-${j}`" :class="{ highlight: !!cardnn.meta.skillGrowth[skill] }">
                   <button class="btn btn-xs btn-ghost font-medium"
-                          @click="cardStore.markSkillGrowth(cardnn, skill)">
+                          @click="cardStore.markSkillGrowth(cardObjnn, skill)">
                     {{ skill }}
                   </button>
                 </td>
@@ -175,17 +175,18 @@ import type { ICocCardData } from '../../../interface/card/coc'
 import { CocCard } from '../../../interface/card/coc'
 
 const cardStore = useCardStore()
-const card = computed(() => cardStore.selectedCard as ICocCardData | null)
+const cardObj = computed(() => cardStore.selectedCard as CocCard | null)
+const card = computed(() => cardObj.value?.data ?? null)
 
 // region 给模板用的，因为 ts 不认识 v-if
 const cardnn = computed(() => card.value!)
+const cardObjnn = computed(() => cardObj.value!)
 const propKeyOf = (card: ICocCardData) => {
   return Object.keys(card.props) as Array<keyof typeof card.props>
 }
 const dbAndBuild = computed(() => {
-  const cardObj = new CocCard(cardnn.value)
-  const db = cardObj.getAbility('DB')?.value ?? '0'
-  const build = cardObj.getEntry('体格')?.value ?? 0
+  const db = cardObj.value?.getAbility('DB')?.value ?? '0'
+  const build = cardObj.value?.getEntry('体格')?.value ?? 0
   return [db, build]
 })
 // endregion 给模板用的
@@ -211,15 +212,15 @@ const skills = computed(() => {
 const deleteCard = () => {
   if (card.value) {
     if (window.confirm('确定要删除这张人物卡吗？')) {
-      cardStore.deleteCard(card.value)
+      cardStore.deleteCard(card.value!.name)
     }
   }
 }
 
 // 标记人物卡被编辑
 const markEdited = () => {
-  if (card.value) {
-    cardStore.markCardEdited(card.value)
+  if (cardObj.value) {
+    cardStore.markCardEdited(cardObj.value)
   }
 }
 

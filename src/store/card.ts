@@ -6,11 +6,12 @@ import XLSX from 'xlsx'
 import { gtagEvent } from '../utils'
 import type { ICocCardData } from '../../interface/card/coc'
 import { CocCard } from '../../interface/card/coc'
-import type { ICardData } from '../../interface/card/types'
+import type { ICardData, ICard } from '../../interface/card/types'
 import { createCard } from '../../interface/card'
+import { VERSION_CODE } from '../../interface/version'
 
 export const useCardStore = defineStore('card', () => {
-  const cardMap = reactive<Record<string, ICardData>>({})
+  const cardMap = reactive<Record<string, ICard>>({})
   const cardEditedMap = reactive<Record<string, boolean>>({}) // 标识卡片是否有编辑未保存
   const cardLinkMap = reactive<Record<string, string>>({}) // 卡片名 -> 用户 id
   const selectedCardId = ref('')
@@ -55,16 +56,15 @@ export const useCardStore = defineStore('card', () => {
       const cardName = card.name
       const oldCard = cardMap[cardName]
       // 本地没这张卡片，或服务端的卡片修改时间更新，才覆盖，否则以本地的为准
-      if (!oldCard || oldCard.lastModified <= card.lastModified) {
-        cardMap[cardName] = card
+      if (!oldCard || oldCard.data.lastModified <= card.lastModified) {
+        cardMap[cardName] = createCard(card)
         cardEditedMap[cardName] = false
       }
     })
   }
 
   // 删除人物卡
-  const deleteCard = (card: ICardData) => {
-    const cardName = card.name
+  const deleteCard = (cardName: string) => {
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     gtagEvent('card/delete')
     // 不管后端删除有没有成功，前端直接删除吧
@@ -75,27 +75,27 @@ export const useCardStore = defineStore('card', () => {
   }
 
   // 选择某张人物卡
-  const selectCard = (card: ICardData) => selectedCardId.value = card.name
+  const selectCard = (card: ICard) => selectedCardId.value = card.name
 
   // 标记某个技能成长( coc only )
-  const markSkillGrowth = (targetCard: ICocCardData, skill: string, value?: boolean) => {
-    targetCard.meta.skillGrowth[skill] = typeof value === 'boolean' ? value : !targetCard.meta.skillGrowth[skill]
+  const markSkillGrowth = (targetCard: CocCard, skill: string, value?: boolean) => {
+    // todo 使用封装方法进行
+    targetCard.data.meta.skillGrowth[skill] = typeof value === 'boolean' ? value : !targetCard.data.meta.skillGrowth[skill]
     markCardEdited(targetCard)
   }
 
   // 标记某张卡片被编辑
-  const markCardEdited = (card: ICardData) => {
-    card.lastModified = Date.now()
+  const markCardEdited = (card: ICard) => {
+    card.data.lastModified = Date.now()
     cardEditedMap[card.name] = true
   }
 
   // 人物卡是否有编辑未保存
-  const isEdited = (card: ICardData) => !!cardEditedMap[card.name]
+  const isEdited = (cardName: string) => !!cardEditedMap[cardName]
 
   // 关联玩家相关
-  const linkedUserOf = (card: ICardData) => cardLinkMap[card.name]
-  const requestLinkUser = (card: ICardData, userId: string | null | undefined) => {
-    const cardName = card.name
+  const linkedUserOf = (cardName: string) => cardLinkMap[cardName]
+  const requestLinkUser = (cardName: string, userId: string | null | undefined) => {
     ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
     gtagEvent('card/link')
   }
@@ -112,7 +112,7 @@ export const useCardStore = defineStore('card', () => {
   const toggleShowAllCards = () => {
     showAllCards.value = !showAllCards.value
     // 判断当前选择的人物卡是否要被隐藏
-    if (!showAllCards.value && selectedCard.value && !linkedUserOf(selectedCard.value)) {
+    if (!showAllCards.value && selectedCard.value && !linkedUserOf(selectedCard.value!.name)) {
       selectedCardId.value = ''
     }
   }
@@ -152,7 +152,7 @@ export const useCardStore = defineStore('card', () => {
 function getCardProto(): ICocCardData {
   return {
     type: 'coc',
-    version: 16,
+    version: VERSION_CODE,
     name: '',
     lastModified: Date.now(),
     basic: {
