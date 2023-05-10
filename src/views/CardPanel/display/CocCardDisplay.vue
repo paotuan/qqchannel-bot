@@ -18,29 +18,39 @@
       <div style="flex: 1 1 0">
         <!-- basic -->
         <div>
-          <table class="table table-compact w-full">
+          <table class="table table-compact table-zebra w-full">
             <thead>
             <tr>
-              <th>体力</th>
-              <th>理智</th>
-              <th>幸运</th>
-              <th>魔法</th>
+              <th class="w-1/3">状态</th>
+              <th></th>
+              <th>%</th>
             </tr>
             </thead>
             <tbody>
             <tr>
-              <td>
-                <number-input v-model="cardData.basic.HP" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXHP }}
-              </td>
-              <td>
-                <number-input v-model="cardData.basic.SAN" class="input input-ghost input-xs text-sm w-14"/>
-              </td>
-              <td>
-                <number-input v-model="cardData.basic.LUCK" class="input input-ghost input-xs text-sm w-14"/>
-              </td>
-              <td>
-                <number-input v-model="cardData.basic.MP" class="input input-ghost input-xs text-sm w-14"/>
-              </td>
+              <td><button class="btn btn-xs btn-ghost font-medium">体力</button></td>
+              <td><number-input v-model="cocCard.HP" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXHP }}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><button class="btn btn-xs btn-ghost font-medium">理智</button></td>
+              <td><number-input v-model="cocCard.SAN" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXSAN }}</td>
+              <td class="text-gray-400 text-xs">{{ Math.floor(cocCard.SAN / 2) }}/{{ Math.floor(cocCard.SAN / 5) }}</td>
+            </tr>
+            <tr>
+              <td><button class="btn btn-xs btn-ghost font-medium">克苏鲁神话</button></td>
+              <td><number-input v-model="cocCard.CM" class="input input-ghost input-xs text-sm w-14"/></td>
+              <td class="text-gray-400 text-xs">{{ Math.floor(cocCard.CM / 2) }}/{{ Math.floor(cocCard.CM / 5) }}</td>
+            </tr>
+            <tr>
+              <td><button class="btn btn-xs btn-ghost font-medium">魔法</button></td>
+              <td><number-input v-model="cocCard.MP" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXMP }}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><button class="btn btn-xs btn-ghost font-medium">信用评级</button></td>
+              <td><number-input v-model="cardData.basic.信用" class="input input-ghost input-xs text-sm w-14"/></td>
+              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.信用 / 2) }}/{{ Math.floor(cardData.basic.信用 / 5) }}</td>
             </tr>
             </tbody>
           </table>
@@ -58,14 +68,16 @@
             </thead>
             <tbody>
             <tr v-for="prop in propKeyOf(cardData)" :key="prop">
-              <td>
-                <button class="btn btn-xs btn-ghost font-medium">{{ prop }}</button>
-              </td>
-              <td class="w-1/4">
-                <number-input v-model="cardData.props[prop]" class="input input-ghost input-xs text-sm w-full"/>
-              </td>
+              <td><button class="btn btn-xs btn-ghost font-medium">{{ prop }}</button></td>
+              <td class="w-1/4"><number-input v-model="cardData.props[prop]" class="input input-ghost input-xs text-sm w-full"/></td>
               <td class="text-gray-400 text-xs">{{ Math.floor(cardData.props[prop] / 2) }}</td>
               <td class="text-gray-400 text-xs">{{ Math.floor(cardData.props[prop] / 5) }}</td>
+            </tr>
+            <tr>
+              <td><button class="btn btn-xs btn-ghost font-medium">幸运</button></td>
+              <td class="w-1/4"><number-input v-model="cardData.basic.LUCK" class="input input-ghost input-xs text-sm w-full"/></td>
+              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.LUCK / 2) }}</td>
+              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.LUCK / 5) }}</td>
             </tr>
             </tbody>
           </table>
@@ -90,16 +102,12 @@
             <template v-for="(skill, j) in sublist">
               <template v-if="skill">
                 <td :key="`name-${j}`" :class="{ highlight: !!cardData.meta.skillGrowth[skill] }">
-                  <button class="btn btn-xs btn-ghost font-medium" @click="toggleSkillGrowth(skill)">
-                    {{ skill }}
-                  </button>
+                  <button class="btn btn-xs btn-ghost font-medium" @click="toggleSkillGrowth(skill)">{{ skill }}</button>
                 </td>
                 <td :key="`value-${j}`" class="flex items-center justify-between group" :class="{ highlight: !!cardData.meta.skillGrowth[skill] }">
                   <span>
                     <number-input v-model="cardData.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
-                    <span class="text-gray-400 text-xs">
-                      {{ Math.floor(cardData.skills[skill] / 2) }}/{{ Math.floor(cardData.skills[skill] / 5) }}
-                    </span>
+                    <span class="text-gray-400 text-xs">{{ Math.floor(cardData.skills[skill] / 2) }}/{{ Math.floor(cardData.skills[skill] / 5) }}</span>
                   </span>
                   <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteSkill(skill)">
                     <XMarkIcon class="w-4 h-4" />
@@ -122,15 +130,9 @@
             </thead>
             <tbody>
             <tr v-for="(ability, i) in cardData.abilities" :key="i" class="group">
-              <td>
-                <text-input v-model="ability.name" class="input input-ghost input-xs w-full"/>
-              </td>
-              <td>
-                <text-input v-model="ability.expression" class="input input-ghost input-xs w-full"/>
-              </td>
-              <td>
-                <text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/>
-              </td>
+              <td><text-input v-model="ability.name" class="input input-ghost input-xs w-full"/></td>
+              <td><text-input v-model="ability.expression" class="input input-ghost input-xs w-full"/></td>
+              <td><text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/></td>
               <td style="padding: 0">
                 <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility(i)">
                   <XMarkIcon class="w-4 h-4" />
@@ -138,9 +140,7 @@
               </td>
             </tr>
             <tr>
-              <td colspan="4">
-                <button class="btn btn-xs btn-ghost" @click="newAbility">+ 新增一行</button>
-              </td>
+              <td colspan="4"><button class="btn btn-xs btn-ghost" @click="newAbility">+ 新增一行</button></td>
             </tr>
             </tbody>
           </table>
@@ -149,8 +149,8 @@
             <tr><th>战斗属性</th></tr>
             </thead>
             <tbody>
-            <tr><td>DB: {{ db }}</td></tr>
-            <tr><td>体格: {{ build }}</td></tr>
+            <tr><td>DB: {{ cocCard.DB }}</td></tr>
+            <tr><td>体格: {{ cocCard.体格 }}</td></tr>
             <tr><td>闪避: {{ cardData.skills['闪避'] || 0 }}/{{ Math.floor((cardData.skills['闪避'] || 0) / 2) }}/{{ Math.floor((cardData.skills['闪避'] || 0) / 5) }}</td></tr>
             </tbody>
           </table>
@@ -161,7 +161,7 @@
 </template>
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject, ref, watch } from 'vue'
+import { computed, ComputedRef, inject, ref } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
@@ -173,8 +173,6 @@ import { SELECTED_CARD } from '../utils'
 const cardStore = useCardStore()
 const cocCard = inject<ComputedRef<CocCard>>(SELECTED_CARD)! // 此处可以确保是 coc card
 const cardData = computed(() => cocCard.value.data)
-const db = computed(() => cocCard.value.getAbility('DB')?.value ?? '0')
-const build = computed(() => cocCard.value.getEntry('体格')?.value ?? 0)
 
 const propKeyOf = (card: ICocCardData) => {
   return Object.keys(card.props) as Array<keyof typeof card.props>
@@ -185,7 +183,8 @@ const skillsSortList = ref<string[]>([])
 const updateSortList = (cardValue: ICocCardData) => {
   skillsSortList.value = Object.keys(cardValue.skills).sort((s1, s2) => cardValue.skills[s2] - cardValue.skills[s1])
 }
-watch(cardData, updateSortList, { immediate: true, deep: true })
+// watch(cardData, updateSortList, { immediate: true, deep: true })
+updateSortList(cardData.value) // 暂时干掉实时排序
 // skills grid 分三栏展示
 const skills = computed(() => {
   const skillList = skillsSortList.value

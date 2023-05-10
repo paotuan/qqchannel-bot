@@ -67,46 +67,46 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     return this.data.basic.HP
   }
 
-  private set HP(value) {
-    this.data.basic.HP = Math.max(value, this.MAXHP)
+  set HP(value) {
+    this.data.basic.HP = clamp(value, 0, this.MAXHP)
   }
 
   get MAXHP() {
     return Math.floor((this.data.props.体质 + this.data.props.体型) / 10)
   }
 
-  private get MP() {
+  get MP() {
     return this.data.basic.MP
   }
 
-  private set MP(value) {
-    this.data.basic.MP = Math.max(value, this.MAXMP)
+  set MP(value) {
+    this.data.basic.MP = clamp(value, 0, this.MAXMP)
   }
 
-  private get MAXMP() {
+  get MAXMP() {
     return Math.floor(this.data.props.意志 / 5)
   }
 
-  private get SAN() {
+  get SAN() {
     return this.data.basic.SAN
   }
 
-  private set SAN(value) {
-    this.data.basic.SAN = Math.max(value, this.MAXSAN)
+  set SAN(value) {
+    this.data.basic.SAN = clamp(value, 0, this.MAXSAN)
   }
 
-  private get MAXSAN() {
+  get MAXSAN() {
     return Math.max(0, 99 - this.data.basic.CM)
   }
 
-  private get CM() {
+  get CM() {
     return this.data.basic.CM
   }
 
-  private set CM(value) {
+  set CM(value) {
     // 增加克苏鲁神话，控制理智值不能超出上限
     this.data.basic.CM = value
-    this.SAN = Math.max(this.SAN, this.MAXSAN)
+    this.SAN = Math.min(this.SAN, this.MAXSAN)
   }
 
   // 计算伤害加值和体格
@@ -128,11 +128,11 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     }
   }
 
-  private get DB() {
+  get DB() {
     return this.dbAndBuild[0]
   }
 
-  private get 体格() {
+  get 体格() {
     return this.dbAndBuild[1]
   }
 
@@ -478,3 +478,7 @@ const DEFAULT_SKILLS = Object.freeze({
   '催眠': 1,
   '炮术': 1
 })
+
+function clamp(num: number, min: number, max: number) {
+  return Math.min(Math.max(num, min), max)
+}

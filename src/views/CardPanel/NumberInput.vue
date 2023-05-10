@@ -1,32 +1,42 @@
 <script setup lang="ts">
 import { useCardStore } from '../../store/card'
-import { ref } from 'vue'
+import { computed, ComputedRef, inject, nextTick, ref } from 'vue'
+import { SELECTED_CARD } from './utils'
+import type { ICard } from '../../../interface/card/types'
 
 const props = defineProps<{ modelValue: number }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: number): void }>()
 const input = ref<HTMLInputElement>()
 
 const cardStore = useCardStore()
-const onInput = (e: any) => {
-  if (cardStore.selectedCard) {
-    cardStore.selectedCard.data.lastModified = Date.now()
-    cardStore.markCardEdited(cardStore.selectedCard.name)
+const selectedCard = inject<ComputedRef<ICard>>(SELECTED_CARD)! // 外部确保 card 存在
+
+const vm = computed({
+  get: () => {
+    return props.modelValue
+  },
+  set: (value) => {
+    selectedCard.value.data.lastModified = Date.now()
+    cardStore.markCardEdited(selectedCard.value.name)
+    emit('update:modelValue', Math.max(0, value)) // 不允许负数 todo 可配置
   }
-  let num = parseInt(e.target.value.trim(), 10)
-  if (isNaN(num)) num = 0
-  if (num < 0) num = 0 // 不允许负数
-  // 这里得手动赋值下，否则界面上不会变
-  if (input.value) {
-    input.value.value = String(num)
-  }
-  emit('update:modelValue', num)
+})
+
+// 这里得手动赋值下，否则界面上不会变. 参考 el-input
+const onInput = () => {
+  nextTick(() => {
+    const inputElem = input.value
+    if (!inputElem) return
+    if (inputElem.value === String(vm.value)) return
+    inputElem.value = String(vm.value)
+  })
 }
 </script>
 <template>
   <input
       ref="input"
       type="number"
-      :value="String(props.modelValue)"
+      v-model="vm"
       @input="onInput"
   />
 </template>

@@ -111,8 +111,8 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     return this.data.basic.HP
   }
 
-  private set HP(value) {
-    this.data.basic.HP = Math.max(value, this.MAXHP)
+  set HP(value) {
+    this.data.basic.HP = clamp(value, 0, this.MAXHP)
   }
 
   get MAXHP() {
@@ -339,4 +339,8 @@ function parseInput(expression: string): [string, PostfixType] {
 // 根据属性值计算调整值
 function calculatePropModifier(value: number) {
   return Math.floor(value / 2) - 5
+}
+
+function clamp(num: number, min: number, max: number) {
+  return Math.min(Math.max(num, min), max)
 }
