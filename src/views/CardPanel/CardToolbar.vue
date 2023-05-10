@@ -7,15 +7,15 @@
 </template>
 <script setup lang="ts">
 import CardAddAttribute from './CardAddAttribute.vue'
-import { computed, inject } from 'vue'
+import { computed, ComputedRef, inject } from 'vue'
 import { SELECTED_CARD } from './utils'
 import { useCardStore } from '../../store/card'
 import { ICard } from '../../../interface/card/types'
 import { addAttributesBatch } from '../../store/card/importer/utils'
 
 const cardStore = useCardStore()
-const selectedCard = inject<ICard>(SELECTED_CARD)
-const cardnn = computed(() => selectedCard!.data) // 外面确保 selectedCard 一定存在
+const selectedCard = inject<ComputedRef<ICard>>(SELECTED_CARD)! // 外面确保 selectedCard 一定存在
+const cardnn = computed(() => selectedCard.value.data)
 
 // 批量增加技能
 const addSkillsBatch = (rawText: string) => {
