@@ -1,13 +1,12 @@
 import { CocCard, ICocCardData } from '../../../../interface/card/coc'
 import { VERSION_CODE } from '../../../../interface/version'
 import XLSX from 'xlsx'
-import { addAttributesBatch } from './utils'
 
-function getCardProto(): ICocCardData {
+export function getCocCardProto(name?: string): ICocCardData {
   return {
     type: 'coc',
     version: VERSION_CODE,
-    name: '',
+    name: name || '未命名',
     lastModified: Date.now(),
     basic: {
       job: '学生',
@@ -53,14 +52,8 @@ function _unifiedKey(key: string) {
   return unifiedKey
 }
 
-export function parseCocText(name: string, rawText: string): ICocCardData {
-  const card = getCardProto()
-  card.name = name.trim()
-  return addAttributesBatch(card, rawText)
-}
-
 export function parseCocXlsx(workbook: XLSX.WorkBook) {
-  const user = getCardProto()
+  const user = getCocCardProto()
   const setter = new CocCard(user)
   // 解析 excel
   const sheet = workbook.Sheets['人物卡']
@@ -143,5 +136,5 @@ export function parseCocXlsx(workbook: XLSX.WorkBook) {
     }
   }
 
-  return user
+  return setter
 }

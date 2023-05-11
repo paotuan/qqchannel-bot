@@ -1,7 +1,7 @@
 <template>
   <div class="flex-grow card bg-base-100 shadow-lg p-4 overflow-y-auto">
     <div class="flex gap-4">
-      <card-import-dialog/>
+      <CardImportDialogNew />
       <button class="btn btn-ghost gap-2" @click="cardStore.toggleShowAllCards()">
         <template v-if="cardStore.showAllCards">
           <EyeSlashIcon class="w-6 h-6"/>
@@ -37,7 +37,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import CardImportDialog from './CardImportDialog.vue'
 import { EyeSlashIcon, EyeIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../store/card'
 import UserSelector from './UserSelector.vue'
@@ -45,6 +44,7 @@ import { computed, provide } from 'vue'
 import { SELECTED_CARD } from './utils'
 import CocCardDisplay from './display/CocCardDisplay.vue'
 import CardTypeBadge from './CardTypeBadge.vue'
+import CardImportDialogNew from './CardImportDialogNew.vue'
 
 const cardStore = useCardStore()
 const selectedCard = computed(() => cardStore.selectedCard)
