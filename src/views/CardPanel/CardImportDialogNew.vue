@@ -22,7 +22,7 @@
     </label>
     <div class="mt-2 ml-8">
       <textarea v-model="textareaContent" class="textarea textarea-bordered w-full h-30" :disabled="importType !== 'text'"
-                placeholder="请输入属性列表，例如：力量37体质60体格65敏捷73外貌75妙手10侦查25潜行20 ……"/>
+                placeholder="请输入属性列表，例如：力量37体质60体格65敏捷73外貌75妙手10侦查25潜行20 …… 留空即代表空白人物卡"/>
     </div>
     <template v-if="cardType !== 'general'">
       <label class="label cursor-pointer justify-start gap-2">
@@ -33,9 +33,14 @@
                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" :disabled="importType !== 'excel'" @change="handleFile" />
       </div>
       <div class="mt-2 ml-8">当前支持的人物卡模版：</div>
-      <ul v-if="cardType === 'coc'" class="ml-8 list-disc list-inside">
-        <li>COC七版人物卡v1.6.0 <a class="link" href="https://paotuan.github.io/static/cocv7.xlsx" target="_blank">点击下载</a></li>
-        <li>COC7 CY22.3Plus <a class="link" href="https://congyu.lanzoui.com/b00nb3n2d" target="_blank">点击下载</a> (密码：29mb)</li>
+      <ul class="ml-8 list-disc list-inside">
+        <template v-if="cardType === 'coc'">
+          <li>COC七版人物卡v1.6.0 <a class="link" href="https://paotuan.github.io/static/cocv7.xlsx" target="_blank">点击下载</a></li>
+          <li>COC7 CY22.3Plus <a class="link" href="https://congyu.lanzoui.com/b00nb3n2d" target="_blank">点击下载</a> (密码：29mb)</li>
+        </template>
+        <template v-else-if="cardType === 'dnd'">
+          <li>5E半自动人物卡1.0.2（SAS）-by喵拜 <a class="link" href="https://www.xn--rss892n.top:8080/externalLinksController/chain/5E%E5%8D%8A%E8%87%AA%E5%8A%A8%E4%BA%BA%E7%89%A9%E5%8D%A11.0.2%EF%BC%88SAS%EF%BC%89-by%E5%96%B5%E6%8B%9C.xlsx?ckey=eq%2BqZcNqTnnyQDtOpi6%2FHtEjFyGdQGdCbBnzbMtN6WD6ixhekJSxK9Wlh%2FtK6Nq%2B" target="_blank">点击下载</a></li>
+        </template>
       </ul>
     </template>
     <template v-if="cardType === 'coc'">
@@ -66,8 +71,9 @@ import * as XLSX from 'xlsx'
 import { getCocCardProto, parseCocXlsx } from '../../store/card/importer/coc'
 import { Toast } from '../../utils'
 import { createCard } from '../../../interface/card'
-import { addAttributesBatch } from '../../store/card/importer/utils'
+import { addAttributesBatch, getGeneralCardProto } from '../../store/card/importer/utils'
 import { CocCard } from '../../../interface/card/coc'
+import { getDndCardProto, parseDndXlsx } from '../../store/card/importer/dnd'
 
 const open = ref(false)
 const cardType = ref<CardType>('coc')
@@ -113,7 +119,13 @@ const handleFile = (e: Event) => {
     try {
       const data = new Uint8Array(e.target!.result as ArrayBuffer)
       const workbook = XLSX.read(data, { type: 'array' })
-      xlsxCard.value = parseCocXlsx(workbook) // todo
+      if (parseType === 'coc') {
+        xlsxCard.value = parseCocXlsx(workbook)
+      } else if (parseType === 'dnd') {
+        xlsxCard.value = parseDndXlsx(workbook)
+      } else {
+        throw new Error('Cannot import xlsx when type=' + parseType)
+      }
       // 自动带入人物卡的名字
       if (!cardName.value) {
         cardName.value = xlsxCard.value.name
@@ -131,9 +143,10 @@ const getCardProto = () => {
   const name = cardName.value.trim()
   if (cardType.value === 'coc') {
     return getCocCardProto(name)
+  } else if (cardType.value === 'dnd') {
+    return getDndCardProto(name)
   } else {
-    // todo
-    return getCocCardProto(name)
+    return getGeneralCardProto(name)
   }
 }
 
@@ -157,5 +170,6 @@ const submit = () => {
   clearFileInput()
   // 导入之
   cardStore.importCard(card.data)
+  open.value = false
 }
 </script>
