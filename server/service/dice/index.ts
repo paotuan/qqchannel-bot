@@ -12,7 +12,7 @@ export abstract class BasePtDiceRoll {
   }
 
   protected get defaultRoll() {
-    return this.context.config.defaultRoll || 'd%'
+    return this.selfCard?.defaultRoll || this.context.config.defaultRoll || 'd%'
   }
 
   protected get hasInlineRolls() {
