@@ -9,7 +9,7 @@ interface IRollResult {
   // 一次 roll 可能同时检定多个技能，也可能没有
   tests: {
     skill: string
-    tempValue: number // NaN 代表无
+    // tempValue: number // NaN 代表无 // 似乎没用
     cardEntry?: ICardEntry
     result?: IRollDecideResult
   }[]
@@ -51,7 +51,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
           if (cardEntry) {
             result = this.decide({ baseValue: cardEntry.value, targetValue: cardEntry.value, roll: roll.total })
           }
-          return { skill, tempValue, cardEntry, result }
+          return { skill, cardEntry, result }
         })
       })
     }

@@ -32,7 +32,7 @@ export class CocDiceRoll extends StandardDiceRoll {
               this.skills2growth.push(cardEntry.key)
             }
           }
-          return { skill, tempValue, cardEntry, result }
+          return { skill, cardEntry, result }
         })
       })
     }
