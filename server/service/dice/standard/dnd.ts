@@ -20,7 +20,6 @@ export class DndDiceRoll extends StandardDiceRoll {
       }
       // 2. 根据描述拿 entry
       this.skillsForTest.forEach(({ skill, tempValue: dc }) => {
-        // todo 死亡豁免特殊处理
         const entry = this.selfCard?.getEntry(skill)
         let finalExpression: string
         // 根据 entry 类型拼接真正掷骰的 expression
@@ -46,7 +45,7 @@ export class DndDiceRoll extends StandardDiceRoll {
         if (!isNaN(dc)) {
           result = this.decide({ baseValue: dc, targetValue: dc, roll: roll.total })
         }
-        // 4. 加入结果 todo 是否合理
+        // 4. 加入结果
         this.rolls.push({ roll, tests: [{ skill, cardEntry: entry, result }] }) // 这里传的 entry 目前不重要
       })
     }

@@ -12,6 +12,7 @@ import { GeneralCard } from '../../../interface/card/general'
 import { CocDiceRoll } from './standard/coc'
 import { DndCard } from '../../../interface/card/dnd'
 import { DndDiceRoll } from './standard/dnd'
+import { DsDiceRoll } from './special/ds'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -165,6 +166,10 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
   } else if (expression.startsWith('st') && specialDiceConfig.stDice.enabled) {
     // st 由于可能要读取他人人物卡，也由内部 parseTemplate
     return new StDiceRoll(expression, context, inlineRolls).roll()
+  } else if (['ds', '死亡豁免'].includes(expression)) {
+    // todo 权限控制
+    // 死亡豁免指令简单，无需 parse
+    return new DsDiceRoll(expression, context, inlineRolls).roll()
   } else if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new OpposedDiceRoll(parsedExpression, context, inlineRolls).roll()

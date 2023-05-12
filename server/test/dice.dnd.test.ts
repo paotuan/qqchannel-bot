@@ -90,6 +90,53 @@ describe('已关联DND人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 力量，医疗\nd20+3: [12]+3 = 15 ≥ 10 成功\nd20+0+0: [12]+0+0 = 12') // 因为和 coc 组合检定不一样（不是一次检定对应多个判定结果，而是每次都是一个独立的检定），每行没有名字回显，不过问题不大，先不管了
   })
 
+  test('死亡豁免', () => {
+    const card = new DndCard(getCardProto())
+    const context = createContext(card)
+    const roller = createDiceRoll('ds', context)
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [12] = 12 ≥ 10 成功')
+    roller.applyToCard()
+    expect(card.data.meta.deathSaving.success).toBe(1)
+  })
+
+  test('死亡豁免失败', () => {
+    NumberGenerator.generator.engine = { next: () => 1 }
+    const card = new DndCard(getCardProto())
+    const context = createContext(card)
+    const roller = createDiceRoll('ds', context)
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [2] = 2 ＜ 10 失败')
+    roller.applyToCard()
+    expect(card.data.meta.deathSaving.failure).toBe(1)
+    NumberGenerator.generator.engine = { next: () => 11 }
+  })
+
+  test('死亡豁免大失败', () => {
+    NumberGenerator.generator.engine = { next: () => 0 }
+    const card = new DndCard(getCardProto())
+    const context = createContext(card)
+    const roller = createDiceRoll('ds', context)
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [1] = 1 二次失败')
+    roller.applyToCard()
+    expect(card.data.meta.deathSaving.failure).toBe(2)
+    NumberGenerator.generator.engine = { next: () => 11 }
+  })
+
+  test('死亡豁免大成功', () => {
+    NumberGenerator.generator.engine = { next: () => 19 }
+    const card = new DndCard(getCardProto())
+    card.HP = 0
+    card.data.meta.deathSaving.success = 2
+    card.data.meta.deathSaving.failure = 2
+    const context = createContext(card)
+    const roller = createDiceRoll('ds', context)
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [20] = 20 起死回生，HP+1')
+    roller.applyToCard()
+    expect(card.HP).toBe(1)
+    expect(card.data.meta.deathSaving.success).toBe(0)
+    expect(card.data.meta.deathSaving.failure).toBe(0)
+    NumberGenerator.generator.engine = { next: () => 11 }
+  })
+
   test('dnd先攻默认骰', () => {
     const roller = createDiceRoll('ri', context)
     expect(roller.output).toBe('Maca 🎲 先攻 d20+2: [12]+2 = 14')
