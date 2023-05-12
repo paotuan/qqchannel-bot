@@ -4,6 +4,7 @@ import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
 import { CocCard, ICocCardData } from '../../interface/card/coc'
+import { VERSION_CODE } from '../../interface/version'
 
 // use a custom engine
 NumberGenerator.generator.engine = {
@@ -15,8 +16,8 @@ NumberGenerator.generator.engine = {
 const MockChannelId = '__mock_channel_id__'
 const MockUserId = '__mock_user_id__'
 
-function createContext(card: ICard) {
-  const context: IDiceRollContext = {
+function createContext(card: ICard): IDiceRollContext {
+  return {
     channelId: MockChannelId,
     userId: MockUserId,
     username: 'Maca',
@@ -24,7 +25,6 @@ function createContext(card: ICard) {
     config: new ChannelConfig(getInitialDefaultConfig()),
     getCard: () => card
   }
-  return context
 }
 
 describe('已关联COC人物卡', () => {
@@ -151,7 +151,7 @@ describe('已关联COC人物卡', () => {
 function getCardProto(): ICocCardData {
   return {
     type: 'coc',
-    version: 16,
+    version: VERSION_CODE,
     name: '铃木翼',
     lastModified: Date.now(),
     basic: {

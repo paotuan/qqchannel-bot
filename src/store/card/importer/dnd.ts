@@ -140,10 +140,15 @@ export function parseDndXlsx(workbook: XLSX.WorkBook) {
       ext: ''
     })
   }
-  // 武器 41-45 L:name， AH 伤害
+  // 武器 41-45 L:name， AH 伤害 AC 命中
   for (let i = 41; i <= 45; i++) {
     const name = sheet['L' + i]?.v
     if (typeof name === 'string' && name) {
+      user.equips.push({
+        name: name + '命中',
+        expression: String(sheet['AC' + i]?.v || '').toLowerCase(),
+        ext: ''
+      })
       user.equips.push({
         name,
         expression: String(sheet['AH' + i]?.v || '').toLowerCase(),

@@ -10,6 +10,8 @@ import type { UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
 import { GeneralCard } from '../../../interface/card/general'
 import { CocDiceRoll } from './standard/coc'
+import { DndCard } from '../../../interface/card/dnd'
+import { DndDiceRoll } from './standard/dnd'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -170,6 +172,8 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     if (selfCard instanceof GeneralCard) {
       return new StandardDiceRoll(parsedExpression, context, inlineRolls).roll()
+    } else if (selfCard instanceof DndCard) {
+      return new DndDiceRoll(parsedExpression, context, inlineRolls).roll()
     } else {
       // 默认情况（包括未关联人物卡）都走 coc 的逻辑吧，和传统一致。后续看是否要引入配置
       return new CocDiceRoll(parsedExpression, context, inlineRolls).roll()
