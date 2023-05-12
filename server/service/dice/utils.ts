@@ -2,7 +2,7 @@ import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
 import { EnDiceRoll } from './special/en'
 import { RiDiceRoll, RiListDiceRoll } from './special/ri'
-import { OpposedDiceRoll } from './standard/oppose'
+import { CocOpposedDiceRoll } from './standard/cocOppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
 import { StDiceRoll } from './special/st'
@@ -32,7 +32,7 @@ export interface IDiceRollContext {
   userRole: UserRole
   config: ChannelConfig
   getCard: (userId: string) => ICard | undefined
-  opposedRoll?: StandardDiceRoll | null
+  opposedRoll?: StandardDiceRoll
 }
 
 /**
@@ -170,11 +170,18 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
     // todo 权限控制
     // 死亡豁免指令简单，无需 parse
     return new DsDiceRoll(expression, context, inlineRolls).roll()
-  } else if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
-    const parsedExpression = parseTemplate(expression, context, inlineRolls)
-    return new OpposedDiceRoll(parsedExpression, context, inlineRolls).roll()
   } else {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
+    // 对抗检定判断
+    if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
+      const opposedType = getOpposedType(context.opposedRoll, selfCard)
+      if (opposedType === 'coc') {
+        return new CocOpposedDiceRoll(parsedExpression, context, inlineRolls).roll()
+      } else if (opposedType === 'dnd') {
+        // todo
+      }
+    }
+    // 走普通掷骰逻辑
     if (selfCard instanceof GeneralCard) {
       return new StandardDiceRoll(parsedExpression, context, inlineRolls).roll()
     } else if (selfCard instanceof DndCard) {
@@ -184,6 +191,20 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
       return new CocDiceRoll(parsedExpression, context, inlineRolls).roll()
     }
   }
+}
+
+// 判断对抗检定的类型
+function getOpposedType(opposedRoll: StandardDiceRoll, selfCard?: ICard) {
+  // 如果没有 selfCard，则跟随 opposedRoll 的类型
+  if (!selfCard) {
+    if (opposedRoll instanceof CocDiceRoll) return 'coc'
+    if (opposedRoll instanceof DndDiceRoll) return 'dnd'
+    return undefined
+  }
+  // 如果有 selfCard，那么必须和 opposedRoll 是相同的类型才能触发对抗
+  if (selfCard.type === 'coc' && opposedRoll instanceof CocDiceRoll) return 'coc'
+  if (selfCard.type === 'dnd' && opposedRoll instanceof DndDiceRoll) return 'dnd'
+  return undefined
 }
 
 // 用户权限 id 适配 理论上不要放在这里

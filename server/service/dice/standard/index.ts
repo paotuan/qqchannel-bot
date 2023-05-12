@@ -171,4 +171,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     }
     return lines.map(line => line.trim()).join('\n')
   }
+
+  // 是否可基于此骰进行对抗检定
+  get eligibleForOpposedRoll() {
+    return false
+  }
 }

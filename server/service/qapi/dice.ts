@@ -8,7 +8,6 @@ import { unescapeHTML } from '../../utils'
 import type { IRiItem } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
 import type { UserRole } from '../../../interface/config'
-import { CocDiceRoll } from '../dice/standard/coc'
 
 interface IMessageCache {
   text?: string
@@ -83,7 +82,7 @@ export class DiceManager {
       } else {
         const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: msg.id })
         // 如果是可供对抗的投骰，记录下缓存
-        if (replyMsg && roll instanceof CocDiceRoll && roll.eligibleForOpposedRoll) {
+        if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
           this.opposedRollCache.set(replyMsg.id, roll)
         }
       }
@@ -152,7 +151,7 @@ export class DiceManager {
       if (!channel) return // channel 信息不存在
       const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
       // 如果是可供对抗的投骰，记录下缓存
-      if (replyMsg && roll instanceof CocDiceRoll && roll.eligibleForOpposedRoll) {
+      if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
         this.opposedRollCache.set(replyMsg.id, roll)
       }
     }
@@ -173,7 +172,7 @@ export class DiceManager {
       // 是否有人物卡
       const getCard = (userId: string) => channelId ? this.wss.cards.getCard(channelId, userId) : undefined
       // 是否有回复消息(目前仅用于对抗检定)
-      const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : null
+      const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : undefined
       // 配置
       const config = this.wss.config.getChannelConfig(channelId || 'default')
       // 投骰

@@ -64,7 +64,7 @@ export class CocDiceRoll extends StandardDiceRoll {
   }
 
   // 是否可以用于对抗
-  get eligibleForOpposedRoll() {
+  override get eligibleForOpposedRoll() {
     if (this.hidden) return false
     // 单轮投骰 & 有且仅有一个技能检定 & 技能检定有结果
     return this.rolls.length === 1 && this.rolls[0].tests.length === 1 && !!this.rolls[0].tests[0].result
