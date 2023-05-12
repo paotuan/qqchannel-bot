@@ -39,15 +39,6 @@ export class CocDiceRoll extends StandardDiceRoll {
     return this
   }
 
-  override get output() {
-    let content = super.output
-    // 判断是否需要对抗标记
-    if (this.vsFlag && this.eligibleForOpposedRoll) {
-      content += '\n> 回复本条消息以进行对抗'
-    }
-    return content
-  }
-
   override applyToCard() {
     const card = this.selfCard as CocCard
     if (!card) return []

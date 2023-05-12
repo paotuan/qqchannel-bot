@@ -51,4 +51,19 @@ export class DndDiceRoll extends StandardDiceRoll {
     }
     return this
   }
+
+  override get eligibleForOpposedRoll() {
+    if (this.hidden) return false
+    // 单轮投骰, 没描述也没关系，反正最后是比大小
+    return this.rolls.length === 1
+  }
+
+  // 用于对抗检定的数据
+  /* protected */ getDataForOpposedRoll() {
+    return {
+      value: this.rolls[0].roll.total,
+      skill: this.rolls[0].tests[0]?.skill ?? '',
+      username: this.context.username
+    }
+  }
 }

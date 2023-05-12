@@ -13,6 +13,7 @@ import { CocDiceRoll } from './standard/coc'
 import { DndCard } from '../../../interface/card/dnd'
 import { DndDiceRoll } from './standard/dnd'
 import { DsDiceRoll } from './special/ds'
+import { DndOpposedRoll } from './standard/dndOppose'
 
 // 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
 // export type SuccessLevel = -2 | -1 | 1 | 2
@@ -178,7 +179,7 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
       if (opposedType === 'coc') {
         return new CocOpposedDiceRoll(parsedExpression, context, inlineRolls).roll()
       } else if (opposedType === 'dnd') {
-        // todo
+        return new DndOpposedRoll(parsedExpression, context, inlineRolls).roll()
       }
     }
     // 走普通掷骰逻辑

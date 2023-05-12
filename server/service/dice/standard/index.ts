@@ -169,6 +169,10 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       // 有多轮投骰，就简单按行显示
       lines.push(...rollLines.flat())
     }
+    // 判断是否需要对抗标记
+    if (this.vsFlag && this.eligibleForOpposedRoll) {
+      lines.push('> 回复本条消息以进行对抗')
+    }
     return lines.map(line => line.trim()).join('\n')
   }
 
