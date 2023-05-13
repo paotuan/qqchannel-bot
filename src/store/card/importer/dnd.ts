@@ -74,14 +74,7 @@ export function getDndCardProto(name?: string): IDndCardData {
         9: { value: 0, max: 0 },
       },
       deathSaving: { success: 0, failure: 0 },
-      propsSaving: {
-        '力量': false,
-        '敏捷': false,
-        '体质': false,
-        '智力': false,
-        '感知': false,
-        '魅力': false,
-      }
+      experienced: {}
     }
   }
 }
@@ -109,11 +102,11 @@ export function parseDndXlsx(workbook: XLSX.WorkBook) {
     if (typeof name === 'string' && typeof value === 'number') {
       setter.setEntry(name, value)
     }
-    // 判断豁免值
+    // 判断属性豁免熟练
     const modifiedValue = sheet['R' + i]?.v
     const savingValue = sheet['T' + i]?.v
-    if (name in user.meta.propsSaving && typeof modifiedValue === 'number' && typeof savingValue === 'number') {
-      user.meta.propsSaving[name as keyof typeof user.meta.propsSaving] = savingValue - modifiedValue !== 0
+    if (typeof modifiedValue === 'number' && typeof savingValue === 'number' && savingValue - modifiedValue !== 0) {
+      setter.markExperienced(name)
     }
   }
   // skills： 39-60 C列 name，F value，跳过 40 44 50 56
@@ -123,6 +116,13 @@ export function parseDndXlsx(workbook: XLSX.WorkBook) {
     const value = sheet['F' + i]?.v
     if (typeof name === 'string' && typeof value === 'number') {
       setter.setEntry(name, value)
+    }
+    // 判断技能熟练
+    const finalValue = sheet['I' + i]?.v
+    const propI = i <= 39 ? 14 : i <= 43 ? 15 : i <= 49 ? 17 : i <= 55 ? 18 : 19
+    const propValue = sheet['R' + propI]?.v
+    if (typeof finalValue === 'number' && typeof propValue === 'number' && finalValue - propValue !== 0) {
+      setter.markExperienced(name)
     }
   }
   // 金币
@@ -177,9 +177,6 @@ export function parseDndXlsx(workbook: XLSX.WorkBook) {
     const max = sheet['AR' + i]?.v || 0
     user.meta.spellSlots[index] = { value, max }
   }
-  // 死亡豁免 28 成功：M N O, 失败：R S T
-  user.meta.deathSaving.success = ['M28', 'N28', 'O28'].map(i => sheet[i]?.v).filter(i => !!i).length
-  user.meta.deathSaving.failure = ['R28', 'S28', 'T28'].map(i => sheet[i]?.v).filter(i => !!i).length
 
   return setter
 }

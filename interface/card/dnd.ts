@@ -79,15 +79,16 @@ export interface IDndCardData extends ICardData {
       success: number
       failure: number
     },
-    // 豁免检定熟练项
-    propsSaving: {
-      '力量': boolean
-      '敏捷': boolean
-      '体质': boolean
-      '智力': boolean
-      '感知': boolean
-      '魅力': boolean
-    }
+    // 豁免检定熟练项 todo 废弃
+    // propsSaving: {
+    //   '力量': boolean
+    //   '敏捷': boolean
+    //   '体质': boolean
+    //   '智力': boolean
+    //   '感知': boolean
+    //   '魅力': boolean
+    // },
+    experienced: Record<string, boolean>
   }
 }
 
@@ -171,7 +172,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
       if (postfix === 'modifier') {
         return calculatePropModifier(value) // 属性调整
       } else if (postfix === 'saving') {
-        const experienced = !!this.data.meta.propsSaving[key as keyof typeof this.data.meta.propsSaving]
+        const experienced = !!this.data.meta.experienced[key]
         return calculatePropModifier(value) + (experienced ? this.data.basic.熟练 : 0) // 属性豁免
       }
     }
@@ -249,6 +250,38 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     } else {
       return false
     }
+  }
+
+  /**
+   * 标记属性/技能熟练
+   */
+  markExperienced(skill: string) {
+    const entry = this.getEntry(skill)
+    if (!entry || !['props', 'skills'].includes(entry.type)) return false // 没这个技能，或技能不能成长
+    const key = entry.key
+    if (this.data.meta.experienced[key]) {
+      return false
+    } else {
+      this.data.meta.experienced[key] = true
+      this.data.lastModified = Date.now()
+      return true // 返回有更新
+    }
+  }
+
+  /**
+   * 取消属性/技能熟练
+   */
+  cancelExperienced(skill: string) {
+    let updated = false
+    const _input = skill.toUpperCase()
+    const possibleSkills = SKILL_ALIAS[_input] ?? [_input]
+    possibleSkills.forEach(skill => { // 把所有的别名都干掉
+      if (this.data.meta.experienced[skill]) {
+        delete this.data.meta.experienced[skill]
+        updated = true
+      }
+    })
+    return updated
   }
 
   override getSummary(): string {
