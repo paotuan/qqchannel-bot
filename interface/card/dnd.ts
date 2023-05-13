@@ -79,15 +79,6 @@ export interface IDndCardData extends ICardData {
       success: number
       failure: number
     },
-    // 豁免检定熟练项 todo 废弃
-    // propsSaving: {
-    //   '力量': boolean
-    //   '敏捷': boolean
-    //   '体质': boolean
-    //   '智力': boolean
-    //   '感知': boolean
-    //   '魅力': boolean
-    // },
     experienced: Record<string, boolean>
   }
 }
@@ -307,11 +298,11 @@ const SPECIAL_ENTRY_SETTERS = ['HP'] as const
  * DND 技能对应的属性表
  */
 const _PROP2SKILLS = Object.freeze({
-  '力量': ['运动'],
-  '敏捷': ['体操', '巧手', '隐匿'],
-  '智力': ['奥秘', '历史', '调查', '自然', '宗教'],
-  '感知': ['驯兽', '洞悉', '医疗', '察觉', '生存'],
-  '魅力': ['欺瞒', '威吓', '表演', '说服']
+  '力量': ['运动'] as const,
+  '敏捷': ['体操', '巧手', '隐匿'] as const,
+  '智力': ['奥秘', '历史', '调查', '自然', '宗教'] as const,
+  '感知': ['驯兽', '洞悉', '医疗', '察觉', '生存'] as const,
+  '魅力': ['欺瞒', '威吓', '表演', '说服'] as const
 })
 
 const _SKILL2PROP = (() => {
@@ -328,6 +319,11 @@ const _SKILL2PROP = (() => {
 // 获取 skill 的 prop。此方法不考虑同义词的问题
 export function getPropOfSkill(skill: string) {
   return _SKILL2PROP[skill]
+}
+
+// 给前端展示用
+export function getSkillsMap() {
+  return _PROP2SKILLS
 }
 
 /**

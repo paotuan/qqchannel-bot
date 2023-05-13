@@ -15,7 +15,7 @@
       <CardToolbar />
     </div>
     <div class="flex gap-2">
-      <div style="flex: 1 1 0">
+      <div class="w-0" style="flex: 1 1 0">
         <!-- basic -->
         <div>
           <table class="table table-compact table-zebra w-full">
@@ -85,7 +85,7 @@
         <!-- ext -->
         <textarea v-model="cardData.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
       </div>
-      <div style="flex: 2 1 0">
+      <div class="w-0" style="flex: 2 1 0">
         <table class="table table-compact table-zebra w-full">
           <thead>
           <tr>

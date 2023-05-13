@@ -30,7 +30,10 @@
       </div>
       <div class="flex-grow">
         <template v-if="selectedCardType === 'coc'">
-          <CocCardDisplay />
+          <CocCardDisplay :key="selectedCardKey" />
+        </template>
+        <template v-else-if="selectedCardType === 'dnd'">
+          <DndCardDisplay :key="selectedCardKey" />
         </template>
       </div>
     </div>
@@ -45,9 +48,11 @@ import { SELECTED_CARD } from './utils'
 import CocCardDisplay from './display/CocCardDisplay.vue'
 import CardTypeBadge from './CardTypeBadge.vue'
 import CardImportDialogNew from './CardImportDialogNew.vue'
+import DndCardDisplay from './display/DndCardDisplay.vue'
 
 const cardStore = useCardStore()
 const selectedCard = computed(() => cardStore.selectedCard)
 const selectedCardType = computed(() => selectedCard.value?.type)
+const selectedCardKey = computed(() => selectedCard.value?.name ?? '')
 provide(SELECTED_CARD, selectedCard)
 </script>
