@@ -1,5 +1,5 @@
 <template>
-  <CardAddAttribute @submit="addSkillsBatch" />
+  <CardAddAttribute :dnd="selectedCard.type === 'dnd'" @submit="addSkillsBatch" />
   <button class="btn btn-xs btn-primary" :disabled="!cardStore.isEdited(selectedCard.name)"
           @click="cardStore.requestSaveCard(selectedCard.data)">保存修改
   </button>
