@@ -5,7 +5,7 @@ export interface IGeneralCardData extends ICardData {
   type: 'general'
   ext: string
   skills: Record<string, number>
-  abilities: Record<string, string>
+  abilities: { key: string, value: string }[]
 }
 
 export class GeneralCard extends BaseCard<IGeneralCardData> {
@@ -19,33 +19,42 @@ export class GeneralCard extends BaseCard<IGeneralCardData> {
 
   getAbility(input: string) {
     const key = input.toUpperCase()
-    const value = this.data.abilities[key]
-    if (typeof value !== 'undefined') {
-      return { input, key, value }
-    } else {
-      return undefined
+    const ability = this.data.abilities.find(item => item.key.toUpperCase() === key)
+    if (ability) {
+      return { input, key: ability.key, value: ability.value }
     }
+    return undefined
   }
 
   setAbility(name: string, value: string) {
-    const key = name.toUpperCase()
-    if (this.data.abilities[key] !== value) {
-      this.data.abilities[key] = value
+    const abilityRet = this.getAbility(name)
+    if (abilityRet) {
+      const ability = this.data.abilities.find(item => item.key === abilityRet.key)!
+      if (ability.value !== value) {
+        ability.value = value
+        this.data.lastModified = Date.now()
+        return true
+      } else {
+        return false
+      }
+    } else {
+      this.data.abilities.push({ key: name, value })
       this.data.lastModified = Date.now()
       return true
     }
-    return false
   }
 
   removeAbility(name: string) {
-    const key = name.toUpperCase()
-    if (typeof this.data.abilities[key] !== 'undefined') {
-      delete this.data.abilities[key]
-      this.data.lastModified = Date.now()
-      return true
-    } else {
-      return false
+    const abilityRet = this.getAbility(name)
+    if (abilityRet) {
+      const index = this.data.abilities.findIndex(item => item.key === abilityRet.key)
+      if (index >= 0) { // must
+        this.data.abilities.splice(index, 1)
+        this.data.lastModified = Date.now()
+        return true
+      }
     }
+    return false
   }
 
   getEntry(input: string) {

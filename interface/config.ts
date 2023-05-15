@@ -90,13 +90,14 @@ export interface ISpecialDiceConfig {
   scDice: { enabled: boolean },
   riDice: { enabled: boolean, baseRoll: string }
   stDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
+  dsDice: { enabled: boolean }
   opposeDice: { enabled: boolean }
   inMessageDice: { enabled: boolean }
 }
 
 export interface IChannelConfig {
-  version: number // 3
-  defaultRoll: string // d100/d20/4dF
+  version: number
+  defaultRoll: { expression: string, preferCard: boolean } // d100/d20/4dF
   specialDice: ISpecialDiceConfig
   customReplyIds: { id: string, enabled: boolean }[] // full id
   aliasRollIds: { id: string, enabled: boolean }[] // full id

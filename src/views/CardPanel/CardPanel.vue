@@ -35,6 +35,9 @@
         <template v-else-if="selectedCardType === 'dnd'">
           <DndCardDisplay :key="selectedCardKey" />
         </template>
+        <template v-else-if="selectedCardType === 'general'">
+          <GeneralCardDisplay :key="selectedCardKey" />
+        </template>
       </div>
     </div>
   </div>
@@ -49,6 +52,7 @@ import CocCardDisplay from './display/CocCardDisplay.vue'
 import CardTypeBadge from './CardTypeBadge.vue'
 import CardImportDialogNew from './CardImportDialogNew.vue'
 import DndCardDisplay from './display/DndCardDisplay.vue'
+import GeneralCardDisplay from './display/GeneralCardDisplay.vue'
 
 const cardStore = useCardStore()
 const selectedCard = computed(() => cardStore.selectedCard)

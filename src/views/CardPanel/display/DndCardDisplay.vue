@@ -111,8 +111,8 @@
               <template v-if="!getSkillCell(i, j)">
                 <td></td><td></td>
               </template>
-              <template v-else-if="getSkillCell(i, j).prop">
-                <td colspan="2"><button class="btn btn-xs btn-ghost font-medium text-gray-400">{{ getSkillCell(i, j).prop + '系' }}</button></td>
+              <template v-else-if="getPropCell(i, j).prop">
+                <td colspan="2"><button class="btn btn-xs btn-ghost font-medium text-gray-400">{{ getPropCell(i, j).prop + '系' }}</button></td>
               </template>
               <template v-else>
                 <td :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
@@ -231,7 +231,7 @@ import { useCardStore } from '../../../store/card'
 import { computed, ComputedRef, inject } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { SELECTED_CARD } from '../utils'
-import { DndCard, getPropOfSkill, getSkillsMap } from '../../../../interface/card/dnd'
+import { DndCard, getPropOfSkill, getSkillsMap, IDndCardData } from '../../../../interface/card/dnd'
 import CardToolbar from '../CardToolbar.vue'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
@@ -256,7 +256,9 @@ const skillsTable = (() => {
   return [col1, col2, col3, col4]
 })()
 const skillsTableRowCount = Math.max(...skillsTable.map(col => col.length))
-const getSkillCell = (row: number, col: number) => skillsTable[col - 1][row - 1]
+// getCell 时处理一些类型问题
+const getPropCell = (row: number, col: number) => skillsTable[col - 1][row - 1] as { prop: keyof IDndCardData['props'] }
+const getSkillCell = (row: number, col: number) => skillsTable[col - 1][row - 1] as { skill: keyof IDndCardData['skills'] }
 const skillTotalOf = (skill: string) => {
   const prop = getPropOfSkill(skill)
   const propModifiedValue = modifiedValueOf(prop)
