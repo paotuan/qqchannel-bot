@@ -53,7 +53,7 @@ export const useConfigStore = defineStore('config', () => {
     const config = state.config
     if (!config) return
     // 默认骰
-    config.defaultRoll = mode === 'coc' ? 'd100' : 'd20'
+    config.defaultRoll.expression = mode === 'coc' ? 'd100' : 'd20'
     // 规则
     const ruleId = config.embedPlugin.id + (mode === 'coc' ? '.coc0' : '.dnd0')
     const ruleExist = config.rollDeciderIds.includes(ruleId)
@@ -62,9 +62,10 @@ export const useConfigStore = defineStore('config', () => {
     }
     // 特殊指令
     // config.specialDice.opposeDice.refineSuccessLevels = mode === 'coc'
-    config.specialDice.riDice.baseRoll = mode === 'coc' ? '$敏捷' : 'd20'
+    // config.specialDice.riDice.baseRoll = mode === 'coc' ? '$敏捷' : 'd20'
     config.specialDice.scDice.enabled = mode === 'coc'
     config.specialDice.enDice.enabled = mode === 'coc'
+    config.specialDice.dsDice.enabled = mode === 'dnd'
   }
 
   return {

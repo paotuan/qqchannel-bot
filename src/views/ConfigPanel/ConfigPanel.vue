@@ -19,10 +19,10 @@
         <div class="card card-compact w-full bg-base-100 shadow-lg">
           <div class="card-body">
             <div class="flex gap-4">
-              <input v-model="config.defaultRoll" type="text" placeholder="请输入默认骰表达式" class="input input-sm input-bordered w-full max-w-xs" />
-              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll = 'd100'">d100</button>
-              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll = 'd20'">d20</button>
-              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll = '4dF'">4dF</button>
+              <input v-model="config.defaultRoll.expression" type="text" placeholder="请输入默认骰表达式" class="input input-sm input-bordered w-full max-w-xs" />
+              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = 'd100'">d100</button>
+              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = 'd20'">d20</button>
+              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = '4dF'">4dF</button>
             </div>
           </div>
         </div>

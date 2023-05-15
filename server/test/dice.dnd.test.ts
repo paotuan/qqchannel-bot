@@ -19,7 +19,7 @@ const MockUserId = '__mock_user_id__'
 function createContext(card: ICard): IDiceRollContext {
   // 修改为 dnd 的一些设置
   const config = getInitialDefaultConfig()
-  config.defaultRoll = 'd20'
+  // config.defaultRoll.expression = 'd20'
   config.rollDeciderId = 'io.paotuan.embed.dnd0'
   return {
     channelId: MockChannelId,

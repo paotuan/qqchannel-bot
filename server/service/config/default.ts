@@ -5,9 +5,9 @@ import type {
   IRollDeciderConfig,
   ISpecialDiceConfig
 } from '../../../interface/config'
+import { VERSION_CODE } from '../../../interface/version'
 
 const embedPluginId = 'io.paotuan.embed'
-const CONFIG_VERSION = 4
 
 export function getInitialDefaultConfig(): IChannelConfig {
   const customReplies = getEmbedCustomReply()
@@ -21,8 +21,8 @@ export function getInitialDefaultConfig(): IChannelConfig {
     'io.paotuan.plugin.cardgen.dnd'
   ]
   return {
-    version: CONFIG_VERSION,
-    defaultRoll: 'd100',
+    version: VERSION_CODE,
+    defaultRoll: { expression: 'd100', preferCard: true },
     specialDice: getSpecialDiceConfig(),
     customReplyIds: customReplies
       .map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
@@ -87,7 +87,15 @@ export function handleUpgrade(config: IChannelConfig) {
     })
     config.version = 4
   }
-  return config
+  if (config.version === 4) {
+    // 默认骰格式更新
+    const defaultRoll = (config as any).defaultRoll as string
+    config.defaultRoll = { expression: defaultRoll, preferCard: true }
+    // 增加特殊指令 ds 配置
+    config.specialDice.dsDice = { enabled: true }
+    config.version = 17 // 1.3.0
+  }
+  return config as IChannelConfig
 }
 
 function getEmbedCustomReply(): ICustomReplyConfig[] {
@@ -407,6 +415,7 @@ function getSpecialDiceConfig(): ISpecialDiceConfig {
     scDice: { enabled: true },
     riDice: { enabled: true, baseRoll: 'd20' },
     stDice: { enabled: true, writable: 'all' },
+    dsDice: { enabled: true },
     opposeDice: { enabled: true },
     inMessageDice: { enabled: true } // 暂不处理
   }
