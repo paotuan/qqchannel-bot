@@ -167,8 +167,7 @@ export function createDiceRoll(expression: string, context: IDiceRollContext) {
   } else if (expression.startsWith('st') && specialDiceConfig.stDice.enabled) {
     // st 由于可能要读取他人人物卡，也由内部 parseTemplate
     return new StDiceRoll(expression, context, inlineRolls).roll()
-  } else if (['ds', '死亡豁免'].includes(expression)) {
-    // todo 权限控制
+  } else if (['ds', '死亡豁免'].includes(expression) && specialDiceConfig.dsDice.enabled) {
     // 死亡豁免指令简单，无需 parse
     return new DsDiceRoll(expression, context, inlineRolls).roll()
   } else {
