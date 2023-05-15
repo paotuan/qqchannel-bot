@@ -12,7 +12,8 @@ export abstract class BasePtDiceRoll {
   }
 
   protected get defaultRoll(): string {
-    return this.selfCard?.defaultRoll || this.context.config.defaultRoll.expression || 'd%'
+    const fromCard = this.context.config.defaultRoll.preferCard ? this.selfCard?.defaultRoll : undefined
+    return fromCard || this.context.config.defaultRoll.expression || 'd%'
   }
 
   protected get hasInlineRolls() {

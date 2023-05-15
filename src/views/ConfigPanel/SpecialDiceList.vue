@@ -30,20 +30,25 @@
         <input v-model="config.riDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
         <span>先攻（ri/init）</span>
       </span>
-      <span class="flex items-center gap-2 text-sm">
-        <span>先攻默认骰</span>
-        <input v-model="config.riDice.baseRoll" type="text" placeholder="Type here" class="input input-bordered input-xs w-24" />
-      </span>
+<!--      <span class="flex items-center gap-2 text-sm">-->
+<!--        <span>先攻默认骰</span>-->
+<!--        <input v-model="config.riDice.baseRoll" type="text" placeholder="Type here" class="input input-bordered input-xs w-24" />-->
+<!--      </span>-->
     </div>
     <!-- sc -->
     <div class="collapse-title flex items-center gap-2">
       <input v-model="config.scDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
-      <span>理智检定（sc）</span>
+      <span>COC 理智检定（sc）</span>
     </div>
     <!-- en -->
     <div class="collapse-title flex items-center gap-2">
       <input v-model="config.scDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
-      <span>成长检定（en）</span>
+      <span>COC 成长检定（en）</span>
+    </div>
+    <!-- ds -->
+    <div class="collapse-title flex items-center gap-2">
+      <input v-model="config.dsDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
+      <span>DND 死亡豁免（ds/死亡豁免）</span>
     </div>
   </div>
 </template>

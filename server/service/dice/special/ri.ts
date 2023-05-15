@@ -20,12 +20,12 @@ export class RiDiceRoll extends BasePtDiceRoll {
     const segments = removeRi.split(/[,，;；]+/).filter(segment => !!segment.trim())
     if (segments.length === 0) segments.push('') // push 一个空的代表自己
     console.log('[Dice] 先攻指令 原始指令', this.rawExpression)
-    const defaultRoll = this.context.config.specialDice.riDice.baseRoll.trim() || 'd20'
+    // const defaultRoll = this.context.config.specialDice.riDice.baseRoll.trim() || 'd20' 干掉先攻默认骰，统一走人物卡的配置
     segments.forEach(segment => {
       const [exp, desc] = parseDescriptions(segment, ParseFlags.PARSE_EXP)
       const type = desc ? 'npc' : 'actor'
       // 如果是骰玩家自己，且包含了人物卡，则优先读取人物卡的先攻默认骰
-      const baseRoll = (type === 'actor' ? this.selfCard?.riDefaultRoll : undefined) ?? defaultRoll
+      const baseRoll = (type === 'actor' ? this.selfCard?.riDefaultRoll : undefined) ?? 'd20'
       const expression = exp.startsWith('+') || exp.startsWith('-') ? `${baseRoll}${exp}` : (exp || baseRoll)
       const parsed = parseTemplate(expression, this.context, this.inlineRolls)
       const diceRoll = new DiceRoll(parsed)

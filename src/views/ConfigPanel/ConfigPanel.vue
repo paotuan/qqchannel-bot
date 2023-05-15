@@ -23,6 +23,13 @@
               <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = 'd100'">d100</button>
               <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = 'd20'">d20</button>
               <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = '4dF'">4dF</button>
+              <label class="label items-center gap-2 cursor-pointer">
+                <input v-model="config.defaultRoll.preferCard" type="checkbox" class="checkbox checkbox-sm" @click.stop />
+                <span class="label-text">优先使用人物卡对应的默认骰</span>
+                <span class="tooltip tooltip-top" data-tip="当玩家关联 COC 人物卡时，默认使用 d%&#xa;当玩家关联 DND 人物卡时，默认使用 d20">
+                  <QuestionMarkCircleIcon class="w-4 h-4" />
+                </span>
+              </label>
             </div>
           </div>
         </div>
@@ -101,13 +108,12 @@ const config = computed(() => configStore.config!)
 const cocDesc = [
   '默认骰设为 d100；',
   '检定规则设为 COC 默认规则（若有）；',
-  '先攻默认骰设为 $敏捷'
+  '禁用死亡豁免检定'
 ]
 
 const dndDesc = [
   '默认骰设为 d20；',
   '检定规则设为 DND 默认规则（若有）；',
-  '先攻默认骰设为 d20；',
   '禁用理智检定、成长检定'
 ]
 
