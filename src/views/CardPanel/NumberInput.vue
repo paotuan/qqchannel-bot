@@ -4,7 +4,7 @@ import { computed, ComputedRef, inject, nextTick, ref } from 'vue'
 import { SELECTED_CARD } from './utils'
 import type { ICard } from '../../../interface/card/types'
 
-const props = defineProps<{ modelValue: number }>()
+const props = defineProps<{ modelValue: number, allowNegative?: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: number): void }>()
 const input = ref<HTMLInputElement>()
 
@@ -18,7 +18,7 @@ const vm = computed({
   set: (value) => {
     selectedCard.value.data.lastModified = Date.now()
     cardStore.markCardEdited(selectedCard.value.name)
-    emit('update:modelValue', Math.max(0, value)) // 不允许负数 todo 可配置
+    emit('update:modelValue', props.allowNegative ? value : Math.max(0, value))
   }
 })
 

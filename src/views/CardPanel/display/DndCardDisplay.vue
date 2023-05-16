@@ -119,7 +119,7 @@
                   <button class="btn btn-xs btn-ghost font-medium" @click="toggleSkillGrowth(getSkillCell(i, j).skill)">{{ getSkillCell(i, j).skill }}</button>
                 </td>
                 <td :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
-                  <number-input v-model="cardData.skills[getSkillCell(i, j).skill]" class="input input-ghost input-xs text-sm w-14"/>
+                  <number-input v-model="cardData.skills[getSkillCell(i, j).skill]" allow-negative class="input input-ghost input-xs text-sm w-14"/>
                   <span class="text-gray-400 text-xs">{{ skillTotalOf(getSkillCell(i, j).skill) }}</span>
                 </td>
               </template>
@@ -144,7 +144,7 @@
                   <template v-if="item">
                     <td :key="`name-${j}`"><button class="btn btn-xs btn-ghost font-medium">{{ item }}</button></td>
                     <td :key="`value-${j}`" class="flex items-center justify-between group">
-                      <number-input v-model="cardData.items[item]" class="input input-ghost input-xs text-sm w-14"/>
+                      <number-input v-model="cardData.items[item]" allow-negative class="input input-ghost input-xs text-sm w-14"/>
                       <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteItem(item)">
                         <XMarkIcon class="w-4 h-4" />
                       </button>
@@ -262,8 +262,9 @@ const getSkillCell = (row: number, col: number) => skillsTable[col - 1][row - 1]
 const skillTotalOf = (skill: string) => {
   const prop = getPropOfSkill(skill)
   const propModifiedValue = modifiedValueOf(prop)
+  const skillValue = cardData.value.skills[skill as keyof typeof cardData.value.skills]
   const isExperienced = !!cardData.value.meta.experienced[skill]
-  return propModifiedValue + (isExperienced ? cardData.value.basic.熟练 : 0)
+  return propModifiedValue + skillValue + (isExperienced ? cardData.value.basic.熟练 : 0)
 }
 
 // 物品表格 分三栏
