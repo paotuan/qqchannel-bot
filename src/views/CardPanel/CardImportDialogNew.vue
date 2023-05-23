@@ -159,6 +159,7 @@ const submit = () => {
   } else { // 导入 excel
     if (!xlsxCard.value) return
     card = xlsxCard.value
+    card.data.name = cardName.value // name 使用界面上的值，允许和 excel 不同
   }
   // coc 设置技能默认值
   if (card instanceof CocCard && cocApplyDefaultValue.value) {
