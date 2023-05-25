@@ -1,7 +1,6 @@
 FROM centos
 RUN chmod 777 /usr/local/
 WORKDIR /usr/local
-EXPOSE 4174 4175
 ENV WS_SERVER_ADDR=localhost WS_SERVER_PORT=4174 WEB_PORT=4175
 RUN cd /etc/yum.repos.d/ \
 	&&sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* \
