@@ -13,11 +13,13 @@ RUN yum install epel-release -y\
     && node -v && npm -v \
     && npm install -g n && n 16.16.0 \
     && n use 16.16.0 && n rm 10.24.0
+# 安装项目和依赖
 RUN npm i yarn -g \
 	&& yarn config set registry https://registry.npmmirror.com/ \
 	&& git clone https://github.com/paotuan/qqchannel-bot.git \
  	&& cd qqchannel-bot && yarn install \
 	&& yarn global add pm2 
+# 持久化运行和环境变量修改
 ENTRYPOINT cd qqchannel-bot && echo -e "WS_SERVER_ADDR=$WS_SERVER_ADDR\nWS_SERVER_PORT=$WS_SERVER_PORT\nWEB_PORT=$WEB_PORT">>.env \
 	&& yarn run build \
 	&& cd dist && yarn install \
