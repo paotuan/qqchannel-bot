@@ -20,5 +20,5 @@ RUN npm i yarn -g \
 	&& echo -e "WS_SERVER_ADDR=$WS_SERVER_ADDR\nWS_SERVER_PORT=$WS_SERVER_PORT\nWEB_PORT=$WEB_PORT">>.env \
 	&& yarn run build && yarn global add pm2 \
 	&& cd dist && yarn install \
-    &&cd .. && yarn run start
+    	&&cd .. && yarn run start
 ENTRYPOINT pm2 logs
