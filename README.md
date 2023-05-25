@@ -36,13 +36,21 @@ docker pull monthwolf/paotuan:latest
 ```
 
 2)运行  
+快速启动（请务必填写主机IP，否则可能会出现无法连接到后端的情况）
 ```
 docker run -d --net=host \
 -e WS_SERVER_ADDR=你的主机IP \
 --name paotuan monthwolf/paotuan:latest
 ```  
 
-如果不需要更改连接地址，则删去` -e WS_SERVER_ADDR=你的主机IP`
+自定义端口
+```
+docker run -d --net=host \
+-e WS_SERVER_ADDR=你的主机IP \
+-e WS_SERVER_PORT=端口1 \
+-e WEB_PORT=端口2 \
+--name paotuan monthwolf/paotuan:latest
+```  
 
 ### 本地开发
 require Node >= 14.18
