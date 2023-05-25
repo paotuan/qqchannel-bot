@@ -27,19 +27,19 @@
 ### Docker部署
 #### 1.通过dockerfile文件部署
 将dockerfile拷贝至本地环境中，并在该路径下运行命令`docker build paotuan:latest .`编译镜像文件(注意命令结尾的 **.** 不要漏掉)  
-dockerfile文件可以自行修改再编译，编译的镜像参考 **方式二** 命令运行,只需要把`monthwolf/paotuan:v2`改成`paotuan:latest`
+dockerfile文件可以自行修改再编译，编译的镜像参考 **方式二** 命令运行,只需要把`monthwolf/paotuan:latest`改成`paotuan:latest`
 
 #### 2.拉取镜像运行  
 1)拉取镜像 
 ```
-docker pull monthwolf/paotuan:v2
+docker pull monthwolf/paotuan:latest
 ```
 
 2)运行  
 ```
 docker run -d --net=host \
 -e WS_SERVER_ADDR=你的主机IP \
---name paotuan monthwolf/paotuan:v2
+--name paotuan monthwolf/paotuan:latest
 ```  
 
 如果不需要更改连接地址，则删去` -e WS_SERVER_ADDR=你的主机IP`
