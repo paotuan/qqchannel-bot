@@ -2,7 +2,7 @@ FROM centos
 RUN chmod 777 /usr/local/
 WORKDIR /usr/local
 EXPOSE 4174 4175
-ENV WS_SERVER_ADDR=0.0.0.0 WS_SERVER_PORT=4174 WEB_PORT=4175
+ENV WS_SERVER_ADDR=localhost WS_SERVER_PORT=4174 WEB_PORT=4175
 RUN cd /etc/yum.repos.d/ \
 	&&sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* \
 	&&sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
@@ -17,8 +17,9 @@ RUN npm i yarn -g \
 	&& yarn config set registry https://registry.npmmirror.com/ \
 	&& git clone https://github.com/paotuan/qqchannel-bot.git \
  	&& cd qqchannel-bot && yarn install \
-	&& echo -e "WS_SERVER_ADDR=$WS_SERVER_ADDR\nWS_SERVER_PORT=$WS_SERVER_PORT\nWEB_PORT=$WEB_PORT">>.env \
-	&& yarn run build && yarn global add pm2 \
+	&& yarn global add pm2 
+ENTRYPOINT cd qqchannel-bot && echo -e "WS_SERVER_ADDR=$WS_SERVER_ADDR\nWS_SERVER_PORT=$WS_SERVER_PORT\nWEB_PORT=$WEB_PORT">>.env \
+	&& yarn run build \
 	&& cd dist && yarn install \
-    	&&cd .. && yarn run start
-ENTRYPOINT pm2 logs qqchannel-bot --lines 400
+	&& cd .. && yarn run start \ 
+	&& pm2 logs qqchannel-bot --lines 100
