@@ -21,4 +21,4 @@ RUN npm i yarn -g \
 	&& yarn run build && yarn global add pm2 \
 	&& cd dist && yarn install \
     	&&cd .. && yarn run start
-ENTRYPOINT pm2 logs qqchannel-bot --line 400
+ENTRYPOINT pm2 logs qqchannel-bot --lines 400
