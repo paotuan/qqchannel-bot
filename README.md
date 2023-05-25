@@ -38,7 +38,6 @@ docker pull monthwolf/paotuan:v2
 2)运行  
 ```
 docker run -d --net=host \
--p 本地端口1:4174 -p 本地端口2:4175 \
 -e WS_SERVER_ADDR=你的主机IP \
 --name paotuan monthwolf/paotuan:v2
 ```  
