@@ -331,6 +331,12 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     this.data.lastModified = Date.now() // 强制认为有更新吧
   }
 
+  override getEntryDisplay(name: string): string {
+    const entry = this.getEntry(name)
+    const isSkillGrowth = !!(entry && entry.type === 'skills' && this.data.meta.skillGrowth[entry.key]) // 是否有技能成长标记
+    return `${name}${isSkillGrowth ? '*' : ''}:${entry?.value ?? '-'}`
+  }
+
   override getSummary() {
     const basic = [
       `生命：${this.HP}/${this.MAXHP}`,
@@ -340,9 +346,9 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
       `克苏鲁神话：${this.CM}`,
       `信用评级：${this.data.basic.信用}`
     ].join(' ')
-    const props = Object.entries(this.data.props).map(([k ,v]) => `${k}：${v}`).join(' ')
-    const skills = Object.entries(this.data.skills).map(([k ,v]) => `${k}：${v}`).join(' ')
-    const abilities = this.data.abilities.map(item => `${item.name}：${item.expression}`).join('\n')
+    const props = Object.entries(this.data.props).map(([k ,v]) => `${k}:${v}`).join(' ') // 理论上都应该走 getEntryDisplay 的逻辑，但出于优化目的，没有特殊展示的就不走了
+    const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')
+    const abilities = this.data.abilities.map(item => `${item.name}:${item.expression}`).join('\n')
     return '角色：' + this.name + '\n' + basic + '\n' + props + '\n' + skills + '\n' + abilities
   }
 }

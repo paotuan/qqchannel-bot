@@ -30,6 +30,7 @@ export interface IDndCardData extends ICardData {
     '感知': number
     '魅力': number
   },
+  // 注意 skills 此处都是指修正值
   skills: {
     '运动': number
     '体操': number
@@ -275,15 +276,40 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     return updated
   }
 
+  // 由于许多地方需要获取技能的总值，可以用这个方法
+  // getEntry 的逻辑暂时不变，还是获取修正值
+  getSkillTotal(entry: IDndCardEntry) {
+    if (entry.type !== 'skills') throw new Error('获取技能总值，非 skill 类型')
+    const prop = getPropOfSkill(entry.key)
+    const modifiedValue = this.getEntry(prop + '调整')!.value // 属性调整
+    const isExperienced = !!this.data.meta.experienced[entry.key] // 是否技能熟练
+    return modifiedValue + entry.value + (isExperienced ? this.data.basic.熟练 : 0)
+  }
+
+  override getEntryDisplay(name: string): string {
+    const entry = this.getEntry(name)
+    if (!entry) return `${name}:-`
+    // 熟练标记
+    const isExperienced = !!this.data.meta.experienced[entry.key]
+    // 技能特殊展示 总值（调整值）
+    if (entry.type === 'skills') {
+      const skillTotal = this.getSkillTotal(entry)
+      const skillSign = entry.value > 0 ? '+' : ''
+      return `${name}${isExperienced ? '*' : ''}:${skillTotal}(${skillSign}${entry.value})`
+    } else {
+      return `${name}${isExperienced ? '*' : ''}:${entry.value}`
+    }
+  }
+
   override getSummary(): string {
     const basic = [
       `生命：${this.HP}/${this.MAXHP}`,
       `LV：${this.data.basic.LV}`,
       `AC：${this.data.basic.AC}`
     ].join(' ')
-    const props = Object.entries(this.data.props).map(([k ,v]) => `${k}：${v}`).join(' ')
-    const skills = Object.entries(this.data.skills).map(([k ,v]) => `${k}：${v}`).join(' ')
-    const items = Object.entries(this.data.items).map(([k ,v]) => `${k}：${v}`).join(' ')
+    const props = Object.keys(this.data.props).map(name => this.getEntryDisplay(name)).join(' ')
+    const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')
+    const items = Object.entries(this.data.items).map(([k ,v]) => `${k}:${v}`).join(' ')
     return '角色：' + this.name + '\n' + basic + '\n' + props + '\n' + skills + '\n' + items
   }
 }

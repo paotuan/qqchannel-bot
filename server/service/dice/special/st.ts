@@ -14,7 +14,7 @@ export class StDiceRoll extends BasePtDiceRoll {
   private exp = ''
   private targetUserCard?: ICard
   private readonly rolls: { name: string, roll: DiceRoll }[] = []
-  private readonly shows: { name: string, value: number | string }[] = []
+  private readonly shows: string[] = []
 
   override roll() {
     this.exp = this.rawExpression.slice(2).trim()
@@ -76,13 +76,10 @@ export class StDiceRoll extends BasePtDiceRoll {
   private rollShow() {
     const segments = this.exp.split(/[,，;；]+/).filter(segment => !!segment.trim())
     if (segments.length > 0) {
-      this.shows.push(...segments.map(name => {
-        const entry = this.targetUserCard!.getEntry(name)
-        return { name, value: entry?.value ?? NaN } // NaN 代表不存在
-      }))
+      this.shows.push(...segments.map(name => this.targetUserCard!.getEntryDisplay(name)))
     } else {
       // 不指定展示哪个，就默认展示全部
-      this.shows.push({ name: '\n', value: this.targetUserCard!.getSummary() })
+      this.shows.push('\n' + this.targetUserCard!.getSummary())
     }
   }
 
@@ -93,7 +90,7 @@ export class StDiceRoll extends BasePtDiceRoll {
     const cardName = this.targetUserCard.data.name
     if (this.show) {
       // 展示
-      const list = this.shows.map(item => item.name + (typeof item.value === 'number' && isNaN(item.value) ? '-' : item.value)).join(' ')
+      const list = this.shows.join(' ')
       return `${at(this.targetUserId)}(${cardName}):${this.shows.length > 1 ? '\n' : ' '}${list}`
     } else {
       // 设置

@@ -37,6 +37,7 @@ export interface ICard<D extends ICardData = ICardData, E extends ICardEntry = I
   setAbility(name: string, value: string): boolean
   removeAbility(name: string): boolean
   getSummary(): string // 用于骰子指令展示人物卡信息
+  getEntryDisplay(name: string): string // 同上
 }
 
 export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICardEntry, A extends ICardAbility = ICardAbility> implements ICard<D, E, A> {
@@ -61,4 +62,9 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
   abstract removeEntry(name: string): boolean
   abstract setAbility(name: string, value: string): boolean
   abstract setEntry(name: string, value: number): boolean
+
+  getEntryDisplay(name: string): string {
+    const entry = this.getEntry(name)
+    return `${name}:${entry?.value ?? '-'}`
+  }
 }

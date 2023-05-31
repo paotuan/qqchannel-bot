@@ -231,7 +231,7 @@ import { useCardStore } from '../../../store/card'
 import { computed, ComputedRef, inject } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { SELECTED_CARD } from '../utils'
-import { DndCard, getPropOfSkill, getSkillsMap, IDndCardData } from '../../../../interface/card/dnd'
+import { DndCard, getSkillsMap, IDndCardData } from '../../../../interface/card/dnd'
 import CardToolbar from '../CardToolbar.vue'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
@@ -260,11 +260,8 @@ const skillsTableRowCount = Math.max(...skillsTable.map(col => col.length))
 const getPropCell = (row: number, col: number) => skillsTable[col - 1][row - 1] as { prop: keyof IDndCardData['props'] }
 const getSkillCell = (row: number, col: number) => skillsTable[col - 1][row - 1] as { skill: keyof IDndCardData['skills'] }
 const skillTotalOf = (skill: string) => {
-  const prop = getPropOfSkill(skill)
-  const propModifiedValue = modifiedValueOf(prop)
-  const skillValue = cardData.value.skills[skill as keyof typeof cardData.value.skills]
-  const isExperienced = !!cardData.value.meta.experienced[skill]
-  return propModifiedValue + skillValue + (isExperienced ? cardData.value.basic.熟练 : 0)
+  const entry = dndCard.value.getEntry(skill)!
+  return dndCard.value.getSkillTotal(entry)
 }
 
 // 物品表格 分三栏
