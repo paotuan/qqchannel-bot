@@ -15,7 +15,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@dice-roller/rpg-dice-roller": "^5.1.0",
+    "@dice-roller/rpg-dice-roller": "^5.3.2",
     "@heroicons/vue": "^2.0.11",
     "@vueuse/core": "^9.13.0",
     "chalk": "4",
