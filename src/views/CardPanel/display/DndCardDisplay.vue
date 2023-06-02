@@ -259,10 +259,7 @@ const skillsTableRowCount = Math.max(...skillsTable.map(col => col.length))
 // getCell 时处理一些类型问题
 const getPropCell = (row: number, col: number) => skillsTable[col - 1][row - 1] as { prop: keyof IDndCardData['props'] }
 const getSkillCell = (row: number, col: number) => skillsTable[col - 1][row - 1] as { skill: keyof IDndCardData['skills'] }
-const skillTotalOf = (skill: string) => {
-  const entry = dndCard.value.getEntry(skill)!
-  return dndCard.value.getSkillTotal(entry)
-}
+const skillTotalOf = (skill: string) => dndCard.value.getEntry(skill)!.value
 
 // 物品表格 分三栏
 const items = computed(() => {

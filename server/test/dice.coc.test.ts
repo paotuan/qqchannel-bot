@@ -124,7 +124,7 @@ describe('已关联COC人物卡', () => {
 
   test('st 展示指定技能', () => {
     const roller = createDiceRoll('st show 侦查', context)
-    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 侦查40`)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 侦查:40`)
   })
 
   test('st 未指定', () => {

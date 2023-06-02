@@ -2,6 +2,7 @@ import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { IDiceRollContext, parseTemplate } from '../utils'
 import type { ICard } from '../../../../interface/card/types'
+import { DndCard } from '../../../../interface/card/dnd'
 
 const AtUserPattern = /^<@!(\d+)>/ // todo 后续配置注入
 
@@ -62,10 +63,18 @@ export class StDiceRoll extends BasePtDiceRoll {
       // 根据空格、+、—、数字来分隔，满足大多数的情况
       const index = segment.search(/[\s+\-\d]/)
       if (index < 0) return
-      const name = segment.slice(0, index).trim()
+      let name = segment.slice(0, index).trim()
       const value = segment.slice(index).trim()
       if (!name || !value) return
       // 根据 value 拼装表达式
+      // dnd 特殊处理，如果 st 的是技能，则重定向到技能修正值，以提供更符合直觉的体验
+      if (this.targetUserCard instanceof DndCard) {
+        const entry = this.targetUserCard.getEntry(name)
+        if (entry && entry.type === 'skills' && entry.postfix === 'none') {
+          name = `${name}修正`
+        }
+      }
+      // dnd 特殊处理 end
       const baseValue = `\${${name}}`
       const expression = value.startsWith('+') || value.startsWith('-') ? `${baseValue}${value}` : value
       const parsed = parseTemplate(expression, context, this.inlineRolls)
@@ -112,6 +121,7 @@ export class StDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard() {
+    console.log('roller apply to card')
     if (this.show) return []
     if (!this.targetUserCard) return []
     if (this.rolls.length === 0) return []
@@ -119,7 +129,8 @@ export class StDiceRoll extends BasePtDiceRoll {
     this.rolls.forEach(item => {
       // const entry = this.targetUserCard!.getEntry(item.name)
       // const skillName = entry?.name || item.name
-      const b = this.targetUserCard!.setEntry(item.name, item.roll.total) // 理论上应该没人 set 的时候加困难前缀
+      console.log(item.name, item.roll.total)
+      const b = this.targetUserCard!.setEntry(item.name, item.roll.total)
       modified ||= b
     })
     return modified ? [this.targetUserCard] : []

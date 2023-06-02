@@ -98,7 +98,7 @@ export interface IDndCardAbility extends ICardAbility {
  */
 export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbility> {
   readonly defaultRoll = 'd20'
-  readonly riDefaultRoll = 'd20+$敏捷调整'
+  readonly riDefaultRoll = 'd20+{$敏捷调整}[敏捷]'
 
   get HP() {
     return this.data.basic.HP
@@ -167,6 +167,16 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
         const experienced = !!this.data.meta.experienced[key]
         return calculatePropModifier(value) + (experienced ? this.data.basic.熟练 : 0) // 属性豁免
       }
+    } else if (type === 'skills') {
+      if (postfix === 'none') {
+        // 获取技能时(不带任何后缀时)默认返回总值
+        const prop = getPropOfSkill(key)
+        const modifiedValue = calculatePropModifier(this.data.props[prop as keyof IDndCardData['props']]) // 属性调整
+        const isExperienced = !!this.data.meta.experienced[key] // 是否技能熟练
+        return modifiedValue + value + (isExperienced ? this.data.basic.熟练 : 0)
+      } else if (postfix === 'modifier') {
+        return value // 技能修正值，反而是返回人物卡本身的值
+      }
     }
     return value
   }
@@ -193,7 +203,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   override setEntry(name: string, value: number): boolean {
     const [skillName, postfix] = parseInput(name)
     if (!skillName) return false
-    if (postfix !== 'none') return false // 有特殊后缀的也不处理吧
+    // if (postfix !== 'none') return false // 有特殊后缀的也不处理吧 // 暂时放开，因为可以【.st 技能修正】
     // 是否是特殊 setter
     const _input = skillName.toUpperCase()
     const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
@@ -215,6 +225,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     // 是否已有条目
     const entry = this.getEntry(name)
     if (entry) {
+      // set 的时候就不考虑后缀了。dnd 的特殊之处在于 set 技能名时实际修改的是技能的修正值，因此在 st 指令中要做些特殊处理
       if (value !== entry.value) {
         (this.data[entry.type] as Record<string, number>)[entry.key] = value
         this.data.lastModified = Date.now()
@@ -276,26 +287,16 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     return updated
   }
 
-  // 由于许多地方需要获取技能的总值，可以用这个方法
-  // getEntry 的逻辑暂时不变，还是获取修正值
-  getSkillTotal(entry: IDndCardEntry) {
-    if (entry.type !== 'skills') throw new Error('获取技能总值，非 skill 类型')
-    const prop = getPropOfSkill(entry.key)
-    const modifiedValue = this.getEntry(prop + '调整')!.value // 属性调整
-    const isExperienced = !!this.data.meta.experienced[entry.key] // 是否技能熟练
-    return modifiedValue + entry.value + (isExperienced ? this.data.basic.熟练 : 0)
-  }
-
   override getEntryDisplay(name: string): string {
     const entry = this.getEntry(name)
     if (!entry) return `${name}:-`
     // 熟练标记
     const isExperienced = !!this.data.meta.experienced[entry.key]
     // 技能特殊展示 总值（调整值）
-    if (entry.type === 'skills') {
-      const skillTotal = this.getSkillTotal(entry)
-      const skillSign = entry.value > 0 ? '+' : ''
-      return `${name}${isExperienced ? '*' : ''}:${skillTotal}(${skillSign}${entry.value})`
+    if (entry.type === 'skills' && entry.postfix === 'none') {
+      const skillModifier = this.data.skills[entry.key as keyof IDndCardData['skills']]
+      const skillSign = skillModifier > 0 ? '+' : ''
+      return `${name}${isExperienced ? '*' : ''}:${entry.value}(${skillSign}${skillModifier})`
     } else {
       return `${name}${isExperienced ? '*' : ''}:${entry.value}`
     }
@@ -382,12 +383,12 @@ const SKILL_ALIAS: Record<string, string[]> = _SKILL_ALIAS
 
 function parseInput(expression: string): [string, PostfixType] {
   let type: PostfixType = 'none'
-  if (expression.endsWith('调整') || expression.endsWith('调整值')) {
+  if (expression.endsWith('调整') || expression.endsWith('调整值') || expression.endsWith('修正') || expression.endsWith('修正值')) {
     type = 'modifier'
   } else if (expression.endsWith('豁免')) {
     type = 'saving'
   }
-  expression = expression.replace(/(调整值|调整|豁免)$/g, '')
+  expression = expression.replace(/(调整值|调整|修正值|修正|豁免)$/g, '')
   return [expression.trim(), type]
 }
 

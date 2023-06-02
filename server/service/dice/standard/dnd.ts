@@ -27,13 +27,15 @@ export class DndDiceRoll extends StandardDiceRoll {
           // 基本属性检定，取属性调整值
           const modifiedValue = this.selfCard?.getEntry(`${entry.key}调整`)?.value
           finalExpression = typeof modifiedValue === 'number' ? `${this.expression}+${modifiedValue}` : this.expression
-        } else if (entry && entry.type === 'skills') {
+        } else if (entry && entry.type === 'skills' && entry.postfix === 'none') {
           // 技能检定，取属性调整值 + 技能调整值 + 技能是否熟练
           const propName = getPropOfSkill(entry.key)
           const modifiedValue = this.selfCard?.getEntry(`${propName}调整`)?.value // 属性调整
-          const skillValue = entry.value // 技能调整
+          const skillValue = this.selfCard?.getEntry(`${entry.key}修正`)?.value  // 技能修正
           const experiencedValue = this.selfCard?.data.meta.experienced[entry.key] ? this.selfCard.data.basic.熟练 : 0
-          const addition = [modifiedValue, skillValue, experiencedValue].filter(i => !!i).map(i => '+' + i).join('')
+          const addition = `+{${modifiedValue}}[${propName}]` // 属性调整不管是不是 0 都写上吧
+            + (skillValue ? `+{${skillValue}}[修正]` : '')
+            + (experiencedValue ? `+{${experiencedValue}}[熟练]` : '')
           finalExpression = `${this.expression}${addition}`
         } else if (entry && entry.type === 'props' && entry.postfix === 'saving') {
           // 属性豁免检定

@@ -46,8 +46,8 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
   const selfCard = context.getCard(context.userId)
-  const getEntry = (key: string) => selfCard?.getEntry(key)?.value || ''
-  const getAbility = (key: string) => selfCard?.getAbility(key)?.value || ''
+  const getEntry = (key: string) => selfCard?.getEntry(key)?.value ?? ''
+  const getAbility = (key: string) => selfCard?.getAbility(key)?.value ?? ''
   const InlineDiceRoll = getInlineDiceRollKlass()
   // 1. 如检测到 ability or attribute，则求值并替换
   expression = expression.replace(ENTRY_REGEX, (_, key1?: string, key2?: string) => {

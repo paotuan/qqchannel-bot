@@ -42,7 +42,7 @@ describe('已关联DND人物卡', () => {
 
   test('技能检定', () => {
     const roller = createDiceRoll('运动', context)
-    expect(roller.output).toBe('Maca 🎲 运动 d20+3+2: [12]+3+2 = 17')
+    expect(roller.output).toBe('Maca 🎲 运动 d20+{3}[力量]+{2}[熟练]: [12]+{3}+{2} = 17')
   })
 
   test('属性豁免', () => {
@@ -87,7 +87,7 @@ describe('已关联DND人物卡', () => {
 
   test('组合检定', () => {
     const roller = createDiceRoll('力量10 医疗', context)
-    expect(roller.output).toBe('Maca 🎲 力量，医疗\nd20+3: [12]+3 = 15 ≥ 10 成功\nd20: [12] = 12') // 因为和 coc 组合检定不一样（不是一次检定对应多个判定结果，而是每次都是一个独立的检定），每行没有名字回显，不过问题不大，先不管了
+    expect(roller.output).toBe('Maca 🎲 力量，医疗\nd20+3: [12]+3 = 15 ≥ 10 成功\nd20+{0}[感知]: [12]+{0} = 12') // 因为和 coc 组合检定不一样（不是一次检定对应多个判定结果，而是每次都是一个独立的检定），每行没有名字回显，不过问题不大，先不管了
   })
 
   test('死亡豁免', () => {
@@ -139,7 +139,26 @@ describe('已关联DND人物卡', () => {
 
   test('dnd先攻默认骰', () => {
     const roller = createDiceRoll('ri', context)
-    expect(roller.output).toBe('Maca 🎲 先攻 d20+2: [12]+2 = 14')
+    expect(roller.output).toBe('Maca 🎲 先攻 d20+{2}[敏捷]: [12]+{2} = 14')
+  })
+
+  test('st属性', () => {
+    const roller = createDiceRoll('st show 力量', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 力量*:17`)
+  })
+
+  test('st技能应展示总值和修正值', () => {
+    const roller = createDiceRoll('st show 运动', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 运动*:5(0)`)
+  })
+
+  test('st修改技能应重定向到修正值', () => {
+    const card = new DndCard(getCardProto())
+    const context = createContext(card)
+    const roller = createDiceRoll('st 运动+1', context)
+    expect(roller.output).toBe('<@!__mock_user_id__>(铃木翼) 设置 运动修正 0+1: 0+1 = 1')
+    roller.applyToCard()
+    expect(card.data.skills.运动).toBe(1)
   })
 })
 
