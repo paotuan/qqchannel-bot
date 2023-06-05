@@ -89,7 +89,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       const timesMatch = flags.match(/x(\d+)/)
       if (timesMatch) {
         const times = parseInt(timesMatch[1], 10)
-        this.times = Math.max(1, Math.min(10, times)) // 最多10连，至少一个
+        this.times = Math.max(1, Math.min(100, times)) // 最多100连，至少一个
       }
       return expression.slice(flags.length)
     }
