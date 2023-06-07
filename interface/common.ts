@@ -26,6 +26,7 @@ export type Command =
   | 'ri/list' // res
   | 'ri/set' // req
   | 'ri/delete' // req
+  | 'dice/roll' // req/res
 
 export interface IMessage<T> {
   cmd: Command
@@ -196,4 +197,10 @@ export type IRiSetReq = IRiItem
 export interface IRiDeleteReq {
   type: 'actor' | 'npc'
   id: string
+}
+
+// 手动代骰
+export interface IDiceRollReq {
+  expression: string
+  cardData: ICardData
 }

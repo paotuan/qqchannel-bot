@@ -5,9 +5,10 @@ import * as LRUCache from 'lru-cache'
 import { convertRoleIds, createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
-import type { IRiItem } from '../../../interface/common'
+import type { IRiItem, IDiceRollReq } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
 import type { UserRole } from '../../../interface/config'
+import { createCard } from '../../../interface/card'
 
 interface IMessageCache {
   text?: string
@@ -204,6 +205,38 @@ export class DiceManager {
       this.riListCache[channelId] = []
     }
     return this.riListCache[channelId]
+  }
+
+  /**
+   * 从网页端手动发起代骰，如错误则返回错误信息
+   */
+  async manualDiceRollFromWeb(channelId: string, guildId: string, { expression, cardData }: IDiceRollReq) {
+    try {
+      // 1. 投骰
+      const SYSTEM_USER_ID = 'system'
+      const systemCard = createCard(cardData)
+      const getCard = (userId: string) => userId === SYSTEM_USER_ID ? systemCard : this.wss.cards.getCard(channelId, userId)
+      const config = this.wss.config.getChannelConfig(channelId)
+      const roller = createDiceRoll(expression, { channelId, userId: SYSTEM_USER_ID, username: cardData.name, userRole: 'admin', config, getCard })
+      // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
+      // 特殊：保存先攻列表
+      if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
+        roller.applyToRiList(this.riListCache)
+      }
+      // 2. 发消息
+      const channel = this.api.guilds.findChannel(channelId, guildId)
+      if (!channel) throw new Error('频道不存在')
+      // 也没有暗骰，因为不知道发给谁
+      const replyMsg = await channel.sendMessage({ content: roller.output })
+      // 如果是可供对抗的投骰，记录下缓存
+      if (replyMsg && roller instanceof StandardDiceRoll && roller.eligibleForOpposedRoll) {
+        this.opposedRollCache.set(replyMsg.id, roller)
+      }
+      return ''
+    } catch (e: any) {
+      console.log('[Dice] 网页端发起投骰失败', e?.message)
+      return '投骰失败：' + (e?.message ?? '')
+    }
   }
 
   private initListeners() {

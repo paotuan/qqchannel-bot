@@ -19,7 +19,13 @@ import type {
   IUser,
   IUserListResp,
   IPluginConfigDisplay,
-  INoteSendImageRawReq, ISceneSendMapImageReq, ISceneSendBattleLogReq, IRiListResp, IRiSetReq, IRiDeleteReq,
+  INoteSendImageRawReq,
+  ISceneSendMapImageReq,
+  ISceneSendBattleLogReq,
+  IRiListResp,
+  IRiSetReq,
+  IRiDeleteReq,
+  IDiceRollReq,
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -71,6 +77,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'ri/delete':
     handleRiDelete(client, server, request.data as IRiDeleteReq)
+    break
+  case 'dice/roll':
+    handleManualDiceRoll(client, server, request.data as IDiceRollReq)
     break
   }
 }
@@ -278,5 +287,13 @@ function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
     if (index >= 0) {
       riList.splice(index, 1)
     }
+  }
+}
+
+async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRollReq) {
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const errmsg = await qApi.dice.manualDiceRollFromWeb(client.listenToChannelId, client.listenToGuildId, data)
+    client.send<string>({ cmd: 'dice/roll', success: !errmsg, data: errmsg })
   }
 }
