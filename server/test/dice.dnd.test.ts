@@ -181,7 +181,8 @@ function getCardProto(): IDndCardData {
       '熟练': 2,
       HP: 12,
       MAXHP: 12,
-      AC: 12
+      AC: 12,
+      '先攻临时': 0
     },
     props: {
       '力量': 17,
@@ -242,7 +243,9 @@ function getCardProto(): IDndCardData {
         '体质': true,
         '运动': true
       }
-    }
+    },
+    jobAbilities: [],
+    specialists: []
   }
 }
 

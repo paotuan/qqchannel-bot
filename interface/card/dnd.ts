@@ -21,6 +21,7 @@ export interface IDndCardData extends ICardData {
     HP: number
     MAXHP: number
     AC: number // 护甲
+    '先攻临时': number
   },
   props: {
     '力量': number
@@ -81,7 +82,19 @@ export interface IDndCardData extends ICardData {
       failure: number
     },
     experienced: Record<string, boolean>
-  }
+  },
+  // 职业能力
+  jobAbilities: {
+    lv: number
+    name: string
+    desc: string
+  }[]
+  // 专长
+  specialists: {
+    lv: number
+    name: string
+    desc: string
+  }[]
 }
 
 export interface IDndCardEntry extends ICardEntry {
@@ -98,7 +111,7 @@ export interface IDndCardAbility extends ICardAbility {
  */
 export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbility> {
   readonly defaultRoll = 'd20'
-  readonly riDefaultRoll = 'd20+{$敏捷调整}[敏捷]'
+  readonly riDefaultRoll = 'd20+{$敏捷调整}[敏捷]+{$先攻临时}[临时]'
 
   get HP() {
     return this.data.basic.HP

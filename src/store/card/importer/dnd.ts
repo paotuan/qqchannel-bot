@@ -21,7 +21,8 @@ export function getDndCardProto(name?: string): IDndCardData {
       '熟练': 2,
       HP: 10,
       MAXHP: 10,
-      AC: 10
+      AC: 10,
+      '先攻临时': 0
     },
     props: {
       '力量': 0,
@@ -75,7 +76,9 @@ export function getDndCardProto(name?: string): IDndCardData {
       },
       deathSaving: { success: 0, failure: 0 },
       experienced: {}
-    }
+    },
+    jobAbilities: [],
+    specialists: []
   }
 }
 
@@ -95,6 +98,7 @@ export function parseDndXlsx(workbook: XLSX.WorkBook) {
   user.basic.HP = sheet['M23']?.v || 10
   user.basic.MAXHP = sheet['Q23']?.v || 10
   user.basic.AC = sheet['D26']?.v || 10
+  user.basic.先攻临时 = sheet['G23']?.v || 0
   // props: C列 name ,F14-F19 value，R列调整值 T列豁免值
   for (let i = 14; i <= 19; i++) {
     const name = sheet['C' + i]?.v
@@ -177,6 +181,21 @@ export function parseDndXlsx(workbook: XLSX.WorkBook) {
     const max = sheet['AR' + i]?.v || 0
     user.meta.spellSlots[index] = { value, max }
   }
-
+  // 职业能力
+  for (let i = 84; i <= 128; i++) {
+    const name = sheet['C' + i]?.v
+    if (!name) continue
+    const lv = Number(sheet['B' + i]?.v) || 0
+    const desc = sheet['H' + i]?.v || ''
+    user.jobAbilities.push({ lv, name, desc })
+  }
+  // 专长
+  for (let i = 109; i <= 117; i++) {
+    const name = sheet['Z' + i]?.v
+    if (!name) continue
+    const lv = Number(sheet['Y' + i]?.v) || 0
+    const desc = sheet['AE' + i]?.v || ''
+    user.specialists.push({ lv, name, desc })
+  }
   return setter
 }
