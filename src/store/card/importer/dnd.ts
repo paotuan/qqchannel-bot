@@ -136,22 +136,22 @@ export function parseDndXlsx(workbook: XLSX.WorkBook) {
   if (armorName) {
     user.equips.push({
       name: armorName,
-      expression: String(sheet['AB39']?.v || ''),
+      expression: String(sheet['AC39']?.v || ''),
       ext: ''
     })
   }
-  // 武器 41-45 L:name， AH 伤害 AC 命中
+  // 武器 41-45 L:name， AI 伤害 AD 命中
   for (let i = 41; i <= 45; i++) {
     const name = sheet['L' + i]?.v
     if (typeof name === 'string' && name) {
       user.equips.push({
         name: name + '命中',
-        expression: String(sheet['AC' + i]?.v || '').toLowerCase(),
+        expression: String(sheet['AD' + i]?.v || '').toLowerCase(),
         ext: ''
       })
       user.equips.push({
         name,
-        expression: String(sheet['AH' + i]?.v || '').toLowerCase(),
+        expression: String(sheet['AI' + i]?.v || '').toLowerCase(),
         ext: ''
       })
     }
