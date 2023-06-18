@@ -204,7 +204,7 @@
                 <td><text-input v-model="ability.expression" class="input input-ghost input-xs w-full"/></td>
                 <td><text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/></td>
                 <td>
-                  <button class="btn btn-xs btn-circle btn-ghost">
+                  <button class="btn btn-xs btn-circle btn-ghost" @click="openSpellData(ability.name)">
                     <InformationCircleIcon class="w-4 h-4" />
                   </button>
                 </td>
@@ -297,17 +297,20 @@
         </table>
       </div>
     </div>
+    <!-- 法术数据库 -->
+    <DndSpellsDataDialog v-model:visible="spellDialogShow" v-model:keyword="spellDialogKeyword" />
   </div>
 </template>
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject, reactive } from 'vue'
+import { computed, ComputedRef, inject, reactive, ref } from 'vue'
 import { XMarkIcon, InformationCircleIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { SELECTED_CARD } from '../utils'
 import { DndCard, getSkillsMap, IDndCardData } from '../../../../interface/card/dnd'
 import CardToolbar from '../CardToolbar.vue'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
+import DndSpellsDataDialog from '../DndSpellsDataDialog.vue'
 
 const cardStore = useCardStore()
 const dndCard = inject<ComputedRef<DndCard>>(SELECTED_CARD)! // 此处可以确保是 dnd card
@@ -380,6 +383,14 @@ const markEdited = () => {
 
 // 记录折叠状态
 const foldPanel = reactive<Record<string, boolean>>({})
+
+// 法术数据库
+const spellDialogShow = ref(true)
+const spellDialogKeyword = ref('')
+const openSpellData = (name: string) => {
+  spellDialogKeyword.value = name
+  spellDialogShow.value = true
+}
 </script>
 <style scoped>
 .table-compact :where(td) {
