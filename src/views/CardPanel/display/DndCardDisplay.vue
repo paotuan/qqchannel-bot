@@ -64,6 +64,13 @@
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">AC</button></td>
               <td><number-input v-model="cardData.basic.AC" class="input input-ghost input-xs text-sm w-14"/></td>
             </tr>
+            <tr>
+              <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">先攻</button></td>
+              <td colspan="3">
+                <span class="text-xs">临时值</span><number-input v-model="cardData.basic.先攻临时" allow-negative class="input input-ghost input-xs text-sm w-14"/>
+                <span class="text-xs font-medium text-gray-400">总值&nbsp;&nbsp;{{ modifiedValueOf('敏捷') + cardData.basic.先攻临时 }}</span>
+              </td>
+            </tr>
             </tbody>
           </table>
         </div>
@@ -144,7 +151,7 @@
                   <template v-if="item">
                     <td :key="`name-${j}`"><button class="btn btn-xs btn-ghost font-medium">{{ item }}</button></td>
                     <td :key="`value-${j}`" class="flex items-center justify-between group">
-                      <number-input v-model="cardData.items[item]" allow-negative class="input input-ghost input-xs text-sm w-14"/>
+                      <number-input v-model="cardData.items[item]" allow-negative class="input input-ghost input-xs text-sm w-20"/>
                       <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteItem(item)">
                         <XMarkIcon class="w-4 h-4" />
                       </button>
@@ -187,7 +194,8 @@
                 <th class="w-1/4">法术</th>
                 <th class="w-1/4">表达式</th>
                 <th>备注</th>
-                <th class="w-8"></th>
+                <th colspan="2" class="w-16 px-0">数据库</th>
+<!--                <th class="w-8"></th>-->
               </tr>
               </thead>
               <tbody>
@@ -195,6 +203,11 @@
                 <td><text-input v-model="ability.name" class="input input-ghost input-xs w-full"/></td>
                 <td><text-input v-model="ability.expression" class="input input-ghost input-xs w-full"/></td>
                 <td><text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/></td>
+                <td>
+                  <button class="btn btn-xs btn-circle btn-ghost">
+                    <InformationCircleIcon class="w-4 h-4" />
+                  </button>
+                </td>
                 <td style="padding: 0">
                   <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('spells', i)">
                     <XMarkIcon class="w-4 h-4" />
@@ -222,14 +235,74 @@
             </tbody>
           </table>
         </div>
+        <!-- 职业能力 -->
+        <table class="table table-compact table-zebra w-full mt-4">
+          <thead>
+          <tr>
+            <th class="w-1/4">职业能力</th>
+            <th class="w-14">LV</th>
+            <th>描述</th>
+            <th class="w-8 p-0">
+              <button class="btn btn-xs btn-circle btn-ghost" @click="foldPanel.jobAbilities = !foldPanel.jobAbilities">
+                <component :is="foldPanel.jobAbilities ? ChevronDownIcon : ChevronUpIcon" class="w-4 h-4" />
+              </button>
+            </th>
+          </tr>
+          </thead>
+          <tbody v-show="!foldPanel.jobAbilities">
+          <tr v-for="(line, i) in cardData.jobAbilities" :key="i" class="group">
+            <td><text-input v-model="line.name" class="input input-ghost input-xs w-full"/></td>
+            <td><number-input v-model="line.lv" class="input input-ghost input-xs text-sm w-14"/></td>
+            <td><textarea v-model="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
+            <td style="padding: 0">
+              <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('jobAbilities', i)">
+                <XMarkIcon class="w-4 h-4" />
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4"><button class="btn btn-xs btn-ghost" @click="newAbility('jobAbilities')">+ 新增一行</button></td>
+          </tr>
+          </tbody>
+        </table>
+        <!-- 专长 -->
+        <table class="table table-compact table-zebra w-full mt-4">
+          <thead>
+          <tr>
+            <th class="w-1/4">专长</th>
+            <th class="w-14">LV</th>
+            <th>描述</th>
+            <th class="w-8 p-0">
+              <button class="btn btn-xs btn-circle btn-ghost" @click="foldPanel.specialists = !foldPanel.specialists">
+                <component :is="foldPanel.specialists ? ChevronDownIcon : ChevronUpIcon" class="w-4 h-4" />
+              </button>
+            </th>
+          </tr>
+          </thead>
+          <tbody v-show="!foldPanel.specialists">
+          <tr v-for="(line, i) in cardData.specialists" :key="i" class="group">
+            <td><text-input v-model="line.name" class="input input-ghost input-xs w-full"/></td>
+            <td><number-input v-model="line.lv" class="input input-ghost input-xs text-sm w-14"/></td>
+            <td><textarea v-model="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
+            <td style="padding: 0">
+              <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('specialists', i)">
+                <XMarkIcon class="w-4 h-4" />
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4"><button class="btn btn-xs btn-ghost" @click="newAbility('specialists')">+ 新增一行</button></td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject } from 'vue'
-import { XMarkIcon } from '@heroicons/vue/24/outline'
+import { computed, ComputedRef, inject, reactive } from 'vue'
+import { XMarkIcon, InformationCircleIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { SELECTED_CARD } from '../utils'
 import { DndCard, getSkillsMap, IDndCardData } from '../../../../interface/card/dnd'
 import CardToolbar from '../CardToolbar.vue'
@@ -284,13 +357,17 @@ const toggleSkillGrowth = (skill: string) => {
 }
 
 // 新增一条 ability
-const newAbility = (type: 'equips' | 'spells') => {
-  cardData.value[type].push({ name: '', expression: '', ext: '' })
+const newAbility = (type: 'equips' | 'spells' | 'jobAbilities' | 'specialists') => {
+  if (type === 'equips' || type === 'spells') {
+    cardData.value[type].push({ name: '', expression: '', ext: '' })
+  } else {
+    cardData.value[type].push({ name: '', lv: 0, desc: '' })
+  }
   // 不用标记编辑，因为单纯添加不后续编辑的话就相当于没有添加
 }
 
 // 删除一条 ability
-const deleteAbility = (type: 'equips' | 'spells', index: number) => {
+const deleteAbility = (type: 'equips' | 'spells' | 'jobAbilities' | 'specialists', index: number) => {
   cardData.value[type].splice(index, 1)
   markEdited()
 }
@@ -300,6 +377,9 @@ const markEdited = () => {
   cardData.value.lastModified = Date.now()
   cardStore.markCardEdited(dndCard.value.name)
 }
+
+// 记录折叠状态
+const foldPanel = reactive<Record<string, boolean>>({})
 </script>
 <style scoped>
 .table-compact :where(td) {
