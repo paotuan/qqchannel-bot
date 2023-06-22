@@ -173,10 +173,13 @@ function handleCardUpgrade(card: any) {
     card.type = 'coc'
     card.version = 17 // 1.3.0
   }
-  if (card.version === 17 && card.type === 'dnd') {
-    card.jobAbilities = []
-    card.specialists = []
-    card.basic.先攻临时 = 0
+  if (card.version === 17) {
+    if (card.type === 'dnd') {
+      card.jobAbilities = []
+      card.specialists = []
+      card.basic.先攻临时 = 0
+    }
+    card.isTemplate = false
     card.version = 18
   }
   return card

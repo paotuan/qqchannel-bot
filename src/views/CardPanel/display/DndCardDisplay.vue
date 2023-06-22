@@ -385,7 +385,7 @@ const markEdited = () => {
 const foldPanel = reactive<Record<string, boolean>>({})
 
 // 法术数据库
-const spellDialogShow = ref(true)
+const spellDialogShow = ref(false)
 const spellDialogKeyword = ref('')
 const openSpellData = (name: string) => {
   spellDialogKeyword.value = name

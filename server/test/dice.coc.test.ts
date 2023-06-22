@@ -154,6 +154,7 @@ function getCardProto(): ICocCardData {
     version: VERSION_CODE,
     name: '铃木翼',
     lastModified: Date.now(),
+    isTemplate: false,
     basic: {
       job: '学生',
       AGE: 24,

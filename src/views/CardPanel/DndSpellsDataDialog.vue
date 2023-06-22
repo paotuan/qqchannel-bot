@@ -60,7 +60,7 @@ import DSelect from '../../dui/select/DSelect.vue'
 
 const props = defineProps<{ visible: boolean; keyword: string }>()
 const emit = defineEmits<{
-  (e: 'update:visible', value: string): void;
+  (e: 'update:visible', value: boolean): void;
   (e: 'update:keyword', value: string): void;
 }>()
 

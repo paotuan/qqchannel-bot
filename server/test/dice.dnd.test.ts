@@ -168,6 +168,7 @@ function getCardProto(): IDndCardData {
     version: VERSION_CODE,
     name: '铃木翼',
     lastModified: Date.now(),
+    isTemplate: false,
     info: {
       job: '战士',
       gender: '男',

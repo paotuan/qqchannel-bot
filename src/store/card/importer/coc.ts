@@ -8,6 +8,7 @@ export function getCocCardProto(name?: string): ICocCardData {
     version: VERSION_CODE,
     name: name || '未命名',
     lastModified: Date.now(),
+    isTemplate: false,
     basic: {
       job: '学生',
       AGE: 24,

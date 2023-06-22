@@ -8,6 +8,7 @@ export function getDndCardProto(name?: string): IDndCardData {
     version: VERSION_CODE,
     name: name || '未命名',
     lastModified: Date.now(),
+    isTemplate: false,
     info: {
       job: '',
       gender: '',

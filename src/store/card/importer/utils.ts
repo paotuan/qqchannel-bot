@@ -19,6 +19,7 @@ export function getGeneralCardProto(name: string): IGeneralCardData {
     version: VERSION_CODE,
     name: name || '未命名',
     lastModified: Date.now(),
+    isTemplate: false,
     ext: '',
     skills: {},
     abilities: []

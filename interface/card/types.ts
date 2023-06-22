@@ -5,6 +5,7 @@ export interface ICardData {
   version: number
   name: string // 目前作唯一标识
   lastModified: number // 用于目前前后端同步判断
+  isTemplate: boolean // 是否用作模板
 }
 
 export interface ICardEntry {
@@ -24,6 +25,7 @@ export interface ICard<D extends ICardData = ICardData, E extends ICardEntry = I
   readonly type: CardType
   // id: string 目前还是 name 做唯一标识
   readonly name: string
+  readonly isTemplate: boolean
   readonly defaultRoll?: string
   readonly riDefaultRoll?: string
   readonly data: D
@@ -49,6 +51,10 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
 
   get name() {
     return this.data.name
+  }
+
+  get isTemplate() {
+    return this.data.isTemplate
   }
 
   constructor(data: D) {

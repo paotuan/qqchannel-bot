@@ -17,11 +17,13 @@ export const useCardStore = defineStore('card', () => {
   // 当前选中的人物卡
   const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : undefined)
   const allCards = computed(() => Object.values(cardMap))
+  // 当前应该展示的人物卡列表
+  const userCardList = computed(() => allCards.value.filter(card => !card.isTemplate))
+  const templateCardList = computed(() => allCards.value.filter(card => card.isTemplate))
+  const displayCardList = computed(() => showAllCards.value ? userCardList.value : userCardList.value.filter(card => !!cardLinkMap[card.name]))
   // 已存在的人物卡文件名
   const existNames = computed(() => allCards.value.map(card => card.name))
   const linkedUsers = computed(() => Object.values(cardLinkMap))
-  // 当前应该展示的人物卡列表
-  const displayCardList = computed(() => showAllCards.value ? allCards.value : allCards.value.filter(card => !!cardLinkMap[card.name]))
 
   const of = (cardName: string) => cardMap[cardName]
 
@@ -135,6 +137,7 @@ export const useCardStore = defineStore('card', () => {
     selectedCard,
     showAllCards,
     displayCardList,
+    templateCardList,
     existNames,
     linkedUsers,
     of,
