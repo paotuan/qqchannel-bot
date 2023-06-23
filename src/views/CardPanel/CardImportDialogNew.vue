@@ -49,6 +49,11 @@
         <span>对于未录入的 COC 技能，自动补充默认值</span>
       </label>
     </template>
+    <div class="divider m-0" />
+    <label class="label cursor-pointer justify-start gap-2">
+      <input v-model="importAsTemplate" type="checkbox" class="checkbox checkbox-primary" />
+      <span>导入为 NPC / 敌人模板</span>
+    </label>
     <template #action>
       <div class="flex items-center gap-4">
         <div v-show="nameExist"
@@ -83,6 +88,7 @@ const textareaContent = ref('')
 const xlsxCard = ref<ICard | null>(null)
 const fileChooser = ref<HTMLInputElement>()
 const cocApplyDefaultValue = ref(true)
+const importAsTemplate = ref(false)
 
 // 表单合法性校验
 const canSubmit = computed(() => {
@@ -164,9 +170,12 @@ const submit = () => {
   if (card instanceof CocCard && cocApplyDefaultValue.value) {
     card.applyDefaultValues()
   }
+  // 是否是模板导入
+  card.data.isTemplate = importAsTemplate.value
   // 清空输入框
   cardName.value = ''
   textareaContent.value = ''
+  importAsTemplate.value = false
   clearFileInput()
   // 导入之
   cardStore.importCard(card.data)

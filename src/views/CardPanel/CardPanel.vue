@@ -27,6 +27,17 @@
           </button>
           <user-selector :user-id="cardStore.linkedUserOf(card.name) || null" @select="cardStore.requestLinkUser(card.name, $event?.id)" />
         </div>
+        <h3 class="font-bold mt-4">NPC / 敌人模板：</h3>
+        <div v-for="card in cardStore.templateCardList" :key="card.name" class="flex gap-2">
+          <button class="btn w-40 gap-2 justify-start flex-nowrap relative"
+                  :class="selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
+                  :title="card.name"
+                  @click="cardStore.selectCard(card.name)">
+            <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
+            <span class="truncate translate-y-1/4">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
+            <CheckCircleIcon v-show="selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
+          </button>
+        </div>
       </div>
       <div class="flex-grow">
         <template v-if="selectedCardType === 'coc'">
