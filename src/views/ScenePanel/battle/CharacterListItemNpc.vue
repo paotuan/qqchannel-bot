@@ -13,7 +13,7 @@
       </template>
       <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />
       <!-- 血条 -->
-      <CharacterHpBar :hp="props.chara.embedCard.hp" :max-hp="props.chara.embedCard.maxHp" />
+      <CharacterHpBar v-if="npcCardnn" :hp="npcCardnn.HP" :max-hp="npcCardnn.MAXHP" />
     </div>
     <div class="flex flex-col justify-between">
       <div class="font-bold max-w-[7rem] truncate">{{ props.chara.userId }}</div>
@@ -38,7 +38,7 @@
 import { ISceneNpc, useSceneStore } from '../../../store/scene'
 import { DocumentTextIcon, MapPinIcon, TrashIcon, Square2StackIcon } from '@heroicons/vue/24/outline'
 import CharacterHpBar from './CharacterHpBar.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import ws from '../../../api/ws'
 import type { IRiDeleteReq } from '../../../../interface/common'
 
@@ -47,6 +47,8 @@ const props = defineProps<{ chara: ISceneNpc }>()
 const sceneStore = useSceneStore()
 const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
 const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.userId)
+// npc 卡片信息（for template
+const npcCardnn = computed(() => props.chara.embedCard!)
 
 // 上传 npc 头像
 const realUploadBtn = ref<HTMLInputElement>()

@@ -7,6 +7,7 @@ import { getDefaultStageData, IStageData, useStage } from './map'
 import type { IRiItem } from '../../../interface/common'
 import ws from '../../api/ws'
 import type { IRiSetReq } from '../../../interface/common'
+import type { ICard } from '../../../interface/card/types'
 
 // 场景地图
 export interface ISceneMap {
@@ -32,11 +33,7 @@ export interface ISceneNpc {
   avatar?: string // npc 图片，可上传
   seq: number
   seq2: number
-  embedCard: {
-    hp: number
-    maxHp: number
-    ext: string
-  }
+  embedCard?: ICard
 }
 
 export const useSceneStore = defineStore('scene', () => {
@@ -166,11 +163,7 @@ export const useSceneStore = defineStore('scene', () => {
         exist.seq = ri.seq
         exist.seq2 = ri.seq2
       } else {
-        if (ri.type === 'actor') {
-          characters.push({ type: 'actor', userId: ri.id, seq: ri.seq, seq2: ri.seq2 })
-        } else {
-          characters.push({ type: 'npc', userId: ri.id, seq: ri.seq, seq2: ri.seq2, embedCard: { hp: NaN, maxHp: NaN, ext: '' } })
-        }
+        characters.push({ type: ri.type, userId: ri.id, seq: ri.seq, seq2: ri.seq2 })
       }
     })
   }

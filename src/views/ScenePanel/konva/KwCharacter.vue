@@ -49,7 +49,7 @@ const userCard = computed(() => {
   if (charaType.value === 'actor') {
     return cardStore.getCardOfUser(charaId.value)
   } else {
-    return undefined
+    return npcInfo.value?.embedCard
   }
 })
 
@@ -106,16 +106,8 @@ const charaName = computed(() => {
   }
 })
 
-const hp = computed(() => userCard.value?.HP ?? npcInfo.value?.embedCard.hp ?? NaN)
-const maxHp = computed(() => {
-  if (userCard.value) {
-    return userCard.value!.MAXHP ?? NaN
-  } else if (npcInfo.value) {
-    return npcInfo.value!.embedCard.maxHp
-  } else {
-    return NaN
-  }
-})
+const hp = computed(() => userCard.value?.HP ?? NaN)
+const maxHp = computed(() => userCard.value?.MAXHP ?? NaN)
 const hasHpBar = computed(() => !isNaN(hp.value) && !isNaN(maxHp.value) && maxHp.value > 0)
 const hpPercentage = computed(() => hasHpBar.value ? clamp(hp.value / maxHp.value, 0, 1) : 0)
 const hpColor = computed(() => {

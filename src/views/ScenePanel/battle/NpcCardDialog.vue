@@ -1,27 +1,129 @@
 <template>
   <d-modal
       :visible="!!sceneStore.currentCardNpc"
-      :title="`编辑【${currentNpcName}】的信息`"
+      :title="`【${currentNpcName}】的人物卡`"
       @update:visible="sceneStore.currentCardNpc = null"
   >
-    <template v-if="sceneStore.currentCardNpc">
-      <div>
-        <span class="font-bold mr-2">HP:</span>
-        <SeqInput v-model="currentNpcnn.embedCard.hp" placeholder="HP" class="input input-bordered input-sm" />
-        <span class="mx-2">/</span>
-        <SeqInput v-model="currentNpcnn.embedCard.maxHp" placeholder="最大 HP" class="input input-bordered input-sm" />
+    <div class="flex flex-col" style="height: calc(100vh - 14rem)">
+      <div class="flex-none flex items-center gap-2 mb-4">
+        <div class="label-text">请选择一个人物卡模板：</div>
+        <select v-model="selectedTemplate" class="select select-bordered select-sm w-full max-w-xs">
+          <option v-for="opt in templateOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+        <button class="btn btn-primary btn-sm" :disabled="!selectedTemplate" @click="onApplyCard">使用此模板初始化！</button>
       </div>
-      <textarea v-model="currentNpcnn.embedCard.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" />
-    </template>
+      <div class="flex-grow overflow-y-auto">
+        <template v-if="selectedCardType === 'coc'">
+          <CocCardDisplay :key="selectedCardKey" />
+        </template>
+        <template v-else-if="selectedCardType === 'dnd'">
+          <DndCardDisplay :key="selectedCardKey" />
+        </template>
+        <template v-else-if="selectedCardType === 'general'">
+          <GeneralCardDisplay :key="selectedCardKey" />
+        </template>
+      </div>
+    </div>
   </d-modal>
 </template>
 <script setup lang="ts">
 import DModal from '../../../dui/modal/DModal.vue'
 import { useSceneStore } from '../../../store/scene'
-import { computed } from 'vue'
-import SeqInput from './SeqInput.vue'
+import { computed, provide, ref } from 'vue'
+import { IS_TEMP_CARD, SELECTED_CARD } from '../../CardPanel/utils'
+import CocCardDisplay from '../../CardPanel/display/CocCardDisplay.vue'
+import DndCardDisplay from '../../CardPanel/display/DndCardDisplay.vue'
+import GeneralCardDisplay from '../../CardPanel/display/GeneralCardDisplay.vue'
+import { useCardStore } from '../../../store/card'
+import type { CardType, ICard } from '../../../../interface/card/types'
+import { getCocCardProto } from '../../../store/card/importer/coc'
+import { getDndCardProto } from '../../../store/card/importer/dnd'
+import { getGeneralCardProto } from '../../../store/card/importer/utils'
+import { createCard } from '../../../../interface/card'
+import { CocCard } from '../../../../interface/card/coc'
+import { cloneDeep } from 'lodash'
 
+// npc 所关联的人物卡
 const sceneStore = useSceneStore()
 const currentNpcName = computed(() => sceneStore.currentCardNpc?.userId || '')
 const currentNpcnn = computed(() => sceneStore.currentCardNpc!)
+const currentCard = computed(() => currentNpcnn.value?.embedCard)
+const selectedCardType = computed(() => currentCard.value?.type)
+const selectedCardKey = computed(() => currentCard.value?.name ?? '')
+provide(SELECTED_CARD, currentCard)
+provide(IS_TEMP_CARD, true)
+
+// 选择人物卡模板
+const cardStore = useCardStore()
+const templateOptions = computed(() => {
+  return cardStore.templateCardList.map(card => ({
+    value: card.name,
+    label: `[${translateCardType(card.type)}] ${card.name}`
+  })).concat({
+    value: '__internal_coc_empty',
+    label: '[COC] 空白卡'
+  }, {
+    value: '__internal_dnd_empty',
+    label: '[DND] 空白卡'
+  }, {
+    value: '__internal_general_empty',
+    label: '[简单] 空白卡'
+  })
+})
+const selectedTemplate = ref('')
+
+const translateCardType = (type: string) => {
+  if (type === 'general') {
+    return '简单'
+  } else {
+    return type.toUpperCase()
+  }
+}
+
+// 应用人物卡模板
+const createEmptyCardByType = (type: CardType) => {
+  const name = currentNpcName.value
+  const cardData = (() => {
+    if (type === 'coc') {
+      return getCocCardProto(name)
+    } else if (type === 'dnd') {
+      return getDndCardProto(name)
+    } else {
+      return getGeneralCardProto(name)
+    }
+  })()
+  const card = createCard(cardData)
+  if (card instanceof CocCard) {
+    card.applyDefaultValues()
+  }
+  return card
+}
+
+const onApplyCard = () => {
+  const templateName = selectedTemplate.value
+  const currentNpc = currentNpcnn.value
+  if (!templateName || !currentNpc) return
+  const twiceConfirm = currentNpc.embedCard ? window.confirm('该 NPC 已有人物卡，重新初始化将覆盖现有的人物卡，是否继续？') : true
+  if (!twiceConfirm) return
+  let card: ICard
+  if (templateName === '__internal_coc_empty') {
+    card = createEmptyCardByType('coc')
+  } else if (templateName === '__internal_dnd_empty') {
+    card = createEmptyCardByType('dnd')
+  } else if (templateName === '__internal_general_empty') {
+    card = createEmptyCardByType('general')
+  } else {
+    const originCard = cardStore.of(templateName)
+    card = cloneDeep(originCard)
+    card.data.name = currentNpcName.value
+  }
+  // 赋给 npc
+  currentNpc.embedCard = card
+}
 </script>
+<style scoped>
+:deep(.modal-box) {
+  max-width: unset;
+  width: 940px;
+}
+</style>

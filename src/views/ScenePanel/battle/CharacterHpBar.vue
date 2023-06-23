@@ -12,11 +12,11 @@
 import { computed } from 'vue'
 
 interface Props {
-  hp: number
-  maxHp: number
+  hp?: number
+  maxHp?: number
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { hp: NaN, maxHp: NaN })
 
 const hasHpBar = computed(() => !isNaN(props.hp) && !isNaN(props.maxHp) && props.maxHp > 0)
 const hpPercentage = computed(() => props.hp * 100 / props.maxHp)
