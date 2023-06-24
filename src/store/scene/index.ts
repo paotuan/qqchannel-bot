@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, toRaw, watch } from 'vue'
 import { useIndexedDBStore } from '../../utils/db'
 import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
@@ -8,6 +8,8 @@ import type { IRiItem } from '../../../interface/common'
 import ws from '../../api/ws'
 import type { IRiSetReq } from '../../../interface/common'
 import type { ICard } from '../../../interface/card/types'
+import { createCard } from '../../../interface/card'
+import { VERSION_CODE } from '../../../interface/version'
 
 // 场景地图
 export interface ISceneMap {
@@ -110,7 +112,7 @@ export const useSceneStore = defineStore('scene', () => {
   const turn = ref(1)
 
   // 人物列表
-  const characters = reactive<(ISceneActor | ISceneNpc)[]>([])
+  const characters = reactive<(ISceneActor | ISceneNpc)[]>(temp_loadCharacterList())
   const charactersSorted = computed(
     () => [...characters].sort((a, b) => {
       const seq1Res = compareSeq(a.seq, b.seq)
@@ -148,6 +150,11 @@ export const useSceneStore = defineStore('scene', () => {
     }
   }
 
+  // 人物列表自动保存
+  watch(characters, value => {
+    temp_saveCharacterList(value)
+  }, { deep: true })
+
   // 更新人物先攻列表
   const updateCharacterRiList = (list: IRiItem[]) => {
     // 1. 删除不存在的角色
@@ -155,7 +162,12 @@ export const useSceneStore = defineStore('scene', () => {
       const exist = list.find(ri => ri.type === chara.type && ri.id === chara.userId)
       return !exist
     })
-    charas2delete.forEach(chara => deleteCharacter(chara))
+    // charas2delete.forEach(chara => deleteCharacter(chara))
+    // 不删除，只清空先攻，以避免现在同步的问题。人物列表只由前端决定
+    charas2delete.forEach(chara => {
+      chara.seq = NaN
+      chara.seq2 = NaN
+    })
     // 2. 更新或添加角色
     list.forEach(ri => {
       const exist = characters.find(chara => ri.type === chara.type && ri.id === chara.userId)
@@ -296,3 +308,50 @@ function compareSeq(a: number, b: number) {
   if (isNaN(b)) return -1
   return b - a
 }
+
+// region 临时本地保存人物列表
+function temp_saveCharacterList(list: (ISceneActor | ISceneNpc)[]) {
+  // 不存先攻，避免和后端的同步问题
+  const data = list.map(item => {
+    if (item.type === 'actor') {
+      const { seq, seq2, ...rest } = item
+      return { ...rest }
+    } else {
+      const { embedCard, seq, seq2, ...rest } = item
+      return { ...rest, embedCardData: toRaw(embedCard?.data) }
+    }
+  })
+  const save = JSON.stringify({ version: VERSION_CODE, data })
+  localStorage.setItem('scene-characterList', save)
+}
+
+function temp_loadCharacterList(): (ISceneActor | ISceneNpc)[] {
+  const save = localStorage.getItem('scene-characterList')
+  if (!save) return []
+  try {
+    const { data } = JSON.parse(save)
+    const list = data.map((item: any) => {
+      if (item.type === 'actor') {
+        return {
+          type: 'actor',
+          userId: item.userId,
+          seq: NaN,
+          seq2: NaN
+        } as ISceneActor
+      } else {
+        return {
+          type: 'npc',
+          userId: item.userId,
+          avatar: item.avatar,
+          seq: NaN,
+          seq2: NaN,
+          embedCard: item.embedCardData ? createCard(item.embedCardData) : undefined
+        } as ISceneNpc
+      }
+    })
+    return list
+  } catch (e) {
+    return []
+  }
+}
+// endregion
