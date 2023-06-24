@@ -21,7 +21,7 @@ import GeneralCardDisplay from './GeneralCardDisplay.vue'
 import type { ICard } from '../../../../interface/card/types'
 import ManualDiceRollDialog from '../ManualDiceRollDialog.vue'
 
-const props = withDefaults(defineProps<{ card?: ICard, isTempCard: boolean }>(), { isTempCard: false })
+const props = withDefaults(defineProps<{ card?: ICard, isTempCard?: boolean }>(), { isTempCard: false })
 
 const selectedCard = computed(() => props.card)
 const selectedCardType = computed(() => selectedCard.value?.type)

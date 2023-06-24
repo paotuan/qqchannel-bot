@@ -29,9 +29,7 @@
                 </td>
                 <td :key="`value-${j}`" class="flex items-center justify-between group">
                   <number-input v-model="cardData.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
-                  <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteSkill(skill)">
-                    <XMarkIcon class="w-4 h-4" />
-                  </button>
+                  <CardMoreAction class="invisible group-hover:visible" :expression="skill" @delete="deleteSkill(skill)" />
                 </td>
               </template>
             </template>
@@ -52,9 +50,7 @@
             <td><text-input v-model="ability.key" class="input input-ghost input-xs w-full"/></td>
             <td><text-input v-model="ability.value" class="input input-ghost input-xs w-full"/></td>
             <td style="padding: 0">
-              <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility(i)">
-                <XMarkIcon class="w-4 h-4" />
-              </button>
+              <CardMoreAction class="invisible group-hover:visible" :expression="ability.key" @delete="deleteAbility(i)" />
             </td>
           </tr>
           <tr>
@@ -69,12 +65,12 @@
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
 import { computed, ComputedRef, inject } from 'vue'
-import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { SELECTED_CARD } from '../utils'
 import { GeneralCard } from '../../../../interface/card/general'
 import CardToolbar from '../CardToolbar.vue'
 import NumberInput from '../NumberInput.vue'
 import TextInput from '../TextInput.vue'
+import CardMoreAction from '../CardMoreAction.vue'
 
 const cardStore = useCardStore()
 const generalCard = inject<ComputedRef<GeneralCard>>(SELECTED_CARD)! // 此处可以确保是 general card

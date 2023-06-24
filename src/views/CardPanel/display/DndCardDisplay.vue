@@ -83,14 +83,18 @@
               <th class="w-1/4">总值</th>
               <th class="w-1/4">调整值</th>
               <th class="w-1/4">豁免</th>
+              <th class="w-8"></th>
             </tr>
             </thead>
             <tbody>
-            <tr v-for="prop in propKeys" :key="prop" :class="{ highlight: !!cardData.meta.experienced[prop] }">
+            <tr v-for="prop in propKeys" :key="prop" class="group" :class="{ highlight: !!cardData.meta.experienced[prop] }">
               <td><button class="btn btn-xs btn-ghost font-medium" @click="toggleSkillGrowth(prop)">{{ prop }}</button></td>
               <td><number-input v-model="cardData.props[prop]" class="input input-ghost input-xs text-sm w-full"/></td>
               <td>{{ modifiedValueOf(prop) }}</td>
               <td>{{ savingValueOf(prop) }}</td>
+              <td style="padding: 0">
+                <CardMoreAction class="invisible group-hover:visible" :expression="prop" :deletable="false" />
+              </td>
             </tr>
             </tbody>
           </table>
@@ -125,9 +129,12 @@
                 <td :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
                   <button class="btn btn-xs btn-ghost font-medium" @click="toggleSkillGrowth(getSkillCell(i, j).skill)">{{ getSkillCell(i, j).skill }}</button>
                 </td>
-                <td :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
-                  <number-input v-model="cardData.skills[getSkillCell(i, j).skill]" allow-negative class="input input-ghost input-xs text-sm w-14"/>
-                  <span class="text-gray-400 text-xs">{{ skillTotalOf(getSkillCell(i, j).skill) }}</span>
+                <td class="flex items-center justify-between group" :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
+                  <span>
+                    <number-input v-model="cardData.skills[getSkillCell(i, j).skill]" allow-negative class="input input-ghost input-xs text-sm w-14"/>
+                    <span class="text-gray-400 text-xs">{{ skillTotalOf(getSkillCell(i, j).skill) }}</span>
+                  </span>
+                  <CardMoreAction class="invisible group-hover:visible" :expression="getSkillCell(i, j).skill" :deletable="false" />
                 </td>
               </template>
             </template>
@@ -152,9 +159,7 @@
                     <td :key="`name-${j}`"><button class="btn btn-xs btn-ghost font-medium">{{ item }}</button></td>
                     <td :key="`value-${j}`" class="flex items-center justify-between group">
                       <number-input v-model="cardData.items[item]" allow-negative class="input input-ghost input-xs text-sm w-20"/>
-                      <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteItem(item)">
-                        <XMarkIcon class="w-4 h-4" />
-                      </button>
+                      <CardMoreAction class="invisible group-hover:visible" :expression="item" @delete="deleteItem(item)" />
                     </td>
                   </template>
                 </template>
@@ -177,9 +182,7 @@
                 <td><text-input v-model="ability.expression" class="input input-ghost input-xs w-full"/></td>
                 <td><text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/></td>
                 <td style="padding: 0">
-                  <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('equips', i)">
-                    <XMarkIcon class="w-4 h-4" />
-                  </button>
+                  <CardMoreAction class="invisible group-hover:visible" :expression="ability.name" @delete="deleteAbility('equips', i)" />
                 </td>
               </tr>
               <tr>
@@ -209,9 +212,7 @@
                   </button>
                 </td>
                 <td style="padding: 0">
-                  <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('spells', i)">
-                    <XMarkIcon class="w-4 h-4" />
-                  </button>
+                  <CardMoreAction class="invisible group-hover:visible" :expression="ability.name" @delete="deleteAbility('spells', i)" />
                 </td>
               </tr>
               <tr>
@@ -311,6 +312,7 @@ import CardToolbar from '../CardToolbar.vue'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
 import DndSpellsDataDialog from '../DndSpellsDataDialog.vue'
+import CardMoreAction from '../CardMoreAction.vue'
 
 const cardStore = useCardStore()
 const dndCard = inject<ComputedRef<DndCard>>(SELECTED_CARD)! // 此处可以确保是 dnd card

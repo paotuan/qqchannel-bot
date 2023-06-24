@@ -21,7 +21,7 @@ export function getGeneralCardProto(name: string): IGeneralCardData {
     lastModified: Date.now(),
     isTemplate: false,
     ext: '',
-    skills: {},
+    skills: { HP: 0, MAXHP: 0 },
     abilities: []
   }
 }
