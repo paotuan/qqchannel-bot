@@ -162,3 +162,11 @@ ws.on('ri/list', data => {
   const sceneStore = useSceneStore()
   sceneStore.updateCharacterRiList(res)
 })
+
+ws.on('dice/roll', data => {
+  if (data.success) {
+    Toast.success('掷骰成功！')
+  } else {
+    Toast.error(data.data as string)
+  }
+})

@@ -1,5 +1,11 @@
 import { defineStore } from 'pinia'
-import type { ICardDeleteReq, ICardImportReq, ICardLinkReq, ICardLinkResp } from '../../../interface/common'
+import type {
+  ICardDeleteReq,
+  ICardImportReq,
+  ICardLinkReq,
+  ICardLinkResp,
+  IDiceRollReq
+} from '../../../interface/common'
 import ws from '../../api/ws'
 import { computed, reactive, ref } from 'vue'
 import { gtagEvent } from '../../utils'
@@ -133,6 +139,13 @@ export const useCardStore = defineStore('card', () => {
     }
   }
 
+  // 主动发起投骰相关
+  const manualDiceRollDialogShow = ref(false)
+  const manualDiceRollReq = reactive<Partial<IDiceRollReq>>({ expression: '', cardData: undefined })
+  const manualDiceRoll = (expression: string, cardData: ICardData) => {
+    ws.send<IDiceRollReq>({ cmd: 'dice/roll', data: { expression, cardData } })
+  }
+
   return {
     selectedCard,
     showAllCards,
@@ -153,6 +166,9 @@ export const useCardStore = defineStore('card', () => {
     requestLinkUser,
     linkUser,
     getCardOfUser,
-    onTestSuccess
+    onTestSuccess,
+    manualDiceRollDialogShow,
+    manualDiceRollReq,
+    manualDiceRoll
   }
 })

@@ -219,10 +219,10 @@ export class DiceManager {
       const config = this.wss.config.getChannelConfig(channelId)
       const roller = createDiceRoll(expression, { channelId, userId: SYSTEM_USER_ID, username: cardData.name, userRole: 'admin', config, getCard })
       // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
-      // 特殊：保存先攻列表
-      if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
-        roller.applyToRiList(this.riListCache)
-      }
+      // 特殊：保存先攻列表会把这个人当成玩家，目前也先不能保存
+      // if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
+      //   roller.applyToRiList(this.riListCache)
+      // }
       // 2. 发消息
       const channel = this.api.guilds.findChannel(channelId, guildId)
       if (!channel) throw new Error('频道不存在')
@@ -235,7 +235,7 @@ export class DiceManager {
       return ''
     } catch (e: any) {
       console.log('[Dice] 网页端发起投骰失败', e?.message)
-      return '投骰失败：' + (e?.message ?? '')
+      return '掷骰失败：' + (e?.message ?? '')
     }
   }
 

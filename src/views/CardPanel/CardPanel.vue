@@ -39,17 +39,7 @@
           </button>
         </div>
       </div>
-      <div class="flex-grow">
-        <template v-if="selectedCardType === 'coc'">
-          <CocCardDisplay :key="selectedCardKey" />
-        </template>
-        <template v-else-if="selectedCardType === 'dnd'">
-          <DndCardDisplay :key="selectedCardKey" />
-        </template>
-        <template v-else-if="selectedCardType === 'general'">
-          <GeneralCardDisplay :key="selectedCardKey" />
-        </template>
-      </div>
+      <CardDisplay :card="selectedCard" class="flex-grow" />
     </div>
   </div>
 </template>
@@ -57,17 +47,11 @@
 import { EyeSlashIcon, EyeIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../store/card'
 import UserSelector from './UserSelector.vue'
-import { computed, provide } from 'vue'
-import { SELECTED_CARD } from './utils'
-import CocCardDisplay from './display/CocCardDisplay.vue'
+import { computed } from 'vue'
 import CardTypeBadge from './CardTypeBadge.vue'
 import CardImportDialogNew from './CardImportDialogNew.vue'
-import DndCardDisplay from './display/DndCardDisplay.vue'
-import GeneralCardDisplay from './display/GeneralCardDisplay.vue'
+import CardDisplay from './display/CardDisplay.vue'
 
 const cardStore = useCardStore()
 const selectedCard = computed(() => cardStore.selectedCard)
-const selectedCardType = computed(() => selectedCard.value?.type)
-const selectedCardKey = computed(() => selectedCard.value?.name ?? '')
-provide(SELECTED_CARD, selectedCard)
 </script>

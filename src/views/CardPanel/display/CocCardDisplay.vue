@@ -64,20 +64,27 @@
               <th>&nbsp;&nbsp;%</th>
               <th>半值</th>
               <th>1/5值</th>
+              <th class="w-8"></th>
             </tr>
             </thead>
             <tbody>
-            <tr v-for="prop in propKeyOf(cardData)" :key="prop">
+            <tr v-for="prop in propKeyOf(cardData)" :key="prop" class="group">
               <td><button class="btn btn-xs btn-ghost font-medium">{{ prop }}</button></td>
               <td class="w-1/4"><number-input v-model="cardData.props[prop]" class="input input-ghost input-xs text-sm w-full"/></td>
               <td class="text-gray-400 text-xs">{{ Math.floor(cardData.props[prop] / 2) }}</td>
               <td class="text-gray-400 text-xs">{{ Math.floor(cardData.props[prop] / 5) }}</td>
+              <td style="padding: 0">
+                <CardMoreAction class="invisible group-hover:visible" :expression="prop" :deletable="false" />
+              </td>
             </tr>
-            <tr>
+            <tr class="group">
               <td><button class="btn btn-xs btn-ghost font-medium">幸运</button></td>
               <td class="w-1/4"><number-input v-model="cardData.basic.LUCK" class="input input-ghost input-xs text-sm w-full"/></td>
               <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.LUCK / 2) }}</td>
               <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.LUCK / 5) }}</td>
+              <td style="padding: 0">
+                <CardMoreAction class="invisible group-hover:visible" expression="幸运" :deletable="false" />
+              </td>
             </tr>
             </tbody>
           </table>
@@ -109,9 +116,7 @@
                     <number-input v-model="cardData.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
                     <span class="text-gray-400 text-xs">{{ Math.floor(cardData.skills[skill] / 2) }}/{{ Math.floor(cardData.skills[skill] / 5) }}</span>
                   </span>
-                  <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteSkill(skill)">
-                    <XMarkIcon class="w-4 h-4" />
-                  </button>
+                  <CardMoreAction class="invisible group-hover:visible" :expression="skill" @delete="deleteSkill(skill)" />
                 </td>
               </template>
             </template>
@@ -134,9 +139,7 @@
               <td><text-input v-model="ability.expression" class="input input-ghost input-xs w-full"/></td>
               <td><text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/></td>
               <td style="padding: 0">
-                <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility(i)">
-                  <XMarkIcon class="w-4 h-4" />
-                </button>
+                <CardMoreAction class="invisible group-hover:visible" :expression="ability.name" @delete="deleteAbility(i)" />
               </td>
             </tr>
             <tr>
@@ -162,13 +165,13 @@
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
 import { computed, ComputedRef, inject, ref } from 'vue'
-import { XMarkIcon } from '@heroicons/vue/24/outline'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
 import type { ICocCardData } from '../../../../interface/card/coc'
 import { CocCard } from '../../../../interface/card/coc'
 import CardToolbar from '../CardToolbar.vue'
 import { SELECTED_CARD } from '../utils'
+import CardMoreAction from '../CardMoreAction.vue'
 
 const cardStore = useCardStore()
 const cocCard = inject<ComputedRef<CocCard>>(SELECTED_CARD)! // 此处可以确保是 coc card

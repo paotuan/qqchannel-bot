@@ -2,6 +2,7 @@
   <d-modal
       :visible="!!sceneStore.currentCardNpc"
       :title="`【${currentNpcName}】的人物卡`"
+      modal-class="npc-card-dialog"
       @update:visible="sceneStore.currentCardNpc = null"
   >
     <div class="flex flex-col" style="height: calc(100vh - 14rem)">
@@ -12,28 +13,14 @@
         </select>
         <button class="btn btn-primary btn-sm" :disabled="!selectedTemplate" @click="onApplyCard">使用此模板初始化！</button>
       </div>
-      <div class="flex-grow overflow-y-auto">
-        <template v-if="selectedCardType === 'coc'">
-          <CocCardDisplay :key="selectedCardKey" />
-        </template>
-        <template v-else-if="selectedCardType === 'dnd'">
-          <DndCardDisplay :key="selectedCardKey" />
-        </template>
-        <template v-else-if="selectedCardType === 'general'">
-          <GeneralCardDisplay :key="selectedCardKey" />
-        </template>
-      </div>
+      <CardDisplay :card="currentCard" is-temp-card class="flex-grow overflow-y-auto" />
     </div>
   </d-modal>
 </template>
 <script setup lang="ts">
 import DModal from '../../../dui/modal/DModal.vue'
 import { useSceneStore } from '../../../store/scene'
-import { computed, provide, ref } from 'vue'
-import { IS_TEMP_CARD, SELECTED_CARD } from '../../CardPanel/utils'
-import CocCardDisplay from '../../CardPanel/display/CocCardDisplay.vue'
-import DndCardDisplay from '../../CardPanel/display/DndCardDisplay.vue'
-import GeneralCardDisplay from '../../CardPanel/display/GeneralCardDisplay.vue'
+import { computed, ref } from 'vue'
 import { useCardStore } from '../../../store/card'
 import type { CardType, ICard } from '../../../../interface/card/types'
 import { getCocCardProto } from '../../../store/card/importer/coc'
@@ -42,16 +29,13 @@ import { getGeneralCardProto } from '../../../store/card/importer/utils'
 import { createCard } from '../../../../interface/card'
 import { CocCard } from '../../../../interface/card/coc'
 import { cloneDeep } from 'lodash'
+import CardDisplay from '../../CardPanel/display/CardDisplay.vue'
 
 // npc 所关联的人物卡
 const sceneStore = useSceneStore()
 const currentNpcName = computed(() => sceneStore.currentCardNpc?.userId || '')
 const currentNpcnn = computed(() => sceneStore.currentCardNpc!)
 const currentCard = computed(() => currentNpcnn.value?.embedCard)
-const selectedCardType = computed(() => currentCard.value?.type)
-const selectedCardKey = computed(() => currentCard.value?.name ?? '')
-provide(SELECTED_CARD, currentCard)
-provide(IS_TEMP_CARD, true)
 
 // 选择人物卡模板
 const cardStore = useCardStore()
@@ -122,7 +106,7 @@ const onApplyCard = () => {
 }
 </script>
 <style scoped>
-:deep(.modal-box) {
+:deep(.npc-card-dialog) {
   max-width: unset;
   width: 940px;
 }
