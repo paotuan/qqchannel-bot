@@ -139,7 +139,7 @@ describe('已关联DND人物卡', () => {
 
   test('dnd先攻默认骰', () => {
     const roller = createDiceRoll('ri', context)
-    expect(roller.output).toBe('Maca 🎲 先攻 d20+{2}[敏捷]: [12]+{2} = 14')
+    expect(roller.output).toBe('Maca 🎲 先攻 d20+{2}[敏捷]+{0}[临时]: [12]+{2}+{0} = 14')
   })
 
   test('st属性', () => {
