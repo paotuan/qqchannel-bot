@@ -46,6 +46,12 @@
       <div class="bg-base-100 p-2 shadow-lg rounded-box mt-4">
         <div class="form-control">
           <label class="label cursor-pointer">
+            <span class="label-text">启用 Log 录制</span>
+            <input v-model="logStore.enableLog" type="checkbox" class="toggle" />
+          </label>
+        </div>
+        <div class="form-control">
+          <label class="label cursor-pointer">
             <span class="label-text">过滤以“.”开头的骰子指令</span>
             <input type="checkbox" class="toggle" :checked="logStore.filterDiceCommand" @change="logStore.toggleFilterDiceCommand()" />
           </label>

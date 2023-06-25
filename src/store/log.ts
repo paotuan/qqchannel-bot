@@ -7,14 +7,17 @@ import { useBotStore } from './bot'
 export const useLogStore = defineStore('log', {
   state: () => ({
     logs: [] as ILog[],
-    filterDiceCommand: Boolean(localStorage.getItem('config-filterDiceCommand')) // 是否无视指令消息
+    filterDiceCommand: Boolean(localStorage.getItem('config-filterDiceCommand')), // 是否无视指令消息
+    enableLog: true
   }),
   actions: {
     addLogs(logs: ILog[]) {
-      if (this.filterDiceCommand) {
-        this.logs.push(...logs.filter(log => !(log.content.startsWith('.') || log.content.startsWith('。'))))
-      } else {
-        this.logs.push(...logs)
+      if (this.enableLog) {
+        if (this.filterDiceCommand) {
+          this.logs.push(...logs.filter(log => !(log.content.startsWith('.') || log.content.startsWith('。'))))
+        } else {
+          this.logs.push(...logs)
+        }
       }
       gtagLogs(logs)
     },
