@@ -216,7 +216,7 @@
                 </td>
               </tr>
               <tr>
-                <td colspan="4"><button class="btn btn-xs btn-ghost" @click="newAbility('spells')">+ 新增一行</button></td>
+                <td colspan="5"><button class="btn btn-xs btn-ghost" @click="newAbility('spells')">+ 新增一行</button></td>
               </tr>
               </tbody>
             </table>
