@@ -21,8 +21,11 @@
 
 你可以在 [releases 页面](https://github.com/paotuan/qqchannel-bot/releases) 找到所有的历史版本。
 
+### Docker 部署
+请参考 [Docker 部署](https://paotuan.io/setup/download/docker.html)
+
 ### 服务器部署
-请参考 [Linux 部署](https://paotuan.io/setup/download/linux.html)
+可以从源码部署，请参考 [Linux 部署](https://paotuan.io/setup/download/linux.html)
 
 ### 本地开发
 require Node >= 14.18
