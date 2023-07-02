@@ -67,7 +67,7 @@ export class Guild {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const lastUserId = allUserList.length === 0 ? '0' : allUserList[allUserList.length - 1].user.id
-      const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 1000, after: lastUserId })
+      const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 400, after: lastUserId })
       console.log('获取用户列表，count = ', data.length)
       if (data.length === 0) {
         break
