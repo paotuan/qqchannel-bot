@@ -3,7 +3,10 @@ import { AvailableIntentsEventsEnum, IChannel, IMember, IMessage } from 'qq-guil
 import { makeAutoObservable, runInAction } from 'mobx'
 import { Channel } from './channel'
 import { User } from './user'
-import type { IUser, IUserUpdateResp } from '../../../interface/common'
+import * as fs from 'fs'
+import { VERSION_CODE } from '../../../interface/version'
+
+const USER_DIR = './user'
 
 /**
  * 频道实例，一个机器人可以被加入多个频道
@@ -20,9 +23,9 @@ export class Guild {
     return Object.values(this.channelsMap)
   }
 
-  // get allUsers() {
-  //   return Object.values(this.usersMap)
-  // }
+  get allUsers() {
+    return Object.values(this.usersMap)
+  }
 
   constructor(api: QApi, id: string, name: string, icon: string) {
     makeAutoObservable<this, 'api'>(this, { id: false, api: false })
@@ -32,6 +35,7 @@ export class Guild {
     this.icon = icon
     this.fetchChannels(api)
     // this.fetchUsers(api)
+    this.loadUsers()
   }
 
   async fetchChannels(api: QApi) {
@@ -96,13 +100,31 @@ export class Guild {
   addOrUpdateUser(member: IMember) {
     const user = this.usersMap[member.user.id]
     if (user) {
-      user.nick = member.nick ?? user.nick
-      user.username = member.user.username ?? user.username
-      user.avatar = member.user.avatar ?? user.avatar
-      user.deleted = false
+      // 判断是否有更新需要持久化
+      let updated = false
+      if (member.nick && member.nick !== user.nick) {
+        user.nick = member.nick
+        updated = true
+      }
+      if (member.user.username && member.user.username !== user.username) {
+        user.username = member.user.username
+        updated = true
+      }
+      if (member.user.avatar && member.user.avatar !== user.avatar) {
+        user.avatar = member.user.avatar
+        updated = true
+      }
+      if (user.deleted) {
+        user.deleted = false
+        updated = true
+      }
+      if (updated) {
+        this.saveUsers()
+      }
     } else {
       const newUser = new User(this.api, member, this.id)
       this.usersMap[newUser.id] = newUser
+      this.saveUsers()
     }
   }
 
@@ -110,6 +132,7 @@ export class Guild {
     const user = this.usersMap[id]
     if (user) {
       user.deleted = true
+      this.saveUsers()
     }
   }
 
@@ -119,6 +142,36 @@ export class Guild {
 
   findChannel(id: string): Channel | undefined {
     return this.channelsMap[id]
+  }
+
+  // user 表持久化
+  private saveUsers() {
+    const allUsersOfGuild = Object.values(this.usersMap).map(user => user.toJSON)
+    console.log('[Guild] 保存用户列表，count=', allUsersOfGuild.length)
+    const data = { version: VERSION_CODE, list: allUsersOfGuild }
+    if (!fs.existsSync(USER_DIR)) {
+      fs.mkdirSync(USER_DIR)
+    }
+    fs.writeFile(`${USER_DIR}/${this.id}.json`, JSON.stringify(data), (e) => {
+      if (e) {
+        console.error('[Guild] 保存用户列表失败', e)
+      }
+    })
+  }
+
+  private loadUsers() {
+    console.log('[Guild] 开始读取用户，guildId=', this.id)
+    const filename = `${USER_DIR}/${this.id}.json`
+    if (!fs.existsSync(filename)) return
+    try {
+      const str = fs.readFileSync(filename, 'utf8')
+      const { version, list } = JSON.parse(str) as { version: number, list: User['toJSON'][] }
+      const users = list.map(data => User.fromJSON(this.api, data))
+      this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
+      // 一次性传给前端吧
+    } catch (e) {
+      console.error(`[Guild] ${filename} 用户列表解析失败`, e)
+    }
   }
 }
 
@@ -221,7 +274,6 @@ export class GuildManager {
   }
 
   addOrUpdateUser(member: IMember) {
-    console.log('[GuildManager] addOrUpdateUser', member)
     const guild = this.guildsMap[member.guild_id]
     if (guild) {
       guild.addOrUpdateUser(member)
@@ -238,16 +290,6 @@ export class GuildManager {
       guild_id: guildId
     }
     this.addOrUpdateUser(member)
-    // 推送前端更新。todo 频道进出人事件先不考虑了
-    const user: IUser = {
-      id: member.user.id,
-      nick: member.nick,
-      username: member.user.username,
-      avatar: member.user.avatar,
-      bot: false,
-      deleted: false
-    }
-    this.api.wss.sendToGuild<IUserUpdateResp>(guildId, { cmd: 'user/update', success: true, data: user })
   }
 
   deleteUser(member: IMember) {

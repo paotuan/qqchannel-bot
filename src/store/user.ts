@@ -19,18 +19,6 @@ export const useUserStore = defineStore('user', {
         this.map[user.id] = user
       })
     },
-    addOrUpdateUser(newUser: IUser) {
-      const user = this.map[newUser.id]
-      if (!user) {
-        this.map[newUser.id] = newUser
-      } else {
-        user.nick = newUser.nick ?? user.nick
-        user.username = newUser.username ?? user.username
-        user.avatar = newUser.avatar ?? user.avatar
-        user.bot = newUser.bot
-        user.deleted = newUser.deleted
-      }
-    },
     of(id: string) {
       return this.map[id]
     },

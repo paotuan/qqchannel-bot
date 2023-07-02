@@ -76,4 +76,40 @@ export class User {
     console.log('[Message] 建立私信通道', data.guild_id)
     return data.guild_id
   }
+
+  // region 序列化相关
+  get toJSON() {
+    return {
+      id: this.id,
+      guildId: this.guildId,
+      nick: this.nick,
+      username: this.username,
+      avatar: this.avatar,
+      bot: this.bot,
+      deleted: this.deleted
+    }
+  }
+
+  static fromJSON(api: QApi, data: User['toJSON']) {
+    const mockMember: IMember = {
+      guild_id: data.guildId,
+      joined_at: '', // useless
+      nick: data.nick,
+      user: {
+        id: data.id,
+        username: data.username,
+        avatar: data.avatar,
+        bot: data.bot,
+        union_openid: '', // useless
+        union_user_account: '', // useless
+      },
+      roles: [], // useless
+      deaf: false, // useless
+      mute: false // useless
+    }
+    const user = new User(api, mockMember, data.guildId)
+    user.deleted = data.deleted
+    return user
+  }
+  // endregion
 }

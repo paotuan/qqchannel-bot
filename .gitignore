@@ -26,6 +26,7 @@ dist-ssr
 /cards/
 /config/
 /plugins/
+/user/
 /dist/client
 /dist/server
 /dist/bin
