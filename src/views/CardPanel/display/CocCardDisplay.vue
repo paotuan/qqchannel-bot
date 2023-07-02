@@ -164,7 +164,7 @@
 </template>
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject, ref } from 'vue'
+import { computed, ComputedRef, inject } from 'vue'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
 import type { ICocCardData } from '../../../../interface/card/coc'
@@ -181,16 +181,9 @@ const propKeyOf = (card: ICocCardData) => {
   return Object.keys(card.props) as Array<keyof typeof card.props>
 }
 
-// 技能按数值排序。缓存一下选择卡片时的技能值顺序，避免编辑过程中实时数值改变导致排序跳动
-const skillsSortList = ref<string[]>([])
-const updateSortList = (cardValue: ICocCardData) => {
-  skillsSortList.value = Object.keys(cardValue.skills).sort((s1, s2) => cardValue.skills[s2] - cardValue.skills[s1])
-}
-// watch(cardData, updateSortList, { immediate: true, deep: true })
-updateSortList(cardData.value) // 暂时干掉实时排序
 // skills grid 分三栏展示
 const skills = computed(() => {
-  const skillList = skillsSortList.value
+  const skillList = Object.keys(cardData.value.skills)
   const length = Math.ceil(skillList.length / 3)
   return new Array(length).fill(0).map((_, i) => [skillList[i * 3], skillList[i * 3 + 1], skillList[i * 3 + 2]])
 })
@@ -227,11 +220,6 @@ const deleteAbility = (index: number) => {
 const deleteSkill = (name: string) => {
   delete cardData.value.skills[name]
   delete cardData.value.meta.skillGrowth[name] // 如有成长标记也一起删了
-  // 从 skillsSortList 也删除
-  const index = skillsSortList.value.indexOf(name)
-  if (index >= 0) {
-    skillsSortList.value.splice(index, 1)
-  }
   markEdited()
 }
 </script>

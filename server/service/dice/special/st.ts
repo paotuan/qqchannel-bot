@@ -121,7 +121,6 @@ export class StDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard() {
-    console.log('roller apply to card')
     if (this.show) return []
     if (!this.targetUserCard) return []
     if (this.rolls.length === 0) return []
@@ -129,7 +128,6 @@ export class StDiceRoll extends BasePtDiceRoll {
     this.rolls.forEach(item => {
       // const entry = this.targetUserCard!.getEntry(item.name)
       // const skillName = entry?.name || item.name
-      console.log(item.name, item.roll.total)
       const b = this.targetUserCard!.setEntry(item.name, item.roll.total)
       modified ||= b
     })
