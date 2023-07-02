@@ -260,14 +260,13 @@ export class DiceManager {
         break
       }
     })
-    this.api.on(AvailableIntentsEventsEnum.DIRECT_MESSAGE, (data: any) => {
-      console.log(`[QApi][私信事件][${data.eventType}]`)
+    this.api.onDirectMessage(async (data: any) => {
       switch (data.eventType) {
       case 'DIRECT_MESSAGE_CREATE':
         this.handleDirectMessage(data.msg as IMessage)
-        break
+        return false
       default:
-        break
+        return false
       }
     })
   }

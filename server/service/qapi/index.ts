@@ -82,6 +82,7 @@ export class QApi {
     // 初始化串行监听器
     this.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, async (data: any) => {
       const msg = data.msg as IMessage
+      // todo update user object
       // 过滤掉未监听的频道消息
       const channelId = msg.channel_id
       if (!this.wss.listeningChannels.includes(channelId)) return
@@ -90,6 +91,16 @@ export class QApi {
       channel && (channel.lastMessage = data.msg)
       // 串行触发消息处理器
       for (const listener of this.guildMessageQueueListeners) {
+        const consumed = await listener(data)
+        if (consumed) return
+      }
+    })
+
+    this.on(AvailableIntentsEventsEnum.DIRECT_MESSAGE, async (data: any) => {
+      console.log(`[QApi][私信事件][${data.eventType}]`)
+      // todo update user object
+      // 串行触发消息处理器
+      for (const listener of this.directMessageQueueListeners) {
         const consumed = await listener(data)
         if (consumed) return
       }
@@ -120,8 +131,13 @@ export class QApi {
   }
 
   private readonly guildMessageQueueListeners: QueueListener[] = []
+  private readonly directMessageQueueListeners: QueueListener[] = []
 
   onGuildMessage(listener: QueueListener) {
     this.guildMessageQueueListeners.push(listener)
+  }
+
+  onDirectMessage(listener: QueueListener) {
+    this.directMessageQueueListeners.push(listener)
   }
 }
