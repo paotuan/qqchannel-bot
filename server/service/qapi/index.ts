@@ -82,7 +82,10 @@ export class QApi {
     // 初始化串行监听器
     this.on(AvailableIntentsEventsEnum.GUILD_MESSAGES, async (data: any) => {
       const msg = data.msg as IMessage
-      // todo update user object
+      // 根据消息中的用户信息更新成员信息。撤回事件信息不完整不处理
+      if (data.eventType === 'MESSAGE_CREATE') {
+        this.guilds.addOrUpdateUserByMessage(msg)
+      }
       // 过滤掉未监听的频道消息
       const channelId = msg.channel_id
       if (!this.wss.listeningChannels.includes(channelId)) return
@@ -98,7 +101,10 @@ export class QApi {
 
     this.on(AvailableIntentsEventsEnum.DIRECT_MESSAGE, async (data: any) => {
       console.log(`[QApi][私信事件][${data.eventType}]`)
-      // todo update user object
+      // 根据消息中的用户信息更新成员信息。撤回事件信息不完整不处理
+      if (data.eventType === 'DIRECT_MESSAGE_CREATE') {
+        this.guilds.addOrUpdateUserByMessage(data.msg)
+      }
       // 串行触发消息处理器
       for (const listener of this.directMessageQueueListeners) {
         const consumed = await listener(data)

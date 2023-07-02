@@ -1,5 +1,5 @@
 import type { QApi } from './index'
-import { AvailableIntentsEventsEnum, IChannel, IMember } from 'qq-guild-bot'
+import { AvailableIntentsEventsEnum, IChannel, IMember, IMessage } from 'qq-guild-bot'
 import { makeAutoObservable, runInAction } from 'mobx'
 import { Channel } from './channel'
 import { User } from './user'
@@ -92,17 +92,16 @@ export class Guild {
     delete this.channelsMap[id]
   }
 
-  addUser(member: IMember) {
-    const user = new User(this.api, member, this.id)
-    this.usersMap[user.id] = user
-  }
-
-  updateUser(member: IMember) {
+  addOrUpdateUser(member: IMember) {
     const user = this.usersMap[member.user.id]
     if (user) {
-      user.nick = member.nick
-      user.username = member.user.username
-      user.avatar = member.user.avatar
+      user.nick = member.nick ?? user.nick
+      user.username = member.user.username ?? user.username
+      user.avatar = member.user.avatar ?? user.avatar
+      user.deleted = false
+    } else {
+      const newUser = new User(this.api, member, this.id)
+      this.usersMap[newUser.id] = newUser
     }
   }
 
@@ -220,18 +219,23 @@ export class GuildManager {
     }
   }
 
-  addUser(member: IMember) {
+  addOrUpdateUser(member: IMember) {
+    console.log('[GuildManager] addOrUpdateUser', member)
     const guild = this.guildsMap[member.guild_id]
     if (guild) {
-      guild.addUser(member)
+      guild.addOrUpdateUser(member)
     }
   }
 
-  updateUser(member: IMember) {
-    const guild = this.guildsMap[member.guild_id]
-    if (guild) {
-      guild.updateUser(member)
+  addOrUpdateUserByMessage(message: IMessage) {
+    // message 返回的格式和实际签名不太符合，要做点兼容处理
+    const member: IMember = {
+      ...message.member,
+      // 注意私信没有 nick 和 roles
+      user: message.author,
+      guild_id: (message as any).direct_message ? (message as any).src_guild_id : message.guild_id // 私信取 src_guild_id
     }
+    this.addOrUpdateUser(member)
   }
 
   deleteUser(member: IMember) {
@@ -271,10 +275,8 @@ export class GuildManager {
       console.log(`[QApi][频道成员事件][${data.eventType}]`, data.msg)
       switch (data.eventType) {
       case 'GUILD_MEMBER_ADD':
-        this.addUser(data.msg)
-        break
       case 'GUILD_MEMBER_UPDATE':
-        this.updateUser(data.msg)
+        this.addOrUpdateUser(data.msg)
         break
       case 'GUILD_MEMBER_REMOVE':
         this.deleteUser(data.msg)
