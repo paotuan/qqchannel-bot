@@ -8,7 +8,8 @@ export type Command =
   | 'channel/listen' // req
   | 'channel/config' // req/res
   | 'channel/config/reset' // req
-  | 'user/list' // res
+  | 'user/list' // res todo 暂时弃用
+  | 'user/update' // res
   | 'log/push' // res
   | 'note/send' // req/res
   | 'note/sendImageRaw' // req/ res: note/send
@@ -87,6 +88,7 @@ export interface IUser {
 }
 
 export type IUserListResp = IUser[]
+export type IUserUpdateResp = IUser
 // endregion channel
 
 // region log

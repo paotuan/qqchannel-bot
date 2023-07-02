@@ -46,6 +46,11 @@ ws.on('channel/list', data => {
 //   user.setUsers((data.data || []) as IUser[])
 // })
 
+ws.on('user/update', data => {
+  const user = useUserStore()
+  user.addOrUpdateUser(data.data as IUser)
+})
+
 ws.on('log/push', data => {
   const log = useLogStore()
   log.addLogs(data.data as ILog[])

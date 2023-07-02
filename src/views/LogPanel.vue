@@ -70,7 +70,7 @@ import type { ILog } from '../../interface/common'
 
 const logStore = useLogStore()
 const userStore = useUserStore()
-const nickOf = (log: ILog) => /*userStore.nickOf(log.userId) ||*/ log.username || log.userId
+const nickOf = (log: ILog) => userStore.nickOf(log.userId) || log.username || log.userId
 
 const hoverMenuIndex = ref(0)
 const onMouseEnter = (index: number) => hoverMenuIndex.value = index

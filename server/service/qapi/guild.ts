@@ -3,6 +3,7 @@ import { AvailableIntentsEventsEnum, IChannel, IMember, IMessage } from 'qq-guil
 import { makeAutoObservable, runInAction } from 'mobx'
 import { Channel } from './channel'
 import { User } from './user'
+import type { IUser, IUserUpdateResp } from '../../../interface/common'
 
 /**
  * 频道实例，一个机器人可以被加入多个频道
@@ -229,13 +230,24 @@ export class GuildManager {
 
   addOrUpdateUserByMessage(message: IMessage) {
     // message 返回的格式和实际签名不太符合，要做点兼容处理
+    const guildId = (message as any).direct_message ? (message as any).src_guild_id : message.guild_id // 私信取 src_guild_id
     const member: IMember = {
       ...message.member,
       // 注意私信没有 nick 和 roles
       user: message.author,
-      guild_id: (message as any).direct_message ? (message as any).src_guild_id : message.guild_id // 私信取 src_guild_id
+      guild_id: guildId
     }
     this.addOrUpdateUser(member)
+    // 推送前端更新。todo 频道进出人事件先不考虑了
+    const user: IUser = {
+      id: member.user.id,
+      nick: member.nick,
+      username: member.user.username,
+      avatar: member.user.avatar,
+      bot: false,
+      deleted: false
+    }
+    this.api.wss.sendToGuild<IUserUpdateResp>(guildId, { cmd: 'user/update', success: true, data: user })
   }
 
   deleteUser(member: IMember) {

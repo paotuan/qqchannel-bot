@@ -73,4 +73,10 @@ export class Wss {
       client.send(message)
     })
   }
+
+  sendToGuild<T>(guildId: string, message: IMessage<T>) {
+    this.clients.filter(client => client.listenToGuildId === guildId).forEach(client => {
+      client.send(message)
+    })
+  }
 }
