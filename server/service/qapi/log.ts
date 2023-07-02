@@ -48,7 +48,7 @@ export class LogManager {
       if (log.msgType === 'text' && log.content) {
         log.content = log.content.replace(/<@!(\d+)>/g, (_, userId: string) => {
           const user = this.api.guilds.findUser(userId, guildId)
-          let name = user ? user.nick || user.username || user.id : userId
+          let name = user?.persona ?? userId
           if (user?.bot) {
             name = name.replace(/-测试中$/, '')
           }

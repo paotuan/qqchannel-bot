@@ -114,10 +114,10 @@ export class Guild {
   }
 
   findUser(id: string) {
-    return this.usersMap[id]
+    return this.usersMap[id] ?? User.createTemp(this.api, id, this.id)
   }
 
-  findChannel(id: string) {
+  findChannel(id: string): Channel | undefined {
     return this.channelsMap[id]
   }
 }
@@ -141,32 +141,31 @@ export class GuildManager {
     })
   }
 
-  find(guildId: string) {
+  find(guildId: string): Guild | undefined {
     return this.guildsMap[guildId]
   }
 
-  findUser(userId: string, guildId?: string) {
-    const guild = guildId ? this.find(guildId) : null
-    if (guild) {
-      return guild.findUser(userId)
-    } else {
-      for (const guild of this.all) {
-        const user = guild.findUser(userId)
-        if (user) return user
-      }
+  findUser(userId: string, guildId: string) {
+    const guild = this.find(guildId)
+    if (!guild) {
+      console.error('[GuildManager]频道信息不存在，guildId=', guildId, 'userId=', userId)
+      return undefined
     }
+    return guild.findUser(userId)
   }
 
-  findChannel(channelId: string, guildId?: string) {
-    const guild = guildId ? this.find(guildId) : null
-    if (guild) {
-      return guild.findChannel(channelId)
-    } else {
-      for (const guild of this.all) {
-        const channel = guild.findChannel(channelId)
-        if (channel) return channel
-      }
+  findChannel(channelId: string, guildId: string) {
+    const guild = this.find(guildId)
+    if (!guild) {
+      console.error('[GuildManager]频道信息不存在，guildId=', guildId, 'channelId=', channelId)
+      return undefined
     }
+    const channel = guild.findChannel(channelId)
+    if (!channel) {
+      console.error('[GuildManager]子频道信息不存在，guildId=', guildId, 'channelId=', channelId)
+      return undefined
+    }
+    return channel
   }
 
   async fetchGuilds() {

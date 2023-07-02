@@ -1,7 +1,6 @@
-import type { IMember } from 'qq-guild-bot'
+import type { IMember, MessageToCreate } from 'qq-guild-bot'
 import { makeAutoObservable } from 'mobx'
 import type { QApi } from './index'
-import { MessageToCreate } from 'qq-guild-bot'
 
 /**
  * 频道用户实例
@@ -26,6 +25,28 @@ export class User {
     this.avatar = member.user.avatar
     this.bot = member.user.bot
     this.api = api
+  }
+
+  // 理论上只有 userId 和 guildId 也可以使用，只是昵称和头像没有，因此遇到这种情况可以创建一个临时的 User 使用，避免阻塞主流程
+  static createTemp(api: QApi, userId: string, guildId: string) {
+    console.log('[User] create temp, id=', userId, 'guildId=', guildId)
+    const mockMember: IMember = {
+      guild_id: guildId,
+      joined_at: '', // useless
+      nick: userId,
+      user: {
+        id: userId,
+        username: userId,
+        avatar: '',
+        bot: false,
+        union_openid: '', // useless
+        union_user_account: '', // useless
+      },
+      roles: [], // useless
+      deaf: false, // useless
+      mute: false // useless
+    }
+    return new User(api, mockMember, guildId)
   }
 
   get persona() {
