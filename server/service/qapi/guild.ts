@@ -19,9 +19,9 @@ export class Guild {
     return Object.values(this.channelsMap)
   }
 
-  get allUsers() {
-    return Object.values(this.usersMap)
-  }
+  // get allUsers() {
+  //   return Object.values(this.usersMap)
+  // }
 
   constructor(api: QApi, id: string, name: string, icon: string) {
     makeAutoObservable<this, 'api'>(this, { id: false, api: false })
@@ -30,7 +30,7 @@ export class Guild {
     this.name = name
     this.icon = icon
     this.fetchChannels(api)
-    this.fetchUsers(api)
+    // this.fetchUsers(api)
   }
 
   async fetchChannels(api: QApi) {
@@ -48,34 +48,34 @@ export class Guild {
     }
   }
 
-  async fetchUsers(api: QApi) {
-    this.usersMap = {}
-    try {
-      const data = await this._fetchUsersInner(api)
-      runInAction(() => {
-        const users = data.map(item => new User(this.api, item, this.id))
-        this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
-      })
-    } catch (e) {
-      console.error('获取频道用户信息失败', e)
-    }
-  }
+  // async fetchUsers(api: QApi) {
+  //   this.usersMap = {}
+  //   try {
+  //     const data = await this._fetchUsersInner(api)
+  //     runInAction(() => {
+  //       const users = data.map(item => new User(this.api, item, this.id))
+  //       this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
+  //     })
+  //   } catch (e) {
+  //     console.error('获取频道用户信息失败', e)
+  //   }
+  // }
 
   // 分页获取全部用户列表
-  async _fetchUsersInner(api: QApi) {
-    const allUserList: IMember[] = []
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const lastUserId = allUserList.length === 0 ? '0' : allUserList[allUserList.length - 1].user.id
-      const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 400, after: lastUserId })
-      console.log('获取用户列表，count = ', data.length)
-      if (data.length === 0) {
-        break
-      }
-      allUserList.push(...data)
-    }
-    return allUserList
-  }
+  // async _fetchUsersInner(api: QApi) {
+  //   const allUserList: IMember[] = []
+  //   // eslint-disable-next-line no-constant-condition
+  //   while (true) {
+  //     const lastUserId = allUserList.length === 0 ? '0' : allUserList[allUserList.length - 1].user.id
+  //     const { data } = await api.qqClient.guildApi.guildMembers(this.id, { limit: 400, after: lastUserId })
+  //     console.log('获取用户列表，count = ', data.length)
+  //     if (data.length === 0) {
+  //       break
+  //     }
+  //     allUserList.push(...data)
+  //   }
+  //   return allUserList
+  // }
 
   addChannel(channel: IChannel) {
     this.channelsMap[channel.id] = new Channel(this.api, channel.id, this.id, channel.name, channel.type)

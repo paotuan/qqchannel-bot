@@ -123,23 +123,23 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
   client.listenTo(data.channelId, data.guildId)
   server.addListeningChannel(data.channelId)
   // watch user list
-  client.autorun(ws => {
-    const qApi = server.qApis.find(ws.appid)
-    if (qApi) {
-      const guild = qApi.guilds.find(ws.listenToGuildId)
-      if (guild) {
-        const users: IUser[] = guild.allUsers.map(user => ({
-          id: user.id,
-          nick: user.nick,
-          username: user.username,
-          avatar: user.avatar,
-          bot: user.bot,
-          deleted: user.deleted
-        }))
-        ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
-      }
-    }
-  })
+  // client.autorun(ws => {
+  //   const qApi = server.qApis.find(ws.appid)
+  //   if (qApi) {
+  //     const guild = qApi.guilds.find(ws.listenToGuildId)
+  //     if (guild) {
+  //       const users: IUser[] = guild.allUsers.map(user => ({
+  //         id: user.id,
+  //         nick: user.nick,
+  //         username: user.username,
+  //         avatar: user.avatar,
+  //         bot: user.bot,
+  //         deleted: user.deleted
+  //       }))
+  //       ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
+  //     }
+  //   }
+  // })
   // watch card link info
   client.autorun(ws => {
     const channel = ws.listenToChannelId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）

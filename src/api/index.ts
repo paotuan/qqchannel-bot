@@ -41,10 +41,10 @@ ws.on('channel/list', data => {
   channel.initGetListSuccess = data.success!
 })
 
-ws.on('user/list', data => {
-  const user = useUserStore()
-  user.setUsers((data.data || []) as IUser[])
-})
+// ws.on('user/list', data => {
+//   const user = useUserStore()
+//   user.setUsers((data.data || []) as IUser[])
+// })
 
 ws.on('log/push', data => {
   const log = useLogStore()
