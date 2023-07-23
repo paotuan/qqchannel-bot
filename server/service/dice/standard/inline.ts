@@ -32,7 +32,7 @@ function initClass() {
       const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
       const roll = this.diceRoll!
       // inline roll 通常只用于中间结果，不参与检定，只回显 description
-      return `🎲${descriptionStr} ${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`.trim()
+      return `${descriptionStr} ${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`.trim()
     }
 
     override applyToCard() {

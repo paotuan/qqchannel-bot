@@ -132,7 +132,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const inlineRollLines = []
     if (this.hasInlineRolls && !this.quiet) {
       const inlineLines = this.inlineRolls.map((roll, i) => {
-        return `${i === 0 ? '先是' : '然后' } ${roll.output}`
+        return `${i === 0 ? '先是 🎲' : '然后 🎲' } ${roll.output}`
       })
       inlineRollLines.push(...inlineLines, '最后 🎲')
     }
