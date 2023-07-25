@@ -45,21 +45,18 @@ export type IAliasRollConfig = {
 // endregion
 
 // region 自定义房规
+export type SuccessLevel = '大失败' | '失败' | '成功' | '困难成功' | '极难成功' | '大成功'
+
 export interface IRollDeciderRule {
+  level: SuccessLevel
   expression: string
-  reply: string
 }
 
 export interface IRollDeciderConfig {
   id: string // 短 id
   name: string
   description?: string
-  rules: {
-    worst: IRollDeciderRule
-    best: IRollDeciderRule
-    fail: IRollDeciderRule
-    success: IRollDeciderRule
-  }
+  rules: IRollDeciderRule[]
 }
 // endregion
 

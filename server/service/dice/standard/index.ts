@@ -144,12 +144,12 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       // 拼接检定结果
       if (rollResult.tests.length === 1) {
         // 单条描述或技能检定，直接拼在后面
-        const testResult = rollResult.tests[0].result?.desc ?? ''
+        const testResult = rollResult.tests[0].result?.level ?? '' // todo
         lines[0] += ` ${testResult}`
       } else {
         // 组合技能检定，回显技能名，且过滤掉没有检定的行，减少冗余信息
         rollResult.tests.forEach(test => {
-          const testResult = test.result?.desc ?? ''
+          const testResult = test.result?.level ?? '' // todo
           if (testResult) {
             lines.push(`${test.skill} ${roll.total} ${testResult}`)
           }

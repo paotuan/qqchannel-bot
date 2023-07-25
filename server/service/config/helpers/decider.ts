@@ -1,7 +1,5 @@
-import { SuccessLevel } from '../../dice/utils'
 import { SyncLruCache } from '../sync-lru-cache'
-import type { IRollDeciderConfig } from '../../../../interface/config'
-import { render } from 'mustache'
+import type { IRollDeciderConfig, SuccessLevel } from '../../../../interface/config'
 
 export interface IRollDecideContext {
   baseValue: number
@@ -12,7 +10,6 @@ export interface IRollDecideContext {
 export interface IRollDecideResult {
   success: boolean
   level: SuccessLevel
-  desc: string
 }
 
 // 全局模板和 function 缓存配置
@@ -38,42 +35,24 @@ export function decideRoll(decider: IRollDeciderConfig | undefined, context: IRo
     return undefined // 规则出错或匹配不上任何一条成功等级
   }
   // 根据命中等级解析描述字符串
-  const rule = decider.rules[resultLevel]
   return {
-    success: ['best', 'success'].includes(resultLevel),
-    level: transformSuccessLevel(resultLevel),
-    desc: render(rule.reply, context) // mustache 内部有缓存
+    success: ['成功', '困难成功', '极难成功', '大成功'].includes(resultLevel),
+    level: resultLevel
   }
 }
 
 // 判断投骰结果命中了哪个等级
 function rollDeciderHit(decider: IRollDeciderConfig, context: IRollDecideContext) {
   try {
-    const resultLevels = ['worst', 'best', 'fail', 'success'] as const
-    for (const resultLevel of resultLevels) {
-      const rule = decider.rules[resultLevel]
+    for (const rule of decider.rules) {
       const func = RollDeciderExpressionCache.get(rule.expression)
       if (func?.(context)) {
-        return resultLevel
+        return rule.level
       }
     }
     return undefined
   } catch (e: any) {
     console.error('[Config] 判断成功等级出错', e?.message, 'context=', JSON.stringify(context))
     return undefined
-  }
-}
-
-function transformSuccessLevel(level: string): SuccessLevel {
-  switch (level) {
-  case 'worst':
-    return SuccessLevel.WORST
-  case 'best':
-    return SuccessLevel.BEST
-  case 'success':
-    return SuccessLevel.REGULAR_SUCCESS
-  case 'fail':
-  default:
-    return SuccessLevel.FAIL
   }
 }

@@ -54,12 +54,14 @@ export function useRollDecider(config: ComputedRef<IChannelConfig | null>) {
       id: nanoid(),
       name: name,
       description: desc,
-      rules: {
-        worst: { expression: '', reply: '大失败' },
-        best: { expression: '', reply: '大成功' },
-        fail: { expression: '', reply: '失败' },
-        success: { expression: '', reply: '成功' }
-      }
+      rules: [
+        { level: '大失败', expression: '' },
+        { level: '大成功', expression: '' },
+        { level: '失败', expression: '' },
+        { level: '极难成功', expression: ''},
+        { level: '困难成功', expression: '' },
+        { level: '成功', expression: '' }
+      ]
     }
     // 写入 embed 插件
     const plugin = config.value!.embedPlugin

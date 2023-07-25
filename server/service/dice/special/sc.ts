@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../index'
-import { parseDescriptions, SuccessLevel } from '../utils'
+import { parseDescriptions } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 
@@ -35,9 +35,10 @@ export class ScDiceRoll extends BasePtDiceRoll {
     }
     if (scEntry) {
       this.rollSc.total
+      // todo decider 传入 acceptSuccessLevels
       this.rollScResult = this.decide({ baseValue: scEntry.value, targetValue: scEntry.value, roll: this.rollSc.total })
       if (this.rollScResult) {
-        if (this.rollScResult.level === SuccessLevel.WORST) {
+        if (this.rollScResult.level === '大失败') {
           const maxLoss = new DiceRoll(this.expression2).maxTotal
           this.rollLoss = new DiceRoll(String(maxLoss))
         } else {
@@ -92,7 +93,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   override get output() {
     const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
     const scRollValue = this.rollSc!.total
-    const resultDesc = this.rollScResult?.desc ?? '……未指定理智值，成功了吗？'
+    const resultDesc = this.rollScResult?.level ?? '……未指定理智值，成功了吗？' // todo
     let line = `${this.context.username} 🎲${descriptionStr} d% = ${scRollValue} ${resultDesc}`
     if (!this.rollScResult) return line // 没有人物卡
     line += `\n${this.context.username} 🎲 理智损失 ${this.rollLoss!.output}`

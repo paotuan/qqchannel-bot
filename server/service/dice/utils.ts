@@ -15,17 +15,6 @@ import { DndDiceRoll } from './standard/dnd'
 import { DsDiceRoll } from './special/ds'
 import { DndOpposedRoll } from './standard/dndOppose'
 
-// 成功等级：大失败，失败，成功，困难成功，极难成功，大成功
-// export type SuccessLevel = -2 | -1 | 1 | 2
-export const enum SuccessLevel {
-  WORST = -2,
-  FAIL = -1,
-  REGULAR_SUCCESS = 1,
-  HARD_SUCCESS = 2,
-  EX_SUCCESS = 3,
-  BEST = 4
-}
-
 export interface IDiceRollContext {
   channelId?: string
   userId: string

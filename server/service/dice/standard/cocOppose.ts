@@ -1,5 +1,4 @@
 import { StandardDiceRoll } from './index'
-import { SuccessLevel } from '../utils'
 import { CocDiceRoll } from './coc'
 
 // 对抗检定
@@ -39,7 +38,7 @@ export class CocOpposedDiceRoll extends CocDiceRoll {
     const otherResult = other.getSuccessLevelForOpposedRoll()
     // 2. 比较
     const selfSuccess = (() => {
-      if (selfResult.level < 0) {
+      if (!selfResult.success) {
         return 'fail' // 本身就失败
       } else { // 本身成功，和对方判断
         if (selfResult.level === otherResult.level) { // 等级一样
@@ -52,7 +51,7 @@ export class CocOpposedDiceRoll extends CocDiceRoll {
     })()
     const otherSuccess = (() => {
       if (selfSuccess === 'fail') { // 我方失败，对方可能成功可能失败
-        return otherResult.level < 0 ? 'fail' : 'success'
+        return !otherResult.success ? 'fail' : 'success'
       } else { // 我方平局或成功，对方就是相反结果
         return selfSuccess === 'draw' ? 'draw' : 'fail'
       }
@@ -60,25 +59,8 @@ export class CocOpposedDiceRoll extends CocDiceRoll {
     // 3. 组装
     const icon = { success: '🟩', fail: '🟥', draw: '🟨' }
     return [icon[selfSuccess], selfResult.username, `${selfResult.skill}(${selfResult.baseValue})`,
-      translateSuccessLevel(selfResult.level), '↔️', otherResult.username,
-      `${otherResult.skill}(${otherResult.baseValue})`, translateSuccessLevel(otherResult.level),
+      selfResult.level, '↔️', otherResult.username,
+      `${otherResult.skill}(${otherResult.baseValue})`, otherResult.level,
       icon[otherSuccess]].join(' ')
-  }
-}
-
-function translateSuccessLevel(level: SuccessLevel) {
-  switch (level) {
-  case SuccessLevel.BEST:
-    return '大成功'
-  case SuccessLevel.EX_SUCCESS:
-    return '极难成功'
-  case SuccessLevel.HARD_SUCCESS:
-    return '困难成功'
-  case SuccessLevel.REGULAR_SUCCESS:
-    return '成功'
-  case SuccessLevel.FAIL:
-    return '失败'
-  case SuccessLevel.WORST:
-    return '大失败'
   }
 }

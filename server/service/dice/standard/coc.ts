@@ -1,8 +1,7 @@
 import { StandardDiceRoll } from './index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import { getCocTempEntry, calculateTargetValueWithDifficulty, CocCard, ICocCardEntry } from '../../../../interface/card/coc'
-import { SuccessLevel } from '../utils'
+import { CocCard, getCocTempEntry, ICocCardEntry } from '../../../../interface/card/coc'
 
 export class CocDiceRoll extends StandardDiceRoll {
   // 标记技能检定列表
@@ -62,27 +61,14 @@ export class CocDiceRoll extends StandardDiceRoll {
   }
 
   // 用于对抗检定的数据
-  /* protected */ getSuccessLevelForOpposedRoll(refineSuccessLevels = true) {
+  /* protected */ getSuccessLevelForOpposedRoll() {
     // eligibleForOpposedRoll 确保了 rollResult 和 test 有且仅有一个
     const rollResult = this.rolls[0]
     const test = rollResult.tests[0]
     // 组装对抗检定数据
-    const rollValue = rollResult.roll.total
     const decideResult = test.result!
     const entry = test.cardEntry! as ICocCardEntry
     const baseValue = entry.baseValue
-    const res = { username: this.context.username, skill: entry.key, baseValue }
-    if (decideResult.level === SuccessLevel.REGULAR_SUCCESS) {
-      // 成功的检定，如设置 refineSuccessLevels，要比较成功等级哪个更高
-      if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'ex')) {
-        return Object.assign(res, { level: SuccessLevel.EX_SUCCESS })
-      } else if (refineSuccessLevels && rollValue <= calculateTargetValueWithDifficulty(baseValue, 'hard')) {
-        return Object.assign(res, { level: SuccessLevel.HARD_SUCCESS })
-      } else {
-        return Object.assign(res, { level: SuccessLevel.REGULAR_SUCCESS })
-      }
-    } else {
-      return Object.assign(res, { level: decideResult.level })
-    }
+    return { username: this.context.username, skill: entry.key, baseValue, level: decideResult.level, success: decideResult.success }
   }
 }
