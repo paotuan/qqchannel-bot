@@ -68,7 +68,7 @@ export class ChannelConfig {
   private get rollDecider() {
     const currentId = this.config.rollDeciderId
     if (!currentId) return undefined // 不要规则的情况
-    return this.embedRollDeciderMap[currentId] || this.plugin?.pluginRollDeciderMap[currentId]
+    return this.embedRollDeciderMap[currentId] /* || this.plugin?.pluginRollDeciderMap[currentId] */
   }
 
   /**

@@ -3,7 +3,7 @@ import type {
   IPluginConfig,
   ICustomReplyConfig,
   IPluginRegisterContext,
-  IRollDeciderConfig, IAliasRollConfig
+  IAliasRollConfig
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
@@ -131,11 +131,12 @@ export class PluginManager {
         name: item.name,
         description: item.description
       })),
-      rollDecider: (plugin.rollDecider || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description
-      })),
+      // rollDecider: (plugin.rollDecider || []).map(item => ({
+      //   id: item.id,
+      //   name: item.name,
+      //   description: item.description
+      // })),
+      rollDecider: [],
       aliasRoll: (plugin.aliasRoll || []).map(item => ({
         id: item.id,
         name: item.name,
@@ -157,16 +158,16 @@ export class PluginManager {
   }
 
   // 提供 roll decider 的列表：fullId => config
-  get pluginRollDeciderMap(): Record<string, IRollDeciderConfig> {
-    const ret: Record<string, IRollDeciderConfig> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.rollDecider) return
-      plugin.rollDecider.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
+  // get pluginRollDeciderMap(): Record<string, IRollDeciderConfig> {
+  //   const ret: Record<string, IRollDeciderConfig> = {}
+  //   Object.values(this.pluginMap).forEach(plugin => {
+  //     if (!plugin.rollDecider) return
+  //     plugin.rollDecider.forEach(item => {
+  //       ret[`${plugin.id}.${item.id}`] = item
+  //     })
+  //   })
+  //   return ret
+  // }
 
   // 提供 alias roll 的列表：fullId => config
   get pluginAliasRollMap(): Record<string, IAliasRollConfig> {
