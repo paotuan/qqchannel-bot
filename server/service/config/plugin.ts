@@ -141,6 +141,11 @@ export class PluginManager {
         id: item.id,
         name: item.name,
         description: item.description
+      })),
+      customText: (plugin.customText || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description
       }))
     }))
   }

@@ -2,8 +2,11 @@ import type {
   IAliasRollConfig,
   IChannelConfig,
   ICustomReplyConfig,
+  ICustomTextConfig,
   IRollDeciderConfig,
-  ISpecialDiceConfig
+  ISpecialDiceConfig,
+  CustomTextKeys,
+  ICustomTextItem
 } from '../../../interface/config'
 import { VERSION_CODE } from '../../../interface/version'
 
@@ -13,6 +16,7 @@ export function getInitialDefaultConfig(): IChannelConfig {
   const customReplies = getEmbedCustomReply()
   const aliasRolls = getEmbedAliasRoll()
   const rollDeciders = getEmbedRollDecider()
+  const customText = getEmbedCustomText()
   const customReplyPlugins = [
     'io.paotuan.plugin.namegen.name',
     'io.paotuan.plugin.insane.ti',
@@ -30,11 +34,13 @@ export function getInitialDefaultConfig(): IChannelConfig {
     aliasRollIds: aliasRolls.map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true })),
     rollDeciderId: `${embedPluginId}.${rollDeciders[0].id}`,
     rollDeciderIds: rollDeciders.map(item => `${embedPluginId}.${item.id}`),
+    customTextIds: [],
     embedPlugin: {
       id: embedPluginId,
       customReply: customReplies,
       aliasRoll: aliasRolls,
-      rollDecider: rollDeciders
+      rollDecider: rollDeciders,
+      customText: [customText] // embed 默认只有一份
     },
     lastModified: 0
   }
@@ -114,7 +120,26 @@ export function handleUpgrade(config: IChannelConfig) {
         ]
       }))
     )
-    // todo 把 description 挪到新的配置去
+    // 增加新的 customText 配置
+    config.customTextIds = []
+    const embedText = getEmbedCustomText()
+    config.embedPlugin.customText = [embedText]
+    // 把原来 roll decider 的 description 挪到新的配置去
+    const set = (k: CustomTextKeys, v: string) => (embedText.texts[k] as ICustomTextItem[])[0].text = v
+    const oldCocConfig = oldDeciderConfig.find(decider => decider.id === 'coc0')
+    if (oldCocConfig) {
+      set('test.coc.worst', (oldCocConfig.rules as any).worst.reply)
+      set('test.coc.best', (oldCocConfig.rules as any).best.reply)
+      set('test.coc.fail', (oldCocConfig.rules as any).fail.reply)
+      set('test.coc.exsuccess', (oldCocConfig.rules as any).success.reply)
+      set('test.coc.hardsuccess', (oldCocConfig.rules as any).success.reply)
+      set('test.coc.success', (oldCocConfig.rules as any).success.reply)
+    }
+    const oldDndConfig = oldDeciderConfig.find(decider => decider.id === 'dnd0')
+    if (oldDndConfig) {
+      set('test.dnd.fail', (oldDndConfig.rules as any).fail.reply)
+      set('test.dnd.success', (oldDndConfig.rules as any).success.reply)
+    }
     config.version = 21 // 1.5.0
   }
   return config as IChannelConfig
@@ -345,6 +370,23 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       ],
     }
   ]
+}
+
+function getEmbedCustomText(): ICustomTextConfig {
+  const s = (text: string) => [{ text, weight: 1 }]
+  const texts: Record<CustomTextKeys, ICustomTextItem[]> = {
+    'roll.start': s('{{username}} 🎲 {{描述}}'),
+    'roll.inline.first': s('先是 🎲'),
+    'test.coc.worst': s(' 大失败'),
+    'test.coc.best': s(' 大成功'),
+    'test.coc.fail': s(' > {{targetValue}} 失败'),
+    'test.coc.exsuccess': s(' ≤ {{targetValue}} 成功'),
+    'test.coc.hardsuccess': s(' ≤ {{targetValue}} 成功'),
+    'test.coc.success': s(' ≤ {{targetValue}} 成功'),
+    'test.dnd.fail': s(' < {{targetValue}} 失败'),
+    'test.dnd.success': s(' ≥ {{targetValue}} 成功')
+  }
+  return { id: 'default', name: '默认文案', texts }
 }
 
 function getSpecialDiceConfig(): ISpecialDiceConfig {

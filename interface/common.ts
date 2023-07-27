@@ -173,6 +173,7 @@ export interface IPluginConfigDisplay {
   customReply: IPluginItemConfig[]
   aliasRoll: IPluginItemConfig[]
   rollDecider: IPluginItemConfig[]
+  customText: IPluginItemConfig[]
 }
 // endregion plugin
 

@@ -60,6 +60,34 @@ export interface IRollDeciderConfig {
 }
 // endregion
 
+// region 自定义文案
+export interface ICustomTextItem {
+  weight: number
+  text: string
+}
+
+export type ICustomTextHandler = (env: Record<string, any>) => string
+
+export type CustomTextKeys =
+  | 'roll.start'
+  | 'roll.inline.first'
+  | 'test.coc.worst'
+  | 'test.coc.best'
+  | 'test.coc.fail'
+  | 'test.coc.exsuccess'
+  | 'test.coc.hardsuccess'
+  | 'test.coc.success'
+  | 'test.dnd.fail'
+  | 'test.dnd.success'
+
+export interface ICustomTextConfig {
+  id: string // 短 id
+  name: string
+  description?: string
+  texts: Partial<Record<CustomTextKeys, ICustomTextItem[] | ICustomTextHandler>>
+}
+// endregion
+
 // region 插件相关
 export interface IPluginRegisterContext {
   versionName: string
@@ -78,6 +106,7 @@ export interface IPluginConfig {
   customReply?: ICustomReplyConfig[]
   aliasRoll?: IAliasRollConfig[]
   rollDecider?: IRollDeciderConfig[]
+  customText?: ICustomTextConfig[]
 }
 // endregion
 
@@ -100,6 +129,7 @@ export interface IChannelConfig {
   aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选
   rollDeciderIds: string[] // full id
+  customTextIds: string[] // full id。 不包含 default
   embedPlugin: IPluginConfig // id = io.paotuan.embed.xx
   lastModified: number // ms
 }
