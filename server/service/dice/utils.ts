@@ -6,7 +6,7 @@ import { CocOpposedDiceRoll } from './standard/cocOppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
 import { StDiceRoll } from './special/st'
-import type { UserRole } from '../../../interface/config'
+import type { CustomTextKeys, SuccessLevel, UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
 import { GeneralCard } from '../../../interface/card/general'
 import { CocDiceRoll } from './standard/coc'
@@ -205,5 +205,22 @@ export function convertRoleIds(ids: string[]): UserRole {
     return 'manager'
   } else {
     return 'user'
+  }
+}
+
+export function convertSuccessLevel2CustomTextKey(level: SuccessLevel): CustomTextKeys {
+  switch (level) {
+  case '大失败':
+    return 'test.worst'
+  case '大成功':
+    return 'test.best'
+  case '失败':
+    return 'test.fail'
+  case '极难成功':
+    return 'test.exsuccess'
+  case '困难成功':
+    return 'test.hardsuccess'
+  case '成功':
+    return 'test.success'
   }
 }

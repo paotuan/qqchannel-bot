@@ -117,7 +117,7 @@ export class ChannelConfig {
   /**
    * 自定义文案格式化
    */
-  formatCustomText(key: CustomTextKeys, args: Record<string, any>) {
-    return renderCustomText(this.customTextMap, key, args)
+  formatCustomText(key: CustomTextKeys, args: Record<string, any>, context: any) {
+    return renderCustomText(this.customTextMap, key, args, context)
   }
 }

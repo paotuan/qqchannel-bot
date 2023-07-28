@@ -1,7 +1,8 @@
 import type { IDiceRollContext } from './utils'
 import type { ICard } from '../../../interface/card/types'
 import type { IRollDecideContext } from '../config/helpers/decider'
-import type { CustomTextKeys } from '../../../interface/config'
+import type { CustomTextKeys, SuccessLevel } from '../../../interface/config'
+import { convertSuccessLevel2CustomTextKey } from './utils'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -45,7 +46,13 @@ export abstract class BasePtDiceRoll {
   }
 
   // 自定义文案格式化
-  protected ct(key: CustomTextKeys, args: Record<string, any>) {
-    return this.context.config.formatCustomText(key, args)
+  protected t(key: CustomTextKeys, args: Record<string, any>) {
+    return this.context.config.formatCustomText(key, args, this)
+  }
+
+  // 自定义文案 - 检定结果字符串
+  protected ts(level: SuccessLevel | undefined, args: Record<string, any>) {
+    if (!level) return ''
+    return this.t(convertSuccessLevel2CustomTextKey(level), args)
   }
 }

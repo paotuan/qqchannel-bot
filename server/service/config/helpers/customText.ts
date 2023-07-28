@@ -2,7 +2,7 @@ import type { CustomTextKeys, ICustomTextHandler, ICustomTextItem } from '../../
 import { render } from 'mustache'
 
 type CustomTextMap = Partial<Record<CustomTextKeys, ICustomTextItem[] | ICustomTextHandler>>
-export function renderCustomText(customTextMap: CustomTextMap, key: CustomTextKeys, args: Record<string, any>) {
+export function renderCustomText(customTextMap: CustomTextMap, key: CustomTextKeys, args: Record<string, any>, context: any) {
   const processor = customTextMap[key]
   if (!processor) {
     console.error(`[Config] 找不到 ${key} 的自定义文案`) // 理论上不可能，因为外部做了兜底
@@ -10,7 +10,9 @@ export function renderCustomText(customTextMap: CustomTextMap, key: CustomTextKe
   }
   if (typeof processor === 'function') {
     try {
-      return processor(args)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore hidden api
+      return processor(args, context)
     } catch (e: any) {
       console.error(`[Config] 自定义文案 ${key} 处理出错`, e?.message)
       return ''

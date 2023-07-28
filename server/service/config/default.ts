@@ -124,22 +124,7 @@ export function handleUpgrade(config: IChannelConfig) {
     config.customTextIds = []
     const embedText = getEmbedCustomText()
     config.embedPlugin.customText = [embedText]
-    // 把原来 roll decider 的 description 挪到新的配置去
-    const set = (k: CustomTextKeys, v: string) => (embedText.texts[k] as ICustomTextItem[])[0].text = v
-    const oldCocConfig = oldDeciderConfig.find(decider => decider.id === 'coc0')
-    if (oldCocConfig) {
-      set('test.coc.worst', (oldCocConfig.rules as any).worst.reply)
-      set('test.coc.best', (oldCocConfig.rules as any).best.reply)
-      set('test.coc.fail', (oldCocConfig.rules as any).fail.reply)
-      set('test.coc.exsuccess', (oldCocConfig.rules as any).success.reply)
-      set('test.coc.hardsuccess', (oldCocConfig.rules as any).success.reply)
-      set('test.coc.success', (oldCocConfig.rules as any).success.reply)
-    }
-    const oldDndConfig = oldDeciderConfig.find(decider => decider.id === 'dnd0')
-    if (oldDndConfig) {
-      set('test.dnd.fail', (oldDndConfig.rules as any).fail.reply)
-      set('test.dnd.success', (oldDndConfig.rules as any).success.reply)
-    }
+    // 由于默认的文案也有所改动，就不迁移了，需要用户升级后自己重新设置
     config.version = 21 // 1.5.0
   }
   return config as IChannelConfig
@@ -377,14 +362,12 @@ export function getEmbedCustomText(): ICustomTextConfig {
   const texts: Record<CustomTextKeys, ICustomTextItem[]> = {
     'roll.start': s('{{username}} 🎲 {{描述}}'),
     'roll.inline.first': s('先是 🎲'),
-    'test.coc.worst': s(' 大失败'),
-    'test.coc.best': s(' 大成功'),
-    'test.coc.fail': s(' > {{targetValue}} 失败'),
-    'test.coc.exsuccess': s(' ≤ {{targetValue}} 成功'),
-    'test.coc.hardsuccess': s(' ≤ {{targetValue}} 成功'),
-    'test.coc.success': s(' ≤ {{targetValue}} 成功'),
-    'test.dnd.fail': s(' < {{targetValue}} 失败'),
-    'test.dnd.success': s(' ≥ {{targetValue}} 成功')
+    'test.worst': s(' 大失败'),
+    'test.best': s(' 大成功'),
+    'test.fail': s('/{{targetValue}} 失败'),
+    'test.exsuccess': s('/{{targetValue}} 成功'),
+    'test.hardsuccess': s('/{{targetValue}} 成功'),
+    'test.success': s('/{{targetValue}} 成功'),
   }
   return { id: 'default', name: '默认文案', texts }
 }
