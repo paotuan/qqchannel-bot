@@ -47,12 +47,21 @@ export abstract class BasePtDiceRoll {
 
   // 自定义文案格式化
   protected t(key: CustomTextKeys, args: Record<string, any>) {
-    return this.context.config.formatCustomText(key, args, this)
+    return this.context.config.formatCustomText(key, { ...this._commonTArgs, ...args }, this)
   }
 
   // 自定义文案 - 检定结果字符串
   protected ts(level: SuccessLevel | undefined, args: Record<string, any>) {
     if (!level) return ''
     return this.t(convertSuccessLevel2CustomTextKey(level), args)
+  }
+
+  // 自定义文案 - 通用格式化参数
+  private get _commonTArgs(): Record<string, string> {
+    return {
+      用户名: this.context.username,
+      人物卡名: this.selfCard?.name ?? this.context.username,
+      at用户: `<@!${this.context.userId}>`
+    }
   }
 }

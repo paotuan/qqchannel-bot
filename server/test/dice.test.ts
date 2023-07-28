@@ -43,12 +43,12 @@ describe('未关联人物卡', () => {
 
   test('临时检定', () => {
     const roller = createDiceRoll('d100 侦察 50', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 ≤ 50 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 50 成功')
   })
 
   test('空格可以省略', () => {
     const roller = createDiceRoll('d100侦察50', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 ≤ 50 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 50 成功')
   })
 
   test('默认骰1', () => {
@@ -88,7 +88,7 @@ describe('未关联人物卡', () => {
 
   test('奖励骰临时检定', () => {
     const roller = createDiceRoll('rb侦察50', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 2d%kl1: [2, 2d] = 2 ≤ 50 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 2d%kl1: [2, 2d] = 2 / 50 成功')
   })
 
   test('骰池别名', () => {
@@ -123,12 +123,12 @@ describe('未关联人物卡', () => {
 
   test('对抗标记', () => {
     const roller = createDiceRoll('v侦察50', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 ≤ 50 成功\n> 回复本条消息以进行对抗')
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 50 成功\n> 回复本条消息以进行对抗')
   })
 
   test('对抗标记+检定别名', () => {
     const roller = createDiceRoll('rav侦察50', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 ≤ 50 成功\n> 回复本条消息以进行对抗')
+    expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 / 50 成功\n> 回复本条消息以进行对抗')
   })
 
   test('对抗标记无效', () => {
@@ -163,7 +163,7 @@ describe('未关联人物卡', () => {
 
   test('组合检定', () => {
     const roller = createDiceRoll('侦察60聆听70', context)
-    expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2\n侦察 2 ≤ 60 成功\n聆听 2 ≤ 70 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2\n侦察 2 / 60 成功\n聆听 2 / 70 成功')
   })
 
   test('组合检定无效', () => {
@@ -173,7 +173,7 @@ describe('未关联人物卡', () => {
 
   test('组合检定部分', () => {
     const roller = createDiceRoll('侦察60聆听', context)
-    expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2\n侦察 2 ≤ 60 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察，聆听 d100: [2] = 2\n侦察 2 / 60 成功')
   })
 
   test('coc理智检定 无人物卡', () => {

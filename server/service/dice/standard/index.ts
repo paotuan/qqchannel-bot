@@ -144,14 +144,15 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       // 拼接检定结果
       if (rollResult.tests.length === 1) {
         // 单条描述或技能检定，直接拼在后面
-        const testResult = rollResult.tests[0].result?.level ?? '' // todo
-        lines[0] += ` ${testResult}`
+        const { tests: [test] } = rollResult
+        const testResult = this.ts(test.result?.level, this.getRollResultFormatArgs(roll, test))
+        lines[0] += testResult
       } else {
         // 组合技能检定，回显技能名，且过滤掉没有检定的行，减少冗余信息
         rollResult.tests.forEach(test => {
-          const testResult = test.result?.level ?? '' // todo
+          const testResult = this.ts(test.result?.level, this.getRollResultFormatArgs(roll, test))
           if (testResult) {
-            lines.push(`${test.skill} ${roll.total} ${testResult}`)
+            lines.push(`${test.skill} ${roll.total}${testResult}`)
           }
         })
       }
@@ -179,5 +180,17 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   // 是否可基于此骰进行对抗检定
   get eligibleForOpposedRoll() {
     return false
+  }
+
+  // 技能检定格式化可提供参数
+  private getRollResultFormatArgs(roll: DiceRoll, test: IRollResult['tests'][number]) {
+    return {
+      原始指令: this.rawExpression,
+      描述: test.skill,
+      目标值: test.cardEntry?.value,
+      掷骰结果: roll.total,
+      掷骰表达式: roll.notation,
+      掷骰输出: roll.output
+    }
   }
 }

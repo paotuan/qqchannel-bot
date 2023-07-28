@@ -33,22 +33,22 @@ describe('已关联COC人物卡', () => {
 
   test('检定', () => {
     const roller = createDiceRoll('d100 侦察', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 ≤ 40 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 40 成功')
   })
 
   test('默认骰检定', () => {
     const roller = createDiceRoll('d侦察', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 ≤ 40 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 / 40 成功')
   })
 
   test('默认骰检定2', () => {
     const roller = createDiceRoll('侦察', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 ≤ 40 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 / 40 成功')
   })
 
   test('忽略临时值', () => {
     const roller = createDiceRoll('d100 侦察 50', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 ≤ 40 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 40 成功')
   })
 
   test('不存在技能仅回显', () => {
@@ -83,7 +83,7 @@ describe('已关联COC人物卡', () => {
 
   test('组合检定', () => {
     const roller = createDiceRoll('侦察 图书馆', context)
-    expect(roller.output).toBe('Maca 🎲 侦察，图书馆 d%: [2] = 2\n侦察 2 ≤ 40 成功\n图书馆 2 ≤ 70 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察，图书馆 d%: [2] = 2\n侦察 2 / 40 成功\n图书馆 2 / 70 成功')
   })
 
   test('coc理智检定 默认骰', () => {

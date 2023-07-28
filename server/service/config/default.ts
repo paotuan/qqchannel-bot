@@ -360,14 +360,14 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
 export function getEmbedCustomText(): ICustomTextConfig {
   const s = (text: string) => [{ text, weight: 1 }]
   const texts: Record<CustomTextKeys, ICustomTextItem[]> = {
-    'roll.start': s('{{username}} 🎲 {{描述}}'),
+    'roll.start': s('{{用户名}} 🎲 {{描述}}'),
     'roll.inline.first': s('先是 🎲'),
     'test.worst': s(' 大失败'),
     'test.best': s(' 大成功'),
-    'test.fail': s('/{{targetValue}} 失败'),
-    'test.exsuccess': s('/{{targetValue}} 成功'),
-    'test.hardsuccess': s('/{{targetValue}} 成功'),
-    'test.success': s('/{{targetValue}} 成功'),
+    'test.fail': s(' / {{目标值}} 失败'),
+    'test.exsuccess': s(' / {{目标值}} 成功'),
+    'test.hardsuccess': s(' / {{目标值}} 成功'),
+    'test.success': s(' / {{目标值}} 成功'),
   }
   return { id: 'default', name: '默认文案', texts }
 }
