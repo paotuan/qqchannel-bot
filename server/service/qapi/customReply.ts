@@ -72,7 +72,7 @@ export class CustomReplyManager {
     try {
       if (!processor.items && !processor.handler) throw new Error('没有处理自定义回复的方法')
       const handler = processor.handler ?? randomReplyItem(processor.items!).reply
-      // 替换模板
+      // 替换模板 todo use mustache
       const username = msg.member.nick || msg.author.username || msg.author.id
       const userId = msg.author.id
       const channelId = msg.channel_id

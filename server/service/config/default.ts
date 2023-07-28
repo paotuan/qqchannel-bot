@@ -372,7 +372,7 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
   ]
 }
 
-function getEmbedCustomText(): ICustomTextConfig {
+export function getEmbedCustomText(): ICustomTextConfig {
   const s = (text: string) => [{ text, weight: 1 }]
   const texts: Record<CustomTextKeys, ICustomTextItem[]> = {
     'roll.start': s('{{username}} 🎲 {{描述}}'),

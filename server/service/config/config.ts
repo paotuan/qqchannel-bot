@@ -2,7 +2,9 @@ import type {
   IAliasRollConfig,
   IChannelConfig,
   ICustomReplyConfig,
-  IRollDeciderConfig
+  ICustomTextConfig,
+  IRollDeciderConfig,
+  CustomTextKeys
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import type { PluginManager } from './plugin'
@@ -10,6 +12,8 @@ import { decideRoll, IRollDecideContext } from './helpers/decider'
 import type { IDiceRollContext } from '../dice/utils'
 import type { InlineDiceRoll } from '../dice/standard/inline'
 import { parseAlias } from './helpers/alias'
+import { getEmbedCustomText } from './default'
+import { renderCustomText } from './helpers/customText'
 
 // 频道配置文件封装
 // !只读 config，不要写 config
@@ -90,7 +94,7 @@ export class ChannelConfig {
   private get aliasRollProcessors() {
     return this.config.aliasRollIds
       .filter(item => item.enabled)
-      .map(item => this.embedAliasRollMap[item.id]|| this.plugin?.pluginAliasRollMap[item.id])
+      .map(item => this.embedAliasRollMap[item.id] || this.plugin?.pluginAliasRollMap[item.id])
       .filter(conf => !!conf)
   }
 
@@ -99,5 +103,21 @@ export class ChannelConfig {
    */
   parseAliasRoll(expression: string, context: IDiceRollContext, inlineRolls: InlineDiceRoll[]) {
     return parseAlias(this.aliasRollProcessors, expression, context, inlineRolls)
+  }
+
+  // 子频道自定义文案配置
+  private get customTextMap() {
+    const embed = this.config.embedPlugin.customText?.[0] ?? getEmbedCustomText() // 理论上有且只有一个 embed 配置，但做个兜底
+    const pluginList = this.config.customTextIds.map(id => this.plugin?.pluginCustomTextMap?.[id])
+    const validConfigList = [embed, ...pluginList].filter(conf => !!conf) as ICustomTextConfig[]
+    // 后面的配置覆盖前面的配置
+    return validConfigList.map(config => config.texts).reduce((all, textMap) => Object.assign(all, textMap), {})
+  }
+
+  /**
+   * 自定义文案格式化
+   */
+  formatCustomText(key: CustomTextKeys, args: Record<string, any>) {
+    return renderCustomText(this.customTextMap, key, args)
   }
 }

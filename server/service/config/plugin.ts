@@ -3,7 +3,7 @@ import type {
   IPluginConfig,
   ICustomReplyConfig,
   IPluginRegisterContext,
-  IAliasRollConfig
+  IAliasRollConfig, ICustomTextConfig
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
@@ -180,6 +180,18 @@ export class PluginManager {
     Object.values(this.pluginMap).forEach(plugin => {
       if (!plugin.aliasRoll) return
       plugin.aliasRoll.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 custom text 的列表：fullId => config
+  get pluginCustomTextMap(): Record<string, ICustomTextConfig> {
+    const ret: Record<string, ICustomTextConfig> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.customText) return
+      plugin.customText.forEach(item => {
         ret[`${plugin.id}.${item.id}`] = item
       })
     })

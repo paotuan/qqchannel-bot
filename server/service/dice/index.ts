@@ -1,6 +1,7 @@
 import type { IDiceRollContext } from './utils'
 import type { ICard } from '../../../interface/card/types'
 import type { IRollDecideContext } from '../config/helpers/decider'
+import type { CustomTextKeys } from '../../../interface/config'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -41,5 +42,10 @@ export abstract class BasePtDiceRoll {
   // 根据配置判断成功等级
   protected decide(context: IRollDecideContext) {
     return this.context.config.decideRoll(context)
+  }
+
+  // 自定义文案格式化
+  protected ct(key: CustomTextKeys, args: Record<string, any>) {
+    return this.context.config.formatCustomText(key, args)
   }
 }
