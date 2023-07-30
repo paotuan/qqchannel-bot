@@ -361,13 +361,19 @@ export function getEmbedCustomText(): ICustomTextConfig {
   const s = (text: string) => [{ text, weight: 1 }]
   const texts: Record<CustomTextKeys, ICustomTextItem[]> = {
     'roll.start': s('{{用户名}} 🎲 {{描述}}'),
-    'roll.inline.first': s('先是 🎲'),
+    'roll.inline.first': s('先是 🎲 '),
+    'roll.inline.middle': s('然后 🎲 '),
+    'roll.inline.last': s('最后 🎲 '),
+    'roll.result': s('{{掷骰输出}}'),
+    'roll.result.quiet': s('{{掷骰表达式}} = {{掷骰结果}}'),
+    'roll.hidden': s('{{用户名}} 在帷幕后面偷偷地 🎲 {{描述}}，猜猜结果是什么'),
     'test.worst': s(' 大失败'),
     'test.best': s(' 大成功'),
     'test.fail': s(' / {{目标值}} 失败'),
     'test.exsuccess': s(' / {{目标值}} 成功'),
     'test.hardsuccess': s(' / {{目标值}} 成功'),
     'test.success': s(' / {{目标值}} 成功'),
+    'roll.vs.prompt': s('> 回复本条消息以进行对抗')
   }
   return { id: 'default', name: '默认文案', texts }
 }

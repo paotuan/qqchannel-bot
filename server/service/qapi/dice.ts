@@ -75,7 +75,7 @@ export class DiceManager {
       const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
       if (!channel) return true // channel 信息不存在
       if (roll instanceof StandardDiceRoll && roll.hidden) { // 处理暗骰
-        const channelMsg = `${username} 在帷幕后面偷偷地 🎲 ${roll.description}，猜猜结果是什么`
+        const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
         channel.sendMessage({ content: channelMsg, msg_id: msg.id })
         const user = this.api.guilds.findUser(msg.author.id, msg.guild_id)
         if (!user) return true // 用户信息不存在

@@ -71,12 +71,18 @@ export type ICustomTextHandler = (env: Record<string, any>) => string
 export type CustomTextKeys =
   | 'roll.start'
   | 'roll.inline.first'
+  | 'roll.inline.middle'
+  | 'roll.inline.last'
+  | 'roll.result'
+  | 'roll.result.quiet'
+  | 'roll.hidden'
   | 'test.worst'
   | 'test.best'
   | 'test.fail'
   | 'test.exsuccess'
   | 'test.hardsuccess'
   | 'test.success'
+  | 'roll.vs.prompt'
 
 export interface ICustomTextConfig {
   id: string // 短 id

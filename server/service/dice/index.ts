@@ -46,7 +46,7 @@ export abstract class BasePtDiceRoll {
   }
 
   // 自定义文案格式化
-  protected t(key: CustomTextKeys, args: Record<string, any>) {
+  /*protected */t(key: CustomTextKeys, args: Record<string, any> = {}) {
     return this.context.config.formatCustomText(key, { ...this._commonTArgs, ...args }, this)
   }
 

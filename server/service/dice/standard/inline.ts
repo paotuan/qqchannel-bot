@@ -29,10 +29,9 @@ function initClass() {
     }
 
     override get output() {
-      const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
       const roll = this.diceRoll!
       // inline roll 通常只用于中间结果，不参与检定，只回显 description
-      return `${descriptionStr} ${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`.trim()
+      return `${this.description.trim()} ${this.t(this.quiet ? 'roll.result.quiet' : 'roll.result', this.getFormatArgs(roll))}`.trim()
     }
 
     override applyToCard() {

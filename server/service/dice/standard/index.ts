@@ -125,32 +125,31 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
-    // 第一行
-    const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
-    const headLine = `${this.context.username} 🎲${descriptionStr}`
+    // 第一行 (Maca 🎲 侦察)
+    const headLine = this.t('roll.start', { 描述: this.description })
     // 是否有中间骰
     const inlineRollLines = []
     if (this.hasInlineRolls && !this.quiet) {
       const inlineLines = this.inlineRolls.map((roll, i) => {
-        return `${i === 0 ? '先是 🎲' : '然后 🎲' } ${roll.output}`
+        return this.t(i === 0 ? 'roll.inline.first' : 'roll.inline.middle') + roll.output // 中间骰暂不提供 roll 作为 args，因为本身要和 inlineRoll.output 拼接
       })
-      inlineRollLines.push(...inlineLines, '最后 🎲')
+      inlineRollLines.push(...inlineLines, this.t('roll.inline.last'))
     }
     // 普通骰 [多轮掷骰][组合检定结果]
     const rollLines = this.rolls.map((rollResult) => {
       const roll = rollResult.roll
       // 掷骰过程
-      const lines = [`${this.quiet ? `${roll.notation} = ${roll.total}` : roll.output}`]
+      const lines = [this.t(this.quiet ? 'roll.result.quiet' : 'roll.result', this.getFormatArgs(roll))]
       // 拼接检定结果
       if (rollResult.tests.length === 1) {
         // 单条描述或技能检定，直接拼在后面
         const { tests: [test] } = rollResult
-        const testResult = this.ts(test.result?.level, this.getRollResultFormatArgs(roll, test))
+        const testResult = this.ts(test.result?.level, this.getFormatArgs(roll, test))
         lines[0] += testResult
       } else {
         // 组合技能检定，回显技能名，且过滤掉没有检定的行，减少冗余信息
         rollResult.tests.forEach(test => {
-          const testResult = this.ts(test.result?.level, this.getRollResultFormatArgs(roll, test))
+          const testResult = this.ts(test.result?.level, this.getFormatArgs(roll, test))
           if (testResult) {
             lines.push(`${test.skill} ${roll.total}${testResult}`)
           }
@@ -164,7 +163,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       // 没有多轮投骰，将两个部分首位相连
       const lastLine = lines[lines.length - 1]
       const [first, ...rest] = rollLines[0]
-      lines[lines.length - 1] = `${lastLine} ${first}`
+      lines[lines.length - 1] = `${lastLine.trim()} ${first}` // trim 以避免可能重复的空格
       lines.push(...rest)
     } else {
       // 有多轮投骰，就简单按行显示
@@ -172,7 +171,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     }
     // 判断是否需要对抗标记
     if (this.vsFlag && this.eligibleForOpposedRoll) {
-      lines.push('> 回复本条消息以进行对抗')
+      lines.push(this.t('roll.vs.prompt'))
     }
     return lines.map(line => line.trim()).join('\n')
   }
@@ -183,11 +182,11 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   // 技能检定格式化可提供参数
-  private getRollResultFormatArgs(roll: DiceRoll, test: IRollResult['tests'][number]) {
+  protected getFormatArgs(roll: DiceRoll, test?: IRollResult['tests'][number]) {
     return {
       原始指令: this.rawExpression,
-      描述: test.skill,
-      目标值: test.cardEntry?.value,
+      描述: test?.skill,
+      目标值: test?.cardEntry?.value,
       掷骰结果: roll.total,
       掷骰表达式: roll.notation,
       掷骰输出: roll.output

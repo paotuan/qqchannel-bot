@@ -19,7 +19,7 @@ export function renderCustomText(customTextMap: CustomTextMap, key: CustomTextKe
     }
   } else {
     const replyItem = randomReplyItem(processor)
-    return render(replyItem.text, args)
+    return render(replyItem.text, args, undefined, { escape: value => value })
   }
 }
 
