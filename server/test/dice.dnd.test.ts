@@ -94,7 +94,7 @@ describe('已关联DND人物卡', () => {
     const card = new DndCard(getCardProto())
     const context = createContext(card)
     const roller = createDiceRoll('ds', context)
-    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [12] = 12 ≥ 10 成功')
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [12] = 12 / 10 成功')
     roller.applyToCard()
     expect(card.data.meta.deathSaving.success).toBe(1)
   })
@@ -104,7 +104,7 @@ describe('已关联DND人物卡', () => {
     const card = new DndCard(getCardProto())
     const context = createContext(card)
     const roller = createDiceRoll('ds', context)
-    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [2] = 2 ＜ 10 失败')
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [2] = 2 / 10 失败')
     roller.applyToCard()
     expect(card.data.meta.deathSaving.failure).toBe(1)
     NumberGenerator.generator.engine = { next: () => 11 }

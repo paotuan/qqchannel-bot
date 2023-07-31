@@ -80,32 +80,51 @@ export class EnDiceRoll extends BasePtDiceRoll {
   override get output() {
     // 不支持的人物卡
     if (this.isCardUnsupported) {
-      return `${this.context.username} 当前的人物卡类型不支持成长检定`
+      return this.t('roll.en.empty')
     }
     // 列出技能模式
     if (this.listMode) {
       if (this.allSkillsCanEn.length > 0) {
-        return `${this.context.username} 当前可成长的技能：\n${this.allSkillsCanEn.join('、')}`
+        return this.t('roll.en.list', { 描述: this.allSkillsCanEn.join('、') })
       } else {
-        return `${this.context.username} 当前暂无可成长的技能`
+        return this.t('roll.en.empty')
       }
     }
     // 成长模式
     const skillsActualGrowth = Object.keys(this.skill2Growth)
     if (skillsActualGrowth.length === 0) {
-      return `${this.context.username} 当前无法技能成长`
+      return this.t('roll.en.empty')
     } else {
-      const lines = [`${this.context.username} 🎲 技能成长：`]
+      const lines: string[] = []
       skillsActualGrowth.forEach(skill => {
         const result = this.skill2Growth[skill]
-        const firstTotal = result.firstRoll.total
-        const firstDesc = result.canGrowth ? (firstTotal > 95 ? '成功' : `> ${result.targetValue} 成功`) : `≤ ${result.targetValue} 失败`
-        lines.push(`🎲 ${skill} d% = ${firstTotal} ${firstDesc}`)
+        const firstArgs = this.getFormatArgs(skill, result.firstRoll, result.targetValue)
+        const firstStart = this.t('roll.start', firstArgs)
+        const firstResult = this.t('roll.result.quiet', firstArgs)
+        const firstTestResult = result.canGrowth ? (result.firstRoll.total > 95 ? '大成功' : '成功') : '失败'
+        const firstTestResultDesc = this.ts(firstTestResult, firstArgs)
+        lines.push(`${firstStart} ${firstResult}${firstTestResultDesc}`)
         if (result.canGrowth) {
-          lines.push(`🎲 ${skill}成长 d10 = ${result.secondRoll!.total}`)
+          const secondArgs = this.getFormatArgs(`${skill}成长`, result.secondRoll!)
+          const secondStart = this.t('roll.start', secondArgs)
+          const secondResult = this.t('roll.result.quiet', secondArgs)
+          lines.push(`${secondStart} ${secondResult}`)
         }
       })
       return lines.join('\n')
+    }
+  }
+
+  // 技能检定格式化可提供参数
+  private getFormatArgs(skill: string, roll: DiceRoll, targetValue?: number) {
+    return {
+      原始指令: this.rawExpression,
+      描述: skill,
+      目标值: targetValue,
+      掷骰结果: roll.total,
+      掷骰表达式: roll.notation,
+      掷骰输出: roll.output,
+      en: true
     }
   }
 

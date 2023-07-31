@@ -40,7 +40,23 @@ export class RiDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
-    return this.rolls.map(item => `${item.username || item.id} 🎲 先攻 ${item.roll.output}`).join('\n')
+    return this.rolls.map(item => {
+      const args = {
+        // ri 不一定是自己，且要区分玩家与 npc
+        用户名: item.username || item.id,
+        人物卡名: this.selfCard?.name ?? (item.username || item.id),
+        at用户: getRiName(item.type, item.id),
+        原始指令: this.rawExpression,
+        描述: '先攻',
+        掷骰结果: item.roll.total,
+        掷骰表达式: item.roll.notation,
+        掷骰输出: item.roll.output,
+        ri: true
+      }
+      const head = this.t('roll.start', args)
+      const desc = this.t('roll.result', args)
+      return `${head} ${desc}`
+    }).join('\n')
   }
 
   // ri 是走缓存，不走人物卡，不走 applyToCard 逻辑，自己处理了
@@ -125,11 +141,11 @@ export class RiListDiceRoll extends BasePtDiceRoll {
 
   override get output() {
     if (!this.riList) {
-      return '私信场景不支持先攻列表'
+      return this.t('roll.ri.unsupported')
     }
     if (this.delList.length > 0) {
       const charaList = this.delList.map(item => getRiName(item.type, item.id))
-      return `${this.context.username} 删除先攻：${charaList.join('，')}`
+      return this.t('roll.ri.del', { 描述: charaList.join('，') })
     } else {
       // 显示先攻列表
       const descList = this.riList
@@ -140,7 +156,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
         .map((entry, i) => `${i + 1}. ${getRiName(entry.type, entry.id)} 🎲 ${isNaN(entry.seq) ? '--' : entry.seq}${isNaN(entry.seq2) ? '' : `(${entry.seq2})`}`)
       const lines = ['当前先攻列表：', ...descList]
       if (this.clear) {
-        lines.push('*先攻列表已清空')
+        lines.push(this.t('roll.ri.clear'))
       }
       return lines.join('\n')
     }
@@ -156,5 +172,5 @@ function compareSeq(a: number, b: number) {
 }
 
 function getRiName(type: 'npc' | 'actor', id: string) {
-  return type === 'npc' ? id : `<@!${id}>`
+  return type === 'npc' || id === 'system' ? id : `<@!${id}>`
 }

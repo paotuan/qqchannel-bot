@@ -88,17 +88,17 @@ describe('已关联COC人物卡', () => {
 
   test('coc理智检定 默认骰', () => {
     const roller = createDiceRoll('sc', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
+    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
   })
 
   test('coc理智检定', () => {
     const roller = createDiceRoll('sc 0/d10', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
+    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
   })
 
   test('coc理智检定 inline 嵌套', () => {
     const roller = createDiceRoll('sc[[1d10]]/[[$1+1]]', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 30 成功\nMaca 🎲 理智损失 2: 2 = 2')
+    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 2: 2 = 2')
   })
 
   test('coc成长检定 列出', () => {
@@ -114,12 +114,12 @@ describe('已关联COC人物卡', () => {
     const initRoll = createDiceRoll('侦查', context)
     initRoll.applyToCard()
     const roller = createDiceRoll('en', context)
-    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 侦查 d% = 2 ≤ 40 失败')
+    expect(roller.output).toBe('Maca 🎲 侦查 d% = 2 / 40 失败')
   })
 
   test('coc成长检定 指定技能', () => {
     const roller = createDiceRoll('en图书馆', context)
-    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 图书馆 d% = 2 ≤ 70 失败')
+    expect(roller.output).toBe('Maca 🎲 图书馆 d% = 2 / 70 失败')
   })
 
   test('st 展示指定技能', () => {

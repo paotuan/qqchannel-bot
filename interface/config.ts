@@ -84,6 +84,14 @@ export type CustomTextKeys =
   | 'test.success'
   | 'roll.vs.prompt'
   | 'roll.vs.result'
+  | 'roll.ds.best'
+  | 'roll.ds.worst'
+  | 'roll.en.empty'
+  | 'roll.en.list'
+  | 'roll.ri.unsupported'
+  | 'roll.ri.del'
+  | 'roll.ri.clear'
+  | 'roll.sc.unsupported'
 
 export interface ICustomTextConfig {
   id: string // 短 id

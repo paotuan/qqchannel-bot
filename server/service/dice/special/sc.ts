@@ -13,6 +13,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   private tempValue = NaN
 
   private rollSc?: DiceRoll
+  private rollScTargetValue?: number
   private rollScResult?: IRollDecideResult
   private rollLoss?: DiceRoll
 
@@ -34,10 +35,13 @@ export class ScDiceRoll extends BasePtDiceRoll {
       scEntry = { input: SC_CARD_ENTRY_NAME, key: SC_CARD_ENTRY_NAME, value: this.tempValue, isTemp: true }
     }
     if (scEntry) {
-      this.rollSc.total
-      // todo decider 传入 acceptSuccessLevels
+      this.rollScTargetValue = scEntry.value
       this.rollScResult = this.decide({ baseValue: scEntry.value, targetValue: scEntry.value, roll: this.rollSc.total })
       if (this.rollScResult) {
+        // sc 成功就只有成功，不细分
+        if (this.rollScResult.success) {
+          this.rollScResult.level = '成功'
+        }
         if (this.rollScResult.level === '大失败') {
           const maxLoss = new DiceRoll(this.expression2).maxTotal
           this.rollLoss = new DiceRoll(String(maxLoss))
@@ -91,13 +95,29 @@ export class ScDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
-    const descriptionStr = this.description ? ' ' + this.description : '' // 避免 description 为空导致连续空格
-    const scRollValue = this.rollSc!.total
-    const resultDesc = this.rollScResult?.level ?? '……未指定理智值，成功了吗？' // todo
-    let line = `${this.context.username} 🎲${descriptionStr} d% = ${scRollValue} ${resultDesc}`
+    const firstArgs = this.getFormatArgs(this.rollSc!, this.description, this.rollScTargetValue)
+    const firstStart = this.t('roll.start', firstArgs).trim()
+    const firstResult = this.t('roll.result.quiet', firstArgs)
+    const firstTest = this.rollScResult ? this.ts(this.rollScResult.level, firstArgs) : this.t('roll.sc.unsupported', firstArgs)
+    let line = `${firstStart} ${firstResult}${firstTest}`
     if (!this.rollScResult) return line // 没有人物卡
-    line += `\n${this.context.username} 🎲 理智损失 ${this.rollLoss!.output}`
+    const secondArgs = this.getFormatArgs(this.rollLoss!, '理智损失')
+    const secondStart = this.t('roll.start', secondArgs).trim()
+    const secondResult = this.t('roll.result', secondArgs)
+    line += `\n${secondStart} ${secondResult}`
     return line
+  }
+
+  private getFormatArgs(roll: DiceRoll, skill: string, targetValue?: number) {
+    return {
+      原始指令: this.rawExpression,
+      描述: skill,
+      目标值: targetValue,
+      掷骰结果: roll.total,
+      掷骰表达式: roll.notation,
+      掷骰输出: roll.output,
+      sc: true
+    }
   }
 
   override applyToCard() {

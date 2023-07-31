@@ -16,20 +16,34 @@ export class DsDiceRoll extends BasePtDiceRoll {
     return this
   }
 
+  private get formatArgs() {
+    return {
+      原始指令: this.rawExpression,
+      描述: '死亡豁免',
+      目标值: 10,
+      掷骰结果: this.diceRoll.total,
+      掷骰表达式: this.diceRoll.notation,
+      掷骰输出: this.diceRoll.output,
+      ds: true // 以防万一特殊场景使用
+    }
+  }
+
   private get decideResult() {
     if (this.isBest) {
-      return '起死回生，HP+1'
+      return this.t('roll.ds.best', this.formatArgs)
     } else if (this.isWorst) {
-      return '二次失败'
+      return this.t('roll.ds.worst', this.formatArgs)
     } else if (this.isSuccess) {
-      return '≥ 10 成功'
+      return this.ts('成功', this.formatArgs)
     } else {
-      return '＜ 10 失败'
+      return this.ts('失败', this.formatArgs)
     }
   }
 
   override get output() {
-    return `${this.context.username} 🎲 死亡豁免 ${this.diceRoll.output} ${this.decideResult}`
+    const headLine = this.t('roll.start', this.formatArgs)
+    const output = this.t('roll.result', this.formatArgs)
+    return `${headLine} ${output}${this.decideResult}`
   }
 
   override applyToCard() {

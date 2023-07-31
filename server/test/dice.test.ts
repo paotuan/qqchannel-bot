@@ -193,12 +193,12 @@ describe('未关联人物卡', () => {
 
   test('coc成长检定 列出', () => {
     const roller = createDiceRoll('en list', context)
-    expect(roller.output).toBe('Maca 当前暂无可成长的技能')
+    expect(roller.output).toBe('Maca 当前暂无可成长的技能或不支持成长')
   })
 
   test('coc成长检定 临时值', () => {
     const roller = createDiceRoll('en图书馆60', context)
-    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 图书馆 d% = 2 ≤ 60 失败')
+    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 图书馆 d% = 2 / 60 失败')
   })
 
   test('先攻', () => {
