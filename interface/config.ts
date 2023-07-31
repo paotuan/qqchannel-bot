@@ -83,6 +83,7 @@ export type CustomTextKeys =
   | 'test.hardsuccess'
   | 'test.success'
   | 'roll.vs.prompt'
+  | 'roll.vs.result'
 
 export interface ICustomTextConfig {
   id: string // 短 id

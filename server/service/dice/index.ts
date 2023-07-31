@@ -61,7 +61,7 @@ export abstract class BasePtDiceRoll {
     return {
       用户名: this.context.username,
       人物卡名: this.selfCard?.name ?? this.context.username,
-      at用户: `<@!${this.context.userId}>`
+      at用户: this.context.userId === 'system' ? this.context.username : `<@!${this.context.userId}>`
     }
   }
 }

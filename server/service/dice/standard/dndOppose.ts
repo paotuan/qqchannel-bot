@@ -33,20 +33,21 @@ export class DndOpposedRoll extends DndDiceRoll {
     // 比大小
     const selfResult = this.getDataForOpposedRoll()
     const otherResult = other.getDataForOpposedRoll()
-    const selfSuccess = selfResult.value > otherResult.value ? 'success' : selfResult.value === otherResult.value ? 'draw' : 'fail'
-    const otherSuccess = selfResult.value > otherResult.value ? 'fail' : selfResult.value === otherResult.value ? 'draw' : 'success'
+    const selfSuccess = selfResult.掷骰结果 > otherResult.掷骰结果 ? 'win' : selfResult.掷骰结果 === otherResult.掷骰结果 ? 'draw' : 'lose'
+    const otherSuccess = selfResult.掷骰结果 > otherResult.掷骰结果 ? 'lose' : selfResult.掷骰结果 === otherResult.掷骰结果 ? 'draw' : 'win'
     // 组装结果
-    const icon = { success: '🟩', fail: '🟥', draw: '🟨' }
-    return [
-      icon[selfSuccess],
-      selfResult.username,
-      selfResult.skill,
-      selfResult.value,
-      '↔️',
-      otherResult.username,
-      otherResult.skill,
-      otherResult.value,
-      icon[otherSuccess]
-    ].join(' ')
+    const _otherArgs = Object.entries(otherResult).reduce((o, [k, v]) => Object.assign(o, { ['对方' + k]: v }), {})
+    const args = {
+      ...selfResult,
+      ..._otherArgs,
+      胜: selfSuccess === 'win',
+      负: selfSuccess === 'draw',
+      平: selfSuccess === 'lose',
+      对方胜: otherSuccess === 'win',
+      对方负: otherSuccess === 'draw',
+      对方平: otherSuccess === 'lose',
+      dnd: true
+    }
+    return this.t('roll.vs.result', args)
   }
 }

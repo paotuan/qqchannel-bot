@@ -65,10 +65,17 @@ export class DndDiceRoll extends StandardDiceRoll {
 
   // 用于对抗检定的数据
   /* protected */ getDataForOpposedRoll() {
+    const rollResult = this.rolls[0]
+    const test = rollResult.tests[0]
     return {
-      value: this.rolls[0].roll.total,
-      skill: this.rolls[0].tests[0]?.skill ?? '',
-      username: this.context.username
+      // 通用参数这里也要提供一下，因为对抗检定有[对方xxx]
+      用户名: this.context.username,
+      人物卡名: this.selfCard?.name ?? this.context.username,
+      at用户: this.context.userId === 'system' ? this.context.username : `<@!${this.context.userId}>`,
+      描述: test?.skill ?? '',
+      掷骰结果: rollResult.roll.total,
+      掷骰表达式: rollResult.roll.notation,
+      掷骰输出: rollResult.roll.output,
     }
   }
 }

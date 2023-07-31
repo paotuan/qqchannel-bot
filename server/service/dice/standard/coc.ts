@@ -68,7 +68,26 @@ export class CocDiceRoll extends StandardDiceRoll {
     // 组装对抗检定数据
     const decideResult = test.result!
     const entry = test.cardEntry! as ICocCardEntry
-    const baseValue = entry.baseValue
-    return { username: this.context.username, skill: entry.key, baseValue, level: decideResult.level, success: decideResult.success }
+    return {
+      // 通用参数这里也要提供一下，因为对抗检定有[对方xxx]
+      用户名: this.context.username,
+      人物卡名: this.selfCard?.name ?? this.context.username,
+      at用户: this.context.userId === 'system' ? this.context.username : `<@!${this.context.userId}>`,
+      描述: entry.key,
+      掷骰结果: rollResult.roll.total,
+      掷骰表达式: rollResult.roll.notation,
+      掷骰输出: rollResult.roll.output,
+      // 以下都是 coc 特有
+      技能值: entry.baseValue, // coc 特有的因为可能存在难度前缀导致目标值与技能值不同
+      目标值: entry.value, //entry.baseValue,
+      成功等级: decideResult.level,
+      成功: ['大成功', '极难成功', '困难成功', '成功'].includes(decideResult.level),
+      大成功: decideResult.level === '大成功',
+      极难成功: decideResult.level === '极难成功',
+      困难成功: decideResult.level === '困难成功',
+      常规成功: decideResult.level === '成功',
+      常规失败: decideResult.level === '失败',
+      大失败: decideResult.level === '大失败'
+    }
   }
 }

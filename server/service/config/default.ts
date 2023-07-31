@@ -373,7 +373,8 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'test.exsuccess': s(' / {{目标值}} 成功'),
     'test.hardsuccess': s(' / {{目标值}} 成功'),
     'test.success': s(' / {{目标值}} 成功'),
-    'roll.vs.prompt': s('> 回复本条消息以进行对抗')
+    'roll.vs.prompt': s('> 回复本条消息以进行对抗'),
+    'roll.vs.result': s('{{#胜}}🟩{{/胜}}{{#负}}🟥{{/负}}{{#平}}🟨{{/平}} {{用户名}} {{描述}}{{#coc}}({{技能值}}) {{成功等级}}{{/coc}}{{#dnd}} {{掷骰结果}}{{/dnd}} ↔️ {{对方用户名}} {{对方描述}}{{#coc}}({{对方技能值}}) {{对方成功等级}}{{/coc}}{{#dnd}} {{对方掷骰结果}}{{/dnd}} {{#对方胜}}🟩{{/对方胜}}{{#对方负}}🟥{{/对方负}}{{#对方平}}🟨{{/对方平}}'),
   }
   return { id: 'default', name: '默认文案', texts }
 }
