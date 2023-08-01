@@ -136,6 +136,15 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       oldDeciderReplies.push('\n')
     })
     _writeUpgradeBacklog(oldDeciderReplies.join('\n'), channelId)
+    // 新增 /help 自定义回复
+    const index = config.embedPlugin.customReply?.findIndex(item => item.id === 'help')
+    if (typeof index === 'number' && index < 0) {
+      const helpConfig = getEmbedCustomReply().find(item => item.id === 'help')
+      if (helpConfig) {
+        config.embedPlugin.customReply!.push(helpConfig)
+        config.customReplyIds.push({ id: `${embedPluginId}.help`, enabled: true })
+      }
+    }
     config.version = 21 // 1.5.0
   }
   return config as IChannelConfig
@@ -156,19 +165,6 @@ function getEmbedCustomReply(): ICustomReplyConfig[] {
         }
       ]
     },
-    // {
-    //   id: 'coccardrand',
-    //   name: 'COC 人物作成',
-    //   description: '使用 /coc 随机人物作成',
-    //   command: 'coc',
-    //   trigger: 'exact',
-    //   items: [
-    //     {
-    //       weight: 1,
-    //       reply: '{{at}}人物作成：\n力量[[3d6*5]] 体质[[3d6*5]] 体型[[(2d6+6)*5]] 敏捷[[3d6*5]] 外貌[[3d6*5]] 智力[[(2d6+6)*5]] 意志[[3d6*5]] 教育[[(2d6+6)*5]] 幸运[[3d6*5]]'
-    //     }
-    //   ]
-    // },
     {
       id: 'gacha',
       name: '简单抽卡',
@@ -206,7 +202,20 @@ function getEmbedCustomReply(): ICustomReplyConfig[] {
           reply: '{{content}}'
         }
       ]
-    }
+    },
+    {
+      id: 'help',
+      name: '帮助文档',
+      description: '使用 /help 查看帮助文档地址',
+      command: 'help',
+      trigger: 'exact',
+      items: [
+        {
+          weight: 1,
+          reply: '跑团IO机器人 {{version}}\n指令文档请移步网址: paotuan[点]io/dice'
+        }
+      ]
+    },
   ]
 }
 

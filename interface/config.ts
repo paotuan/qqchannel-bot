@@ -4,7 +4,7 @@ import type { ICard } from './card/types'
 
 export type UserRole = 'admin' | 'manager' | 'user'
 
-// region 自定义回复
+// region 自定义回复 todo 后续和自定义文本的变量名看齐
 export interface ICustomReplyEnv {
   botId: string
   guildId: string
@@ -13,6 +13,7 @@ export interface ICustomReplyEnv {
   nick: string
   at: string
   userRole: UserRole
+  version: string
 }
 
 export type CustomReplyHandler = (env: ICustomReplyEnv, matchGroup: Record<string, string>) => string | Promise<string>

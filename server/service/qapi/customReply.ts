@@ -5,6 +5,7 @@ import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
 import { convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
 import { ICustomReplyEnv } from '../../../interface/config'
+import { VERSION_NAME } from '../../../interface/version'
 
 export class CustomReplyManager {
   private readonly api: QApi
@@ -90,7 +91,7 @@ export class CustomReplyManager {
         })
       })
       const userRole = convertRoleIds(msg.member.roles)
-      const env: ICustomReplyEnv = { botId: this.api.appid, channelId: msg.channel_id, guildId: msg.guild_id, userId: msg.author.id, userRole, nick: username, at: `<@!${msg.author.id}>` }
+      const env: ICustomReplyEnv = { botId: this.api.appid, channelId: msg.channel_id, guildId: msg.guild_id, userId: msg.author.id, userRole, nick: username, at: `<@!${msg.author.id}>`, version: VERSION_NAME }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
       const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
