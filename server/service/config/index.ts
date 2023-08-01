@@ -72,7 +72,7 @@ export class ConfigManager {
             const str = fs.readFileSync(filename, 'utf8')
             const config = JSON.parse(str) as IChannelConfig
             const name = filename.match(/config\/(.+)\.json$/)![1]
-            this.configMap[name] = new ChannelConfig(handleUpgrade(config), this.plugin)
+            this.configMap[name] = new ChannelConfig(handleUpgrade(config, name), this.plugin)
           } catch (e) {
             console.log(`[Config] ${filename} 解析失败`, e)
           }

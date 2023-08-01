@@ -1,3 +1,4 @@
+import * as fs from 'fs'
 import type {
   IAliasRollConfig,
   IChannelConfig,
@@ -46,7 +47,7 @@ export function getInitialDefaultConfig(): IChannelConfig {
   }
 }
 
-export function handleUpgrade(config: IChannelConfig) {
+export function handleUpgrade(config: IChannelConfig, channelId: string) {
   if (config.version === 1) {
     const rollDeciders = getEmbedRollDecider()
     config.embedPlugin.rollDecider = rollDeciders
@@ -125,6 +126,16 @@ export function handleUpgrade(config: IChannelConfig) {
     const embedText = getEmbedCustomText()
     config.embedPlugin.customText = [embedText]
     // 由于默认的文案也有所改动，就不迁移了，需要用户升级后自己重新设置
+    // 但我们可以把用户旧的数据备份一下
+    const oldDeciderReplies: string[] = []
+    oldDeciderConfig.forEach(decider => {
+      oldDeciderReplies.push((decider.rules as any).worst.reply)
+      oldDeciderReplies.push((decider.rules as any).best.reply)
+      oldDeciderReplies.push((decider.rules as any).fail.reply)
+      oldDeciderReplies.push((decider.rules as any).success.reply)
+      oldDeciderReplies.push('\n')
+    })
+    _writeUpgradeBacklog(oldDeciderReplies.join('\n'), channelId)
     config.version = 21 // 1.5.0
   }
   return config as IChannelConfig
@@ -402,4 +413,18 @@ function getSpecialDiceConfig(): ISpecialDiceConfig {
     opposeDice: { enabled: true },
     inMessageDice: { enabled: true } // 暂不处理
   }
+}
+
+function _writeUpgradeBacklog(content: string, channelId: string) {
+  const fileContent = '本文件是跑团IO机器人在版本更新时自动生成的备份文件，如你确认不需要该文件，可以安全地删除。\n\n' + content
+  const now = new Date()
+  const today = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`
+  const filename = `paotuan-bot-backup-${today}-${channelId}.txt`
+  fs.writeFile(`./${filename}`, fileContent, e => {
+    if (e) {
+      console.error('[Config] 版本更新，生成备份文件失败', e)
+    } else {
+      console.error('[Config] 版本更新，已自动生成备份文件', filename)
+    }
+  })
 }
