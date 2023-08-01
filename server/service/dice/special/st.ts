@@ -16,6 +16,7 @@ export class StDiceRoll extends BasePtDiceRoll {
   private targetUserCard?: ICard
   private readonly rolls: { name: string, roll: DiceRoll }[] = []
   private readonly shows: string[] = []
+  private showSummary = false
 
   override roll() {
     this.exp = this.rawExpression.slice(2).trim()
@@ -88,35 +89,57 @@ export class StDiceRoll extends BasePtDiceRoll {
       this.shows.push(...segments.map(name => this.targetUserCard!.getEntryDisplay(name)))
     } else {
       // 不指定展示哪个，就默认展示全部
-      this.shows.push('\n' + this.targetUserCard!.getSummary())
+      this.shows.push(this.targetUserCard!.getSummary())
+      this.showSummary = true
     }
   }
 
   override get output() {
     if (!this.targetUserCard) {
-      return `${at(this.targetUserId)}没有关联人物卡`
+      return this.t('card.empty', this.formatArgs)
     }
-    const cardName = this.targetUserCard.data.name
     if (this.show) {
       // 展示
-      const list = this.shows.join(' ')
-      return `${at(this.targetUserId)}(${cardName}):${this.shows.length > 1 ? '\n' : ' '}${list}`
+      return this.t('roll.st.show', {
+        ...this.formatArgs,
+        条目列表: this.shows.map((条目, i) => ({ 条目, last: i === this.shows.length - 1 })),
+        条目唯一: this.shows.length === 1,
+        条目: this.shows[0],
+        展示全部: this.showSummary
+      })
     } else {
       // 设置
       // 权限判断
       if (!this.hasEditPermission) {
-        return `${this.context.username} 没有修改人物卡的权限`
+        return this.t('card.nopermission', this.formatArgs)
       }
-      // 如果只设置一个属性，就显示详细信息，否则就简略吧
       if (this.rolls.length === 0) {
-        return `${at(this.context.userId)}请指定想要设置的属性名与属性值`
-      } else if (this.rolls.length === 1) {
-        const entry = this.rolls[0]
-        return `${at(this.targetUserId)}(${cardName}) 设置 ${entry.name} ${entry.roll.output}`
+        return this.t('roll.st.prompt', this.formatArgs)
       } else {
-        const list = this.rolls.map(item => `${item.name}=${item.roll.total}`).join(' ')
-        return `${at(this.targetUserId)}(${cardName}) 设置:\n${list}`
+        const 条目列表 = this.rolls.map((item, i) => {
+          const rollOutput = this.t('roll.result', {
+            ...this.formatArgs,
+            掷骰结果: item.roll.total,
+            掷骰表达式: item.roll.notation,
+            掷骰输出: item.roll.output
+          })
+          return { 条目: `${item.name} ${rollOutput}`, last: i === this.rolls.length - 1 }
+        })
+        return this.t('roll.st.set', {
+          ...this.formatArgs,
+          条目列表,
+          条目唯一: this.rolls.length === 1,
+          条目: 条目列表[0],
+        })
       }
+    }
+  }
+
+  private get formatArgs() {
+    return {
+      目标人物卡名: this.targetUserCard?.name,
+      目标用户: `<@!${this.targetUserId}>`,
+      st: true
     }
   }
 
@@ -133,8 +156,4 @@ export class StDiceRoll extends BasePtDiceRoll {
     })
     return modified ? [this.targetUserCard] : []
   }
-}
-
-function at(userId: string) {
-  return `<@!${userId}>`
 }

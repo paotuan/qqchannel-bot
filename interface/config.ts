@@ -92,6 +92,11 @@ export type CustomTextKeys =
   | 'roll.ri.del'
   | 'roll.ri.clear'
   | 'roll.sc.unsupported'
+  | 'card.empty'
+  | 'card.nopermission'
+  | 'roll.st.prompt'
+  | 'roll.st.show'
+  | 'roll.st.set'
 
 export interface ICustomTextConfig {
   id: string // 短 id

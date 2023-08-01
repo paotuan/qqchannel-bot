@@ -124,7 +124,7 @@ describe('已关联COC人物卡', () => {
 
   test('st 展示指定技能', () => {
     const roller = createDiceRoll('st show 侦查', context)
-    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 侦查:40`)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n侦查:40`)
   })
 
   test('st 未指定', () => {
@@ -134,12 +134,12 @@ describe('已关联COC人物卡', () => {
 
   test('st 修改', () => {
     const roller = createDiceRoll('st 侦查+10', context)
-    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置 侦查 40+10: 40+10 = 50`)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n侦查 40+10: 40+10 = 50`)
   })
 
   test('st 批量新增', () => {
     const roller = createDiceRoll('st 拉拉20，打架30', context)
-    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n拉拉=20 打架=30`)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n拉拉 20: 20 = 20\n打架 30: 30 = 30`)
   })
 
   test('coc 先攻默认骰', () => {

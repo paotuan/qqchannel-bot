@@ -144,19 +144,19 @@ describe('已关联DND人物卡', () => {
 
   test('st属性', () => {
     const roller = createDiceRoll('st show 力量', context)
-    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 力量*:17`)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n力量*:17`)
   })
 
   test('st技能应展示总值和修正值', () => {
     const roller = createDiceRoll('st show 运动', context)
-    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼): 运动*:5(0)`)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n运动*:5(0)`)
   })
 
   test('st修改技能应重定向到修正值', () => {
     const card = new DndCard(getCardProto())
     const context = createContext(card)
     const roller = createDiceRoll('st 运动+1', context)
-    expect(roller.output).toBe('<@!__mock_user_id__>(铃木翼) 设置 运动修正 0+1: 0+1 = 1')
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n运动修正 0+1: 0+1 = 1`)
     roller.applyToCard()
     expect(card.data.skills.运动).toBe(1)
   })
