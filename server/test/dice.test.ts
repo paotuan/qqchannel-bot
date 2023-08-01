@@ -188,7 +188,7 @@ describe('未关联人物卡', () => {
 
   test('coc理智检定 临时值', () => {
     const roller = createDiceRoll('sc0/1d10 60', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 2 ≤ 60 成功\nMaca 🎲 理智损失 0: 0 = 0')
+    expect(roller.output).toBe('Maca 🎲 d% = 2 / 60 成功\nMaca 🎲 理智损失 0: 0 = 0')
   })
 
   test('coc成长检定 列出', () => {
@@ -198,7 +198,7 @@ describe('未关联人物卡', () => {
 
   test('coc成长检定 临时值', () => {
     const roller = createDiceRoll('en图书馆60', context)
-    expect(roller.output).toBe('Maca 🎲 技能成长：\n🎲 图书馆 d% = 2 / 60 失败')
+    expect(roller.output).toBe('Maca 🎲 图书馆 d% = 2 / 60 失败')
   })
 
   test('先攻', () => {

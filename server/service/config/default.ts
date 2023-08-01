@@ -378,11 +378,11 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.ds.best': s(' 起死回生，HP+1'),
     'roll.ds.worst': s(' 二次失败'),
     'roll.en.empty': s('{{用户名}} 当前暂无可成长的技能或不支持成长'),
-    'roll.en.list': s('{{用户名}} 当前可成长的技能：\n{{描述}}'),
+    'roll.en.list': s('{{用户名}} 当前可成长的技能：\n{{#技能列表}}{{技能名}}{{^last}}、{{/last}}{{/技能列表}}'),
     'roll.ri.unsupported': s('当前场景不支持先攻列表'),
-    'roll.ri.del': s('{{用户名}} 删除先攻：{{描述}}'),
+    'roll.ri.del': s('{{用户名}} 删除先攻：{{#人物列表}}{{人物名}}{{^last}}、{{/last}}{{/人物列表}}'),
     'roll.ri.clear': s('*先攻列表已清空'),
-    'roll.sc.unsupported': s('……未指定理智值，成功了吗？')
+    'roll.sc.unsupported': s(' ……未指定理智值，成功了吗？')
   }
   return { id: 'default', name: '默认文案', texts }
 }

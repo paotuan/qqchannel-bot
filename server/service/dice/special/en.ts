@@ -85,7 +85,11 @@ export class EnDiceRoll extends BasePtDiceRoll {
     // 列出技能模式
     if (this.listMode) {
       if (this.allSkillsCanEn.length > 0) {
-        return this.t('roll.en.list', { 描述: this.allSkillsCanEn.join('、') })
+        return this.t('roll.en.list', {
+          技能列表: this.allSkillsCanEn.map((技能名, i) => ({ 技能名, last: i === this.allSkillsCanEn.length - 1 })),
+          技能唯一: this.allSkillsCanEn.length === 1,
+          技能名: this.allSkillsCanEn[0]
+        })
       } else {
         return this.t('roll.en.empty')
       }

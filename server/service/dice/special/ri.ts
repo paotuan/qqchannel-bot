@@ -145,7 +145,11 @@ export class RiListDiceRoll extends BasePtDiceRoll {
     }
     if (this.delList.length > 0) {
       const charaList = this.delList.map(item => getRiName(item.type, item.id))
-      return this.t('roll.ri.del', { 描述: charaList.join('，') })
+      return this.t('roll.ri.del', {
+        人物列表: charaList.map((人物名, i) => ({ 人物名, last: i === charaList.length - 1 })),
+        人物唯一: charaList.length === 0,
+        人物名: charaList[0]
+      })
     } else {
       // 显示先攻列表
       const descList = this.riList
