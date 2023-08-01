@@ -90,4 +90,15 @@ export class CocDiceRoll extends StandardDiceRoll {
       大失败: decideResult.level === '大失败'
     }
   }
+
+  protected override getFormatArgs(roll: DiceRoll, test?: any) {
+    const _test = test as ICocCardEntry | undefined
+    return {
+      ...super.getFormatArgs(roll, test),
+      // coc 额外追加是否是 困难/极难 前缀
+      困难前缀: _test?.difficulty === 'hard',
+      极难前缀: _test?.difficulty === 'ex',
+      无前缀: _test?.difficulty === 'normal'
+    }
+  }
 }
