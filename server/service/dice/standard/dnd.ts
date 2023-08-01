@@ -51,7 +51,7 @@ export class DndDiceRoll extends StandardDiceRoll {
           result = this.decide({ baseValue: dc, targetValue: dc, roll: roll.total })
         }
         // 4. 加入结果
-        this.rolls.push({ roll, tests: [{ skill, cardEntry: entry, result }] }) // 这里传的 entry 目前不重要
+        this.rolls.push({ roll, tests: [{ skill, targetValue: dc, cardEntry: entry, result }] }) // 这里传的 entry 目前不重要
       })
     }
     return this

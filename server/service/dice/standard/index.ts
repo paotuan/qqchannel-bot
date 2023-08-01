@@ -10,6 +10,7 @@ interface IRollResult {
   tests: {
     skill: string
     // tempValue: number // NaN 代表无 // 似乎没用
+    targetValue?: number // 目标值。coc：cardEntry.value / dnd: dc
     cardEntry?: ICardEntry
     result?: IRollDecideResult
   }[]
@@ -51,7 +52,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
           if (cardEntry) {
             result = this.decide({ baseValue: cardEntry.value, targetValue: cardEntry.value, roll: roll.total })
           }
-          return { skill, cardEntry, result }
+          return { skill, targetValue: cardEntry?.value, cardEntry, result }
         })
       })
     }
@@ -186,7 +187,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     return {
       原始指令: this.rawExpression,
       描述: test?.skill,
-      目标值: test?.cardEntry?.value,
+      目标值: test?.targetValue,
       掷骰结果: roll.total,
       掷骰表达式: roll.notation,
       掷骰输出: roll.output
