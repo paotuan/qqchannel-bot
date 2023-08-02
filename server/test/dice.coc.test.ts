@@ -7,11 +7,7 @@ import { CocCard, ICocCardData } from '../../interface/card/coc'
 import { VERSION_CODE } from '../../interface/version'
 
 // use a custom engine
-NumberGenerator.generator.engine = {
-  next() {
-    return 1
-  }
-}
+const resetRandomEngine = () => (NumberGenerator.generator.engine = { next: () => 1 })
 
 const MockChannelId = '__mock_channel_id__'
 const MockUserId = '__mock_user_id__'
@@ -28,8 +24,14 @@ function createContext(card: ICard): IDiceRollContext {
 }
 
 describe('已关联COC人物卡', () => {
-  // 生成一个通用的只读 config，用于大部分的情况
-  const context = createContext(new CocCard(getCardProto()))
+  let card: CocCard
+  let context: IDiceRollContext
+
+  beforeEach(() => {
+    card = new CocCard(getCardProto())
+    context = createContext(card)
+    resetRandomEngine()
+  })
 
   test('检定', () => {
     const roller = createDiceRoll('d100 侦察', context)
@@ -102,7 +104,6 @@ describe('已关联COC人物卡', () => {
   })
 
   test('coc成长检定 列出', () => {
-    const context = createContext(new CocCard(getCardProto()))
     const initRoll = createDiceRoll('侦查', context)
     initRoll.applyToCard()
     const roller = createDiceRoll('enl', context)
@@ -110,7 +111,6 @@ describe('已关联COC人物卡', () => {
   })
 
   test('coc成长检定 全部', () => {
-    const context = createContext(new CocCard(getCardProto()))
     const initRoll = createDiceRoll('侦查', context)
     initRoll.applyToCard()
     const roller = createDiceRoll('en', context)

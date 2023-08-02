@@ -7,11 +7,7 @@ import { DndCard, IDndCardData } from '../../interface/card/dnd'
 import { VERSION_CODE } from '../../interface/version'
 
 // use a custom engine
-NumberGenerator.generator.engine = {
-  next() {
-    return 11
-  }
-}
+const resetRandomEngine = () => (NumberGenerator.generator.engine = { next: () => 11 })
 
 const MockChannelId = '__mock_channel_id__'
 const MockUserId = '__mock_user_id__'
@@ -32,8 +28,14 @@ function createContext(card: ICard): IDiceRollContext {
 }
 
 describe('已关联DND人物卡', () => {
-  // 生成一个通用的只读 config，用于大部分的情况
-  const context = createContext(new DndCard(getCardProto()))
+  let card: DndCard
+  let context: IDiceRollContext
+
+  beforeEach(() => {
+    card = new DndCard(getCardProto())
+    context = createContext(card)
+    resetRandomEngine()
+  })
 
   test('属性检定', () => {
     const roller = createDiceRoll('力量', context)
@@ -91,8 +93,6 @@ describe('已关联DND人物卡', () => {
   })
 
   test('死亡豁免', () => {
-    const card = new DndCard(getCardProto())
-    const context = createContext(card)
     const roller = createDiceRoll('ds', context)
     expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [12] = 12 / 10 成功')
     roller.applyToCard()
@@ -101,40 +101,31 @@ describe('已关联DND人物卡', () => {
 
   test('死亡豁免失败', () => {
     NumberGenerator.generator.engine = { next: () => 1 }
-    const card = new DndCard(getCardProto())
-    const context = createContext(card)
     const roller = createDiceRoll('ds', context)
     expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [2] = 2 / 10 失败')
     roller.applyToCard()
     expect(card.data.meta.deathSaving.failure).toBe(1)
-    NumberGenerator.generator.engine = { next: () => 11 }
   })
 
   test('死亡豁免大失败', () => {
     NumberGenerator.generator.engine = { next: () => 0 }
-    const card = new DndCard(getCardProto())
-    const context = createContext(card)
     const roller = createDiceRoll('ds', context)
     expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [1] = 1 二次失败')
     roller.applyToCard()
     expect(card.data.meta.deathSaving.failure).toBe(2)
-    NumberGenerator.generator.engine = { next: () => 11 }
   })
 
   test('死亡豁免大成功', () => {
     NumberGenerator.generator.engine = { next: () => 19 }
-    const card = new DndCard(getCardProto())
     card.HP = 0
     card.data.meta.deathSaving.success = 2
     card.data.meta.deathSaving.failure = 2
-    const context = createContext(card)
     const roller = createDiceRoll('ds', context)
     expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [20] = 20 起死回生，HP+1')
     roller.applyToCard()
     expect(card.HP).toBe(1)
     expect(card.data.meta.deathSaving.success).toBe(0)
     expect(card.data.meta.deathSaving.failure).toBe(0)
-    NumberGenerator.generator.engine = { next: () => 11 }
   })
 
   test('dnd先攻默认骰', () => {
@@ -153,8 +144,6 @@ describe('已关联DND人物卡', () => {
   })
 
   test('st修改技能应重定向到修正值', () => {
-    const card = new DndCard(getCardProto())
-    const context = createContext(card)
     const roller = createDiceRoll('st 运动+1', context)
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n运动修正 0+1: 0+1 = 1`)
     roller.applyToCard()
