@@ -94,24 +94,24 @@ describe('已关联DND人物卡', () => {
 
   test('死亡豁免', () => {
     const roller = createDiceRoll('ds', context)
-    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [12] = 12 / 10 成功')
     roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [12] = 12 / 10 成功')
     expect(card.data.meta.deathSaving.success).toBe(1)
   })
 
   test('死亡豁免失败', () => {
     NumberGenerator.generator.engine = { next: () => 1 }
     const roller = createDiceRoll('ds', context)
-    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [2] = 2 / 10 失败')
     roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [2] = 2 / 10 失败')
     expect(card.data.meta.deathSaving.failure).toBe(1)
   })
 
   test('死亡豁免大失败', () => {
     NumberGenerator.generator.engine = { next: () => 0 }
     const roller = createDiceRoll('ds', context)
-    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [1] = 1 二次失败')
     roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [1] = 1 二次失败')
     expect(card.data.meta.deathSaving.failure).toBe(2)
   })
 
@@ -121,8 +121,8 @@ describe('已关联DND人物卡', () => {
     card.data.meta.deathSaving.success = 2
     card.data.meta.deathSaving.failure = 2
     const roller = createDiceRoll('ds', context)
-    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [20] = 20 起死回生，HP+1')
     roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [20] = 20 起死回生，HP+1')
     expect(card.HP).toBe(1)
     expect(card.data.meta.deathSaving.success).toBe(0)
     expect(card.data.meta.deathSaving.failure).toBe(0)
@@ -145,8 +145,8 @@ describe('已关联DND人物卡', () => {
 
   test('st修改技能应重定向到修正值', () => {
     const roller = createDiceRoll('st 运动+1', context)
-    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n运动修正 0+1: 0+1 = 1`)
     roller.applyToCard()
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n运动修正 0+1: 0+1 = 1`)
     expect(card.data.skills.运动).toBe(1)
   })
 })
