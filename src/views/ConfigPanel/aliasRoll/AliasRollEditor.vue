@@ -36,8 +36,8 @@
 <script setup lang="ts">
 import { computed, ref, toRefs } from 'vue'
 import { Bars3Icon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
-import { useConfigStore } from '../../store/config'
-import { IPluginItemConfigForDisplay, usePluginStore } from '../../store/plugin'
+import { useConfigStore } from '../../../store/config'
+import { IPluginItemConfigForDisplay, usePluginStore } from '../../../store/plugin'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
 interface Emits {

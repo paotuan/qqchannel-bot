@@ -53,9 +53,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useConfigStore } from '../../store/config'
+import { useConfigStore } from '../../../store/config'
 import { computed } from 'vue'
-import DNativeSelect from '../../dui/select/DNativeSelect.vue'
+import DNativeSelect from '../../../dui/select/DNativeSelect.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!.specialDice)

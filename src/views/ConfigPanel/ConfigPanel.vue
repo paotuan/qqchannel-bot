@@ -3,80 +3,26 @@
     <!-- 侧边栏目录 -->
     <ul class="menu bg-transparent w-48 sticky top-0 float-left z-10">
       <li class="menu-title"><span>目录</span></li>
-      <li><a href="#defaultroll">默认骰</a></li>
-      <li><a href="#customreply">自定义回复</a></li>
-      <li><a href="#rolldecider">检定规则</a></li>
-      <li><a href="#aliasroll">别名指令</a></li>
-      <li><a href="#specialdice">特殊指令</a></li>
+      <li v-for="menu in menuList" :key="menu.value">
+        <a :class="{ active: currentMenu === menu.value }" @click="currentMenu = menu.value">{{ menu.label }}</a>
+      </li>
       <li class="menu-title mt-4"><span>快捷设置</span></li>
       <li class="tooltip tooltip-right" :data-tip="cocDesc.join(`&#xa;`)"><a @click="quickSet('coc')">设为 COC 常用规则</a></li>
       <li class="tooltip tooltip-right" :data-tip="dndDesc.join(`&#xa;`)"><a @click="quickSet('dnd')">设为 DND 常用规则</a></li>
     </ul>
     <div class="max-w-4xl mx-auto" style="--btn-text-case: none">
-      <!-- 默认骰 -->
-      <section id="defaultroll">
-        <h2>默认骰：</h2>
-        <div class="card card-compact w-full bg-base-100 shadow-lg">
-          <div class="card-body">
-            <div class="flex gap-4">
-              <input v-model="config.defaultRoll.expression" type="text" placeholder="请输入默认骰表达式" class="input input-sm input-bordered w-full max-w-xs" />
-              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = 'd100'">d100</button>
-              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = 'd20'">d20</button>
-              <button class="btn btn-sm btn-outline btn-primary" @click="config.defaultRoll.expression = '4dF'">4dF</button>
-              <label class="label items-center gap-2 cursor-pointer">
-                <input v-model="config.defaultRoll.preferCard" type="checkbox" class="checkbox checkbox-sm" @click.stop />
-                <span class="label-text">优先使用人物卡对应的默认骰</span>
-                <span class="tooltip tooltip-top" data-tip="当玩家关联 COC 人物卡时，默认使用 d%&#xa;当玩家关联 DND 人物卡时，默认使用 d20">
-                  <QuestionMarkCircleIcon class="w-4 h-4" />
-                </span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </section>
-      <!-- 自定义回复 -->
-      <section id="customreply" class="mt-4">
-        <div class="flex items-center">
-          <h2>自定义回复：</h2>
-          <button class="btn btn-circle btn-xs btn-ghost" @click="openHelpDoc('/config/customreply/')">
-            <QuestionMarkCircleIcon class="w-4 h-4" />
-          </button>
-        </div>
-        <div class="card card-compact w-full bg-base-100 shadow-lg">
-          <custom-reply-list />
-        </div>
-      </section>
-      <!-- 自定义规则 -->
-      <section id="rolldecider" class="mt-4">
-        <div class="flex items-center">
-          <h2>检定规则：</h2>
-          <button class="btn btn-circle btn-xs btn-ghost" @click="openHelpDoc('/config/rule/')">
-            <QuestionMarkCircleIcon class="w-4 h-4" />
-          </button>
-        </div>
-        <div class="card card-compact w-full bg-base-100 shadow-lg">
-          <roll-decider-list />
-        </div>
-      </section>
-      <!-- 别名指令 -->
-      <section id="aliasroll" class="mt-4">
-        <div class="flex items-center">
-          <h2>别名指令：</h2>
-          <button class="btn btn-circle btn-xs btn-ghost" @click="openHelpDoc('/config/alias/')">
-            <QuestionMarkCircleIcon class="w-4 h-4" />
-          </button>
-        </div>
-        <div class="card card-compact w-full bg-base-100 shadow-lg">
-          <alias-roll-list />
-        </div>
-      </section>
-      <!-- 特殊指令 -->
-      <section id="specialdice" class="mt-4">
-        <h2>特殊指令：</h2>
-        <div class="card card-compact w-full bg-base-100 shadow-lg">
-          <special-dice-list />
-        </div>
-      </section>
+      <template v-if="currentMenu === 'customReply'">
+        <CustomReplyPanel />
+      </template>
+      <template v-else-if="currentMenu === 'rollDecider'">
+        <RollDeciderPanel />
+      </template>
+      <template v-else-if="currentMenu === 'aliasRoll'">
+        <AliasRollPanel />
+      </template>
+      <template v-else-if="currentMenu === 'others'">
+        <OthersPanel />
+      </template>
     </div>
     <!-- 底部栏 -->
     <div class="fixed left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
@@ -93,18 +39,28 @@
   </div>
 </template>
 <script setup lang="ts">
-import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../store/config'
-import { computed } from 'vue'
-import CustomReplyList from './CustomReplyList.vue'
-import RollDeciderList from './RollDeciderList.vue'
-import AliasRollList from './AliasRollList.vue'
-import SpecialDiceList from './SpecialDiceList.vue'
+import { computed, ref } from 'vue'
 import { Toast } from '../../utils'
+import OthersPanel from './others/OthersPanel.vue'
+import CustomReplyPanel from './customReply/CustomReplyPanel.vue'
+import RollDeciderPanel from './rollDecider/RollDeciderPanel.vue'
+import AliasRollPanel from './aliasRoll/AliasRollPanel.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
 
+// nav
+type NavMenu = 'aliasRoll' | 'customReply' | 'rollDecider' | 'customText' | 'others'
+const currentMenu = ref<NavMenu>('customReply')
+const menuList: { label: string, value: NavMenu }[] = [
+  { label: '自定义回复', value: 'customReply' },
+  { label: '检定规则', value: 'rollDecider' },
+  { label: '别名指令', value: 'aliasRoll' },
+  { label: '默认骰&特殊指令', value: 'others' },
+]
+
+// quick set
 const cocDesc = [
   '默认骰设为 d100；',
   '检定规则设为 COC 默认规则（若有）；',
@@ -121,16 +77,8 @@ const quickSet = (mode: 'coc' | 'dnd') => {
   configStore.quickSet(mode)
   Toast.success('设置成功')
 }
-
-const openHelpDoc = (path: string) => {
-  window.open('https://paotuan.io' + path)
-}
 </script>
 <style scoped>
-h2 {
-  @apply font-bold leading-10;
-}
-
 .tooltip:before {
   white-space: pre;
   text-align: left;

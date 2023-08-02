@@ -48,10 +48,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { Bars3Icon, XMarkIcon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
-import { useConfigStore } from '../../store/config'
-import { IPluginItemConfigForDisplay, usePluginStore } from '../../store/plugin'
-import type { IRollDeciderConfig } from '../../../interface/config'
-import DNativeSelect from '../../dui/select/DNativeSelect.vue'
+import { useConfigStore } from '../../../store/config'
+import { IPluginItemConfigForDisplay, usePluginStore } from '../../../store/plugin'
+import type { IRollDeciderConfig } from '../../../../interface/config'
+import DNativeSelect from '../../../dui/select/DNativeSelect.vue'
 import Sortable from 'sortablejs'
 
 interface Props { id: string, defaultOpen: boolean } // full id

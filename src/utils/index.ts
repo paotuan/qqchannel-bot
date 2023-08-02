@@ -34,3 +34,7 @@ export async function imageUrlToBase64(url: string) {
     }
   })
 }
+
+export function openHelpDoc(path: string) {
+  window.open('https://paotuan.io' + path)
+}

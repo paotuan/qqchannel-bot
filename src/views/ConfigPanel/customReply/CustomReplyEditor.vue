@@ -45,13 +45,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { ICustomReplyConfig } from '../../../interface/config'
+import type { ICustomReplyConfig } from '../../../../interface/config'
 import { computed, ref, toRefs } from 'vue'
 import { Bars3Icon, XMarkIcon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
-import { useConfigStore } from '../../store/config'
-import DNativeSelect from '../../dui/select/DNativeSelect.vue'
-import DNumberInput from '../../dui/input/DNumberInput.vue'
-import { IPluginItemConfigForDisplay, usePluginStore } from '../../store/plugin'
+import { useConfigStore } from '../../../store/config'
+import DNativeSelect from '../../../dui/select/DNativeSelect.vue'
+import DNumberInput from '../../../dui/input/DNumberInput.vue'
+import { IPluginItemConfigForDisplay, usePluginStore } from '../../../store/plugin'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
 interface Emits {
