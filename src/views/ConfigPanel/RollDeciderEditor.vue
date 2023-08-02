@@ -21,33 +21,38 @@
       <div class="pl-8">
         <div>{{ config.description || '作者什么说明都没有留下' }}</div>
         <template v-if="!fromPlugin">
-          <div class="grid rules-grid gap-2 mt-2">
-            <div></div>
-            <div class="font-bold">检定规则</div>
-            <div class="font-bold">结果描述</div>
-            <div class="leading-8 font-bold">大失败</div>
-            <input v-model="config.rules.worst.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-            <input v-model="config.rules.worst.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
-            <div class="leading-8 font-bold">大成功</div>
-            <input v-model="config.rules.best.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-            <input v-model="config.rules.best.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
-            <div class="leading-8 font-bold">失败</div>
-            <input v-model="config.rules.fail.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-            <input v-model="config.rules.fail.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
-            <div class="leading-8 font-bold">成功</div>
-            <input v-model="config.rules.success.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
-            <input v-model="config.rules.success.reply" type="text" placeholder="请输入结果描述" class="input input-bordered input-sm w-full" />
+          <div class="mt-2">
+            <div class="flex gap-2 p-1">
+              <div class="w-4 h-4 flex-none"></div>
+              <div class="w-32 pl-2 font-bold">成功等级</div>
+              <div class="pl-2 font-bold">判断规则</div>
+              <div></div>
+            </div>
+            <div ref="rulesPanelRef">
+              <div v-for="(rule, i) in config.rules" :key="getRuleRowId(rule)" class="flex gap-2 items-center p-1">
+                <Bars3Icon class="w-4 h-4 cursor-move flex-none sortable-handle"/>
+                <d-native-select v-model="rule.level" :options="ruleLevelOptions" class="select-bordered select-sm w-32" placeholder="成功等级" />
+                <input v-model="rule.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
+                <button class="btn btn-circle btn-ghost btn-xs flex-none" :class="{ invisible: config.rules.length <= 1 }" @click="deleteRule(i)">
+                  <XMarkIcon class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
+          <button class="btn btn-xs btn-ghost" @click="newRule">+ 新增一行</button>
         </template>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
+import { computed, onMounted, ref } from 'vue'
+import { Bars3Icon, XMarkIcon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../store/config'
 import { IPluginItemConfigForDisplay, usePluginStore } from '../../store/plugin'
+import type { IRollDeciderConfig } from '../../../interface/config'
+import DNativeSelect from '../../dui/select/DNativeSelect.vue'
+import Sortable from 'sortablejs'
 
 interface Props { id: string, defaultOpen: boolean } // full id
 interface Emits {
@@ -61,7 +66,7 @@ const emit = defineEmits<Emits>()
 // 根据 id 获取规则配置的具体内容
 const configStore = useConfigStore()
 const pluginStore = usePluginStore()
-const config = computed(() => configStore.getRollDeciderConfig(props.id) || pluginStore.getPluginRollDeciderConfig(props.id))
+const config = computed<IRollDeciderConfig>(() => configStore.getRollDeciderConfig(props.id) || pluginStore.getPluginRollDeciderConfig(props.id))
 const fromPlugin = computed(() => (config.value as unknown as IPluginItemConfigForDisplay).fromPlugin) // 如果是插件，则取插件名
 
 // 当前规则是否被选中
@@ -75,13 +80,43 @@ const deleteSelf = () => emit('delete', props.id)
 
 // 编辑标题描述
 const editSelf = () => emit('edit', { id: props.id, name: config.value.name, desc: config.value.description || '' })
+
+// 规则中每一条的排序、删除、编辑等操作
+const ruleLevelOptions = ['大失败', '大成功', '失败', '极难成功', '困难成功', '成功'].map(v => ({ label: v, value: v }))
+const _tempRuleRowIdMap = new WeakMap<IRollDeciderConfig['rules'][number], number>()
+const _tempRuleRowIdCounter = ref(0)
+const getRuleRowId = (row: IRollDeciderConfig['rules'][number]) => {
+  let id = _tempRuleRowIdMap.get(row)
+  if (!id) {
+    id = ++_tempRuleRowIdCounter.value
+    _tempRuleRowIdMap.set(row, id)
+  }
+  return id
+}
+const deleteRule = (index: number) => {
+  config.value.rules.splice(index, 1)
+}
+
+const newRule = () => {
+  config.value.rules.push({ level: '成功', expression: '' })
+}
+
+const rulesPanelRef = ref(null)
+onMounted(() => {
+  if (!rulesPanelRef.value) return
+  Sortable.create(rulesPanelRef.value, {
+    handle: '.sortable-handle',
+    ghostClass: 'bg-base-200',
+    onEnd: (event) => {
+      const { newIndex, oldIndex } = event
+      const moving = config.value.rules.splice(oldIndex!, 1)[0]
+      config.value.rules.splice(newIndex!, 0, moving)
+    }
+  })
+})
 </script>
 <style scoped>
 .collapse-title {
   padding-right: 1rem;
-}
-
-.rules-grid {
-  grid-template-columns: 60px 1fr 1fr;
 }
 </style>

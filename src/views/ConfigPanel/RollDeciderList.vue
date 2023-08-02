@@ -16,7 +16,7 @@
   </div>
   <div class="p-2 border-t border-base-content/10 flex items-center gap-2">
     <button class="btn btn-sm btn-ghost gap-1" @click="newEmbedConfig"><PlusIcon class="w-4 h-4" />新增检定规则</button>
-    <button class="btn btn-sm btn-ghost gap-1" @click="pluginEditVisible = true"><SquaresPlusIcon class="w-4 h-4" />从插件新增</button>
+<!--    <button class="btn btn-sm btn-ghost gap-1" @click="pluginEditVisible = true"><SquaresPlusIcon class="w-4 h-4" />从插件新增</button>-->
   </div>
   <config-name-edit
       v-model:mode="editForm.mode"
@@ -25,12 +25,12 @@
       :default-desc="editForm.desc"
       @submit="submitEditForm"
   />
-  <plugin-edit
-      v-model:visible="pluginEditVisible"
-      :list="pluginList"
-      :default-select="rollDeciderIds"
-      @submit="onEditPlugins"
-  />
+<!--  <plugin-edit-->
+<!--      v-model:visible="pluginEditVisible"-->
+<!--      :list="pluginList"-->
+<!--      :default-select="rollDeciderIds"-->
+<!--      @submit="onEditPlugins"-->
+<!--  />-->
 </template>
 <script setup lang="ts">
 import { useConfigStore } from '../../store/config'

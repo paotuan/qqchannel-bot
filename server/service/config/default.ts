@@ -133,10 +133,12 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     // 但我们可以把用户旧的数据备份一下
     const oldDeciderReplies: string[] = []
     oldDeciderConfig.forEach(decider => {
-      oldDeciderReplies.push((decider.rules as any).worst.reply)
-      oldDeciderReplies.push((decider.rules as any).best.reply)
-      oldDeciderReplies.push((decider.rules as any).fail.reply)
-      oldDeciderReplies.push((decider.rules as any).success.reply)
+      oldDeciderReplies.push(decider.name + '\n' + decider.description)
+      const rules = decider.rules as any
+      oldDeciderReplies.push(rules.worst.expression + ' | ' + rules.worst.reply)
+      oldDeciderReplies.push(rules.best.expression + ' | ' + rules.best.reply)
+      oldDeciderReplies.push(rules.fail.expression + ' | ' + rules.fail.reply)
+      oldDeciderReplies.push(rules.success.expression + ' | ' + rules.success.reply)
       oldDeciderReplies.push('\n')
     })
     _writeUpgradeBacklog(oldDeciderReplies.join('\n'), channelId)
