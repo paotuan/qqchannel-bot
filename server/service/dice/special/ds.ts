@@ -10,6 +10,8 @@ export class DsDiceRoll extends BasePtDiceRoll {
   private isBest = this.diceRoll.total === 20
   private isWorst = this.diceRoll.total === 1
   private isSuccess = this.diceRoll.total >= 10
+  private toStable = false // 是否伤势转为稳定
+  private toDeath = false // 是否死亡
 
   override roll(): this {
     // 不受任何参数影响，初始化时直接 roll 了
@@ -43,7 +45,14 @@ export class DsDiceRoll extends BasePtDiceRoll {
   override get output() {
     const headLine = this.t('roll.start', this.formatArgs)
     const output = this.t('roll.result', this.formatArgs)
-    return `${headLine} ${output}${this.decideResult}`
+    const firstLine = `${headLine} ${output}${this.decideResult}`
+    if (this.toStable) {
+      return firstLine + this.t('roll.ds.tostable', this.formatArgs)
+    } else if (this.toDeath) {
+      return firstLine + this.t('roll.ds.todeath', this.formatArgs)
+    } else {
+      return firstLine
+    }
   }
 
   override applyToCard() {
@@ -62,6 +71,14 @@ export class DsDiceRoll extends BasePtDiceRoll {
       card.data.meta.deathSaving.success++
     } else {
       card.data.meta.deathSaving.failure++
+    }
+    if (card.data.meta.deathSaving.success >= 3) {
+      this.toStable = true
+      // 伤势稳定重置次数
+      card.data.meta.deathSaving.success = 0
+      card.data.meta.deathSaving.failure = 0
+    } else if (card.data.meta.deathSaving.failure >= 3) {
+      this.toDeath = true
     }
     return [card]
   }

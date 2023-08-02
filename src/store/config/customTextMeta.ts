@@ -165,6 +165,20 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
     args: [_.用户名, _.人物卡名, _.at用户, _.原始指令, _.描述, _.目标值, _.掷骰结果, _.掷骰表达式, _.掷骰输出]
   },
   {
+    key: 'roll.ds.tostable',
+    name: '死亡豁免-伤势稳定',
+    description: '',
+    defaultTemplate: '\n成功三次，伤势稳定了',
+    args: [_.用户名, _.人物卡名, _.at用户, _.原始指令, _.描述, _.目标值, _.掷骰结果, _.掷骰表达式, _.掷骰输出]
+  },
+  {
+    key: 'roll.ds.todeath',
+    name: '死亡豁免-去世',
+    description: '',
+    defaultTemplate: '\n失败三次，去世了',
+    args: [_.用户名, _.人物卡名, _.at用户, _.原始指令, _.描述, _.目标值, _.掷骰结果, _.掷骰表达式, _.掷骰输出]
+  },
+  {
     key: 'roll.en.empty',
     name: '成长检定-不支持',
     description: '',

@@ -397,6 +397,8 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.vs.result': s('{{#胜}}🟩{{/胜}}{{#负}}🟥{{/负}}{{#平}}🟨{{/平}} {{用户名}} {{描述}}{{#coc}}({{技能值}}) {{成功等级}}{{/coc}}{{#dnd}} {{掷骰结果}}{{/dnd}} ↔️ {{对方用户名}} {{对方描述}}{{#coc}}({{对方技能值}}) {{对方成功等级}}{{/coc}}{{#dnd}} {{对方掷骰结果}}{{/dnd}} {{#对方胜}}🟩{{/对方胜}}{{#对方负}}🟥{{/对方负}}{{#对方平}}🟨{{/对方平}}'),
     'roll.ds.best': s(' 起死回生，HP+1'),
     'roll.ds.worst': s(' 二次失败'),
+    'roll.ds.tostable': s('\n成功三次，伤势稳定了'),
+    'roll.ds.todeath': s('\n失败三次，去世了'),
     'roll.en.empty': s('{{用户名}} 当前暂无可成长的技能或不支持成长'),
     'roll.en.list': s('{{用户名}} 当前可成长的技能：\n{{#技能列表}}{{技能名}}{{^last}}、{{/last}}{{/技能列表}}'),
     'roll.ri.unsupported': s('当前场景不支持先攻列表'),

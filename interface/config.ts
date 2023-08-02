@@ -87,6 +87,8 @@ export type CustomTextKeys =
   | 'roll.vs.result'
   | 'roll.ds.best'
   | 'roll.ds.worst'
+  | 'roll.ds.tostable'
+  | 'roll.ds.todeath'
   | 'roll.en.empty'
   | 'roll.en.list'
   | 'roll.ri.unsupported'

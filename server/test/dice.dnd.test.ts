@@ -128,6 +128,31 @@ describe('已关联DND人物卡', () => {
     expect(card.data.meta.deathSaving.failure).toBe(0)
   })
 
+  test('死亡豁免累积三次成功', () => {
+    card.HP = 0
+    card.data.meta.deathSaving.success = 2
+    card.data.meta.deathSaving.failure = 2
+    const roller = createDiceRoll('ds', context)
+    roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [12] = 12 / 10 成功\n成功三次，伤势稳定了')
+    expect(card.HP).toBe(0)
+    expect(card.data.meta.deathSaving.success).toBe(0)
+    expect(card.data.meta.deathSaving.failure).toBe(0)
+  })
+
+  test('死亡豁免累积三次失败', () => {
+    NumberGenerator.generator.engine = { next: () => 1 }
+    card.HP = 0
+    card.data.meta.deathSaving.success = 2
+    card.data.meta.deathSaving.failure = 2
+    const roller = createDiceRoll('ds', context)
+    roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 死亡豁免 d20: [2] = 2 / 10 失败\n失败三次，去世了')
+    expect(card.HP).toBe(0)
+    expect(card.data.meta.deathSaving.success).toBe(2)
+    expect(card.data.meta.deathSaving.failure).toBe(3)
+  })
+
   test('dnd先攻默认骰', () => {
     const roller = createDiceRoll('ri', context)
     expect(roller.output).toBe('Maca 🎲 先攻 d20+{2}[敏捷]+{0}[临时]: [12]+{2}+{0} = 14')

@@ -118,6 +118,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   }
 
   set HP(value) {
+    // todo 看是否需要增加 hp 清空死亡豁免计数，看看实际交互奇不奇怪吧
     this.data.basic.HP = clamp(value, 0, this.MAXHP)
   }
 
