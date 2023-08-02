@@ -106,9 +106,9 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     // roll decider 格式更新
     const oldDeciderConfig = config.embedPlugin.rollDecider || []
     config.embedPlugin.rollDecider = getEmbedRollDecider()
-    // 旧的配置转换一下
-    config.embedPlugin.rollDecider!.splice(2, 0, ...oldDeciderConfig
-      .filter(decider => decider.id !== 'coc0' && decider.id !== 'dnd0') // 两个默认规则就不处理了
+    // 旧的配置(若有)转换一下
+    const decider2insert = oldDeciderConfig.filter(decider => decider.id !== 'coc0' && decider.id !== 'dnd0') // 两个默认规则就不处理了
+    config.embedPlugin.rollDecider!.splice(2, 0, ...decider2insert
       .map((decider) => ({
         id: decider.id,
         name: decider.name,
@@ -121,6 +121,10 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
         ]
       }))
     )
+    config.rollDeciderIds = config.embedPlugin.rollDecider!.map(decider => `${embedPluginId}.${decider.id}`)
+    if (!config.rollDeciderIds.includes(config.rollDeciderId)) {
+      config.rollDeciderId = config.rollDeciderIds[0]
+    }
     // 增加新的 customText 配置
     config.customTextIds = []
     const embedText = getEmbedCustomText()
@@ -429,13 +433,16 @@ function getSpecialDiceConfig(): ISpecialDiceConfig {
 function _writeUpgradeBacklog(content: string, channelId: string) {
   const fileContent = '本文件是跑团IO机器人在版本更新时自动生成的备份文件，如你确认不需要该文件，可以安全地删除。\n\n' + content
   const now = new Date()
-  const today = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`
-  const filename = `paotuan-bot-backup-${today}-${channelId}.txt`
-  fs.writeFile(`./${filename}`, fileContent, e => {
+  const today = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}`
+  const filename = `${today}-${channelId}.txt`
+  if (!fs.existsSync('./config-backup')) {
+    fs.mkdirSync('./config-backup')
+  }
+  fs.writeFile(`./config-backup/${filename}`, fileContent, e => {
     if (e) {
       console.error('[Config] 版本更新，生成备份文件失败', e)
     } else {
-      console.error('[Config] 版本更新，已自动生成备份文件', filename)
+      console.error('[Config] 版本更新，已自动生成备份文件', `./config-backup/${filename}`)
     }
   })
 }

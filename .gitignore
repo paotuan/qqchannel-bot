@@ -25,6 +25,7 @@ dist-ssr
 .env
 /cards/
 /config/
+/config-backup/
 /plugins/
 /user/
 /dist/client
