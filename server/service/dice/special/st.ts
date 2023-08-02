@@ -57,7 +57,7 @@ export class StDiceRoll extends BasePtDiceRoll {
   }
 
   private rollSet() {
-    const segments = this.exp.split(/[,，;；]+/).filter(segment => !!segment.trim())
+    const segments = this.exp.split(/[,，;；、]+/).filter(segment => !!segment.trim())
     // 解析表达式，注意要指定 targetUserId 的人物卡
     const context: IDiceRollContext = { ...this.context, userId: this.targetUserId, username: this.targetUserId }
     segments.forEach(segment => {
@@ -84,7 +84,7 @@ export class StDiceRoll extends BasePtDiceRoll {
   }
 
   private rollShow() {
-    const segments = this.exp.split(/[,，;；]+/).filter(segment => !!segment.trim())
+    const segments = this.exp.split(/[,，;；、]+/).filter(segment => !!segment.trim())
     if (segments.length > 0) {
       this.shows.push(...segments.map(name => this.targetUserCard!.getEntryDisplay(name)))
     } else {

@@ -61,11 +61,11 @@ export class CocOpposedDiceRoll extends CocDiceRoll {
       ...selfResult,
       ..._otherArgs,
       胜: selfSuccess === 'win',
-      负: selfSuccess === 'draw',
-      平: selfSuccess === 'lose',
+      负: selfSuccess === 'lose',
+      平: selfSuccess === 'draw',
       对方胜: otherSuccess === 'win',
-      对方负: otherSuccess === 'draw',
-      对方平: otherSuccess === 'lose',
+      对方负: otherSuccess === 'lose',
+      对方平: otherSuccess === 'draw',
       coc: true
     }
     return this.t('roll.vs.result', args)
