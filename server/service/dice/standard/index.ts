@@ -127,7 +127,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   override get output() {
     // 第一行 (Maca 🎲 侦察)
-    const headLine = this.t('roll.start', { 描述: this.description })
+    const headLine = this.t('roll.start', { 描述: this.description, 原始指令: this.rawExpression })
     // 是否有中间骰
     const inlineRollLines = []
     if (this.hasInlineRolls && !this.quiet) {
