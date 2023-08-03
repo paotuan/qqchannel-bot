@@ -5,7 +5,7 @@
       <span>{{ meta.name }}</span>
       <div class="dropdown dropdown-hover dropdown-right">
         <label tabindex="0"><InformationCircleIcon class="w-4 h-4" /></label>
-        <div tabindex="0" class="dropdown-content p-2 shadow-lg bg-base-100 rounded-lg" @click.stop>
+        <div tabindex="0" class="dropdown-content p-2 shadow-lg bg-base-100 rounded-lg example-content" @click.stop>
           <div v-html="meta.description" class="font-medium text-sm whitespace-pre example-text"></div>
         </div>
       </div>
@@ -104,7 +104,11 @@ const onClickVar = ({ segment, insertAt }: { segment: string, insertAt: number }
   height: v-bind(defaultTextareaHeight);
 }
 
+.example-content {
+  @apply bg-neutral text-neutral-content;
+}
+
 .example-text::first-line {
-  @apply text-base-content/70
+  @apply text-success;
 }
 </style>
