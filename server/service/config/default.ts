@@ -141,7 +141,7 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       oldDeciderReplies.push(rules.success.expression + ' | ' + rules.success.reply)
       oldDeciderReplies.push('\n')
     })
-    _writeUpgradeBacklog(oldDeciderReplies.join('\n'), channelId)
+    _writeUpgradeBacklog(oldDeciderReplies.join('\n'), channelId, 21)
     // 新增 /help 自定义回复
     const index = config.embedPlugin.customReply?.findIndex(item => item.id === 'help')
     if (typeof index === 'number' && index < 0) {
@@ -432,19 +432,20 @@ function getSpecialDiceConfig(): ISpecialDiceConfig {
   }
 }
 
-function _writeUpgradeBacklog(content: string, channelId: string) {
+function _writeUpgradeBacklog(content: string, channelId: string, targetVersion: number) {
   const fileContent = '本文件是跑团IO机器人在版本更新时自动生成的备份文件，如你确认不需要该文件，可以安全地删除。\n\n' + content
-  const now = new Date()
-  const today = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}`
-  const filename = `${today}-${channelId}.txt`
+  const filename = `v${targetVersion}-${channelId}.txt`
   if (!fs.existsSync('./config-backup')) {
     fs.mkdirSync('./config-backup')
   }
-  fs.writeFile(`./config-backup/${filename}`, fileContent, e => {
-    if (e) {
-      console.error('[Config] 版本更新，生成备份文件失败', e)
-    } else {
-      console.error('[Config] 版本更新，已自动生成备份文件', `./config-backup/${filename}`)
-    }
-  })
+  // 不重复写文件了，省的一直没有登录过的子频道每次打开都重新写
+  if (!fs.existsSync(`./config-backup/${filename}`)) {
+    fs.writeFile(`./config-backup/${filename}`, fileContent, e => {
+      if (e) {
+        console.error('[Config] 版本更新，生成备份文件失败', e)
+      } else {
+        console.error('[Config] 版本更新，已自动生成备份文件', `./config-backup/${filename}`)
+      }
+    })
+  }
 }
