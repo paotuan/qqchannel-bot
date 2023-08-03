@@ -1,6 +1,6 @@
-import type { CustomTextKeys } from '../../../interface/config'
+import type { CustomTextKeys } from '../../../../interface/config'
 
-interface ICustomTextMetaItem {
+export interface ICustomTextMetaItem {
   key: CustomTextKeys
   name: string
   description: string
@@ -39,7 +39,7 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
   {
     key: 'roll.start',
     name: '掷骰-起始',
-    description: '.侦查\n<u>Maca 🎲 侦察</u> d%: [84] = 84',
+    description: '.侦查<br><u>Maca 🎲 侦察</u> d%: [84] = 84',
     defaultTemplate: '{{用户名}} 🎲 {{描述}}',
     args: [_.用户名, _.人物卡名, _.at用户, _.原始指令, _.描述, _.ds, _.en, _.ri, _.sc]
   },

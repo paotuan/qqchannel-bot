@@ -9,7 +9,7 @@ export interface IPluginItemConfigForDisplay {
   fromPlugin: string // 标识插件名字，用于展示
 }
 
-export type PluginItemType = 'customReply' | 'rollDecider' | 'aliasRoll'
+export type PluginItemType = 'customReply' | 'rollDecider' | 'aliasRoll' | 'customText'
 
 export const usePluginStore = defineStore('plugin', () => {
   const plugins = ref<IPluginConfigDisplay[]>([])
@@ -34,6 +34,7 @@ export const usePluginStore = defineStore('plugin', () => {
   const customReplyMap = computed(() => plugin2map('customReply'))
   const rollDeciderMap = computed(() => plugin2map('rollDecider'))
   const aliasRollMap = computed(() => plugin2map('aliasRoll'))
+  const customTextMap = computed(() => plugin2map('customText'))
 
   const getPluginCustomReplyProcessor = (fullId: string) => {
     return customReplyMap.value[fullId]
@@ -47,6 +48,10 @@ export const usePluginStore = defineStore('plugin', () => {
     return aliasRollMap.value[fullId]
   }
 
+  const getCustomTextProcessor = (fullId: string) => {
+    return customTextMap.value[fullId]
+  }
+
   const onGetPlugins = (data: IPluginConfigDisplay[]) => {
     plugins.value = data
   }
@@ -55,9 +60,11 @@ export const usePluginStore = defineStore('plugin', () => {
     customReplyMap,
     rollDeciderMap,
     aliasRollMap,
+    customTextMap,
     getPluginCustomReplyProcessor,
     getPluginRollDeciderConfig,
     getPluginAliasRollProcessor,
+    getCustomTextProcessor,
     onGetPlugins
   }
 })

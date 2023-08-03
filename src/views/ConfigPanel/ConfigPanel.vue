@@ -14,6 +14,9 @@
       <template v-if="currentMenu === 'customReply'">
         <CustomReplyPanel />
       </template>
+      <template v-else-if="currentMenu === 'customText'">
+        <CustomTextPanel />
+      </template>
       <template v-else-if="currentMenu === 'rollDecider'">
         <RollDeciderPanel />
       </template>
@@ -46,6 +49,7 @@ import OthersPanel from './others/OthersPanel.vue'
 import CustomReplyPanel from './customReply/CustomReplyPanel.vue'
 import RollDeciderPanel from './rollDecider/RollDeciderPanel.vue'
 import AliasRollPanel from './aliasRoll/AliasRollPanel.vue'
+import CustomTextPanel from './customText/CustomTextPanel.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
@@ -55,6 +59,7 @@ type NavMenu = 'aliasRoll' | 'customReply' | 'rollDecider' | 'customText' | 'oth
 const currentMenu = ref<NavMenu>('customReply')
 const menuList: { label: string, value: NavMenu }[] = [
   { label: '自定义回复', value: 'customReply' },
+  { label: '自定义文案', value: 'customText' },
   { label: '检定规则', value: 'rollDecider' },
   { label: '别名指令', value: 'aliasRoll' },
   { label: '默认骰&特殊指令', value: 'others' },
