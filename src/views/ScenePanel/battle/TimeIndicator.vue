@@ -1,6 +1,16 @@
 <template>
   <div class="flex gap-2 justify-between">
-    <DateTimePicker v-model="sceneStore.timeIndicator" />
+    <VueDatePicker
+        v-model="sceneStore.timeIndicator"
+        locale="zh"
+        format="yyyy/MM/dd HH:mm:ss"
+        enable-seconds
+        time-picker-inline
+        week-start="0"
+        :day-names="['日', '一', '二', '三', '四', '五', '六']"
+        auto-apply
+        :close-on-auto-apply="false"
+    />
     <div class="dropdown dropdown-end">
       <label tabindex="0" class="btn btn-sm btn-square btn-outline border-base-300">
         <ChevronDoubleRightIcon class="w-4 h-4" />
@@ -17,8 +27,9 @@
   </div>
 </template>
 <script setup lang="ts">
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import { ChevronDoubleRightIcon } from '@heroicons/vue/24/outline'
-import DateTimePicker from './DateTimePicker.vue'
 import { useSceneStore } from '../../../store/scene'
 
 const sceneStore = useSceneStore()
@@ -28,3 +39,33 @@ const addTime = (timeS: number) => {
   sceneStore.timeIndicator = new Date(newTime)
 }
 </script>
+<style>
+.dp__theme_light {
+  --tw-border-opacity: .2;
+  --dp-background-color: hsl(var(--b1));
+  --dp-text-color: hsl(var(--bc));
+  /*--dp-hover-color: #f3f3f3;*/
+  --dp-hover-text-color: hsl(var(--bc));
+  /*--dp-hover-icon-color: #959595;*/
+  --dp-primary-color: hsl(var(--p));
+  --dp-primary-text-color: hsl(var(--pc));
+  --dp-secondary-color: hsl(var(--s));
+  --dp-border-color: hsl(var(--bc) / var(--tw-border-opacity));
+  --dp-menu-border-color: hsl(var(--bc) / var(--tw-border-opacity));
+  --dp-border-color-hover: hsl(var(--bc) / var(--tw-border-opacity));
+  /*--dp-disabled-color: #f6f6f6;*/
+  /*--dp-scroll-bar-background: #f3f3f3;*/
+  /*--dp-scroll-bar-color: #959595;*/
+  /*--dp-success-color: #76d275;*/
+  /*--dp-success-color-disabled: #a3d9b1;*/
+  /*--dp-icon-color: #959595;*/
+  /*--dp-danger-color: #ff6f60;*/
+  /*--dp-highlight-color: rgba(25, 118, 210, 0.1);*/
+  --dp-border-radius: var(--rounded-btn, .5rem);
+  --dp-cell-border-radius: var(--rounded-btn, .5rem);
+}
+
+.dp__input {
+  height: 2rem;
+}
+</style>
