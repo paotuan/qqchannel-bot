@@ -27,7 +27,7 @@
 <!--          <span>变量：</span>-->
           <ArgButton v-for="arg in commonVars" :key="arg.name" :data="arg" @click="onClickVar" />
         </div>
-        <div v-if="cocOnlyVars.length > 0" class="mt-2 text-sm flex gap-2 items-start">
+        <div v-if="cocOnlyVars.length > 0" class="mt-2 text-sm flex gap-2 items-center">
           <span class="flex-none">COC 特有：</span>
           <span class="flex flex-wrap gap-2">
             <ArgButton v-for="arg in cocOnlyVars" :key="arg.name" :data="arg" @click="onClickVar" />

@@ -92,7 +92,7 @@ export class CocDiceRoll extends StandardDiceRoll {
   }
 
   protected override getFormatArgs(roll: DiceRoll, test?: any) {
-    const _test = test as ICocCardEntry | undefined
+    const _test = test?.cardEntry as ICocCardEntry | undefined // todo 完善类型定义
     return {
       ...super.getFormatArgs(roll, test),
       // coc 额外追加是否是 困难/极难 前缀
