@@ -66,3 +66,8 @@ const stOptions = [
   { label: '禁止修改', value: 'none' }
 ]
 </script>
+<style scoped>
+.divider-y > div {
+  @apply border-base-content/10;
+}
+</style>

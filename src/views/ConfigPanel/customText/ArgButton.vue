@@ -1,5 +1,5 @@
 <template>
-  <button class="btn btn-xs" :class="data.section ? 'btn-warning' : 'btn-success'" @click="onClick" @contextmenu.prevent="onClick(true)">{{ data.name }}</button>
+  <button class="btn btn-xs" :class="data.section ? 'btn-warning' : 'btn-success'" @click="onClick()" @contextmenu.prevent="onClick(true)">{{ data.name }}</button>
 </template>
 <script setup lang="ts">
 import type { ICustomTextMetaItem } from './customTextMeta'
