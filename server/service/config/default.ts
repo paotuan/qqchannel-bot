@@ -94,7 +94,7 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     })
     config.version = 4
   }
-  if (config.version === 4) {
+  if (config.version < 17) {
     // 默认骰格式更新
     const defaultRoll = (config as any).defaultRoll as string
     config.defaultRoll = { expression: defaultRoll, preferCard: true }
@@ -102,7 +102,7 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     config.specialDice.dsDice = { enabled: true }
     config.version = 17 // 1.3.0
   }
-  if (config.version === 17) {
+  if (config.version < 21) {
     // roll decider 格式更新
     const oldDeciderConfig = config.embedPlugin.rollDecider || []
     config.embedPlugin.rollDecider = getEmbedRollDecider()
