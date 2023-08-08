@@ -1,6 +1,6 @@
 /* eslint-env node */
-import path from 'path'
-import fs from 'fs'
+const path = require('path')
+const fs = require('fs')
 
 const FILES_DIR = path.join(__dirname, 'files')
 
