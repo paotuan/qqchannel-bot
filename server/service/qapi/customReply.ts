@@ -91,10 +91,22 @@ export class CustomReplyManager {
         })
       })
       const userRole = convertRoleIds(msg.member.roles)
-      const env: ICustomReplyEnv = { botId: this.api.appid, channelId: msg.channel_id, guildId: msg.guild_id, userId: msg.author.id, userRole, nick: username, at: `<@!${msg.author.id}>`, version: VERSION_NAME }
+      const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
+      const env: ICustomReplyEnv = {
+        botId: this.api.appid,
+        channelId: msg.channel_id,
+        guildId: msg.guild_id,
+        userId: msg.author.id,
+        userRole,
+        nick: username,
+        用户名: username,
+        人物卡名: getCard(msg.author.id)?.name ?? username,
+        at: `<@!${msg.author.id}>`,
+        at用户: `<@!${msg.author.id}>`,
+        version: VERSION_NAME,
+      }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
-      const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
       const config = this.wss.config.getChannelConfig(channelId)
       const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
       return parseTemplate(template, context, [])

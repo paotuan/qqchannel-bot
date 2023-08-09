@@ -4,14 +4,17 @@ import type { ICard } from './card/types'
 
 export type UserRole = 'admin' | 'manager' | 'user'
 
-// region 自定义回复 todo 后续和自定义文本的变量名看齐
+// region 自定义回复
 export interface ICustomReplyEnv {
   botId: string
   guildId: string
   channelId: string
   userId: string
-  nick: string
-  at: string
+  nick: string // deprecated
+  用户名: string
+  人物卡名: string
+  at: string // deprecated
+  at用户: string
   userRole: UserRole
   version: string
 }

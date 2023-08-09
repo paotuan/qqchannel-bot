@@ -14,6 +14,7 @@ import type { IPluginConfigDisplay } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '../../../interface/card/types'
 import { render } from 'mustache'
+import { IDiceRollContext, parseTemplate } from '../dice/utils'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -38,15 +39,33 @@ export class PluginManager {
       render: render,
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
-      sendMessageToChannel: ({ channelId, guildId, botId }, msg, msgType = 'text') => {
+      sendMessageToChannel: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {
         const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)
         if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
-        return channel.sendMessage({ [msgType === 'text' ? 'content' : 'image']: msg })
+        // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
+        if (msgType === 'text') {
+          const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
+          const config = this.wss.config.getChannelConfig(channelId)
+          const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
+          const content = parseTemplate(msg, context, [])
+          return channel.sendMessage({ content })
+        } else {
+          return channel.sendMessage({ image: msg })
+        }
       },
-      sendMessageToUser: ({ guildId, botId, userId }, msg, msgType = 'text') => {
+      sendMessageToUser: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {
         const user = this.wss.qApis.find(botId)?.guilds.findUser(userId, guildId)
         if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
-        return user.sendMessage({ [msgType === 'text' ? 'content' : 'image']: msg })
+        // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
+        if (msgType === 'text') {
+          const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
+          const config = this.wss.config.getChannelConfig(channelId)
+          const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
+          const content = parseTemplate(msg, context, [])
+          return user.sendMessage({ content })
+        } else {
+          return user.sendMessage({ image: msg })
+        }
       }
     } // todo: getItem/setItem
   }
@@ -116,7 +135,8 @@ export class PluginManager {
       if (!currentVersion) return
       if (version > currentVersion) {
         console.log(`[Plugin] 检测到插件 ${name} 有更新，即将进行更新。若更新后功能异常，请尝试重新启动软件。`)
-        fs.rmdirSync(path.join(PLUGIN_DIR, name), { recursive: true })
+        // 考虑到牌堆插件的更新，不删除文件了，反正一般也没必要删除，都是覆盖
+        // fs.rmdirSync(path.join(PLUGIN_DIR, name), { recursive: true })
         copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
         // 再次加载插件
         this.reloadPlugin(name)
@@ -205,5 +225,6 @@ const officialPluginsVersions = {
   'io.paotuan.plugin.namegen': 1,
   'io.paotuan.plugin.insane': 1,
   'io.paotuan.plugin.cardgen': 2,
+  'io.paotuan.plugin.draw': 1,
   // 'io.paotuan.plugin.cocrules': 1,
 }
