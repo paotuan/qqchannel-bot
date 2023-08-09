@@ -2,7 +2,8 @@
 module.exports = (context) => {
   const { convertOtherFormatFiles } = require('./convert')
   const { loadDecks, reloadAllDecks, reloadDeck, drawDeck, drawRandomDeck } = require('./deck')
-  const { roll, render } = context
+  const texts = require('./texts.json')
+  const { roll, render, sendMessageToUser } = context
   // 1. 从其他格式转换
   convertOtherFormatFiles()
   // 2. 构建牌堆到内存中
@@ -56,7 +57,7 @@ module.exports = (context) => {
             } else {
               reloadAllDecks(roll)
             }
-            return render('重置牌堆成功', formatArgs)
+            return render(texts.resetSuccess, formatArgs)
           }
           // draw
           try {
@@ -66,11 +67,20 @@ module.exports = (context) => {
             } else {
               template = deckName ? deckProxy(deckName) : drawRandomDeck(true)
             }
-            return render(template, formatArgs, deckProxy)
-            // todo hidden
+            const result = render(template, formatArgs, deckProxy)
+            if (hidden) {
+              sendMessageToUser(env, result)
+              return render(texts.hidden, formatArgs)
+            } else {
+              return result
+            }
           } catch (e) {
-            // todo format err msg
-            return e.message
+            if (e instanceof Error) {
+              return e.message
+            } else {
+              const message = texts[e.key] || ''
+              return render(message, { ...formatArgs, ...e.args })
+            }
           }
         }
       }

@@ -36,7 +36,7 @@ export class PluginManager {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
       roll: exp => new DiceRoll(exp),
-      render: render,
+      render: (arg1, arg2, arg3) => render(arg1, arg2, arg3, { escape: value => value }),
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
       sendMessageToChannel: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {

@@ -53,7 +53,7 @@ function reloadAllDecks(roll) {
   // 根据 deck 的权重计算 names
   if (!$deck.namesProto) {
     console.warn('[牌堆]请检查是否正确初始化')
-    throw new Error('牌堆未初始化')
+    throw { key: 'error.initializeFailed', args: {} }
   }
   $deck.publicNames = []
   $deck.decks = new Map()
@@ -73,13 +73,12 @@ function reloadDeck(name, roll) {
   const lines = $deck.decksProto?.get(name)
   if (!lines) {
     console.error('[牌堆]找不到牌堆描述', name)
-    throw new Error('找不到牌堆')
+    throw { key: 'error.notFound', args: { 牌堆名: name } }
   }
   if (!$deck.decks) {
     console.error('[牌堆]请检查是否正确初始化')
-    throw new Error('找不到牌堆')
+    throw { key: 'error.initializeFailed', args: {} }
   }
-  // console.log('load deck', name, lines)
   const deckItems = []
   lines.forEach(line => {
     const [, weight = '', itemName] = line.match(WEIGHT_REGEX)
@@ -105,10 +104,10 @@ function _safeParseWeight(identifier, weight, roll) {
 function drawDeck(name, putBack) {
   const deck = $deck.decks?.get(name)
   if (!deck) {
-    throw new Error('[牌堆]找不到牌堆：' + name)
+    throw { key: 'error.notFound', args: { 牌堆名: name } }
   }
   if (deck.length === 0) {
-    throw new Error('[牌堆]牌堆为空：' + name)
+    throw { key: 'error.empty', args: { 牌堆名: name } }
   }
   const [item, index] = _randomArray(deck)
   if (!putBack) {
@@ -123,7 +122,7 @@ function drawRandomDeck(putBack) {
     const [name] = _randomArray($deck.publicNames)
     deckName = name
   } catch (e) {
-    throw new Error('[牌堆]可用牌堆为空')
+    throw { key: 'error.allEmpty', args: {} }
   }
   return drawDeck(deckName, putBack)
 }
