@@ -11,7 +11,9 @@
             </div>
           </div>
           <div class="collapse-content">
-            <div class="pl-6">{{ item.description || '作者什么说明都没有留下' }}</div>
+            <div class="pl-6">
+              <div v-for="(line, i) in (item.description || '作者什么说明都没有留下').split('\n')" :key="i">{{ line }}</div>
+            </div>
           </div>
         </div>
       </template>

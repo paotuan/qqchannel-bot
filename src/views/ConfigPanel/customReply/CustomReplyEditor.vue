@@ -20,7 +20,9 @@
     </div>
     <div class="collapse-content">
       <div class="pl-6">
-        <div>{{ processor.description || '作者什么说明都没有留下' }}</div>
+        <div>
+          <div v-for="(line, i) in (processor.description || '作者什么说明都没有留下').split('\n')" :key="i">{{ line }}</div>
+        </div>
         <template v-if="!fromPlugin">
           <div class="py-2 flex items-center">
             当用户的指令
