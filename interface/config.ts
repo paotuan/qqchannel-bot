@@ -114,6 +114,7 @@ export interface IPluginRegisterContext {
   versionName: string
   versionCode: number
   roll: (exp: string) => DiceRoll
+  render: (template: string, view: any, partials?: any) => string
   getCard: (env: ICustomReplyEnv) => ICard | undefined
   saveCard: (card: ICard) => void
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>

@@ -35,14 +35,14 @@ function _constructDeckProto(files) {
         if (Array.isArray(deckValue)) {
           const [, weight = '', deckName] = key.match(WEIGHT_REGEX)
           if (decksProto.has(deckName)) {
-            console.warn('[牌堆插件]存在名称相同的牌堆，将覆盖之前的内容', deckName)
+            console.warn('[牌堆]存在名称相同的牌堆，将覆盖之前的内容', deckName)
           }
           decksProto.set(deckName, deckValue)
           namesProto.set(deckName, weight)
         }
       })
     } catch (e) {
-      console.error(`[牌堆插件]加载文件失败，可能存在格式错误：${filename}`, e)
+      console.error(`[牌堆]加载文件失败，可能存在格式错误：${filename}`, e)
     }
   })
   return { decksProto, namesProto }
@@ -52,8 +52,8 @@ function _constructDeckProto(files) {
 function reloadAllDecks(roll) {
   // 根据 deck 的权重计算 names
   if (!$deck.namesProto) {
-    console.warn('[牌堆插件]请检查是否正确初始化')
-    return
+    console.warn('[牌堆]请检查是否正确初始化')
+    throw new Error('牌堆未初始化')
   }
   $deck.publicNames = []
   $deck.decks = new Map()
@@ -72,12 +72,12 @@ function reloadAllDecks(roll) {
 function reloadDeck(name, roll) {
   const lines = $deck.decksProto?.get(name)
   if (!lines) {
-    console.warn('[牌堆插件]找不到牌堆描述', name)
-    return
+    console.error('[牌堆]找不到牌堆描述', name)
+    throw new Error('找不到牌堆')
   }
   if (!$deck.decks) {
-    console.warn('[牌堆插件]请检查是否正确初始化')
-    return
+    console.error('[牌堆]请检查是否正确初始化')
+    throw new Error('找不到牌堆')
   }
   // console.log('load deck', name, lines)
   const deckItems = []
@@ -94,7 +94,7 @@ function _safeParseWeight(identifier, weight, roll) {
   try {
     return roll(weight).total
   } catch (e) {
-    console.warn(`[牌堆插件]解析${identifier}的权重 ${weight} 格式不正确，将视为 1`)
+    console.warn(`[牌堆]解析${identifier}的权重 ${weight} 格式不正确，将视为 1`)
     return 1
   }
 }
@@ -105,10 +105,10 @@ function _safeParseWeight(identifier, weight, roll) {
 function drawDeck(name, putBack) {
   const deck = $deck.decks?.get(name)
   if (!deck) {
-    throw new Error('[牌堆插件]找不到牌堆：' + name)
+    throw new Error('[牌堆]找不到牌堆：' + name)
   }
   if (deck.length === 0) {
-    throw new Error('[牌堆插件]牌堆为空：' + name)
+    throw new Error('[牌堆]牌堆为空：' + name)
   }
   const [item, index] = _randomArray(deck)
   if (!putBack) {
@@ -123,7 +123,7 @@ function drawRandomDeck(putBack) {
     const [name] = _randomArray($deck.publicNames)
     deckName = name
   } catch (e) {
-    throw new Error('[牌堆插件]可用牌堆为空')
+    throw new Error('[牌堆]可用牌堆为空')
   }
   return drawDeck(deckName, putBack)
 }

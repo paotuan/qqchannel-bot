@@ -13,6 +13,7 @@ import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '../../../interface/card/types'
+import { render } from 'mustache'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -34,6 +35,7 @@ export class PluginManager {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
       roll: exp => new DiceRoll(exp),
+      render: render,
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
       sendMessageToChannel: ({ channelId, guildId, botId }, msg, msgType = 'text') => {

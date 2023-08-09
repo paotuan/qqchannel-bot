@@ -15,9 +15,9 @@ function convertOtherFormatFiles() {
       try {
         const data = require(filename)
         replaceAndCopyToFiles(filename, data)
-        console.log(`[牌堆插件]转换成功：${filename}`)
+        console.log(`[牌堆]转换成功：${filename}`)
       } catch (e) {
-        console.error(`[牌堆插件]转换失败：${filename}`, e)
+        console.error(`[牌堆]转换失败：${filename}`, e)
       }
     }
   })
