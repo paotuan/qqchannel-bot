@@ -1,13 +1,14 @@
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
 import * as fs from 'fs'
 import * as glob from 'glob'
-import { makeAutoObservable } from 'mobx'
+import { autorun, makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
 import type { ICard, ICardData } from '../../interface/card/types'
 import { createCard } from '../../interface/card'
 
 const dir = './cards'
+const LINK_FILE_NAME = '/__link.json'
 
 type LinkMap = Record<string, string> // userId => cardName
 
@@ -26,6 +27,7 @@ export class CardManager {
     makeAutoObservable<this, 'wss' | 'cardCache'>(this, { wss: false, cardCache: false })
     this.wss = wss
     this.initCardFiles()
+    autorun(() => this._saveLinkData())
   }
 
   private initCardFiles() {
@@ -37,11 +39,22 @@ export class CardManager {
       const files: string[] = glob.sync(`${dir}/*.json`)
       files.forEach(filename => {
         const str = fs.readFileSync(filename, 'utf8')
-        try {
-          const card = handleCardUpgrade(JSON.parse(str) as ICardData)
-          this.cardMap[card.name] = card
-        } catch (e) {
-          console.log(`[Card] ${filename} 解析失败`)
+        if (filename.endsWith(LINK_FILE_NAME)) {
+          // 人物卡关联
+          try {
+            const link = JSON.parse(str)
+            Object.assign(this.channelLinkMap, link)
+          } catch (e) {
+            console.log('[Card] 人物卡关联 解析失败')
+          }
+        } else {
+          // 人物卡文件
+          try {
+            const card = handleCardUpgrade(JSON.parse(str) as ICardData)
+            this.cardMap[card.name] = card
+          } catch (e) {
+            console.log(`[Card] ${filename} 解析失败`)
+          }
         }
       })
     } catch (e) {
@@ -71,6 +84,17 @@ export class CardManager {
     fs.writeFile(`${dir}/${cardName}.json`, JSON.stringify(cardData), (e) => {
       if (e) {
         console.error('[Card] 人物卡写文件失败', e)
+      }
+    })
+  }
+
+  private _saveLinkData() {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir)
+    }
+    fs.writeFile(`${dir}${LINK_FILE_NAME}`, JSON.stringify(this.channelLinkMap), (e) => {
+      if (e) {
+        console.error('[Card] 人物卡写关联失败', e)
       }
     })
   }
