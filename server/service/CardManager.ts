@@ -146,7 +146,7 @@ function handleCardUpgrade(card: any) {
     card.abilities = []
     card.version = 3
   }
-  if (card.version === 3) {
+  if (card.version < 17) {
     card.basic.AGE = card.basic.age
     delete card.basic.age
     card.basic.HP = card.basic.hp
@@ -173,7 +173,7 @@ function handleCardUpgrade(card: any) {
     card.type = 'coc'
     card.version = 17 // 1.3.0
   }
-  if (card.version === 17) {
+  if (card.version < 18) {
     if (card.type === 'dnd') {
       card.jobAbilities = []
       card.specialists = []
