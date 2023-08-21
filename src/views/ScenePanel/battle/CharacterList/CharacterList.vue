@@ -30,14 +30,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneActor, ISceneNpc, useSceneStore } from '../../../store/scene'
+import { ISceneActor, ISceneNpc, useSceneStore } from '../../../../store/scene'
 import { computed } from 'vue'
 import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import CharacterListItemActor from './CharacterListItemActor.vue'
 import SeqInput from './SeqInput.vue'
 import CharacterListItemNpc from './CharacterListItemNpc.vue'
-import ws from '../../../api/ws'
-import type { IRiSetReq } from '../../../../interface/common'
+import ws from '../../../../api/ws'
+import type { IRiSetReq } from '../../../../../interface/common'
 
 const sceneStore = useSceneStore()
 const charaList = computed(() => sceneStore.charactersSorted)

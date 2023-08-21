@@ -35,12 +35,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneNpc, useSceneStore } from '../../../store/scene'
+import { ISceneNpc, useSceneStore } from '../../../../store/scene'
 import { DocumentTextIcon, MapPinIcon, TrashIcon, Square2StackIcon } from '@heroicons/vue/24/outline'
 import CharacterHpBar from './CharacterHpBar.vue'
 import { computed, ref } from 'vue'
-import ws from '../../../api/ws'
-import type { IRiDeleteReq } from '../../../../interface/common'
+import ws from '../../../../api/ws'
+import type { IRiDeleteReq } from '../../../../../interface/common'
 
 const props = defineProps<{ chara: ISceneNpc }>()
 

@@ -31,15 +31,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneActor, useSceneStore } from '../../../store/scene'
+import { ISceneActor, useSceneStore } from '../../../../store/scene'
 import { computed } from 'vue'
-import { useUserStore } from '../../../store/user'
+import { useUserStore } from '../../../../store/user'
 import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outline'
-import { useCardStore } from '../../../store/card'
-import { useUIStore } from '../../../store/ui'
+import { useCardStore } from '../../../../store/card'
+import { useUIStore } from '../../../../store/ui'
 import CharacterHpBar from './CharacterHpBar.vue'
-import ws from '../../../api/ws'
-import type { IRiDeleteReq, IUser } from '../../../../interface/common'
+import ws from '../../../../api/ws'
+import type { IRiDeleteReq, IUser } from '../../../../../interface/common'
 
 const props = defineProps<{ chara: ISceneActor }>()
 
