@@ -1,10 +1,11 @@
 <template>
   <div
-    class="absolute top-0 bottom-0 -right-4 bg-base-100 p-4 rounded-l-xl shadow-lg transition-all"
-    :class="{ /*'translate-x-[19rem]': collapse*/ 'w-[22rem]': !panelCollapse, 'w-0': panelCollapse }"
+    class="absolute top-0 bottom-0 -right-4 bg-base-100 p-4 rounded-l-xl shadow-lg"
+    :style="{ width: panelWidth + 'px' }"
   >
+    <DragResizer @offset="onDrag" />
     <!-- 主体内容 -->
-    <div v-show="!panelCollapse" class="flex flex-col gap-2 h-full">
+    <div class="flex flex-col gap-2 h-full">
       <TimeIndicator />
       <div class="h-px bg-base-200 my-2" />
       <BattleTurnIndicator />
@@ -21,14 +22,6 @@
         <button class="btn btn-secondary w-1/2" @click="battleLogDialogVisible = true">发送战报</button>
       </div>
     </div>
-    <!-- 折叠按钮 -->
-    <button
-      class="btn btn-sm btn-circle btn-outline border-base-300 bg-base-100 absolute -left-4 bottom-2"
-      @click="panelCollapse = !panelCollapse"
-    >
-      <ChevronLeftIcon v-if="panelCollapse" class="w-4 h-4" />
-      <ChevronRightIcon v-else class="w-4 h-4" />
-    </button>
     <!-- NPC 编辑弹窗 -->
     <NpcCardDialog />
     <!-- 发送战报弹窗 -->
@@ -36,7 +29,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 import TimeIndicator from './TimeIndicator.vue'
 import BattleTurnIndicator from './BattleTurnIndicator.vue'
@@ -45,9 +37,12 @@ import CharacterList from './CharacterList/CharacterList.vue'
 import NpcCardDialog from './NpcCardDialog.vue'
 import { useSceneStore } from '../../../store/scene'
 import BattleLogDialog from './BattleLogDialog.vue'
+import DragResizer from './DragResizer.vue'
 
-const panelCollapse = ref(false)
 const sceneStore = useSceneStore()
-
 const battleLogDialogVisible = ref(false)
+
+// 拖动调整宽度
+const panelWidth = ref(330)
+const onDrag = (offset: number) => panelWidth.value += offset
 </script>
