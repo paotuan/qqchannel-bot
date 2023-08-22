@@ -217,6 +217,9 @@ export const useSceneStore = defineStore('scene', () => {
   // 发送地图图片指示器
   const sendMapImageSignal = ref(false)
 
+  // 人物列表自定义列
+  const customColumns = ref<{ id: string, name: string }[]>([])
+
   return {
     mapList,
     currentMapId,
@@ -235,7 +238,8 @@ export const useSceneStore = defineStore('scene', () => {
     duplicateNpc,
     currentCardNpcName,
     currentCardNpc,
-    sendMapImageSignal
+    sendMapImageSignal,
+    customColumns
   }
 })
 
