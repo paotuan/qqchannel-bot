@@ -1,8 +1,8 @@
 <template>
   <div class="flex-grow" style="height: calc(100% - 200px)">
-    <div class="flex justify-between -mx-4 list-header">
-      <div>角色信息</div>
-      <div class="w-32 flex items-start">
+    <div class="flex -mx-4 list-header">
+      <div class="w-44 flex-none">角色信息</div>
+      <div class="w-32 flex-none flex items-start">
         <span>先攻值</span>
         <div class="tooltip tooltip-left font-medium h-5 -top-0.5" :data-tip="riDesc.join(`&#xa;`)">
           <button class="btn btn-circle btn-xs btn-ghost">
@@ -15,15 +15,17 @@
       <div
         v-for="chara in charaList"
         :key="chara.userId"
-        class="flex justify-between py-2 px-4 cursor-pointer"
+        class="flex py-2 px-4 cursor-pointer"
         :class="{ 'bg-secondary/50': sceneStore.currentSelectedCharacter === chara }"
         @click="sceneStore.currentSelectedCharacter = chara"
       >
-        <CharacterListItemActor v-if="chara.type === 'actor'" :chara="chara" />
-        <CharacterListItemNpc v-if="chara.type === 'npc'" :chara="chara" />
-        <div class="flex-none flex gap-2 items-center">
-          <SeqInput v-model="chara.seq" class="input input-bordered input-sm w-16" @update:modelValue="updateSeq(chara, 'seq', $event)" />
-          <SeqInput v-model="chara.seq2" class="input input-bordered input-sm w-16" @update:modelValue="updateSeq(chara, 'seq2', $event)" />
+        <div class="w-44">
+          <CharacterListItemActor v-if="chara.type === 'actor'" :chara="chara" />
+          <CharacterListItemNpc v-else-if="chara.type === 'npc'" :chara="chara" />
+        </div>
+        <div class="w-32 flex gap-2 items-center">
+          <SeqInput v-model="chara.seq" class="input input-bordered input-sm w-10" @update:modelValue="updateSeq(chara, 'seq', $event)" />
+          <SeqInput v-model="chara.seq2" class="input input-bordered input-sm w-10" @update:modelValue="updateSeq(chara, 'seq2', $event)" />
         </div>
       </div>
     </div>

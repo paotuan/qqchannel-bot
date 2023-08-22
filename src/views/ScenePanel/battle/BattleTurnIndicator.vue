@@ -1,12 +1,14 @@
 <template>
   <div class="flex gap-2 justify-between">
-    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevTurn">
-      <ChevronDoubleLeftIcon class="w-4 h-4" />
-    </button>
-    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevChara">
-      <ChevronLeftIcon class="w-4 h-4" />
-    </button>
-    <div>
+    <div class="flex-none flex gap-2">
+      <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevTurn">
+        <ChevronDoubleLeftIcon class="w-4 h-4" />
+      </button>
+      <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevChara">
+        <ChevronLeftIcon class="w-4 h-4" />
+      </button>
+    </div>
+    <div class="flex-none">
       战斗轮
       <input
         ref="input"
@@ -17,12 +19,14 @@
       />
       轮
     </div>
-    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextChara">
-      <ChevronRightIcon class="w-4 h-4" />
-    </button>
-    <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextTurn">
-      <ChevronDoubleRightIcon class="w-4 h-4" />
-    </button>
+    <div class="flex-none flex gap-2">
+      <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextChara">
+        <ChevronRightIcon class="w-4 h-4" />
+      </button>
+      <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextTurn">
+        <ChevronDoubleRightIcon class="w-4 h-4" />
+      </button>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
