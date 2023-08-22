@@ -218,7 +218,8 @@ export const useSceneStore = defineStore('scene', () => {
   const sendMapImageSignal = ref(false)
 
   // 人物列表自定义列
-  const customColumns = ref<{ id: string, name: string }[]>([])
+  const customColumns = ref<{ id: string, name: string }[]>(loadCustomColumns())
+  watch(customColumns, value => saveCustomColumns(value))
 
   return {
     mapList,
@@ -359,3 +360,19 @@ function temp_loadCharacterList(): (ISceneActor | ISceneNpc)[] {
   }
 }
 // endregion
+
+function saveCustomColumns(list: { id: string, name: string }[]) {
+  const save = JSON.stringify({ version: VERSION_CODE, data: list })
+  localStorage.setItem('scene-customColumns', save)
+}
+
+function loadCustomColumns(): { id: string, name: string }[] {
+  const save = localStorage.getItem('scene-customColumns')
+  if (!save) return []
+  try {
+    const { data } = JSON.parse(save)
+    return data
+  } catch (e) {
+    return []
+  }
+}

@@ -33,6 +33,7 @@ module.exports = {
       'error',
       'never'
     ],
-    '@typescript-eslint/no-non-null-assertion': 'off'
+    '@typescript-eslint/no-non-null-assertion': 'off',
+    'vue/no-mutating-props': 'off',
   }
 }

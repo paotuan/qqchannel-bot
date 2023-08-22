@@ -22,40 +22,18 @@
       </div>
     </div>
     <div class="-mx-4 overflow-y-auto" style="height: calc(100% - 2.5rem)">
-      <div
-        v-for="chara in charaList"
-        :key="chara.userId"
-        class="flex py-2 px-4 cursor-pointer"
-        :class="{ 'bg-secondary/50': sceneStore.currentSelectedCharacter === chara }"
-        @click="sceneStore.currentSelectedCharacter = chara"
-      >
-        <div class="w-44 flex-none">
-          <CharacterListItemActor v-if="chara.type === 'actor'" :chara="chara" />
-          <CharacterListItemNpc v-else-if="chara.type === 'npc'" :chara="chara" />
-        </div>
-        <div class="w-24 flex-none flex gap-2 items-center">
-          <SeqInput v-model="chara.seq" class="input input-bordered input-sm w-10 px-2" @update:modelValue="updateSeq(chara, 'seq', $event)" />
-          <SeqInput v-model="chara.seq2" class="input input-bordered input-sm w-10 px-2" @update:modelValue="updateSeq(chara, 'seq2', $event)" />
-        </div>
-        <div v-for="col in sceneStore.customColumns" :key="col.id" class="w-12 flex-none flex items-center justify-center text-sm">
-          99
-        </div>
-      </div>
+      <CharacterListItem v-for="chara in charaList" :key="chara.userId" :chara="chara" />
     </div>
     <!-- 自定义列 -->
     <CustomColumnDialog v-model:visible="customColumnDialogShow" />
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneActor, ISceneNpc, useSceneStore } from '../../../../store/scene'
+import { useSceneStore } from '../../../../store/scene'
 import { computed, ref } from 'vue'
 import { QuestionMarkCircleIcon, Cog6ToothIcon } from '@heroicons/vue/24/outline'
-import CharacterListItemActor from './CharacterListItemActor.vue'
-import SeqInput from './SeqInput.vue'
-import CharacterListItemNpc from './CharacterListItemNpc.vue'
-import ws from '../../../../api/ws'
-import type { IRiSetReq } from '../../../../../interface/common'
 import CustomColumnDialog from './CustomColumnDialog.vue'
+import CharacterListItem from './CharacterListItem.vue'
 
 const sceneStore = useSceneStore()
 const charaList = computed(() => sceneStore.charactersSorted)
@@ -66,19 +44,6 @@ const riDesc = [
   '若两个角色先攻值相同，可通过额外数值',
   '（填写在第二列）进一步排序'
 ]
-
-const updateSeq = (chara: ISceneActor | ISceneNpc, type: 'seq' | 'seq2', value: number) => {
-  ws.send<IRiSetReq>({
-    cmd: 'ri/set',
-    data: {
-      type: chara.type,
-      id: chara.userId,
-      seq: chara.seq,
-      seq2: chara.seq2,
-      [type]: value
-    }
-  })
-}
 
 const customColumnDialogShow = ref(false)
 </script>
