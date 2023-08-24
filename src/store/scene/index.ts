@@ -251,6 +251,15 @@ function handleSceneMapUpgrade(data: any[]): ISceneMap[] {
     if (!item.data.grid) {
       item.data.grid = getDefaultStageData().grid
     }
+    item.data.items.forEach((token: any) => {
+      // 2. IBaseStageItem 增加 remark，必填 id
+      if (typeof token.remark === 'undefined') {
+        token.remark = token.name
+      }
+      if (!token.id) {
+        token.id = nanoid()
+      }
+    })
     return item
   })
 }

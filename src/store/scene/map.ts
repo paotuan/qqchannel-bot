@@ -5,7 +5,7 @@ import type {
   ICircleToken,
   IRectToken,
   IPolygonToken,
-  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem, IGridConfig
+  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem, IGridConfig, ILayer
 } from './map-types'
 import { ICustomToken, ITextEditConfig, IToken, ITokenEditConfig } from './map-types'
 import { nanoid } from 'nanoid/non-secure'
@@ -50,6 +50,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       background.value = {
         id: nanoid(),
         name: 'map',
+        remark: 'map',
         x: 0 - x.value,
         y: 0 - y.value,
         scaleX: scale,
@@ -87,7 +88,8 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       scaleY: 0.5,
       rotation: 0,
       'data-src': src,
-      name: 'custom-token'
+      name: 'custom-token',
+      remark: '自定义Token'
     }
     items.push(token)
     nextTick(() => {
@@ -105,6 +107,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       scaleY: 1,
       rotation: 0,
       name: 'text',
+      remark: 'text',
       fill: config.fill,
       stroke: config.stroke,
       text: config.text,
@@ -142,6 +145,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
         scaleY: 1,
         rotation: 0,
         name: 'character',
+        remark: 'character',
         'data-chara-type': type,
         'data-chara-id': userId
       }
@@ -173,6 +177,22 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     nextTick(() => {
       selectNodeIds.value = [newItem.id]
     })
+  }
+
+  // 添加图层
+  const addLayer = () => {
+    const layer: ILayer = {
+      name: 'layer',
+      id: nanoid(),
+      x: 0,
+      y: 0,
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+      remark: '图层',
+      children: []
+    }
+    items.push(layer)
   }
 
   // 移到顶层
@@ -225,6 +245,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     addCharacter,
     removeCharacter,
     duplicateToken,
+    addLayer,
     bringToFront,
     bringToBottom,
     destroyNode,
@@ -244,6 +265,7 @@ function createToken(type: string, stageX: number, stageY: number, config: IToke
     stroke: config.stroke,
     strokeWidth: 3,
     name: type,
+    remark: type
   }
   switch (type) {
   case 'circle':

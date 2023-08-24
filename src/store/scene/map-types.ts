@@ -2,13 +2,19 @@
 
 // 基础 token
 export interface IBaseStageItem {
-  name: string
+  name: string // used as type
   id: string
   x: number
   y: number
   scaleX: number
   scaleY: number
   rotation: number
+  remark: string // 备注
+}
+
+// 图层
+export interface ILayer extends IBaseStageItem {
+  children: IBaseStageItem[]
 }
 
 export interface IToken extends IBaseStageItem {
