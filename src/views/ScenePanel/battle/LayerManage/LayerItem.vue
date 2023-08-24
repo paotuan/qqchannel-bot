@@ -1,16 +1,16 @@
 <template>
   <div>
-    <div>{{ item.name }}</div>
-    <div ref="sortableRef" v-if="item.children" class="pl-4" :data-id="item.id">
-      <LayerItem v-for="child in item.children" :key="child.id" :item="child" :level="level + 1" />
+    <div>{{ item['data-remark'] }}</div>
+    <div ref="sortableRef" v-if="(item as ILayer).children" class="pl-4" :data-id="item.id">
+      <LayerItem v-for="child in (item as ILayer).children" :key="child.id" :item="child" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { useSortable } from './useSortable'
+import type { IBaseStageItem, ILayer } from '../../../../store/scene/map-types'
 
-type Item = { name: string, id: string, children?: Item[] }
-const props = defineProps<{ item: Item, level: number }>()
+const props = defineProps<{ item: IBaseStageItem }>()
 
 const sortableRef = useSortable()
 </script>

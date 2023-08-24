@@ -7,12 +7,7 @@
       </KonvaLayer>
       <!-- content -->
       <KonvaLayer>
-        <component
-          :is="getKonvaComponent(item.name)"
-          v-for="item in currentMapData.items"
-          :key="item.id"
-          :config="{ ...item, draggable: true }"
-        />
+        <KwComponent v-for="item in currentMapData.items" :key="item.id" :item="item" />
         <KwTransformer />
       </KonvaLayer>
       <!-- grid -->
@@ -27,10 +22,9 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useSceneStore } from '../../../store/scene'
 import KwImage from './KwImage.vue'
 import KwStage from './KwStage.vue'
-import KwText from './KwText.vue'
 import KwTransformer from './KwTransformer.vue'
-import KwCharacter from './KwCharacter.vue'
 import KwGrid from './KwGrid.vue'
+import KwComponent from './KwComponent.vue'
 
 const sceneStore = useSceneStore()
 const currentMapData = computed(() => sceneStore.currentMap!.stage)
@@ -49,30 +43,4 @@ const backgroundConfig = computed(() => {
   if (!bg) return null
   return { ...bg, listening: false } // 不监听 background 层事件
 })
-
-// item => Konva 映射
-const getKonvaComponent = (type: string) => {
-  switch (type) {
-  case 'circle':
-    return 'KonvaCircle'
-  case 'rect':
-    return 'KonvaRect'
-  case 'polygon':
-    return 'KonvaRegularPolygon'
-  case 'wedge':
-    return 'KonvaWedge'
-  case 'star':
-    return 'KonvaStar'
-  case 'arrow':
-    return 'KonvaArrow'
-  case 'custom-token':
-    return KwImage
-  case 'text':
-    return KwText
-  case 'character':
-    return KwCharacter
-  default:
-    throw new Error('unknown token type: ' + type)
-  }
-}
 </script>

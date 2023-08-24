@@ -61,7 +61,7 @@ const onClick = (e: Konva.KonvaEventObject<any>) => {
     selectNodeIds.value = []
     return
   }
-  // 2. 获取 layer 的直接子元素
+  // 2. 获取 layer 的直接子元素 // todo 此处应该要修改
   const target = getDirectLayerChild(e.target)
   const targetId = target.id()
   // 3. do we press shift or ctrl?
