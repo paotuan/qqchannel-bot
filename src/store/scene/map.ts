@@ -42,6 +42,9 @@ export function useStage(data: IStageData = getDefaultStageData()) {
   const selectNodeIds = ref<string[]>([]) // transformer 选中的 node id
   const grid = reactive<IGridConfig>(data.grid)
 
+  // private 递归查找 item, 返回 item 本身和它所在的 parent
+  const _findItem = (predicate: (value: IBaseStageItem) => boolean) => findItemRecursively(undefined, items, predicate)
+
   // 设置场景背景
   const setBackground = (src: string | null, scale = 0.5) => {
     if (!src) {
@@ -123,11 +126,12 @@ export function useStage(data: IStageData = getDefaultStageData()) {
 
   // 获取场景中的玩家或 npc
   const findCharacter = (type: 'actor' | 'npc', userId: string) => {
-    return items.find(item =>
+    const [chara] = _findItem(item =>
       item.name === 'character' &&
       (item as ICharacterItem)['data-chara-type'] === type &&
       (item as ICharacterItem)['data-chara-id'] === userId
     )
+    return chara
   }
 
   // 添加玩家或 npc 标志。如已经存在，则选中它
@@ -166,13 +170,14 @@ export function useStage(data: IStageData = getDefaultStageData()) {
 
   // 复制 token
   const duplicateToken = (id: string) => {
-    const old = items.find(item => item.id === id)
+    const [old, parent] = _findItem(item => item.id === id)
     if (!old) return
     const newItem = cloneDeep(old)
     newItem.id = nanoid()
     newItem.x = old.x + 20
     newItem.y = old.y + 20
-    items.push(newItem)
+    const list = parent?.children ?? items
+    list.push(newItem)
     // 选中新 item
     nextTick(() => {
       selectNodeIds.value = [newItem.id]
@@ -197,25 +202,28 @@ export function useStage(data: IStageData = getDefaultStageData()) {
 
   // 移到顶层
   const bringToFront = (id: string) => {
-    const targetIndex = items.findIndex(item => item.id === id)
-    if (targetIndex < 0) return
-    const deleted = items.splice(targetIndex, 1)
-    items.push(...deleted)
+    // const targetIndex = items.findIndex(item => item.id === id)
+    // if (targetIndex < 0) return
+    // const deleted = items.splice(targetIndex, 1)
+    // items.push(...deleted)
   }
 
   // 移到底层
   const bringToBottom = (id: string) => {
-    const targetIndex = items.findIndex(item => item.id === id)
-    if (targetIndex < 0) return
-    const deleted = items.splice(targetIndex, 1)
-    items.unshift(...deleted)
+    // const targetIndex = items.findIndex(item => item.id === id)
+    // if (targetIndex < 0) return
+    // const deleted = items.splice(targetIndex, 1)
+    // items.unshift(...deleted)
   }
 
   // 删除元素
   const destroyNode = (id: string) => {
-    const targetIndex = items.findIndex(item => item.id === id)
+    const [item, parent] = _findItem(item => item.id === id)
+    if (!item) return
+    const list = parent?.children ?? items
+    const targetIndex = list.findIndex(i => i === item)
     if (targetIndex < 0) return
-    items.splice(targetIndex, 1)
+    list.splice(targetIndex, 1)
     // 如果 transform 处于选中态也要一并移除
     selectNodeIds.value = []
   }
@@ -308,4 +316,19 @@ function createToken(type: string, stageX: number, stageY: number, config: IToke
   default:
     throw new Error('unknown token type: ' + type)
   }
+}
+
+function findItemRecursively(parent: ILayer | undefined, arr: IBaseStageItem[], predicate: (value: IBaseStageItem) => boolean): [item?: IBaseStageItem, parent?: ILayer] {
+  for (const item of arr) {
+    if (predicate(item)) {
+      return [item, parent]
+    } else if (item.name === 'layer') {
+      const layer = item as ILayer
+      const result = findItemRecursively(layer, layer.children, predicate)
+      if (result[0]) {
+        return result
+      }
+    }
+  }
+  return []
 }

@@ -14,6 +14,7 @@ export interface IBaseStageItem {
 
 // 图层
 export interface ILayer extends IBaseStageItem {
+  name: 'layer'
   children: IBaseStageItem[]
 }
 
