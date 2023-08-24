@@ -48,6 +48,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       background.value = null
     } else {
       background.value = {
+        id: nanoid(),
         name: 'map',
         x: 0 - x.value,
         y: 0 - y.value,
@@ -72,7 +73,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     const token = createToken(type, x.value, y.value, config)
     items.push(token)
     nextTick(() => {
-      selectNodeIds.value = [token.id!]
+      selectNodeIds.value = [token.id]
     })
   }
 
@@ -90,7 +91,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     }
     items.push(token)
     nextTick(() => {
-      selectNodeIds.value = [token.id!]
+      selectNodeIds.value = [token.id]
     })
   }
 
@@ -113,7 +114,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     }
     items.push(token)
     nextTick(() => {
-      selectNodeIds.value = [token.id!]
+      selectNodeIds.value = [token.id]
     })
   }
 
@@ -131,7 +132,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     // 判断是否已经存在了
     const exist = findCharacter(type, userId)
     if (exist) {
-      selectNodeIds.value = [exist.id!]
+      selectNodeIds.value = [exist.id]
     } else {
       const token: ICharacterItem = {
         id: nanoid(),
@@ -146,7 +147,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       }
       items.push(token)
       nextTick(() => {
-        selectNodeIds.value = [token.id!]
+        selectNodeIds.value = [token.id]
       })
     }
   }
@@ -170,7 +171,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     items.push(newItem)
     // 选中新 item
     nextTick(() => {
-      selectNodeIds.value = [newItem.id!]
+      selectNodeIds.value = [newItem.id]
     })
   }
 

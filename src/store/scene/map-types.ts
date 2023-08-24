@@ -3,7 +3,7 @@
 // 基础 token
 export interface IBaseStageItem {
   name: string
-  id?: string
+  id: string
   x: number
   y: number
   scaleX: number
