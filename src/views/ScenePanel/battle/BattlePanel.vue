@@ -1,11 +1,12 @@
 <template>
   <div
-    class="absolute top-0 bottom-0 -right-4 bg-base-100 p-4 rounded-l-xl shadow-lg"
+    class="absolute top-0 bottom-0 -right-4 bg-base-100 p-4 rounded-bl-xl shadow-lg"
     :style="{ width: panelWidth + 'px' }"
   >
+    <PanelTabs v-model="tab" />
     <DragResizer @offset="onDrag" />
     <!-- 主体内容 -->
-    <div class="flex flex-col gap-2 h-full">
+    <div v-show="tab === 'battle'" class="flex flex-col gap-2 h-full">
       <TimeIndicator />
       <div class="h-px bg-base-200 my-2" />
       <BattleTurnIndicator />
@@ -22,6 +23,7 @@
         <button class="btn btn-secondary w-1/2" @click="battleLogDialogVisible = true">发送战报</button>
       </div>
     </div>
+    <LayerManage v-show="tab === 'layer'" />
     <!-- NPC 编辑弹窗 -->
     <NpcCardDialog />
     <!-- 发送战报弹窗 -->
@@ -38,9 +40,12 @@ import NpcCardDialog from './NpcCardDialog.vue'
 import { useSceneStore } from '../../../store/scene'
 import BattleLogDialog from './BattleLogDialog.vue'
 import DragResizer from './DragResizer.vue'
+import PanelTabs from './PanelTabs.vue'
+import LayerManage from './LayerManage/LayerManage.vue'
 
 const sceneStore = useSceneStore()
 const battleLogDialogVisible = ref(false)
+const tab = ref<'battle' | 'layer'>('battle')
 
 // 拖动调整宽度
 const panelWidth = ref(330)
