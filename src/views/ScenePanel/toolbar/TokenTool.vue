@@ -55,7 +55,7 @@ const currentMapData = computed(() => sceneStore.currentMap!.stage)
 const selectedToken = computed<IToken | null>(() => {
   if (currentMapData.value.selectNodeIds.length === 1) { // 只考虑选中单个节点的情况
     const selectedId = currentMapData.value.selectNodeIds[0]
-    const selected = currentMapData.value.items.find(item => item.id === selectedId)
+    const selected = currentMapData.value.getItem(selectedId)
     if (selected) {
       for (const shape of basicShapes) {
         if (selected.name === shape) {

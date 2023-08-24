@@ -7,7 +7,7 @@ import { computed, ref, watch } from 'vue'
 import Konva from 'konva'
 
 const sceneStore = useSceneStore()
-const stageItems = computed(() => sceneStore.currentMap!.stage.items)
+const stage = computed(() => sceneStore.currentMap!.stage)
 const selectNodeIds = computed(() => sceneStore.currentMap!.stage.selectNodeIds)
 
 const transformer = ref()
@@ -24,7 +24,7 @@ const onTransformEnd = () => {
   const transformerNode: Konva.Transformer = transformer.value.getNode()
   const nodes = transformerNode.nodes()
   nodes.forEach(node => {
-    const data = stageItems.value.find(item => item.id && item.id === node.id())
+    const data = stage.value.getItem(node.id())
     if (data) {
       data.x = node.x()
       data.y = node.y()

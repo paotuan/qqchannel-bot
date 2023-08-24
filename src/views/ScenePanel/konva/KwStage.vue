@@ -41,7 +41,7 @@ const onDragEnd = (e: Konva.KonvaEventObject<any>) => {
   } else {
     const id = e.target.id()
     if (id) {
-      const token = currentMapData.value.items.find(item => item.id === id)
+      const token = currentMapData.value.getItem(id)
       if (token) {
         token.x = e.target.x()
         token.y = e.target.y()

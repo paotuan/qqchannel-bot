@@ -1,23 +1,15 @@
-import { nextTick, reactive, ref, toRaw } from 'vue'
+import { nextTick, reactive, readonly, ref, toRaw } from 'vue'
 import type {
-  IStageBackground,
-  IBaseStageItem,
   ICircleToken,
   IRectToken,
   IPolygonToken,
-  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem, IGridConfig, ILayer
+  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem, IGridConfig, ILayer, IStageData,
+  ICustomToken, ITextEditConfig, IToken, ITokenEditConfig
 } from './map-types'
-import { ICustomToken, ITextEditConfig, IToken, ITokenEditConfig } from './map-types'
 import { nanoid } from 'nanoid/non-secure'
 import { cloneDeep } from 'lodash'
-
-export interface IStageData {
-  x: number
-  y: number
-  background: IStageBackground | null
-  items: IBaseStageItem[]
-  grid: IGridConfig
-}
+import { useStageBackground } from './map-background'
+import { useStageItems } from './map-items'
 
 export const getDefaultStageData: () => IStageData = () => ({
   x: 0,
@@ -37,45 +29,15 @@ export const getDefaultStageData: () => IStageData = () => ({
 export function useStage(data: IStageData = getDefaultStageData()) {
   const x = ref(data.x)
   const y = ref(data.y)
-  const background = ref<IStageBackground | null>(data.background)
-  const items = reactive<IBaseStageItem[]>(data.items)
+  const { background, setBackground, setBackgroundScale } = useStageBackground(data, x, y)
+  const { getItem, findItem, addItem, removeItem, items } = useStageItems(data)
   const selectNodeIds = ref<string[]>([]) // transformer 选中的 node id
   const grid = reactive<IGridConfig>(data.grid)
-
-  // private 递归查找 item, 返回 item 本身和它所在的 parent
-  const _findItem = (predicate: (value: IBaseStageItem) => boolean) => findItemRecursively(undefined, items, predicate)
-
-  // 设置场景背景
-  const setBackground = (src: string | null, scale = 0.5) => {
-    if (!src) {
-      background.value = null
-    } else {
-      background.value = {
-        id: nanoid(),
-        name: 'map',
-        remark: 'map',
-        x: 0 - x.value,
-        y: 0 - y.value,
-        scaleX: scale,
-        scaleY: scale,
-        rotation: 0,
-        'data-src': src
-      }
-    }
-  }
-
-  // 设置背景缩放
-  const setBackgroundScale = (scale: number) => {
-    if (background.value) {
-      background.value.scaleX = scale
-      background.value.scaleY = scale
-    }
-  }
 
   // 添加 token
   const addToken = (type: string, config: ITokenEditConfig) => {
     const token = createToken(type, x.value, y.value, config)
-    items.push(token)
+    addItem(token)
     nextTick(() => {
       selectNodeIds.value = [token.id]
     })
@@ -90,11 +52,12 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       scaleX: 0.5,
       scaleY: 0.5,
       rotation: 0,
+      visible: true,
       'data-src': src,
       name: 'custom-token',
-      remark: '自定义Token'
+      'data-remark': '自定义Token'
     }
-    items.push(token)
+    addItem(token)
     nextTick(() => {
       selectNodeIds.value = [token.id]
     })
@@ -109,8 +72,9 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       scaleX: 1,
       scaleY: 1,
       rotation: 0,
+      visible: true,
       name: 'text',
-      remark: 'text',
+      'data-remark': 'text',
       fill: config.fill,
       stroke: config.stroke,
       text: config.text,
@@ -118,7 +82,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       fontSize: 18,
       padding: 5
     }
-    items.push(token)
+    addItem(token)
     nextTick(() => {
       selectNodeIds.value = [token.id]
     })
@@ -126,7 +90,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
 
   // 获取场景中的玩家或 npc
   const findCharacter = (type: 'actor' | 'npc', userId: string) => {
-    const [chara] = _findItem(item =>
+    const [chara] = findItem(item =>
       item.name === 'character' &&
       (item as ICharacterItem)['data-chara-type'] === type &&
       (item as ICharacterItem)['data-chara-id'] === userId
@@ -148,12 +112,13 @@ export function useStage(data: IStageData = getDefaultStageData()) {
         scaleX: 1,
         scaleY: 1,
         rotation: 0,
+        visible: true,
         name: 'character',
-        remark: 'character',
+        'data-remark': 'character',
         'data-chara-type': type,
         'data-chara-id': userId
       }
-      items.push(token)
+      addItem(token)
       nextTick(() => {
         selectNodeIds.value = [token.id]
       })
@@ -170,14 +135,13 @@ export function useStage(data: IStageData = getDefaultStageData()) {
 
   // 复制 token
   const duplicateToken = (id: string) => {
-    const [old, parent] = _findItem(item => item.id === id)
+    const [old, parent] = findItem(item => item.id === id)
     if (!old) return
     const newItem = cloneDeep(old)
     newItem.id = nanoid()
     newItem.x = old.x + 20
     newItem.y = old.y + 20
-    const list = parent?.children ?? items
-    list.push(newItem)
+    addItem(newItem, parent)
     // 选中新 item
     nextTick(() => {
       selectNodeIds.value = [newItem.id]
@@ -194,10 +158,11 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       scaleX: 1,
       scaleY: 1,
       rotation: 0,
-      remark: '图层',
+      visible: true,
+      'data-remark': '图层',
       children: []
     }
-    items.push(layer)
+    addItem(layer)
   }
 
   // 移到顶层
@@ -218,14 +183,12 @@ export function useStage(data: IStageData = getDefaultStageData()) {
 
   // 删除元素
   const destroyNode = (id: string) => {
-    const [item, parent] = _findItem(item => item.id === id)
-    if (!item) return
-    const list = parent?.children ?? items
-    const targetIndex = list.findIndex(i => i === item)
-    if (targetIndex < 0) return
-    list.splice(targetIndex, 1)
-    // 如果 transform 处于选中态也要一并移除
-    selectNodeIds.value = []
+    const item = getItem(id)
+    if (item) {
+      removeItem(item)
+      // 如果 transform 处于选中态也要一并移除
+      selectNodeIds.value = []
+    }
   }
 
   const toJson: () => IStageData = () => ({
@@ -245,7 +208,8 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     setBackground,
     setBackgroundScale,
     selectNodeIds,
-    items,
+    items: readonly(items),
+    getItem,
     grid,
     addToken,
     addCustomToken,
@@ -269,11 +233,12 @@ function createToken(type: string, stageX: number, stageY: number, config: IToke
     scaleX: 1,
     scaleY: 1,
     rotation: 0,
+    visible: true,
     fill: config.fill,
     stroke: config.stroke,
     strokeWidth: 3,
     name: type,
-    remark: type
+    'data-remark': type
   }
   switch (type) {
   case 'circle':
@@ -316,19 +281,4 @@ function createToken(type: string, stageX: number, stageY: number, config: IToke
   default:
     throw new Error('unknown token type: ' + type)
   }
-}
-
-function findItemRecursively(parent: ILayer | undefined, arr: IBaseStageItem[], predicate: (value: IBaseStageItem) => boolean): [item?: IBaseStageItem, parent?: ILayer] {
-  for (const item of arr) {
-    if (predicate(item)) {
-      return [item, parent]
-    } else if (item.name === 'layer') {
-      const layer = item as ILayer
-      const result = findItemRecursively(layer, layer.children, predicate)
-      if (result[0]) {
-        return result
-      }
-    }
-  }
-  return []
 }

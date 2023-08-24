@@ -3,7 +3,8 @@ import { computed, reactive, ref, toRaw, watch } from 'vue'
 import { useIndexedDBStore } from '../../utils/db'
 import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
-import { getDefaultStageData, IStageData, useStage } from './map'
+import { getDefaultStageData, useStage } from './map'
+import type { IStageData } from './map-types'
 import type { IRiItem } from '../../../interface/common'
 import ws from '../../api/ws'
 import type { IRiSetReq } from '../../../interface/common'
@@ -252,12 +253,12 @@ function handleSceneMapUpgrade(data: any[]): ISceneMap[] {
       item.data.grid = getDefaultStageData().grid
     }
     item.data.items.forEach((token: any) => {
-      // 2. IBaseStageItem 增加 remark，必填 id
-      if (typeof token.remark === 'undefined') {
-        token.remark = token.name
+      // 2. IBaseStageItem 增加 remark, visible
+      if (typeof token['data-remark'] === 'undefined') {
+        token['data-remark'] = token.name
       }
-      if (!token.id) {
-        token.id = nanoid()
+      if (typeof token.visible === 'undefined') {
+        token.visible = true
       }
     })
     return item

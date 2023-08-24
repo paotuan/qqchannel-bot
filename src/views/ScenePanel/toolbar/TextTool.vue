@@ -27,7 +27,7 @@ const currentMapData = computed(() => sceneStore.currentMap!.stage)
 const selectedText = computed<ITextLabel | null>(() => {
   if (currentMapData.value.selectNodeIds.length === 1) { // 只考虑选中单个节点的情况
     const selectedId = currentMapData.value.selectNodeIds[0]
-    const selected = currentMapData.value.items.find(item => item.id === selectedId)
+    const selected = currentMapData.value.getItem(selectedId)
     if (selected?.name === 'text') {
       return selected as ITextLabel
     }

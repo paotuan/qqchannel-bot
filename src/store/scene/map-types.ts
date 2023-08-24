@@ -1,5 +1,14 @@
 // 对 stage 上存在的各种元素进行建模，抽象出 map 的数据结构
 
+// map 整体数据结构
+export interface IStageData {
+  x: number
+  y: number
+  background: IStageBackground | null
+  items: IBaseStageItem[]
+  grid: IGridConfig
+}
+
 // 基础 token
 export interface IBaseStageItem {
   name: string // used as type
@@ -9,7 +18,8 @@ export interface IBaseStageItem {
   scaleX: number
   scaleY: number
   rotation: number
-  remark: string // 备注
+  visible: boolean
+  'data-remark': string // 备注
 }
 
 // 图层

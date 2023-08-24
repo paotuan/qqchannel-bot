@@ -78,7 +78,7 @@ const selectToolbar = (item: ToolbarItem | null) => toolbarItem.value = item ===
 // region 选择 token 逻辑
 watch(() => currentMap.value?.stage.selectNodeIds, ids => {
   if (ids && ids.length === 1) {
-    const token = currentMap.value!.stage.items.find(item => item.id === ids[0])
+    const token = currentMap.value!.stage.getItem(ids[0])
     if (!token) return
     // 切换到对应的菜单，以供编辑
     if (token.name === 'text') {
@@ -92,7 +92,7 @@ watch(() => currentMap.value?.stage.selectNodeIds, ids => {
 
 // // region 右键事件
 const contextMenuTokenId = ref<string | null>(null) // 触发右键的 Konva Node
-const contextMenuToken = computed(() => contextMenuTokenId.value ? currentMap.value?.stage.items.find(item => item.id === contextMenuTokenId.value) : undefined)
+const contextMenuToken = computed(() => contextMenuTokenId.value ? currentMap.value?.stage.getItem(contextMenuTokenId.value) : undefined)
 const contextMenuRef = ref<HTMLUListElement>() // 右键菜单 elem
 // 点击右键显示菜单
 const onContextMenu = ({ id, x, y }: { id: string, x: number, y: number }) => {
