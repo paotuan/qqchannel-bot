@@ -1,6 +1,6 @@
 <template>
   <template v-if="item.name === 'layer'">
-    <KonvaGroup>
+    <KonvaGroup :config="item">
       <KwComponent v-for="child in (item as ILayer).children" :key="child.id" :item="child" />
     </KonvaGroup>
   </template>

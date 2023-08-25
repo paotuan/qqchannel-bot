@@ -1,4 +1,4 @@
-import { nextTick, reactive, readonly, ref, toRaw } from 'vue'
+import { nextTick, reactive, ref, toRaw } from 'vue'
 import type {
   ICircleToken,
   IRectToken,
@@ -30,7 +30,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
   const x = ref(data.x)
   const y = ref(data.y)
   const { background, setBackground, setBackgroundScale } = useStageBackground(data, x, y)
-  const { getItem, findItem, addItem, removeItem, items } = useStageItems(data)
+  const { getItem, findItem, addItem, removeItem, moveItem, items } = useStageItems(data)
   const selectNodeIds = ref<string[]>([]) // transformer 选中的 node id
   const grid = reactive<IGridConfig>(data.grid)
 
@@ -208,8 +208,9 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     setBackground,
     setBackgroundScale,
     selectNodeIds,
-    items: readonly(items),
+    items,
     getItem,
+    moveItem,
     grid,
     addToken,
     addCustomToken,

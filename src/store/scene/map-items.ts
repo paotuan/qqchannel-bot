@@ -1,11 +1,11 @@
 import type { IStageData, IBaseStageItem, ILayer } from './map-types'
-import { reactive, shallowRef } from 'vue'
+import { reactive } from 'vue'
 
 export function useStageItems(data: IStageData) {
   const items = reactive<IBaseStageItem[]>(data.items)
-  const itemsMap = shallowRef(items2Map(data.items)) // 以 id 索引
+  const itemsMap = reactive(items2Map(data.items, {})) // 以 id 索引
 
-  const getItem = (id: string) => itemsMap.value.get(id)
+  const getItem = (id: string) => itemsMap[id]
 
   // 递归查找 item, 返回 item 本身和它所在的 parent
   const findItem = (predicate: (value: IBaseStageItem) => boolean) => findItemRecursively(undefined, items, predicate)
@@ -13,7 +13,7 @@ export function useStageItems(data: IStageData) {
   const addItem = (item: IBaseStageItem, parent?: ILayer) => {
     const list = parent?.children ?? items
     list.push(item)
-    itemsMap.value.set(item.id, item)
+    itemsMap[item.id] = item
   }
 
   const removeItem = (item: IBaseStageItem) => {
@@ -26,10 +26,19 @@ export function useStageItems(data: IStageData) {
     list.splice(targetIndex, 1)
     // 2. 从 map 中删除自己和所有 child
     const ids = getItemIdsRecursively(realItem, [])
-    ids.forEach(id => itemsMap.value.delete(id))
+    ids.forEach(id => delete itemsMap[id])
   }
 
-  return { getItem, findItem, addItem, removeItem, items }
+  // 拖动排序
+  const moveItem = (from: string | undefined, fromIndex: number, to: string | undefined, toIndex: number) => {
+    const fromList = from ? (getItem(from) as ILayer)?.children : items
+    const toList = to ? (getItem(to) as ILayer)?.children : items
+    if (!fromList || !toList) return // 理论上不可能
+    const [movedItem] = fromList.splice(fromIndex, 1)
+    toList.splice(toIndex, 0, movedItem)
+  }
+
+  return { getItem, findItem, addItem, removeItem, moveItem, items }
 }
 
 function findItemRecursively(parent: ILayer | undefined, arr: IBaseStageItem[], predicate: (value: IBaseStageItem) => boolean): [item?: IBaseStageItem, parent?: ILayer] {
@@ -55,10 +64,13 @@ function getItemIdsRecursively(item: IBaseStageItem, ids: string[]) {
   return ids
 }
 
-function items2Map(items: IBaseStageItem[]) {
-  const map = new Map<string, IBaseStageItem>()
-  for (const item of items) {
-    map.set(item.id, item)
-  }
-  return map
+function items2Map(items: IBaseStageItem[], obj: Record<string, IBaseStageItem>) {
+  items.forEach(item => {
+    obj[item.id] = item
+    if (item.name === 'layer') {
+      const layer = item as ILayer
+      items2Map(layer.children, obj)
+    }
+  })
+  return obj
 }
