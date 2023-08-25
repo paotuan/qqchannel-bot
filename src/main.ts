@@ -6,11 +6,11 @@ import VueKonva from 'vue-konva'
 import './api'
 import { useUIStore } from './store/ui'
 
-const pinia = createPinia()
 const app = createApp(App)
-
-app.use(pinia)
 app.use(VueKonva, { prefix: 'Konva'})
+
+const pinia = createPinia()
+app.use(pinia)
 
 // set theme from localstorage
 const ui = useUIStore()
