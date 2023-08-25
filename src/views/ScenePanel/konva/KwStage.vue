@@ -61,7 +61,7 @@ const onClick = (e: Konva.KonvaEventObject<any>) => {
     selectNodeIds.value = []
     return
   }
-  // 2. 获取 layer 的直接子元素 // todo 此处应该要修改
+  // 2. 获取 layer 的直接子元素
   const target = getDirectLayerChild(e.target)
   const targetId = target.id()
   // 3. do we press shift or ctrl?
@@ -105,13 +105,15 @@ const onContextMenu = (e: Konva.KonvaEventObject<any>) => {
   })
 }
 
-// 选择 layer 的直接子元素
+// 选择 layer/group 的直接子元素
 function getDirectLayerChild(node: Konva.Node) {
   let target = node
+  // 目前看下来，点击事件应该是选不到 Konva.Group 的
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const ancestor = target.getAncestors()[0]
-    if (ancestor instanceof Konva.Layer) {
+    // konva layer 或我们自定义的图层。不能判断 Konva.Group, 因为不是所有的 Group 都是 layer，还有 character 组合的情况
+    if (ancestor instanceof Konva.Layer || ancestor.getAttr('name') === 'layer') {
       return target
     }
     target = ancestor

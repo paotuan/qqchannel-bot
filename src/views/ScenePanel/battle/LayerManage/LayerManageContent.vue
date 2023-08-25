@@ -3,7 +3,7 @@
     <button class="btn btn-primary btn-sm gap-2 w-28" @click="createNewLayer">
       <PlusCircleIcon class="w-4 h-4"/>新增图层
     </button>
-    <div ref="sortableRef">
+    <div ref="sortableRef" class="mt-4">
       <LayerItem v-for="item in currentMapData.items" :key="item.id" :item="item" />
     </div>
   </div>

@@ -16,8 +16,11 @@ const labelConfig = computed(() => ({
   y: props.config.y,
   scaleX: props.config.scaleX,
   scaleY: props.config.scaleY,
+  rotation: props.config.rotation,
   draggable: true,
-  name: props.config.name
+  name: props.config.name,
+  visible: props.config.visible,
+  'data-remark': props.config['data-remark']
 }))
 
 const tagConfig = computed(() => ({
