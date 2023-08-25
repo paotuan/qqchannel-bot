@@ -43,6 +43,7 @@ const sortableRef = useSortable()
 const sceneStore = useSceneStore()
 const currentMapData = computed(() => sceneStore.currentMap!.stage)
 const selectSelfOnStage = () => {
+  if (isLayer.value && (item.value as ILayer).children.length === 0) return // layer 没内容不给选中
   currentMapData.value.selectNodeIds = [item.value.id]
 }
 
