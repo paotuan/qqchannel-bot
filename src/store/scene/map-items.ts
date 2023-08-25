@@ -38,6 +38,10 @@ export function useStageItems(data: IStageData) {
     toList.splice(toIndex, 0, movedItem)
   }
 
+  // const _inspect = () => {
+  //   return items.map(item => item['data-remark']).join(',')
+  // }
+
   return { getItem, findItem, addItem, removeItem, moveItem, items }
 }
 

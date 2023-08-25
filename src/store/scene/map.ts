@@ -1,4 +1,4 @@
-import { nextTick, reactive, ref, toRaw } from 'vue'
+import { reactive, ref, toRaw } from 'vue'
 import type {
   ICircleToken,
   IRectToken,
@@ -10,6 +10,7 @@ import { nanoid } from 'nanoid/non-secure'
 import { cloneDeep } from 'lodash'
 import { useStageBackground } from './map-background'
 import { useStageItems } from './map-items'
+import { useStageSelect } from './map-select'
 
 export const getDefaultStageData: () => IStageData = () => ({
   x: 0,
@@ -31,16 +32,14 @@ export function useStage(data: IStageData = getDefaultStageData()) {
   const y = ref(data.y)
   const { background, setBackground, setBackgroundScale } = useStageBackground(data, x, y)
   const { getItem, findItem, addItem, removeItem, moveItem, items } = useStageItems(data)
-  const selectNodeIds = ref<string[]>([]) // transformer 选中的 node id
+  const { selectNodeIds, selectNode, clearSelection } = useStageSelect()
   const grid = reactive<IGridConfig>(data.grid)
 
   // 添加 token
   const addToken = (type: string, config: ITokenEditConfig) => {
     const token = createToken(type, x.value, y.value, config)
     addItem(token)
-    nextTick(() => {
-      selectNodeIds.value = [token.id]
-    })
+    selectNode(token)
   }
 
   // 添加自定义图片 token
@@ -58,9 +57,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       'data-remark': '自定义Token'
     }
     addItem(token)
-    nextTick(() => {
-      selectNodeIds.value = [token.id]
-    })
+    selectNode(token)
   }
 
   // 添加文字标签
@@ -83,9 +80,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       padding: 5
     }
     addItem(token)
-    nextTick(() => {
-      selectNodeIds.value = [token.id]
-    })
+    selectNode(token)
   }
 
   // 获取场景中的玩家或 npc
@@ -119,9 +114,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
         'data-chara-id': userId
       }
       addItem(token)
-      nextTick(() => {
-        selectNodeIds.value = [token.id]
-      })
+      selectNode(token)
     }
   }
 
@@ -143,9 +136,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     newItem.y = old.y + 20
     addItem(newItem, parent)
     // 选中新 item
-    nextTick(() => {
-      selectNodeIds.value = [newItem.id]
-    })
+    selectNode(newItem)
   }
 
   // 添加图层
@@ -167,18 +158,29 @@ export function useStage(data: IStageData = getDefaultStageData()) {
 
   // 移到顶层
   const bringToFront = (id: string) => {
-    // const targetIndex = items.findIndex(item => item.id === id)
-    // if (targetIndex < 0) return
-    // const deleted = items.splice(targetIndex, 1)
-    // items.push(...deleted)
+    const [self, parent] = findItem(item => item.id === id)
+    if (!self) return
+    const list = parent?.children ?? items
+    const selfOldIndex = list.indexOf(self)
+    if (selfOldIndex < 0) return // 理论上不可能
+    // 新的 index，如果都是在顶级移动，需要考虑 remove 以后 index - 1
+    moveNode(parent?.id, selfOldIndex, undefined, list === items ? items.length - 1 : items.length)
   }
 
   // 移到底层
   const bringToBottom = (id: string) => {
-    // const targetIndex = items.findIndex(item => item.id === id)
-    // if (targetIndex < 0) return
-    // const deleted = items.splice(targetIndex, 1)
-    // items.unshift(...deleted)
+    const [self, parent] = findItem(item => item.id === id)
+    if (!self) return
+    const list = parent?.children ?? items
+    const selfOldIndex = list.indexOf(self)
+    if (selfOldIndex < 0) return // 理论上不可能
+    moveNode(parent?.id, selfOldIndex, undefined, 0)
+  }
+
+  // 移动元素
+  const moveNode = (from: string | undefined, fromIndex: number, to: string | undefined, toIndex: number) => {
+    moveItem(from, fromIndex, to, toIndex)
+    clearSelection() // move 后 selection 会有问题，干脆 clear
   }
 
   // 删除元素
@@ -187,7 +189,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     if (item) {
       removeItem(item)
       // 如果 transform 处于选中态也要一并移除
-      selectNodeIds.value = []
+      clearSelection()
     }
   }
 
@@ -210,7 +212,7 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     selectNodeIds,
     items,
     getItem,
-    moveItem,
+    moveNode,
     grid,
     addToken,
     addCustomToken,

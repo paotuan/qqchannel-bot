@@ -18,7 +18,7 @@ export function useSortable() {
         swapThreshold: 0.65,
         onEnd: (event) => {
           if (typeof event.oldIndex !== 'undefined' && typeof event.newIndex !== 'undefined') {
-            currentMapData.value.moveItem(event.from.dataset.id, event.oldIndex, event.to.dataset.id, event.newIndex)
+            currentMapData.value.moveNode(event.from.dataset.id, event.oldIndex, event.to.dataset.id, event.newIndex)
           } else {
             console.warn('from:', event.from.dataset.id, '|', event.oldIndex)
             console.warn('to:', event.to.dataset.id, '|', event.newIndex)

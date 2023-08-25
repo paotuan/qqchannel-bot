@@ -1,5 +1,5 @@
 <template>
-  <div class="my-1">
+  <div class="my-1" :key="item.id">
     <div class="flex items-center justify-between gap-4">
       <span class="inline-flex items-center flex-grow">
         <button v-if="isLayer" class="btn btn-xs btn-circle btn-ghost" @click="layerCollapsed = !layerCollapsed">
