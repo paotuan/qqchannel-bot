@@ -91,7 +91,7 @@ function reloadDeck(name, roll) {
 function _safeParseWeight(identifier, weight, roll) {
   if (!weight) return 1 // 默认 1
   try {
-    return roll(weight).total
+    return Math.max(0, Math.round(roll(weight).total)) // 至少保证是自然数吧
   } catch (e) {
     console.warn(`[牌堆]解析${identifier}的权重 ${weight} 格式不正确，将视为 1`)
     return 1
