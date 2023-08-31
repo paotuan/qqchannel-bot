@@ -39,6 +39,7 @@ export class PluginManager {
       render: (arg1, arg2, arg3) => render(arg1, arg2, arg3, { escape: value => value }),
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
+      getLinkedCardUserList: ({ channelId }) => Object.keys(this.wss.cards.getLinkMap(channelId)),
       sendMessageToChannel: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {
         const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)
         if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
@@ -66,7 +67,8 @@ export class PluginManager {
         } else {
           return user.sendMessage({ image: msg })
         }
-      }
+      },
+      _context: this.wss
     } // todo: getItem/setItem
   }
 

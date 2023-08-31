@@ -7,8 +7,8 @@ module.exports = ({ roll, sendMessageToChannel }) => {
     const total = list.reduce((a, b) => a + b, 0)
     const totalExcludeLuck = total - list[8]
     const maxhp = Math.floor((list[1] + list[2]) / 10)
-    const [db] = getDbAndBuild(list[0], list[2])
-    return `力量:${list[0]} 敏捷:${list[3]} 意志:${list[6]}\n体质:${list[1]} 外貌:${list[4]} 教育:${list[7]}\n体型:${list[2]} 智力:${list[5]} 幸运:${list[8]}\nHP:${maxhp} DB:${db} 总计:${totalExcludeLuck}/${total}`
+    const [db, build] = getDbAndBuild(list[0], list[2])
+    return `力量:${list[0]}  敏捷:${list[3]}  意志:${list[6]}\n体质:${list[1]}  外貌:${list[4]}  教育:${list[7]}\n体型:${list[2]}  智力:${list[5]}  幸运:${list[8]}\n血量:${maxhp}  体格:${build}  DB:${db}\n总计:${totalExcludeLuck}/${total}`
   }
 
   function getDbAndBuild(str, siz) {

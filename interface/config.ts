@@ -120,8 +120,10 @@ export interface IPluginRegisterContext {
   render: (template: string, view: any, partials?: any) => string
   getCard: (env: ICustomReplyEnv) => ICard | undefined
   saveCard: (card: ICard) => void
+  getLinkedCardUserList: (env: ICustomReplyEnv) => string[] // 获取当前频道关联了人物卡的 user id 列表
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  _context: any // 逃生通道，通常不要使用
 }
 
 export interface IPluginConfig {
