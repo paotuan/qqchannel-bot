@@ -1,7 +1,7 @@
 /* eslint-env node */
 module.exports = (context) => {
   const { convertOtherFormatFiles } = require('./convert')
-  const { loadDecks, reloadAllDecks, reloadDeck, drawDeck, drawRandomDeck } = require('./deck')
+  const { loadDecks, reloadAllDecks, reloadDeck, drawDeck, drawRandomDeck, getAllDeckNames } = require('./deck')
   const texts = require('./texts.json')
   const { roll, render, sendMessageToUser } = context
   // 1. 从其他格式转换
@@ -23,6 +23,7 @@ module.exports = (context) => {
     let deckName = ''
     let hidden = false
     let isReset = false
+    let isList = false
     content = content.trim()
     if (content.startsWith('h')) {
       hidden = true
@@ -32,8 +33,12 @@ module.exports = (context) => {
       isReset = true
       content = content.slice(5).trim()
     }
+    if (content.startsWith('list')) {
+      isList = true
+      content = content.slice(4).trim()
+    }
     deckName = content
-    return { deckName, hidden, isReset }
+    return { deckName, hidden, isReset, isList }
   }
 
   return {
@@ -44,11 +49,11 @@ module.exports = (context) => {
       {
         id: 'draw',
         name: '牌堆抽取',
-        description: '/draw 牌堆名 - 抽取牌堆，省略牌堆名则进行随机选取\n/drawh - 暗抽\n/draw !牌堆名 - 不放回抽取\n/draw reset 牌堆名 - 重置牌堆，省略牌堆名则重置全部',
+        description: '/draw 牌堆名 - 抽取牌堆，省略牌堆名则进行随机选取\n/drawh - 暗抽\n/draw !牌堆名 - 不放回抽取\n/draw reset 牌堆名 - 重置牌堆，省略牌堆名则重置全部\n/draw list - 查看所有可供抽取的牌堆名',
         command: '^\\s*draw(?<content>.*)',
         trigger: 'regex',
         handler(env, matchGroup) {
-          const { deckName, hidden, isReset } = parse(matchGroup.content)
+          const { deckName, hidden, isReset, isList } = parse(matchGroup.content)
           const formatArgs = { ...env, 牌堆名: deckName }
           // reset
           if (isReset) {
@@ -58,6 +63,11 @@ module.exports = (context) => {
               reloadAllDecks(roll)
             }
             return render(texts.resetSuccess, formatArgs)
+          }
+          // list
+          if (isList) {
+            const listNames = getAllDeckNames()
+            return render(texts.deckList) + '\n' + listNames.join('\n')
           }
           // draw
           try {

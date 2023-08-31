@@ -137,4 +137,8 @@ function _randomArray(array) {
 
 // endregion draw
 
-module.exports = { loadDecks, reloadAllDecks, reloadDeck, drawDeck, drawRandomDeck }
+function getAllDeckNames() {
+  return $deck.publicNames || []
+}
+
+module.exports = { loadDecks, reloadAllDecks, reloadDeck, drawDeck, drawRandomDeck, getAllDeckNames }
