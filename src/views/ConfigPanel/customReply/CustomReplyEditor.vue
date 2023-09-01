@@ -26,7 +26,7 @@
         <template v-if="!fromPlugin">
           <div class="py-2 flex items-center">
             当用户的指令
-            <d-native-select v-model="processor.trigger" :options="matchOptions" class="select-bordered select-sm w-32 ml-2" placeholder="选择匹配方式" />
+            <d-native-select v-model="processor.trigger" :options="matchOptions" select-class="select-bordered select-sm" class="w-32 ml-2" placeholder="选择匹配方式" />
             <input v-model="processor.command" type="text" placeholder="请输入匹配词" class="input input-bordered input-sm w-60 mx-2" />
             时，回复：
           </div>

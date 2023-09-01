@@ -31,7 +31,7 @@
             <div ref="rulesPanelRef">
               <div v-for="(rule, i) in config.rules" :key="getRuleRowId(rule)" class="flex gap-2 items-center p-1">
                 <Bars3Icon class="w-4 h-4 cursor-move flex-none sortable-handle"/>
-                <d-native-select v-model="rule.level" :options="ruleLevelOptions" class="select-bordered select-sm w-32" placeholder="成功等级" />
+                <d-native-select v-model="rule.level" :options="ruleLevelOptions" select-class="select-bordered select-sm" class="w-32" placeholder="成功等级" />
                 <input v-model="rule.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
                 <button class="btn btn-circle btn-ghost btn-xs flex-none" :class="{ invisible: config.rules.length <= 1 }" @click="deleteRule(i)">
                   <XMarkIcon class="w-4 h-4" />

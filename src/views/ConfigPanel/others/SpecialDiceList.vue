@@ -8,7 +8,7 @@
       </span>
       <span class="flex items-center gap-2 text-sm">
         <span>谁能修改人物卡？</span>
-        <d-native-select v-model="config.stDice.writable" :options="stOptions" class="select-bordered select-xs w-24" />
+        <d-native-select v-model="config.stDice.writable" :options="stOptions" select-class="select-bordered select-xs" class="w-24" />
       </span>
     </div>
     <!-- 对抗 -->
