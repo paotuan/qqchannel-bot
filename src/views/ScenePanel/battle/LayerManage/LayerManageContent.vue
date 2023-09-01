@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-full flex flex-col">
     <div class="flex justify-between">
       <button class="btn btn-primary btn-sm gap-2 w-28" @click="createNewLayer">
         <PlusCircleIcon class="w-4 h-4"/>新增图层
@@ -8,7 +8,7 @@
           <button class="btn btn-sm btn-circle btn-ghost" @click="$emit('refresh')"><ArrowPathRoundedSquareIcon class="w-4 h-4" /></button>
         </span>
     </div>
-    <div ref="sortableRef" class="mt-4">
+    <div ref="sortableRef" class="mt-4 flex-grow overflow-auto">
       <LayerItem v-for="item in currentMapData.items" :key="item.id" :item="item" />
     </div>
   </div>

@@ -1,5 +1,5 @@
 <template>
-  <div :key="refreshKey">
+  <div :key="refreshKey" class="h-full">
     <template v-if="sceneStore.currentMap">
       <LayerManageContent :key="sceneStore.currentMapId" @refresh="refreshKey++" />
     </template>
