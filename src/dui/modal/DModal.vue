@@ -2,13 +2,13 @@
   <span>
     <input :checked="props.visible" type="checkbox" class="modal-toggle" @change="closeModal" />
     <div class="modal" @click="clickOutside">
-      <div class="modal-box relative" :class="modalClass" @click.stop>
+      <div class="modal-box relative flex flex-col" :class="modalClass" @click.stop>
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="closeModal">✕</button>
         <h3 v-if="props.title" class="font-bold text-lg">{{ props.title }}</h3>
-        <div class="py-4">
+        <div class="py-4 flex-1 overflow-auto">
           <slot></slot>
         </div>
-        <div class="modal-action">
+        <div v-if="$slots.action" class="modal-action">
           <slot name="action"></slot>
         </div>
       </div>
