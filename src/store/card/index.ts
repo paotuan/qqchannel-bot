@@ -18,15 +18,11 @@ export const useCardStore = defineStore('card', () => {
   const cardEditedMap = reactive<Record<string, boolean>>({}) // 标识卡片是否有编辑未保存
   const cardLinkMap = reactive<Record<string, string>>({}) // 卡片名 -> 用户 id
   const selectedCardId = ref('')
-  const showAllCards = ref(true)
 
   // 当前选中的人物卡
   const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : undefined)
   const allCards = computed(() => Object.values(cardMap))
-  // 当前应该展示的人物卡列表
-  const userCardList = computed(() => allCards.value.filter(card => !card.isTemplate))
   const templateCardList = computed(() => allCards.value.filter(card => card.isTemplate))
-  const displayCardList = computed(() => showAllCards.value ? userCardList.value : userCardList.value.filter(card => !!cardLinkMap[card.name]))
   // 已存在的人物卡文件名
   const existNames = computed(() => allCards.value.map(card => card.name))
   const linkedUsers = computed(() => Object.values(cardLinkMap))
@@ -107,15 +103,6 @@ export const useCardStore = defineStore('card', () => {
     })
   }
 
-  // 切换显示/隐藏未关联玩家的人物卡
-  const toggleShowAllCards = () => {
-    showAllCards.value = !showAllCards.value
-    // 判断当前选择的人物卡是否要被隐藏
-    if (!showAllCards.value && selectedCard.value && !linkedUserOf(selectedCard.value!.name)) {
-      selectedCardId.value = ''
-    }
-  }
-
   // 根据用户 id 反查关联卡片
   const getCardOfUser = (userId: string) => {
     for (const cardName of Object.keys(cardLinkMap)) {
@@ -148,8 +135,7 @@ export const useCardStore = defineStore('card', () => {
 
   return {
     selectedCard,
-    showAllCards,
-    displayCardList,
+    allCards,
     templateCardList,
     existNames,
     linkedUsers,
@@ -160,7 +146,6 @@ export const useCardStore = defineStore('card', () => {
     markCardEdited,
     requestSaveCard,
     deleteCard,
-    toggleShowAllCards,
     isEdited,
     linkedUserOf,
     requestLinkUser,
