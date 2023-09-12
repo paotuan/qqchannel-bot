@@ -56,17 +56,24 @@
             <input type="checkbox" class="toggle" :checked="logStore.filterDiceCommand" @change="logStore.toggleFilterDiceCommand()" />
           </label>
         </div>
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">自动滚动到底部</span>
+            <input type="checkbox" class="toggle" :checked="logStore.autoScroll" @change="logStore.toggleAutoScroll()" />
+          </label>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { useLogStore } from '../store/log'
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Bars3Icon, XMarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline'
 import Sortable from 'sortablejs'
 import { useUserStore } from '../store/user'
 import type { ILog } from '../../interface/common'
+import { eventBus } from '../utils'
 
 const logStore = useLogStore()
 const userStore = useUserStore()
@@ -92,7 +99,7 @@ const tooltip = computed(() => {
   }
 })
 
-const sortableRef = ref(null)
+const sortableRef = ref<HTMLDivElement | null>(null)
 onMounted(() => {
   Sortable.create(sortableRef.value!, {
     handle: '.sortable-handle',
@@ -104,4 +111,20 @@ onMounted(() => {
     }
   })
 })
+
+// init scroll 2 bottom
+const scrollToBottomIfNeed = () => {
+  if (logStore.autoScroll) {
+    nextTick(() => {
+      const elem = sortableRef.value
+      if (elem) {
+        elem.scrollTo(0, elem.scrollHeight)
+      }
+    })
+  }
+}
+
+onMounted(() => eventBus.on('client/log/add', scrollToBottomIfNeed))
+onBeforeUnmount(() => eventBus.off('client/log/add', scrollToBottomIfNeed))
+onActivated(scrollToBottomIfNeed)
 </script>

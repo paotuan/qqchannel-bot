@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import type { ILog } from '../../interface/common'
 import { useUserStore } from './user'
-import { gtagEvent } from '../utils'
+import { eventBus, gtagEvent } from '../utils'
 import { useBotStore } from './bot'
 
 export const useLogStore = defineStore('log', {
   state: () => ({
     logs: [] as ILog[],
-    filterDiceCommand: Boolean(localStorage.getItem('config-filterDiceCommand')), // 是否无视指令消息
+    filterDiceCommand: getBooleanConfig('config-filterDiceCommand', false), // 是否无视指令消息
+    autoScroll: getBooleanConfig('config-autoScrollLog', true), // 是否自动滚动到 log 底部
     enableLog: true
   }),
   actions: {
@@ -19,6 +20,7 @@ export const useLogStore = defineStore('log', {
           this.logs.push(...logs)
         }
       }
+      eventBus.emit('client/log/add')
       gtagLogs(logs)
     },
     removeLog(log: ILog) {
@@ -47,6 +49,10 @@ export const useLogStore = defineStore('log', {
     toggleFilterDiceCommand() {
       this.filterDiceCommand = !this.filterDiceCommand
       localStorage.setItem('config-filterDiceCommand', String(this.filterDiceCommand))
+    },
+    toggleAutoScroll() {
+      this.autoScroll = !this.autoScroll
+      localStorage.setItem('config-autoScrollLog', String(this.autoScroll))
     }
   }
 })
@@ -159,4 +165,9 @@ function gtagLogs(logs: ILog[]) {
       gtagEvent('log/botMessage')
     }
   })
+}
+
+function getBooleanConfig(key: string, defaultValue: boolean) {
+  const str = localStorage.getItem(key)
+  return str ? Boolean(str) : defaultValue
 }

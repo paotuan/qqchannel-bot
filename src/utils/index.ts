@@ -1,6 +1,7 @@
 import { useUIStore } from '../store/ui'
 import { useChannelStore } from '../store/channel'
 import { VERSION_NAME } from '../../interface/version'
+import mitt from 'mitt'
 
 export const Toast = {
   success: (msg: string) => useUIStore().toast('success', msg),
@@ -38,3 +39,6 @@ export async function imageUrlToBase64(url: string) {
 export function openHelpDoc(path: string) {
   window.open('https://paotuan.io' + path)
 }
+
+const eventBus = mitt()
+export { eventBus }
