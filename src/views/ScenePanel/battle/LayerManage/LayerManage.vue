@@ -1,7 +1,7 @@
 <template>
   <div :key="refreshKey" class="h-full">
     <template v-if="sceneStore.currentMap">
-      <LayerManageContent :key="sceneStore.currentMapId" @refresh="refreshKey++" />
+      <LayerManageContent :key="sceneStore.currentMapId!" @refresh="refreshKey++" />
     </template>
     <template v-else>
       <div>请在页面左侧选择地图</div>
