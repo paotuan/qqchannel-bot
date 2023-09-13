@@ -1,6 +1,6 @@
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
 import * as fs from 'fs'
-import * as glob from 'glob'
+import { globSync } from 'glob'
 import { autorun, makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
@@ -36,10 +36,11 @@ export class CardManager {
       if (!fs.existsSync(dir)) {
         return
       }
-      const files: string[] = glob.sync(`${dir}/*.json`)
-      files.forEach(filename => {
-        const str = fs.readFileSync(filename, 'utf8')
-        if (filename.endsWith(LINK_FILE_NAME)) {
+      const filesPath = globSync(`${dir}/*.json`, { stat: true, withFileTypes: true })
+      const files = filesPath.map(path=> ({ created: path.birthtimeMs, modified: path.mtimeMs, path: path.relative() }))
+      files.forEach(file => {
+        const str = fs.readFileSync(file.path, 'utf8')
+        if (file.path.endsWith(LINK_FILE_NAME)) {
           // 人物卡关联
           try {
             const link = JSON.parse(str)
@@ -50,10 +51,17 @@ export class CardManager {
         } else {
           // 人物卡文件
           try {
-            const card = handleCardUpgrade(JSON.parse(str) as ICardData)
+            const card = handleCardUpgrade(JSON.parse(str) as ICardData) as ICardData
+            // 补充 created，lastModified if need
+            if (!card.created && file.created) {
+              card.created = file.created
+            }
+            if (!card.lastModified && file.modified) {
+              card.lastModified = file.modified
+            }
             this.cardMap[card.name] = card
           } catch (e) {
-            console.log(`[Card] ${filename} 解析失败`)
+            console.log(`[Card] ${file.path} 解析失败`)
           }
         }
       })
@@ -205,6 +213,10 @@ function handleCardUpgrade(card: any) {
     }
     card.isTemplate = false
     card.version = 18
+  }
+  if (card.version < 22) {
+    card.created = 0 // 后面赋值
+    card.version = 22
   }
   return card
 }

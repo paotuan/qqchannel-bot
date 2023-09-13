@@ -4,6 +4,7 @@ export interface ICardData {
   type: CardType
   version: number
   name: string // 目前作唯一标识
+  created: number // 创建时间
   lastModified: number // 用于目前前后端同步判断
   isTemplate: boolean // 是否用作模板
 }

@@ -18,6 +18,7 @@ export function getGeneralCardProto(name: string): IGeneralCardData {
     type: 'general',
     version: VERSION_CODE,
     name: name || '未命名',
+    created: Date.now(),
     lastModified: Date.now(),
     isTemplate: false,
     ext: '',

@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import * as glob from 'glob'
+import { globSync } from 'glob'
 import { makeAutoObservable } from 'mobx'
 import type { Wss } from '../../app/wss'
 import type { IChannelConfig } from '../../../interface/config'
@@ -66,7 +66,7 @@ export class ConfigManager {
     try {
       console.log('[Config] 开始读取配置')
       if (fs.existsSync(CONFIG_DIR)) {
-        const files: string[] = glob.sync(`${CONFIG_DIR}/*.json`)
+        const files: string[] = globSync(`${CONFIG_DIR}/*.json`)
         files.forEach(filename => {
           try {
             const str = fs.readFileSync(filename, 'utf8')

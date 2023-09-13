@@ -153,6 +153,7 @@ function getCardProto(): ICocCardData {
     type: 'coc',
     version: VERSION_CODE,
     name: '铃木翼',
+    created: Date.now(),
     lastModified: Date.now(),
     isTemplate: false,
     basic: {

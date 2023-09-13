@@ -7,6 +7,7 @@ export function getCocCardProto(name?: string): ICocCardData {
     type: 'coc',
     version: VERSION_CODE,
     name: name || '未命名',
+    created: Date.now(),
     lastModified: Date.now(),
     isTemplate: false,
     basic: {
