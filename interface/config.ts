@@ -123,6 +123,7 @@ export interface IPluginRegisterContext {
   getLinkedCardUserList: (env: ICustomReplyEnv) => string[] // 获取当前频道关联了人物卡的 user id 列表
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  _: any // lodash
   _context: any // 逃生通道，通常不要使用
 }
 
