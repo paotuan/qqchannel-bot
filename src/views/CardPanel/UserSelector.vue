@@ -57,7 +57,7 @@ const props = defineProps<{ userId: string | null }>()
 const emit = defineEmits<{ (e: 'select', value: IUser | null): void }>()
 
 const userStore = useUserStore()
-const realUsers = computed(() => userStore.list/*.filter(u => !u.bot)*/)
+const realUsers = computed(() => userStore.list.filter(u => !u.deleted)) // 已退出的用户不显示
 // const botUsers = computed(() => userStore.list.filter(u => u.bot))
 const currentUser = computed(() => props.userId ? userStore.of(props.userId) : null)
 
