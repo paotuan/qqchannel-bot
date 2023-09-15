@@ -1,6 +1,7 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import type { IMessage } from 'qq-guild-bot'
+import { render } from 'mustache'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
 import { convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
@@ -73,22 +74,12 @@ export class CustomReplyManager {
     try {
       if (!processor.items && !processor.handler) throw new Error('没有处理自定义回复的方法')
       const handler = processor.handler ?? randomReplyItem(processor.items!).reply
-      // 替换模板 todo use mustache
+      // 替换模板
       const username = msg.member.nick || msg.author.username || msg.author.id
       const userId = msg.author.id
       const channelId = msg.channel_id
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
-        if (!handler) return '' // 不是 function 必然是 string
-        // 正则的逻辑和 inline roll 一致，但不支持嵌套，没必要
-        return handler.replace(/\{\{\s*([^{}]*)\s*\}\}/g, (_, key) => {
-          if (_matchGroup[key]) {
-            return _matchGroup[key]
-          } else if (key in env) {
-            return env[key as keyof ICustomReplyEnv]
-          } else {
-            return key
-          }
-        })
+        return render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
       })
       const userRole = convertRoleIds(msg.member.roles)
       const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)

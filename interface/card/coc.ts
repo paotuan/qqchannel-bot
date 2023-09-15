@@ -328,7 +328,16 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
         this.data.skills[key] = value
       }
     })
-    // todo 闪避？1/2 dex, 母语 edu
+    // 闪避
+    const shanbiEntry = this.getRawEntry('闪避')
+    if (!shanbiEntry) {
+      this.data.skills['闪避'] = Math.floor(this.data.props.敏捷 / 2)
+    }
+    // 母语
+    const muyuEntry = this.getRawEntry('母语')
+    if (!muyuEntry) {
+      this.data.skills['母语'] = this.data.props.教育
+    }
     this.data.lastModified = Date.now() // 强制认为有更新吧
   }
 
