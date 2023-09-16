@@ -70,7 +70,7 @@ function reloadAllDecks(roll) {
 
 // load 某个牌堆
 function reloadDeck(name, roll) {
-  const lines = $deck.decksProto?.get(name)
+  const lines = $deck.decksProto ? $deck.decksProto.get(name) : undefined
   if (!lines) {
     console.error('[牌堆]找不到牌堆描述', name)
     throw { key: 'error.notFound', args: { 牌堆名: name } }
@@ -102,7 +102,7 @@ function _safeParseWeight(identifier, weight, roll) {
 
 // region draw
 function drawDeck(name, putBack) {
-  const deck = $deck.decks?.get(name)
+  const deck = $deck.decks ? $deck.decks.get(name) : undefined
   if (!deck) {
     throw { key: 'error.notFound', args: { 牌堆名: name } }
   }
@@ -128,7 +128,7 @@ function drawRandomDeck(putBack) {
 }
 
 function _randomArray(array) {
-  if (array?.length === 0) {
+  if (!array || array.length === 0) {
     throw new Error('') // 数据为空，或抽空了
   }
   const index = Math.floor(Math.random() * array.length)
