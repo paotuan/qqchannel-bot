@@ -420,7 +420,7 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.ri.del': s('{{用户名}} 删除先攻：{{#人物列表}}{{人物名}}{{^last}}、{{/last}}{{/人物列表}}'),
     'roll.ri.clear': s('*先攻列表已清空'),
     'roll.sc.unsupported': s(' ……未指定理智值，成功了吗？'),
-    'roll.sc.extra': s('{{#损失值}}\n理智变化：{{旧值}} → {{新值}}{{/损失值}}'),
+    'roll.sc.extra': s('\n{{#损失值}}理智变化：{{旧值}} → {{新值}}{{/损失值}}'),
     'card.empty': s('{{目标用户}}没有关联人物卡'),
     'card.nopermission': s('{{用户名}} 没有修改人物卡的权限'),
     'roll.st.prompt': s('{{at用户}}请指定想要设置的属性名与属性值'),

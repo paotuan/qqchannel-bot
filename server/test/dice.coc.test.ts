@@ -100,7 +100,8 @@ describe('已关联COC人物卡', () => {
 
   test('coc理智检定 inline 嵌套', () => {
     const roller = createDiceRoll('sc[[1d10]]/[[$1+1]]', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 2: 2 = 2')
+    roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 2: 2 = 2\n理智变化：30 → 28')
   })
 
   test('coc成长检定 列出', () => {
