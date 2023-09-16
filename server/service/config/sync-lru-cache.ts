@@ -1,4 +1,4 @@
-import * as LRUCache from 'lru-cache'
+import LRUCache from 'lru-cache'
 
 type Fetcher<K, V> = (key: K) => V | undefined
 

@@ -14,7 +14,7 @@ import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '../../../interface/card/types'
-import { render } from 'mustache'
+import Mustache from 'mustache'
 import { IDiceRollContext, parseTemplate } from '../dice/utils'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
@@ -37,7 +37,7 @@ export class PluginManager {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
       roll: exp => new DiceRoll(exp),
-      render: (arg1, arg2, arg3) => render(arg1, arg2, arg3, { escape: value => value }),
+      render: (arg1, arg2, arg3) => Mustache.render(arg1, arg2, arg3, { escape: value => value }),
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
       getLinkedCardUserList: ({ channelId }) => Object.keys(this.wss.cards.getLinkMap(channelId)),

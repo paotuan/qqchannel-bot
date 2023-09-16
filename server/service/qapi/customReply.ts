@@ -1,7 +1,7 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import type { IMessage } from 'qq-guild-bot'
-import { render } from 'mustache'
+import Mustache from 'mustache'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
 import { convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
@@ -79,7 +79,7 @@ export class CustomReplyManager {
       const userId = msg.author.id
       const channelId = msg.channel_id
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
-        return render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
+        return Mustache.render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
       })
       const userRole = convertRoleIds(msg.member.roles)
       const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
