@@ -7,7 +7,11 @@ process
     // process.exit(1)
   })
 
-require('./server/index') // 内部调用了 dotenv
+try {
+  require('./server/index') // 内部调用了 dotenv
+} catch (e) {
+  console.error(e)
+}
 
 const express = require('express')
 const path = require('path')

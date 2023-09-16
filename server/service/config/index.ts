@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { globSync } from 'glob'
+import { globSync } from 'fast-glob'
 import { makeAutoObservable } from 'mobx'
 import type { Wss } from '../../app/wss'
 import type { IChannelConfig } from '../../../interface/config'

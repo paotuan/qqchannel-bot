@@ -1,6 +1,6 @@
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
 import * as fs from 'fs'
-import { globSync } from 'glob'
+import { globSync } from 'fast-glob'
 import { autorun, makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
@@ -36,8 +36,8 @@ export class CardManager {
       if (!fs.existsSync(dir)) {
         return
       }
-      const filesPath = globSync(`${dir}/*.json`, { stat: true, withFileTypes: true })
-      const files = filesPath.map(path=> ({ created: path.birthtimeMs, modified: path.mtimeMs, path: path.relative() }))
+      const filesPath = globSync(`${dir}/*.json`, { stats: true })
+      const files = filesPath.map(path=> ({ created: path.stats?.birthtimeMs, modified: path.stats?.mtimeMs, path: path.path }))
       files.forEach(file => {
         const str = fs.readFileSync(file.path, 'utf8')
         if (file.path.endsWith(LINK_FILE_NAME)) {
