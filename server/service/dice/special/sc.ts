@@ -17,6 +17,10 @@ export class ScDiceRoll extends BasePtDiceRoll {
   private rollScResult?: IRollDecideResult
   private rollLoss?: DiceRoll
 
+  // 记录变化前后值，用于展示. 负值代表不可用（无人物卡等情况）
+  private oldSan = -1
+  private newSan = -1
+
   private get scLoss() {
     return this.rollLoss?.total || 0
   }
@@ -105,6 +109,11 @@ export class ScDiceRoll extends BasePtDiceRoll {
     const secondStart = this.t('roll.start', secondArgs).trim()
     const secondResult = this.t('roll.result', secondArgs)
     line += `\n${secondStart} ${secondResult}`
+    // 如果发生了真实的损失，则加入附加语
+    if (this.oldSan >= 0) {
+      const extra = this.t('roll.sc.extra', { 旧值: this.oldSan, 新值: this.newSan, 损失值: this.scLoss })
+      line += extra
+    }
     return line
   }
 
@@ -122,11 +131,18 @@ export class ScDiceRoll extends BasePtDiceRoll {
 
   override applyToCard() {
     const card = this.selfCard
-    if (this.noModify || !card || this.scLoss === 0) return []
+    if (this.noModify || !card) return []
     const oldSan = card.getEntry(SC_CARD_ENTRY_NAME)
     if (!oldSan) return []
-    const newSan = Math.max(0, oldSan.value - this.scLoss)
-    const updated = card.setEntry(SC_CARD_ENTRY_NAME, newSan)
-    return updated? [card] : []
+    this.oldSan = oldSan.value
+    if (this.scLoss === 0) {
+      this.newSan = this.oldSan
+      return []
+    } else {
+      const newSan = Math.max(0, oldSan.value - this.scLoss)
+      const updated = card.setEntry(SC_CARD_ENTRY_NAME, newSan)
+      this.newSan = card.getEntry(SC_CARD_ENTRY_NAME)!.value // set 过程可能有 clamp，故取真实值
+      return updated? [card] : []
+    }
   }
 }

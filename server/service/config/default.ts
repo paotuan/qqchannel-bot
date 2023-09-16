@@ -23,7 +23,8 @@ export function getInitialDefaultConfig(): IChannelConfig {
     'io.paotuan.plugin.insane.ti',
     'io.paotuan.plugin.insane.li',
     'io.paotuan.plugin.cardgen.coc',
-    'io.paotuan.plugin.cardgen.dnd'
+    'io.paotuan.plugin.cardgen.dnd',
+    'io.paotuan.plugin.draw.draw'
   ]
   return {
     version: VERSION_CODE,
@@ -152,6 +153,14 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       }
     }
     config.version = 21 // 1.5.0
+  }
+  if (config.version < 22) {
+    // 新增牌堆插件
+    config.customReplyIds.push({ id: 'io.paotuan.plugin.draw.draw', enabled: true })
+    // 新增自定义文案
+    const embedText = getEmbedCustomText()
+    config.embedPlugin.customText![0].texts['roll.sc.extra'] = embedText.texts['roll.sc.extra']
+    config.version = 22 // 1.6.0
   }
   return config as IChannelConfig
 }
@@ -411,6 +420,7 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.ri.del': s('{{用户名}} 删除先攻：{{#人物列表}}{{人物名}}{{^last}}、{{/last}}{{/人物列表}}'),
     'roll.ri.clear': s('*先攻列表已清空'),
     'roll.sc.unsupported': s(' ……未指定理智值，成功了吗？'),
+    'roll.sc.extra': s('{{#损失值}}\n理智变化：{{旧值}} → {{新值}}{{/损失值}}'),
     'card.empty': s('{{目标用户}}没有关联人物卡'),
     'card.nopermission': s('{{用户名}} 没有修改人物卡的权限'),
     'roll.st.prompt': s('{{at用户}}请指定想要设置的属性名与属性值'),

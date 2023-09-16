@@ -98,6 +98,7 @@ export type CustomTextKeys =
   | 'roll.ri.del'
   | 'roll.ri.clear'
   | 'roll.sc.unsupported'
+  | 'roll.sc.extra'
   | 'card.empty'
   | 'card.nopermission'
   | 'roll.st.prompt'

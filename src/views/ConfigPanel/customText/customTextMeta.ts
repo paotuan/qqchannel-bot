@@ -224,6 +224,13 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
     args: [_.用户名, _.人物卡名, _.at用户]
   },
   {
+    key: 'roll.sc.extra',
+    name: '理智检定-附加语',
+    description: '.sc1/1d3<br>Maca 🎲 d% = 44 / 30 失败<br>Maca 🎲 理智损失 1d3: [3] = 3<br><u>理智变化：30 → 27</u>',
+    defaultTemplate: '\n{{#损失值}}理智变化：{{旧值}} → {{新值}}{{/损失值}}',
+    args: [_.用户名, _.人物卡名, _.at用户, { name: '旧值' }, { name: '新值' }, { name: '损失值' }]
+  },
+  {
     key: 'card.empty',
     name: '人物卡-未关联',
     description: '.st<br><u>@Maca 没有关联人物卡</u>',
