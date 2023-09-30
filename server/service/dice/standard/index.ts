@@ -98,12 +98,14 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   }
 
   protected parseDescriptions(expression: string) {
-    const { exp, skills } = parseDescriptions2(expression)
-    // 如果是 alias dice，则认为 expression 已经由 config 指定，无视解析出的 exp
+    // 如果是 alias dice，则 expression 已经在 parseAlias 中指定，剩下的内容都当成技能名和临时值来解析
     if (this.isAlias) {
+      const { skills } = parseDescriptions2(expression, false)
       this.skillsForTest.push(...skills)
       return
     }
+    // 正常流程解析
+    const { exp, skills } = parseDescriptions2(expression)
     // 如果只有单独的一条 description，没有 exp，判断一下是否是直接调用人物卡的表达式
     // 例如【.徒手格斗】直接替换成【.1d3+$db】. 而【.$徒手格斗】走通用逻辑，求值后【.const】
     if (!exp && skills.length === 1 && isNaN(skills[0].tempValue)) {

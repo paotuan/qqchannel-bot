@@ -106,6 +106,11 @@ describe('未关联人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 d%: [2] = 2')
   })
 
+  test('检定别名+临时值', () => {
+    const roller = createDiceRoll('rc 60', context)
+    expect(roller.output).toBe('Maca 🎲 d%: [2] = 2 / 60 成功')
+  })
+
   test('暗骰 flag', () => {
     const roller = createDiceRoll('rh心理学', context)
     expect(roller.output).toBe('Maca 🎲 心理学 d100: [2] = 2')

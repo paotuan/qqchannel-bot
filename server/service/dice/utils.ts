@@ -121,13 +121,24 @@ export function parseDescriptions(rawExp: string, flag = ParseFlags.PARSE_EXP | 
   return [exp, desc, tempValue]
 }
 
-export function parseDescriptions2(rawExp: string) {
+/**
+ * 解析表达式，提取出 骰子指令 和 [技能名，临时值]数组（考虑到组合技能检定的情况）
+ * @param rawExp 原始输入
+ * @param parseExp 是否认为原始输入中包含 骰子指令。false - 用于别名指令的场景，expression 已由别名指定，此处只解析技能名和临时值
+ */
+export function parseDescriptions2(rawExp: string, parseExp = true) {
   // parse exp & desc
   let exp = '', desc = rawExp.trim()
-  const index = desc.search(/[\p{Unified_Ideograph}\s]/u)
-  const [_exp, _desc = ''] = index < 0 ? [desc] : [desc.slice(0, index), desc.slice(index)]
-  exp = _exp
-  desc = _desc.trim()
+  if (parseExp) {
+    const index = desc.search(/[\p{Unified_Ideograph}\s]/u)
+    const [_exp, _desc = ''] = index < 0 ? [desc] : [desc.slice(0, index), desc.slice(index)]
+    exp = _exp
+    desc = _desc.trim()
+  }
+  // 如果 desc 完全是数字格式，认为是一个指定了临时值的空技能
+  if (desc.match(/^\d+$/)) {
+    return { exp, skills: [{ skill: '', tempValue: Number(desc) }]}
+  }
   // parse (multi) skills and tempValue from desc
   const regex = /(?<skill>[^0-9\s,，;；]+)\s*((?<tempValue>\d+)|[\s,，;；]*)/g
   const matchResult = [...desc.matchAll(regex)].map(entry => ({ skill: entry.groups!.skill, tempValue: Number(entry.groups!.tempValue) })) // NaN 代表没设
