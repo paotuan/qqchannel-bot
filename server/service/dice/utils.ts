@@ -35,6 +35,8 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
   const selfCard = context.getCard(context.userId)
+  // 0. 是否需要智能探测人物卡引用
+  expression = context.config.detectCardEntry(expression, selfCard)
   const getEntry = (key: string) => selfCard?.getEntry(key)?.value ?? ''
   const getAbility = (key: string) => selfCard?.getAbility(key)?.value ?? ''
   const InlineDiceRoll = getInlineDiceRollKlass()

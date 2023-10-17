@@ -2,6 +2,8 @@ import { NumberGenerator } from '@dice-roller/rpg-dice-roller'
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
+import { CocCard, ICocCardData } from '../../interface/card/coc'
+import { VERSION_CODE } from '../../interface/version'
 
 // use a custom engine
 NumberGenerator.generator.engine = {
@@ -24,7 +26,7 @@ describe('特殊解析规则', () => {
     username: 'Maca',
     userRole: 'admin',
     config: new ChannelConfig(config),
-    getCard: () => undefined,
+    getCard: () => new CocCard(getCardProto()),
   }
 
   test('不区分大小写', () => {
@@ -36,4 +38,94 @@ describe('特殊解析规则', () => {
     const roller = createDiceRoll('4dF+1', context)
     expect(roller.output).toBe('Maca 🎲 4dF+1: [0, 0, 0, 0]+1 = 1')
   })
+
+  test('自动检测 entry', () => {
+    const result = context.config.detectCardEntry('1d3+力量', context.getCard(MockUserId))
+    expect(result).toBe('1d3+$力量')
+  })
+
+  test('自动检测 ability', () => {
+    const result = context.config.detectCardEntry('1d3+db', context.getCard(MockUserId))
+    expect(result).toBe('1d3+$db')
+  })
+
+  // todo 为简化判断，暂不处理这种情况
+  // test('自动检测-在开头', () => {
+  //   const result = context.config.detectCardEntry('db+1d3')
+  //   expect(result).toBe('$db+1d3')
+  // })
+
+  test('自动检测-不检测整体 ability/entry', () => {
+    const result = context.config.detectCardEntry('db', context.getCard(MockUserId))
+    expect(result).toBe('db')
+  })
+
+  test('自动检测-不检测描述1', () => {
+    const result = context.config.detectCardEntry('d100侦察', context.getCard(MockUserId))
+    expect(result).toBe('d100侦察')
+  })
+
+  test('自动检测-不检测描述2', () => {
+    const result = context.config.detectCardEntry('d100 侦察', context.getCard(MockUserId))
+    expect(result).toBe('d100 侦察')
+  })
+
+  test('自动检测-不检测 Describing Rolls', () => {
+    const result = context.config.detectCardEntry('d20+{3}[力量]+{2}[熟练]', context.getCard(MockUserId))
+    expect(result).toBe('d20+{3}[力量]+{2}[熟练]')
+  })
+
+  test('自动检测-掷骰', () => {
+    const roller = createDiceRoll('1d3+db', context)
+    expect(roller.output).toBe('Maca 🎲\n先是 🎲 db 0: 0 = 0\n最后 🎲 1d3+0: [2]+0 = 2')
+  })
 })
+
+function getCardProto(): ICocCardData {
+  return {
+    type: 'coc',
+    version: VERSION_CODE,
+    name: '铃木翼',
+    created: Date.now(),
+    lastModified: Date.now(),
+    isTemplate: false,
+    basic: {
+      job: '学生',
+      AGE: 24,
+      gender: '秀吉',
+      HP: 10,
+      SAN: 30,
+      LUCK: 50,
+      MP: 10,
+      CM: 0,
+      '信用': 0
+    },
+    props: {
+      '力量': 60,
+      '体质': 60,
+      '体型': 60,
+      '敏捷': 60,
+      '外貌': 60,
+      '智力': 60,
+      '意志': 60,
+      '教育': 60
+    },
+    skills: {
+      '侦查': 40,
+      '图书馆': 70
+    },
+    abilities: [
+      {
+        name: '徒手格斗',
+        expression: '1d3+$db',
+        ext: ''
+      }
+    ],
+    ext: '',
+    meta: {
+      skillGrowth: {}
+    }
+  }
+}
+
+export {}

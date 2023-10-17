@@ -14,6 +14,7 @@ import type { InlineDiceRoll } from '../dice/standard/inline'
 import { parseAlias } from './helpers/alias'
 import { getEmbedCustomText } from './default'
 import { renderCustomText } from './helpers/customText'
+import type { ICard } from '../../../interface/card/types'
 
 // 频道配置文件封装
 // !只读 config，不要写 config
@@ -141,4 +142,23 @@ export class ChannelConfig {
     }
     return expression
   }
+
+  /**
+   * 智能探测指令中可能出现的 entry/ability 并加上 $ 前缀
+   */
+  detectCardEntry(expression: string, card?: ICard) {
+    if (this.config.parseRule.detectCardEntry && card) {
+      return expression.replace(MAYBE_ENTRY_REGEX, key => {
+        if (card.getEntry(key) || card.getAbility(key)) {
+          return '$' + key
+        } else {
+          return key
+        }
+      })
+    }
+    return expression
+  }
 }
+
+// match 独立出现的疑似人物卡引用（前后不为数字或 $，前向匹配简化了）
+const MAYBE_ENTRY_REGEX = /(?<=[+\-*/(){}])([a-zA-Z\p{Unified_Ideograph}]+)(?![\d$])/gu
