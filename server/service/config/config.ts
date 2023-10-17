@@ -120,4 +120,25 @@ export class ChannelConfig {
   formatCustomText(key: CustomTextKeys, args: Record<string, any>, context: any) {
     return renderCustomText(this.customTextMap, key, args, context)
   }
+
+  /**
+   * 指令兼容大小写
+   * 目前的实现是简单粗暴转全小写（引用人物卡的部分本来就不区分大小写，因此只用考虑骰子指令和描述部分）
+   * 针对 dF 特殊处理
+   */
+  convertCase(expression: string) {
+    if (this.config.parseRule.convertCase) {
+      const dFIndexes = Array.from(expression.matchAll(/dF/g)).map(result => result.index)
+      const result = expression.toLowerCase()
+      if (dFIndexes.length === 0) return result
+      const arr = result.split('')
+      dFIndexes.forEach(index => {
+        if (typeof index === 'number') {
+          arr[index + 1] = 'F'
+        }
+      })
+      return arr.join('')
+    }
+    return expression
+  }
 }

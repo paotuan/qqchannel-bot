@@ -150,10 +150,17 @@ export interface ISpecialDiceConfig {
   inMessageDice: { enabled: boolean }
 }
 
+// 解析规则配置
+export interface IParseRuleConfig {
+  convertCase: boolean // 是否自动转换大小写
+  detectCardEntry: boolean // 是否自动检测引用人物卡变量
+}
+
 export interface IChannelConfig {
   version: number
   defaultRoll: { expression: string, preferCard: boolean } // d100/d20/4dF
   specialDice: ISpecialDiceConfig
+  parseRule: IParseRuleConfig
   customReplyIds: { id: string, enabled: boolean }[] // full id
   aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选

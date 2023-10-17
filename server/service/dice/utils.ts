@@ -148,7 +148,8 @@ export function parseDescriptions2(rawExp: string, parseExp = true) {
 /**
  * 工厂方法创建骰子实例
  */
-export function createDiceRoll(expression: string, context: IDiceRollContext) {
+export function createDiceRoll(_expression: string, context: IDiceRollContext) {
+  const expression = context.config.convertCase(_expression)
   const specialDiceConfig = context.config.specialDice
   const inlineRolls: InlineDiceRoll[] = []
   const selfCard = context.getCard(context.userId)

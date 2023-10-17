@@ -30,6 +30,7 @@ export function getInitialDefaultConfig(): IChannelConfig {
     version: VERSION_CODE,
     defaultRoll: { expression: 'd100', preferCard: true },
     specialDice: getSpecialDiceConfig(),
+    parseRule: { convertCase: false, detectCardEntry: false },
     customReplyIds: customReplies
       .map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
       .concat(customReplyPlugins.map(id => ({ id, enabled: true }))),
@@ -161,6 +162,10 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     const embedText = getEmbedCustomText()
     config.embedPlugin.customText![0].texts['roll.sc.extra'] = embedText.texts['roll.sc.extra']
     config.version = 22 // 1.6.0
+  }
+  if (config.version < 23) {
+    config.parseRule = { convertCase: false, detectCardEntry: false }
+    config.version = 23 // 1.7.0
   }
   return config as IChannelConfig
 }
