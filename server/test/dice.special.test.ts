@@ -19,6 +19,7 @@ describe('特殊解析规则', () => {
   const config = getInitialDefaultConfig()
   config.parseRule.convertCase = true
   config.parseRule.detectCardEntry = true
+  config.parseRule.detectDefaultRoll = true
 
   const context: IDiceRollContext = {
     channelId: MockChannelId,
@@ -49,11 +50,10 @@ describe('特殊解析规则', () => {
     expect(result).toBe('1d3+$db')
   })
 
-  // todo 为简化判断，暂不处理这种情况
-  // test('自动检测-在开头', () => {
-  //   const result = context.config.detectCardEntry('db+1d3')
-  //   expect(result).toBe('$db+1d3')
-  // })
+  test('自动检测-在开头', () => {
+    const result = context.config.detectCardEntry('db+1d3', context.getCard(MockUserId))
+    expect(result).toBe('$db+1d3')
+  })
 
   test('自动检测-不检测整体 ability/entry', () => {
     const result = context.config.detectCardEntry('db', context.getCard(MockUserId))
@@ -78,6 +78,26 @@ describe('特殊解析规则', () => {
   test('自动检测-掷骰', () => {
     const roller = createDiceRoll('1d3+db', context)
     expect(roller.output).toBe('Maca 🎲\n先是 🎲 db 0: 0 = 0\n最后 🎲 1d3+0: [2]+0 = 2')
+  })
+
+  test('默认骰检测-原有逻辑', () => {
+    const result = context.config.detectDefaultRollCalculation('rd', context.getCard(MockUserId))
+    expect(result).toBe('rd')
+  })
+
+  test('默认骰检测-1', () => {
+    const result = context.config.detectDefaultRollCalculation('rd+1', context.getCard(MockUserId))
+    expect(result).toBe('d%+1')
+  })
+
+  test('默认骰检测-2', () => {
+    const result = context.config.detectDefaultRollCalculation('1+r+d', context.getCard(MockUserId))
+    expect(result).toBe('1+d%+d%')
+  })
+
+  test('综合', () => {
+    const roller = createDiceRoll('R1D100+D+Db+1', context)
+    expect(roller.output).toBe('Maca 🎲\n先是 🎲 db 0: 0 = 0\n最后 🎲 1d100+d%+0+1: [2]+[2]+0+1 = 5')
   })
 })
 

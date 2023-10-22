@@ -32,8 +32,9 @@ export class ChannelConfig {
   /**
    * 默认骰配置
    */
-  get defaultRoll() {
-    return this.config.defaultRoll
+  defaultRoll(card?: ICard) {
+    const fromCard = this.config.defaultRoll.preferCard ? card?.defaultRoll : undefined
+    return fromCard || this.config.defaultRoll.expression || 'd%'
   }
 
   /**
@@ -148,17 +149,36 @@ export class ChannelConfig {
    */
   detectCardEntry(expression: string, card?: ICard) {
     if (this.config.parseRule.detectCardEntry && card) {
-      return expression.replace(MAYBE_ENTRY_REGEX, key => {
+      const replacer = (key: string) => {
         if (card.getEntry(key) || card.getAbility(key)) {
           return '$' + key
         } else {
           return key
         }
-      })
+      }
+      return expression.replace(MAYBE_ENTRY_REGEX, replacer).replace(MAYBE_ENTRY_REGEX_AT_START, replacer)
+    }
+    return expression
+  }
+
+  /**
+   * 智能探测默认骰参与加减值运算，并替换默认骰为表达式
+   */
+  detectDefaultRollCalculation(expression: string, card?: ICard) {
+    if (this.config.parseRule.detectDefaultRoll) {
+      // 纯默认骰不处理，交给原来的逻辑处理
+      if (expression.match(DEFAULT_ROLL_REGEX)) return expression
+      const defaultRoll = this.defaultRoll(card)
+      return expression.replace(MAYBE_INCLUDE_DEFAULT_ROLL_REGEX, () => defaultRoll)
     }
     return expression
   }
 }
 
 // match 独立出现的疑似人物卡引用（前后不为数字或 $，前向匹配简化了）
-const MAYBE_ENTRY_REGEX = /(?<=[+\-*/(){}])([a-zA-Z\p{Unified_Ideograph}]+)(?![\d$])/gu
+const MAYBE_ENTRY_REGEX = /(?<=[+\-*/({])([a-zA-Z\p{Unified_Ideograph}]+)(?![\d$])/gu
+const MAYBE_ENTRY_REGEX_AT_START = /^([a-zA-Z\p{Unified_Ideograph}]+)(?=[+\-*/])/gu
+
+// match 疑似默认骰
+const DEFAULT_ROLL_REGEX = /^(r|d|rd)$/
+const MAYBE_INCLUDE_DEFAULT_ROLL_REGEX = /(?<=^|[+\-*/({])(r|d|rd)(?=$|[+\-*/)}])/g

@@ -154,6 +154,7 @@ export interface ISpecialDiceConfig {
 export interface IParseRuleConfig {
   convertCase: boolean // 是否自动转换大小写
   detectCardEntry: boolean // 是否自动检测引用人物卡变量
+  detectDefaultRoll: boolean // 是否自动检测默认骰加减值
 }
 
 export interface IChannelConfig {
