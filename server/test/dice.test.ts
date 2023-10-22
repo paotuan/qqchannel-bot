@@ -1,20 +1,12 @@
-import { NumberGenerator } from '@dice-roller/rpg-dice-roller'
 import type { IDiceRollContext } from '../service/dice/utils'
 import { createDiceRoll } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
 import type { IRiItem } from '../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../service/dice/special/ri'
+import { MockChannelId, MockUserId, resetRandomEngine } from './utils'
 
-// use a custom engine
-NumberGenerator.generator.engine = {
-  next() {
-    return 1
-  }
-}
-
-const MockChannelId = '__mock_channel_id__'
-const MockUserId = '__mock_user_id__'
+resetRandomEngine(1)
 
 describe('未关联人物卡', () => {
   const context: IDiceRollContext = {

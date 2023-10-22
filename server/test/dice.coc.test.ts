@@ -1,16 +1,9 @@
-import { NumberGenerator } from '@dice-roller/rpg-dice-roller'
 import { ICard } from '../../interface/card/types'
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
-import { CocCard, ICocCardData } from '../../interface/card/coc'
-import { VERSION_CODE } from '../../interface/version'
-
-// use a custom engine
-const resetRandomEngine = () => (NumberGenerator.generator.engine = { next: () => 1 })
-
-const MockChannelId = '__mock_channel_id__'
-const MockUserId = '__mock_user_id__'
+import { CocCard } from '../../interface/card/coc'
+import { getCocCardProto, MockChannelId, MockUserId, resetRandomEngine } from './utils'
 
 function createContext(card: ICard): IDiceRollContext {
   return {
@@ -28,9 +21,9 @@ describe('已关联COC人物卡', () => {
   let context: IDiceRollContext
 
   beforeEach(() => {
-    card = new CocCard(getCardProto())
+    card = new CocCard(getCocCardProto())
     context = createContext(card)
-    resetRandomEngine()
+    resetRandomEngine(1)
   })
 
   test('检定', () => {
@@ -148,52 +141,5 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 先攻 60: 60 = 60')
   })
 })
-
-function getCardProto(): ICocCardData {
-  return {
-    type: 'coc',
-    version: VERSION_CODE,
-    name: '铃木翼',
-    created: Date.now(),
-    lastModified: Date.now(),
-    isTemplate: false,
-    basic: {
-      job: '学生',
-      AGE: 24,
-      gender: '秀吉',
-      HP: 10,
-      SAN: 30,
-      LUCK: 50,
-      MP: 10,
-      CM: 0,
-      '信用': 0
-    },
-    props: {
-      '力量': 60,
-      '体质': 60,
-      '体型': 60,
-      '敏捷': 60,
-      '外貌': 60,
-      '智力': 60,
-      '意志': 60,
-      '教育': 60
-    },
-    skills: {
-      '侦查': 40,
-      '图书馆': 70
-    },
-    abilities: [
-      {
-        name: '徒手格斗',
-        expression: '1d3+$db',
-        ext: ''
-      }
-    ],
-    ext: '',
-    meta: {
-      skillGrowth: {}
-    }
-  }
-}
 
 export {}
