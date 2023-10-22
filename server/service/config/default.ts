@@ -7,7 +7,7 @@ import type {
   IRollDeciderConfig,
   ISpecialDiceConfig,
   CustomTextKeys,
-  ICustomTextItem
+  ICustomTextItem, SuccessLevel
 } from '../../../interface/config'
 import { VERSION_CODE } from '../../../interface/version'
 
@@ -164,6 +164,23 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     config.version = 22 // 1.6.0
   }
   if (config.version < 23) {
+    // 修正 rollDecider 错误
+    if (config.embedPlugin.rollDecider) {
+      const mistakeIds: [string, SuccessLevel][] = [['coc0', '大失败'], ['coc1', '大失败'], ['coc1', '大成功'], ['coc4', '大失败'], ['coc5', '大失败']]
+      const newestConfig = getEmbedRollDecider()
+      const getRule = (config: IRollDeciderConfig[], id: string, level: SuccessLevel) => {
+        const item = config.find(_item => _item.id === id)
+        return item?.rules.find(rule => rule.level === level)
+      }
+      mistakeIds.forEach(([id, level]) => {
+        const now = getRule(config.embedPlugin.rollDecider!, id, level)
+        if (!now) return
+        const right = getRule(newestConfig, id, level)
+        if (!right) return
+        now.expression = right.expression
+      })
+    }
+    // 新增配置
     config.parseRule = { convertCase: false, detectCardEntry: false, detectDefaultRoll: false }
     config.version = 23 // 1.7.0
   }
@@ -299,7 +316,7 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       name: 'COC 默认规则',
       description: '出 1 大成功；不满 50 出 96-100 大失败，满 50 出 100 大失败',
       rules: [
-        { level: '大失败', expression: '(baseValue < 50 && roll > 95) || (baseValue >= 50 && roll == 100)' },
+        { level: '大失败', expression: '(targetValue < 50 && roll > 95) || (targetValue >= 50 && roll == 100)' },
         { level: '大成功', expression: 'roll == 1' },
         { level: '失败', expression: 'roll > targetValue' },
         { level: '极难成功', expression: 'roll <= targetValue && roll <= baseValue / 5' },
@@ -321,8 +338,8 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       name: 'COC 规则 1',
       description: '不满 50 出 1 大成功，满 50 出 1-5 大成功；不满 50 出 96-100 大失败，满 50 出 100 大失败',
       rules: [
-        { level: '大失败', expression: '(baseValue < 50 && roll > 95) || (baseValue >= 50 && roll == 100)' },
-        { level: '大成功', expression: '(baseValue < 50 && roll == 1) || (baseValue >= 50 && roll <= 5)' },
+        { level: '大失败', expression: '(targetValue < 50 && roll > 95) || (targetValue >= 50 && roll == 100)' },
+        { level: '大成功', expression: '(targetValue < 50 && roll == 1) || (targetValue >= 50 && roll <= 5)' },
         { level: '失败', expression: 'roll > targetValue' },
         { level: '极难成功', expression: 'roll <= targetValue && roll <= baseValue / 5' },
         { level: '困难成功', expression: 'roll <= targetValue && roll <= baseValue / 2' },
@@ -360,7 +377,7 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       name: 'COC 规则 4',
       description: '出 1-5 且 ≤ 成功率/10 大成功；不满 50 出 ≥ 96+成功率/10 大失败，满 50 出 100 大失败',
       rules: [
-        { level: '大失败', expression: '(baseValue < 50 && roll >= 96 + targetValue / 10) || (baseValue >= 50 && roll == 100)' },
+        { level: '大失败', expression: '(targetValue < 50 && roll >= 96 + targetValue / 10) || (targetValue >= 50 && roll == 100)' },
         { level: '大成功', expression: 'roll <= 5 && roll <= targetValue / 10' },
         { level: '失败', expression: 'roll > targetValue' },
         { level: '极难成功', expression: 'roll <= targetValue && roll <= baseValue / 5' },
@@ -373,7 +390,7 @@ function getEmbedRollDecider(): IRollDeciderConfig[] {
       name: 'COC 规则 5',
       description: '出 1-2 且 < 成功率/5 大成功；不满 50 出 96-100 大失败，满 50 出 99-100 大失败',
       rules: [
-        { level: '大失败', expression: '(baseValue < 50 && roll >= 96) || (baseValue >= 50 && roll >= 99)' },
+        { level: '大失败', expression: '(targetValue < 50 && roll >= 96) || (targetValue >= 50 && roll >= 99)' },
         { level: '大成功', expression: 'roll <= 2 && roll < targetValue / 5' },
         { level: '失败', expression: 'roll > targetValue' },
         { level: '极难成功', expression: 'roll <= targetValue && roll <= baseValue / 5' },
