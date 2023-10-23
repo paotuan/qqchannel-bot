@@ -140,13 +140,6 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     const _input = input.toUpperCase()
     // 获取所有可能的别名
     const possibleNames = SKILL_ALIAS[_input] ?? [_input]
-    // 是否是特殊的 computed abilities
-    for (const key of possibleNames) {
-      const keyAsComputedAbilities = key as typeof COMPUTED_ABILITIES[number]
-      if (COMPUTED_ABILITIES.includes(keyAsComputedAbilities)) {
-        return { input, key, value: this[keyAsComputedAbilities], readonly: true }
-      }
-    }
     // 是否从配置表里找得到这个 ability
     for (const key of possibleNames) {
       const ability = this.data.abilities.find(item => item.name.toUpperCase() === key)
@@ -154,13 +147,19 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
         return { input, key: ability.name, value: ability.expression, readonly: false }
       }
     }
+    // 是否是特殊的 computed abilities
+    for (const key of possibleNames) {
+      const keyAsComputedAbilities = key as typeof COMPUTED_ABILITIES[number]
+      if (COMPUTED_ABILITIES.includes(keyAsComputedAbilities)) {
+        return { input, key, value: this[keyAsComputedAbilities], readonly: true }
+      }
+    }
     return undefined
   }
 
   override setAbility(name: string, expression: string) {
     const abilityRet = this.getAbility(name)
-    if (abilityRet) {
-      if (abilityRet.readonly) return false
+    if (abilityRet && !abilityRet.readonly) { // 允许用户输入同名的 ability 覆盖系统内置的
       // 非 readonly 情况，key 和 name 严格相等了，所以可以直接 find
       const ability = this.data.abilities.find(item => item.name === abilityRet.key)!
       if (ability.expression !== expression) {
@@ -194,20 +193,20 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
   private getRawEntry(input: string): ICocCardEntryRaw | undefined {
     const _input = input.toUpperCase()
     const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
+    // 遍历 basic，props 和 skills 尝试获取. 先判断 skills，因为可能有用户输入同名属性，优先级更高
+    for (const key of possibleSkills) {
+      for (const type of ['skills', 'basic', 'props'] as const) {
+        const target = (this.data[type] as Record<string, number | string>)[key]
+        if (typeof target === 'number') {
+          return { input, key, baseValue: target, isTemp: false, readonly: false, type } // 返回真实存在的那个别名
+        }
+      }
+    }
     // 是否是特殊的 computed skills
     for (const key of possibleSkills) {
       const keyAsComputedEntries = key as typeof COMPUTED_ENTRIES[number]
       if (COMPUTED_ENTRIES.includes(keyAsComputedEntries)) {
         return { input, key, baseValue: this[keyAsComputedEntries], isTemp: false, readonly: true, type: 'basic' }
-      }
-    }
-    // 遍历 basic，props 和 skills 尝试获取
-    for (const key of possibleSkills) {
-      for (const type of ['basic', 'props', 'skills'] as const) {
-        const target = (this.data[type] as Record<string, number | string>)[key]
-        if (typeof target === 'number') {
-          return { input, key, baseValue: target, isTemp: false, readonly: false, type } // 返回真实存在的那个别名
-        }
       }
     }
     return undefined
@@ -228,11 +227,11 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
   override setEntry(name: string, value: number) {
     const [skillWithoutDifficulty, difficulty] = parseDifficulty(name)
     if (!skillWithoutDifficulty) return false
-    // 是否是特殊的 setter，不直接调用 data，而是通过 setter 修改
     const _input = skillWithoutDifficulty.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
-    for (const key of possibleSkills) {
-      const keyAsSpecialSetters = key as typeof SPECIAL_ENTRY_SETTERS[number]
+    const rawEntry = this.getRawEntry(skillWithoutDifficulty)
+    // 是否是特殊的 setter，不直接调用 data，而是通过 setter 修改
+    if (rawEntry && rawEntry.type === 'basic') { // 所有的特殊 setter 都是 basic。而用户覆盖的话 type 是 skill，因此可以区分
+      const keyAsSpecialSetters = rawEntry.key as typeof SPECIAL_ENTRY_SETTERS[number]
       if (SPECIAL_ENTRY_SETTERS.includes(keyAsSpecialSetters)) {
         const oldValue = this[keyAsSpecialSetters]
         this[keyAsSpecialSetters] = value
@@ -248,9 +247,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     }
     // 是否已有条目
     const targetValue = calculateTargetValueWithDifficulty(value, difficulty, true)
-    const rawEntry = this.getRawEntry(skillWithoutDifficulty)
-    if (rawEntry) {
-      if (rawEntry.readonly) return false
+    if (rawEntry && !rawEntry.readonly) {
       if (targetValue !== rawEntry.baseValue) {
         (this.data[rawEntry.type] as Record<string, number>)[rawEntry.key] = targetValue
         this.data.lastModified = Date.now()
@@ -348,13 +345,14 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
   }
 
   override getSummary() {
+    const _ = (name: string) => this.getEntry(name)?.value ?? '-' // 基础属性还是走 getEntry，以防用户覆盖基础属性
     const basic = [
-      `生命：${this.HP}/${this.MAXHP}`,
-      `理智：${this.SAN}/${this.MAXSAN}`,
-      `幸运：${this.data.basic.LUCK}`,
-      `魔法：${this.MP}/${this.MAXMP}`,
-      `克苏鲁神话：${this.CM}`,
-      `信用评级：${this.data.basic.信用}`
+      `生命:${_('HP')}/${_('MAXHP')}`,
+      `理智:${_('SAN')}/${_('MAXSAN')}`,
+      `幸运:${_('LUCK')}`,
+      `魔法:${_('MP')}/${_('MAXMP')}`,
+      `克苏鲁神话:${_('CM')}`,
+      `信用评级:${_('信用')}`
     ].join(' ')
     const props = Object.entries(this.data.props).map(([k ,v]) => `${k}:${v}`).join(' ') // 理论上都应该走 getEntryDisplay 的逻辑，但出于优化目的，没有特殊展示的就不走了
     const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')

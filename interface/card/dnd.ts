@@ -144,7 +144,6 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   override setAbility(name: string, expression: string): boolean {
     const abilityRet = this.getAbility(name)
     if (abilityRet) {
-      // 非 readonly 情况，key 和 name 严格相等了，所以可以直接 find
       const ability = this.data[abilityRet.type].find(item => item.name === abilityRet.key)!
       if (ability.expression !== expression) {
         ability.expression = expression
@@ -202,7 +201,8 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
     // 遍历尝试获取
     for (const key of possibleSkills) {
-      for (const type of ['basic', 'props', 'skills', 'items'] as const) {
+      // 先判断 items，因为可能有用户输入同名属性，优先级更高
+      for (const type of ['items', 'basic', 'props', 'skills'] as const) {
         const target = (this.data[type] as Record<string, number>)[key]
         if (typeof target === 'number') {
           // 是否需要根据 postfix 计算
@@ -218,11 +218,11 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     const [skillName, postfix] = parseInput(name)
     if (!skillName) return false
     // if (postfix !== 'none') return false // 有特殊后缀的也不处理吧 // 暂时放开，因为可以【.st 技能修正】
-    // 是否是特殊 setter
     const _input = skillName.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
-    for (const key of possibleSkills) {
-      const keyAsSpecialSetters = key as typeof SPECIAL_ENTRY_SETTERS[number]
+    const entry = this.getEntry(name)
+    // 是否是特殊 setter
+    if (entry && entry.type === 'basic') {
+      const keyAsSpecialSetters = entry.key as typeof SPECIAL_ENTRY_SETTERS[number]
       if (SPECIAL_ENTRY_SETTERS.includes(keyAsSpecialSetters)) {
         const oldValue = this[keyAsSpecialSetters]
         this[keyAsSpecialSetters] = value
@@ -237,7 +237,6 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
       }
     }
     // 是否已有条目
-    const entry = this.getEntry(name)
     if (entry) {
       // set 的时候就不考虑后缀了。dnd 的特殊之处在于 set 技能名时实际修改的是技能的修正值，因此在 st 指令中要做些特殊处理
       if (value !== entry.value) {
@@ -317,10 +316,11 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   }
 
   override getSummary(): string {
+    const _ = (name: string) => this.getEntry(name)?.value ?? '-' // 基础属性还是走 getEntry，以防用户覆盖基础属性
     const basic = [
-      `生命：${this.HP}/${this.MAXHP}`,
-      `LV：${this.data.basic.LV}`,
-      `AC：${this.data.basic.AC}`
+      `生命:${_('HP')}/${_('MAXHP')}`,
+      `LV:${_('LV')}`,
+      `AC:${_('AC')}`
     ].join(' ')
     const props = Object.keys(this.data.props).map(name => this.getEntryDisplay(name)).join(' ')
     const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')
