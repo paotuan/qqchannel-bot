@@ -32,6 +32,10 @@ export class Channel {
     if (!msg.msg_id) {
       msg.msg_id = this.getLastMessageIdForReply()
     }
+    // 如果发送文字消息，则对文字消息做 trim。因为 qq 除 android 端都会自动 trim，为了保证结果在各个平台展示的一致性，此处先统一做 trim
+    if (msg.content) {
+      msg.content = msg.content.trim()
+    }
     try {
       // console.time('message')
       const res = await this.api.qqClient.messageApi.postMessage(this.id, msg)
