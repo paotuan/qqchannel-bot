@@ -27,12 +27,21 @@
       <special-dice-list />
     </div>
   </section>
+  <!-- 实验性设置 -->
+  <section class="mt-4">
+    <h2>实验性指令设置：</h2>
+    <div class="text-sm mb-2">以下功能设置并非绝对严谨，有时可能会与现有的指令体系产生冲突。但在大部分场景下，这些设置可以一定程度方便用户的操作。目前这些功能默认关闭，大家可视自己的需要选择开启。</div>
+    <div class="card card-compact w-full bg-base-100 shadow-lg">
+      <ExperimentalConfig />
+    </div>
+  </section>
 </template>
 <script setup lang="ts">
 import { QuestionMarkCircleIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
 import { computed } from 'vue'
 import SpecialDiceList from './SpecialDiceList.vue'
+import ExperimentalConfig from './ExperimentalConfig.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
