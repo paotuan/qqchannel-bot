@@ -27,11 +27,12 @@
       </div>
     </div>
     <div style="flex: 1 0 0">
+      <UndoManager />
       <ul class="menu bg-base-100 p-2 rounded-box shadow-lg">
         <li @mouseenter="onMouseEnter(1)" @mouseleave="onMouseLeave(1)" @click="logStore.export(1)"><a>导出为文本</a></li>
         <li @mouseenter="onMouseEnter(2)" @mouseleave="onMouseLeave(2)" @click="logStore.export(2)"><a>导出为 HTML</a></li>
         <li @mouseenter="onMouseEnter(3)" @mouseleave="onMouseLeave(3)" @click="logStore.export(3)"><a>导出为 JSON</a></li>
-        <li @click="logStore.clear()"><a class="text-error font-bold">清空</a></li>
+        <li @click="clearLogs"><a class="text-error font-bold">清空</a></li>
       </ul>
       <div v-if="tooltip" class="alert bg-base-100 shadow-lg mt-4">
         <div>
@@ -67,13 +68,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useLogStore } from '../store/log'
+import { useLogStore } from '../../store/log'
 import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Bars3Icon, XMarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline'
 import Sortable from 'sortablejs'
-import { useUserStore } from '../store/user'
-import type { ILog } from '../../interface/common'
-import { eventBus } from '../utils'
+import { useUserStore } from '../../store/user'
+import type { ILog } from '../../../interface/common'
+import { eventBus } from '../../utils'
+import UndoManager from './UndoManager.vue'
 
 const logStore = useLogStore()
 const userStore = useUserStore()
@@ -106,11 +108,17 @@ onMounted(() => {
     ghostClass: 'bg-base-200',
     onEnd: (event) => {
       const { newIndex, oldIndex } = event
-      const movingLog = logStore.logs.splice(oldIndex!, 1)[0]
-      logStore.logs.splice(newIndex!, 0, movingLog)
+      if (newIndex === oldIndex) return
+      logStore.dragLog(oldIndex!, newIndex!)
     }
   })
 })
+
+const clearLogs = () => {
+  if (window.confirm('确定清空当前子频道的所有 Log 吗？清空后将无法恢复。')) {
+    logStore.clear()
+  }
+}
 
 // init scroll 2 bottom
 const scrollToBottomIfNeed = () => {

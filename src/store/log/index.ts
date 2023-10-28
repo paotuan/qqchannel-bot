@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia'
-import type { ILog } from '../../interface/common'
-import { useUserStore } from './user'
-import { eventBus, gtagEvent } from '../utils'
-import { useBotStore } from './bot'
+import type { ILog } from '../../../interface/common'
+import { useUserStore } from '../user'
+import { eventBus, gtagEvent } from '../../utils'
+import { useBotStore } from '../bot'
+import type { ILogCommand } from './command'
+import { DeleteAction, DragAction } from './command'
 
 export const useLogStore = defineStore('log', {
   state: () => ({
     logs: [] as ILog[],
+    actionStack: [] as ILogCommand[],
     filterDiceCommand: getBooleanConfig('config-filterDiceCommand', false), // 是否无视指令消息
     autoScroll: getBooleanConfig('config-autoScrollLog', true), // 是否自动滚动到 log 底部
     enableLog: true
@@ -24,13 +27,25 @@ export const useLogStore = defineStore('log', {
       gtagLogs(logs)
     },
     removeLog(log: ILog) {
-      const index = this.logs.indexOf(log)
-      if (index >= 0) {
-        this.logs.splice(index, 1)
+      const action = new DeleteAction(log)
+      action.apply(this.logs)
+      this.actionStack.push(action)
+    },
+    dragLog(oldIndex: number, newIndex: number) {
+      const action = new DragAction(oldIndex, newIndex)
+      action.apply(this.logs)
+      this.actionStack.push(action)
+    },
+    undo(count: number) {
+      for (let i = 0; i < count; i++) {
+        const action = this.actionStack.pop()
+        if (!action) return // stack is empty
+        action.undo(this.logs)
       }
     },
     clear() {
       this.logs.length = 0
+      this.actionStack.length = 0
     },
     export(type: number) {
       gtagEvent('log/export', { log_type: ['', 'text', 'html', 'json'][type] })
