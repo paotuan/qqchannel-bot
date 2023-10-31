@@ -76,6 +76,7 @@ import { useUserStore } from '../../store/user'
 import type { ILog } from '../../../interface/common'
 import { eventBus } from '../../utils'
 import UndoManager from './UndoManager.vue'
+import { useHotkey } from '../../utils/useHotkey'
 
 const logStore = useLogStore()
 const userStore = useUserStore()
@@ -135,4 +136,8 @@ const scrollToBottomIfNeed = () => {
 onMounted(() => eventBus.on('client/log/add', scrollToBottomIfNeed))
 onBeforeUnmount(() => eventBus.off('client/log/add', scrollToBottomIfNeed))
 onActivated(scrollToBottomIfNeed)
+
+useHotkey('ctrl+z,command+z', 'LogPanel', () => {
+  logStore.undo(1)
+})
 </script>
