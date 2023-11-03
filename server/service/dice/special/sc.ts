@@ -42,10 +42,6 @@ export class ScDiceRoll extends BasePtDiceRoll {
       this.rollScTargetValue = scEntry.value
       this.rollScResult = this.decide({ baseValue: scEntry.value, targetValue: scEntry.value, roll: this.rollSc.total })
       if (this.rollScResult) {
-        // sc 成功就只有成功，不细分
-        if (this.rollScResult.success) {
-          this.rollScResult.level = '成功'
-        }
         if (this.rollScResult.level === '大失败') {
           const maxLoss = new DiceRoll(this.expression2).maxTotal
           this.rollLoss = new DiceRoll(String(maxLoss))

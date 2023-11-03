@@ -91,6 +91,12 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
   })
 
+  test('coc理智检定 区分大成功', () => {
+    resetRandomEngine(0)
+    const roller = createDiceRoll('sc 0/d10', context)
+    expect(roller.output).toBe('Maca 🎲 d% = 1 大成功\nMaca 🎲 理智损失 0: 0 = 0')
+  })
+
   test('coc理智检定 inline 嵌套', () => {
     const roller = createDiceRoll('sc[[1d10]]/[[$1+1]]', context)
     roller.applyToCard()
