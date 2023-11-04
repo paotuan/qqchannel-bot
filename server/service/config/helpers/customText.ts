@@ -19,7 +19,13 @@ export function renderCustomText(customTextMap: CustomTextMap, key: CustomTextKe
     }
   } else {
     const replyItem = randomReplyItem(processor)
-    return render(replyItem.text, args, undefined, { escape: value => value })
+    let result = render(replyItem.text, args, undefined, { escape: value => value })
+    // 是否有提前结束
+    const endIndex = result.indexOf('$end$')
+    if (endIndex >= 0) {
+      result = result.substring(0, endIndex)
+    }
+    return result
   }
 }
 

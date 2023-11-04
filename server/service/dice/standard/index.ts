@@ -129,7 +129,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   override get output() {
     // 第一行 (Maca 🎲 侦察)
-    const headLine = this.t('roll.start', { 描述: this.description, 原始指令: this.rawExpression })
+    const headLine = this.t('roll.start', this.getRollStartArgs())
     // 是否有中间骰
     const inlineRollLines = []
     if (this.hasInlineRolls && !this.quiet) {
@@ -186,8 +186,13 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   // roll.start 格式化参数
   protected getRollStartArgs() {
+    // 需求区分检定和普通掷骰，根据是否有检定结果来判断
+    const hasTest = this.rolls.some(roll => roll.tests.some(test => !!test.result))
     return {
-
+      描述: this.description,
+      原始指令: this.rawExpression,
+      普通检定: hasTest,
+      普通掷骰: !hasTest,
     }
   }
 

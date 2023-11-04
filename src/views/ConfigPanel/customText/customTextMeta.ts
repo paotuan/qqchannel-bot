@@ -44,7 +44,7 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
     name: '掷骰-起始',
     description: '.侦查<br><u>Maca 🎲 侦察</u> d%: [84] = 84',
     defaultTemplate: '{{用户名}} 🎲 {{描述}}',
-    args: [_.用户名, _.人物卡名, _.at用户, _.原始指令, _.描述, _.ds, _.en, _.ri, _.sc]
+    args: [_.用户名, _.人物卡名, _.at用户, _.原始指令, _.描述, _.ds, _.en, _.ri, _.sc, _.coc, _.dnd, { name: '普通检定', section: true }, { name: '普通掷骰', section: true }]
   },
   {
     key: 'roll.inline.first',

@@ -121,7 +121,8 @@ export class ScDiceRoll extends BasePtDiceRoll {
       掷骰结果: roll.total,
       掷骰表达式: roll.notation,
       掷骰输出: roll.output,
-      sc: true
+      sc: true,
+      coc: true
     }
   }
 

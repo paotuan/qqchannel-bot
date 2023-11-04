@@ -26,7 +26,8 @@ export class DsDiceRoll extends BasePtDiceRoll {
       掷骰结果: this.diceRoll.total,
       掷骰表达式: this.diceRoll.notation,
       掷骰输出: this.diceRoll.output,
-      ds: true // 以防万一特殊场景使用
+      ds: true, // 以防万一特殊场景使用
+      dnd: true
     }
   }
 
