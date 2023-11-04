@@ -33,8 +33,9 @@ export class Channel {
       msg.msg_id = this.getLastMessageIdForReply()
     }
     // 如果发送文字消息，则对文字消息做 trim。因为 qq 除 android 端都会自动 trim，为了保证结果在各个平台展示的一致性，此处先统一做 trim
+    // 同时人肉对 \b 做下处理，支持退格，以应对自定义回复拼接时用户需要自定义的极端情况
     if (msg.content) {
-      msg.content = msg.content.trim()
+      msg.content = removeBackspaces(msg.content.trim())
     }
     try {
       // console.time('message')
@@ -141,4 +142,17 @@ export class Channel {
       console.error('[Message] 获取消息详情失败', e)
     }
   }
+}
+
+// 允许支持 \b 退格
+// https://stackoverflow.com/questions/11891653/javascript-concat-string-with-backspace
+function removeBackspaces(str: string) {
+  let index = str.indexOf('\b') // str must be trimed
+  while (index >= 0) {
+    const left = str.substring(0, index - 1)
+    const right = str.substring(index + 1)
+    str = (left + right).trim()
+    index = str.indexOf('\b')
+  }
+  return str
 }
