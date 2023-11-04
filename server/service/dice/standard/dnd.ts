@@ -78,4 +78,12 @@ export class DndDiceRoll extends StandardDiceRoll {
       掷骰输出: rollResult.roll.output,
     }
   }
+
+  protected override getRollStartArgs() {
+    return { ...super.getRollStartArgs(), dnd: true }
+  }
+
+  protected override getFormatArgs(roll: DiceRoll, test?: any) {
+    return { ...super.getFormatArgs(roll, test), dnd: true }
+  }
 }

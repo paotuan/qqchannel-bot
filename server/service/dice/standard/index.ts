@@ -184,6 +184,13 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     return false
   }
 
+  // roll.start 格式化参数
+  protected getRollStartArgs() {
+    return {
+
+    }
+  }
+
   // 技能检定格式化可提供参数
   protected getFormatArgs(roll: DiceRoll, test?: IRollResult['tests'][number]) {
     return {

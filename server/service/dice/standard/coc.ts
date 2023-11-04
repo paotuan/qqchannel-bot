@@ -91,11 +91,16 @@ export class CocDiceRoll extends StandardDiceRoll {
     }
   }
 
+  protected override getRollStartArgs() {
+    return { ...super.getRollStartArgs(), coc: true }
+  }
+
   protected override getFormatArgs(roll: DiceRoll, test?: any) {
     const _test = test?.cardEntry as ICocCardEntry | undefined // todo 完善类型定义
     return {
       ...super.getFormatArgs(roll, test),
       // coc 额外追加是否是 困难/极难 前缀
+      coc: true,
       困难前缀: _test?.difficulty === 'hard',
       极难前缀: _test?.difficulty === 'ex',
       无前缀: _test?.difficulty === 'normal'
