@@ -45,9 +45,9 @@ import { useSceneStore } from '../../../store/scene'
 const userStore = useUserStore()
 const cardStore = useCardStore()
 // 已关联人物卡用户
-const haveCardUsers = computed(() => userStore.list.filter(u => cardStore.getCardOfUser(u.id)))
+const haveCardUsers = computed(() => userStore.enabledUserList.filter(u => cardStore.getCardOfUser(u.id)))
 // 未关联人物卡用户
-const noCardUsers = computed(() => userStore.list.filter(u => !cardStore.getCardOfUser(u.id)))
+const noCardUsers = computed(() => userStore.enabledUserList.filter(u => !cardStore.getCardOfUser(u.id)))
 
 // 搜索相关
 const keyword = ref('')

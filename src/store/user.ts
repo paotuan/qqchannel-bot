@@ -6,7 +6,8 @@ export const useUserStore = defineStore('user', {
     map: {} as Record<string, IUser>
   }),
   getters: {
-    list: state => Object.values(state.map)
+    list: state => Object.values(state.map),
+    enabledUserList: state => Object.values(state.map).filter(user => !user.bot && !user.deleted)
   },
   actions: {
     setUsers(list: IUser[]) {
