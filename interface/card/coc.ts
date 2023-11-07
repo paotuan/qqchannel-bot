@@ -379,7 +379,7 @@ const _SKILL_ALIAS = Object.freeze([
   ['意志', 'POW'],
   ['体质', 'CON'],
   ['外貌', 'APP'],
-  ['教育', 'EDU'],
+  ['教育', '知识', 'EDU'],
   ['体型', 'SIZ', 'SIZE'],
   ['智力', '灵感', 'INT'],
   ['生命', 'HP', '生命值'],
