@@ -96,13 +96,13 @@ export class ScDiceRoll extends BasePtDiceRoll {
 
   override get output() {
     const firstArgs = this.getFormatArgs(this.rollSc!, this.description, this.rollScTargetValue)
-    const firstStart = this.t('roll.start', firstArgs).trim()
+    const firstStart = this.t('roll.start', firstArgs)
     const firstResult = this.t('roll.result.quiet', firstArgs)
     const firstTest = this.rollScResult ? this.ts(this.rollScResult.level, firstArgs) : this.t('roll.sc.unsupported', firstArgs)
     let line = `${firstStart} ${firstResult}${firstTest}`
     if (!this.rollScResult) return line // 没有人物卡
     const secondArgs = this.getFormatArgs(this.rollLoss!, '理智损失')
-    const secondStart = this.t('roll.start', secondArgs).trim()
+    const secondStart = this.t('roll.start', secondArgs)
     const secondResult = this.t('roll.result', secondArgs)
     line += `\n${secondStart} ${secondResult}`
     // 如果发生了真实的损失，则加入附加语
