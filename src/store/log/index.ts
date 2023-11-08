@@ -45,6 +45,9 @@ export const useLogStore = defineStore('log', {
     },
     clear() {
       this.logs.length = 0
+      this.clearActionStack()
+    },
+    clearActionStack() {
       this.actionStack.length = 0
     },
     export(type: number) {

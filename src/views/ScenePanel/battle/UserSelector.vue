@@ -1,39 +1,13 @@
 <template>
-  <div class="dropdown dropdown-end">
-    <label tabindex="0">
-      <input
+  <UserSelectDropdown :options="options" class="dropdown-end" @select="select($event)">
+    <input
         v-model="keyword"
         type="text"
         placeholder="搜索玩家或输入名字创建敌人/NPC, 回车键确认"
         class="input input-bordered input-sm w-full"
         @keyup.enter="keydownEnter"
-      />
-    </label>
-    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 max-h-96 -ml-1 mt-2 overflow-y-auto flex-nowrap">
-      <li class="menu-title"><span>已关联人物卡</span></li>
-      <li v-for="user in haveCardUsersAfterSearch" :key="user.id">
-        <a @click="select(user)">
-          <div class="avatar">
-            <div class="w-6 rounded-full">
-              <img :src="user.avatar" :alt="user.nick" />
-            </div>
-          </div>
-          <div>{{ user.nick }}</div>
-        </a>
-      </li>
-      <li class="menu-title"><span>未关联人物卡</span></li>
-      <li v-for="user in noCardUsersAfterSearch" :key="user.id">
-        <a @click="select(user)">
-          <div class="avatar">
-            <div class="w-6 rounded-full">
-              <img :src="user.avatar" :alt="user.nick" />
-            </div>
-          </div>
-          <div>{{ user.nick }}</div>
-        </a>
-      </li>
-    </ul>
-  </div>
+    />
+  </UserSelectDropdown>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
@@ -41,6 +15,7 @@ import { useUserStore } from '../../../store/user'
 import { useCardStore } from '../../../store/card'
 import type { IUser } from '../../../../interface/common'
 import { useSceneStore } from '../../../store/scene'
+import UserSelectDropdown from '../../../components/user/UserSelectDropdown.vue'
 
 const userStore = useUserStore()
 const cardStore = useCardStore()
@@ -57,6 +32,11 @@ const keywordContains = (user: IUser) => {
 }
 const haveCardUsersAfterSearch = computed(() => haveCardUsers.value.filter(user => keywordContains(user)))
 const noCardUsersAfterSearch = computed(() => noCardUsers.value.filter(user => keywordContains(user)).slice(0, 100)) // 默认展示 100 条
+
+const options = computed(() => [
+  { id: '1', name: '已关联人物卡', children: haveCardUsersAfterSearch.value as IUser[] },
+  { id: '2', name: '未关联人物卡', children: noCardUsersAfterSearch.value as IUser[] }
+])
 
 // 点击选择玩家进入场景
 const sceneStore = useSceneStore()
