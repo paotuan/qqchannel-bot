@@ -15,6 +15,9 @@
     <keep-alive>
       <scene-panel v-if="ui.activeTab === 'scene'" />
     </keep-alive>
+    <keep-alive>
+      <UserManageDialog v-if="ui.userManageDialogShow" />
+    </keep-alive>
   </div>
 </template>
 <script setup lang="ts">
@@ -24,6 +27,7 @@ import NotePanel from '../../views/NotePanel/NotePanel.vue'
 import CardPanel from '../../views/CardPanel/CardPanel.vue'
 import ConfigPanel from '../../views/ConfigPanel/ConfigPanel.vue'
 import ScenePanel from '../../views/ScenePanel/ScenePanel.vue'
+import UserManageDialog from '../user/UserManageDialog.vue'
 
 const ui = useUIStore()
 </script>

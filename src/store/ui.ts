@@ -8,9 +8,9 @@ export const useUIStore = defineStore('ui', {
   state: () => ({
     activeTab: 'log' as Tabs,
     connectionStatus: true, // 连接状态
-    statusAlertVisible: true,
     toasts: [] as { id: number, type: ToastType, msg: string }[],
-    theme: localStorage.getItem('theme') || 'lemonade'
+    theme: localStorage.getItem('theme') || 'lemonade',
+    userManageDialogShow: false
   }),
   actions: {
     toast(type: ToastType, msg: string) {
