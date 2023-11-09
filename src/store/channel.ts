@@ -35,7 +35,7 @@ export const useChannelStore = defineStore('channel', {
 function initChannelRelatedStorage(channelId: string) {
   const logStore = useLogStore()
   logStore.logs = getLocalStorage<ILog[]>(`log-${channelId}`, [])
-  watch(logStore.logs, value => localStorage.setItem(`log-${channelId}`, JSON.stringify(value)))
+  watch(() => logStore.logs.length, () => localStorage.setItem(`log-${channelId}`, JSON.stringify(logStore.logs)))
 }
 
 function getLocalStorage<T>(key: string, defaultValue: T) {

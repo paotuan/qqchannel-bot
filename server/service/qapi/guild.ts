@@ -130,8 +130,22 @@ export class Guild {
 
   deleteUser(id: string) {
     const user = this.usersMap[id]
-    if (user) {
+    if (user && !user.deleted) {
       user.deleted = true
+      this.saveUsers()
+    }
+  }
+
+  deleteUsersBatch(ids: string[]) {
+    let updated = false
+    ids.forEach(id => {
+      const user = this.usersMap[id]
+      if (user && !user.deleted) {
+        user.deleted = true
+        updated = true
+      }
+    })
+    if (updated) {
       this.saveUsers()
     }
   }

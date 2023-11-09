@@ -49,7 +49,10 @@ import { useUserStore } from '../../store/user'
 import { computed, ref } from 'vue'
 import DNativeSelect from '../../dui/select/DNativeSelect.vue'
 import UserItem from './UserItem.vue'
-import type { IUser } from '../../../interface/common'
+import type { ILog, IUser, IUserDeleteReq } from '../../../interface/common'
+import ws from '../../api/ws'
+import { Toast } from '../../utils'
+import { useLogStore } from '../../store/log'
 
 const ui = useUIStore()
 const userStore = useUserStore()
@@ -57,18 +60,18 @@ const userStore = useUserStore()
 // search
 const keyword = ref('')
 const userOptions = computed(() => {
-  if (!keyword.value) return userStore.list
+  if (!keyword.value) return userStore.enabledUserList
   const search = keyword.value.toLowerCase()
-  return userStore.list.filter(user => user.nick.toLowerCase().includes(search) || user.username.toLowerCase().includes(search))
+  return userStore.enabledUserList.filter(user => user.nick.toLowerCase().includes(search) || user.username.toLowerCase().includes(search))
 })
 
 // log 处理方式
-type LogAction = 'delete' | 'keep' | 'rename'
+type LogAction = 'delete' | 'keep' | 'deleteAll'
 const logAction = ref<LogAction>('keep')
 const logOptions = [
-  { label: '删除 Log', value: 'delete' },
-  { label: '保留 Log 并保持 Log 发送时的昵称', value: 'keep' },
-  { label: '保留 Log 并使用成员此刻最新的昵称', value: 'rename' },
+  { label: '在当前子频道中删除 Log', value: 'delete' },
+  { label: '在所有子频道中删除 Log', value: 'deleteAll' },
+  { label: '保留 Log', value: 'keep' },
 ]
 
 // 选择成员 userId => selected
@@ -85,8 +88,38 @@ const close = () => {
   ui.userManageDialogShow = false
 }
 
+const logStore = useLogStore()
+const handleLogAction = () => {
+  if (logAction.value === 'keep') return
+  // delete 和 deleteAll 都清空当前子频道的内存数据
+  logStore.removeLogByUsers(selectedUserIds.value)
+  if (logAction.value === 'deleteAll') {
+    // 清除 localstorage 数据
+    const edited: Record<string, ILog[]> = {}
+    const length = localStorage.length
+    for (let i = 0; i < length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('log-')) {
+        try {
+          const logs = JSON.parse(localStorage.getItem(key)!) as ILog[]
+          edited[key] = logs.filter(log => !selectedUserIds.value.includes(log.userId))
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+    // 写回 localstorage
+    Object.entries(edited).forEach(([key, value]) => {
+      localStorage.setItem(key, JSON.stringify(value))
+    })
+  }
+}
+
 const submit = () => {
-  // todo
+  handleLogAction() // 是否需要 log 处理
+  ws.send<IUserDeleteReq>({ cmd: 'user/delete', data: { ids: selectedUserIds.value } })
+  Toast.success('操作成功')
+  close()
 }
 </script>
 <style scoped>

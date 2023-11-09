@@ -25,7 +25,7 @@ import type {
   IRiListResp,
   IRiSetReq,
   IRiDeleteReq,
-  IDiceRollReq,
+  IDiceRollReq, IUserDeleteReq,
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -80,6 +80,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'dice/roll':
     handleManualDiceRoll(client, server, request.data as IDiceRollReq)
+    break
+  case 'user/delete':
+    handleUserDelete(client, server, request.data as IUserDeleteReq)
     break
   }
 }
@@ -295,5 +298,15 @@ async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRo
   if (qApi) {
     const errmsg = await qApi.dice.manualDiceRollFromWeb(client.listenToChannelId, client.listenToGuildId, data)
     client.send<string>({ cmd: 'dice/roll', success: !errmsg, data: errmsg })
+  }
+}
+
+function handleUserDelete(client: WsClient, server: Wss, data: IUserDeleteReq) {
+  const qApi = server.qApis.find(client.appid)
+  if (qApi) {
+    const guild = qApi.guilds.find(client.listenToGuildId)
+    if (guild) {
+      guild.deleteUsersBatch(data.ids)
+    }
   }
 }

@@ -36,6 +36,10 @@ export const useLogStore = defineStore('log', {
       action.apply(this.logs)
       this.actionStack.push(action)
     },
+    removeLogByUsers(userIds: string[]) {
+      this.logs = this.logs.filter(log => !userIds.includes(log.userId))
+      this.actionStack.length = 0
+    },
     undo(count: number) {
       for (let i = 0; i < count; i++) {
         const action = this.actionStack.pop()
@@ -45,9 +49,6 @@ export const useLogStore = defineStore('log', {
     },
     clear() {
       this.logs.length = 0
-      this.clearActionStack()
-    },
-    clearActionStack() {
       this.actionStack.length = 0
     },
     export(type: number) {

@@ -9,6 +9,7 @@ export type Command =
   | 'channel/config' // req/res
   | 'channel/config/reset' // req
   | 'user/list' // res
+  | 'user/delete' // req
   | 'log/push' // res
   | 'note/send' // req/res
   | 'note/sendImageRaw' // req/ res: note/send
@@ -87,6 +88,10 @@ export interface IUser {
 }
 
 export type IUserListResp = IUser[]
+
+export type IUserDeleteReq = {
+  ids: string[]
+}
 // endregion channel
 
 // region log
