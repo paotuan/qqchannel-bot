@@ -85,6 +85,7 @@ export class QApi {
       // 根据消息中的用户信息更新成员信息。撤回事件信息不完整不处理
       if (data.eventType === 'MESSAGE_CREATE') {
         this.guilds.addOrUpdateUserByMessage(msg)
+        this.guilds.addGuildChannelByMessage(msg)
       }
       // 过滤掉未监听的频道消息
       const channelId = msg.channel_id

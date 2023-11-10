@@ -203,6 +203,7 @@ export class GuildManager {
   constructor(api: QApi) {
     makeAutoObservable<this, 'api'>(this, { api: false })
     this.api = api
+    // todo 理论上不需要请求成功后再 init listener。不过这些 listener 一般也很少触发，问题不大
     this.fetchGuilds().then(() => {
       this.initEventListeners()
     })
@@ -284,6 +285,26 @@ export class GuildManager {
     const guild = this.guildsMap[channel.guild_id]
     if (guild) {
       guild.deleteChannel(channel.id)
+    }
+  }
+
+  // 处理获取 guild/channel 接口有时失败的问题，理论上我们只需要 guildId、channelId，可以和 user 一样直接从 message 里面取
+  addGuildChannelByMessage(message: IMessage) {
+    // 不处理私信消息
+    if ((message as any).direct_message) return
+    const guildId = message.guild_id
+    const channelId = message.channel_id
+    let guild = this.guildsMap[guildId]
+    if (!guild) {
+      console.log('Create guild by message, id =', guildId)
+      this.addGuild({ id: guildId, name: guildId, icon: '' })
+      guild = this.guildsMap[guildId]
+    }
+    const channel = guild.findChannel(channelId)
+    if (!channel) {
+      console.log('Create channel by message, id =', channelId)
+      // type 假定是 0；后面其他字段都没用
+      guild.addChannel({ id: channelId, name: channelId, type: 0, guild_id: guildId, owner_id: '', position: 0, parent_id: '' })
     }
   }
 
