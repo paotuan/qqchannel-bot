@@ -26,7 +26,9 @@ const props = defineProps<{ userId: string | null }>()
 const emit = defineEmits<{ (e: 'select', value: IUser | null): void }>()
 
 const userStore = useUserStore()
-const currentUser = computed(() => props.userId ? userStore.of(props.userId) : null)
+// 支持通过指令关联人物卡后，可能出现本地没有这个人信息的情况。此时生成一个临时用户，至少让这里可以回显出来
+const createTempUser = (id: string): IUser => ({ id, avatar: '', nick: id, username: id, bot: false, deleted: false })
+const currentUser = computed(() => props.userId ? (userStore.of(props.userId) ?? createTempUser(props.userId)) : null)
 
 // 搜索相关
 const editMode = ref(false)
