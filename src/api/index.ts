@@ -38,7 +38,6 @@ ws.on('bot/info', message => {
 ws.on('channel/list', data => {
   const channel = useChannelStore()
   channel.list = data.data as IChannel[] | null
-  channel.initGetListSuccess = data.success!
 })
 
 ws.on('user/list', data => {

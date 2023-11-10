@@ -1,9 +1,6 @@
 <template>
   <div class="my-40 flex items-center justify-center">
-    <template v-if="!channelStore.initGetListSuccess">
-      <div>请求失败，请刷新页面重试</div>
-    </template>
-    <template v-else-if="channelStore.list">
+    <template v-if="channelStore.list">
       <div class="card bg-primary/75 pl-2 shadow-lg overflow-hidden">
         <div class="flex">
           <!-- 左侧频道选择 -->
@@ -26,15 +23,27 @@
               <div class="card-title">请选择机器人工作的子频道</div>
               <a class="link text-sm inline-flex" @click="openMultiWindow">我要多开<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a>
             </div>
+            <!-- 子频道空数据展示 -->
+            <div v-if="channelStore.list.length === 0" class="w-96">
+              <div class="font-bold my-4 loading">频道信息获取中...</div>
+              <template v-if="showLoadingFailTips">
+                <div>如长时间获取不到频道信息：</div>
+                <ol class="list-decimal pl-4 mb-4">
+                  <li>请检查机器人 APPID 和 机器人令牌 是否填写正确。</li>
+                  <li>请检查机器人是否真的已经被添加到了频道中。</li>
+                  <li>可能是腾讯接口挂了。可以在频道里发一条消息，频道 ID 就会展示在此处。</li>
+                </ol>
+              </template>
+            </div>
             <!-- 子频道选择 -->
-            <div v-if="checkedGuildId" class="grid grid-cols-2 gap-2 w-96 bg-base-100 pt-4 pb-12">
+            <div v-else-if="checkedGuildId" class="grid grid-cols-2 gap-2 w-96 bg-base-100 pt-4 pb-12">
               <label v-for="channel in channelsGroupByGuild[checkedGuildId]" :key="channel.id"
                      class="label cursor-pointer p-2 rounded-xl border"
                      :class="checkedChannelId === channel.id ? 'border-primary' : 'border-base-300'">
-            <span class="inline-flex items-center gap-2">
-              <component :is="iconByChannel(channel)" class="w-4 h-4" :class="colorByChannel(channel)" />
-              <span class="label-text">{{ channel.name }}</span>
-            </span>
+                <span class="inline-flex items-center gap-2">
+                  <component :is="iconByChannel(channel)" class="w-4 h-4" :class="colorByChannel(channel)" />
+                  <span class="label-text">{{ channel.name }}</span>
+                </span>
                 <input type="radio" name="login_channel-select-radio" class="radio radio-primary"
                        :checked="checkedChannelId === channel.id" @click="checkedChannel = channel"/>
               </label>
@@ -50,7 +59,7 @@
 </template>
 <script setup lang="ts">
 import { useChannelStore } from '../../store/channel'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import type { IChannel } from '../../../interface/common'
 import { groupBy } from 'lodash'
 import { ArrowTopRightOnSquareIcon, VideoCameraIcon, MicrophoneIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/vue/24/outline'
@@ -99,4 +108,28 @@ const colorByChannel = (channel: IChannel) => {
     return 'text-blue-600'
   }
 }
+
+// 展示子频道获取不到提示
+const showLoadingFailTips = ref(false)
+onMounted(() => {
+  setTimeout(() => {
+    showLoadingFailTips.value = true
+  }, 5000)
+})
 </script>
+<style scoped>
+.loading::before {
+  margin-right: 0.5rem;
+  height: 1rem;
+  width: 1rem;
+  border-radius: 9999px;
+  border-width: 2px;
+  animation: spin 2s linear infinite;
+  content: "";
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-bottom-color: currentColor;
+  border-right-color: currentColor;
+  display: inline-block;
+}
+</style>
