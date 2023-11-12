@@ -1,6 +1,16 @@
 <template>
+  <!-- 骰主设置 -->
+  <section>
+    <h2>骰主设置：</h2>
+    <div class="text-sm mb-2">非必填。填写后可在网页端人物卡发起暗骰，暗骰结果将发送给骰主。<br>由于机器人主动发送私信受到条数、时段等限制，建议适时主动向机器人发送任意消息以保持私信畅通。</div>
+    <div class="card card-compact w-full bg-base-100 shadow-lg">
+      <div class="card-body">
+        <BotOwnerSelector :user-id="config.botOwner" @select="onSelectBotOwner" />
+      </div>
+    </div>
+  </section>
   <!-- 默认骰 -->
-  <section id="defaultroll">
+  <section class="mt-4">
     <h2>默认骰：</h2>
     <div class="card card-compact w-full bg-base-100 shadow-lg">
       <div class="card-body">
@@ -42,9 +52,13 @@ import { useConfigStore } from '../../../store/config'
 import { computed } from 'vue'
 import SpecialDiceList from './SpecialDiceList.vue'
 import ExperimentalConfig from './ExperimentalConfig.vue'
+import BotOwnerSelector from './BotOwnerSelector.vue'
+import type { IUser } from '../../../../interface/common'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
+
+const onSelectBotOwner = (user: IUser | null) => config.value.botOwner = user?.id ?? null
 </script>
 <style scoped>
 h2 {

@@ -4,8 +4,9 @@
       <EllipsisVerticalIcon class="w-4 h-4" />
     </label>
     <ul tabindex="0" class="dropdown-content menu menu-compact shadow bg-base-100 rounded-md w-24">
-      <li><a class="text-xs" @click="onManualDiceRoll">掷骰</a></li>
-      <li><a class="text-xs" @click="onEditManualDiceRoll">编辑并掷骰</a></li>
+      <li><a class="text-xs" @click="onManualDiceRoll()">掷骰</a></li>
+      <li v-if="hasBotOwner"><a class="text-xs" @click="onManualDiceRoll(true)">暗骰</a></li>
+      <li><a class="text-xs" @click="onEditManualDiceRoll()">编辑并掷骰</a></li>
       <li v-if="props.deletable"><a class="text-xs" @click="onDelete">删除</a></li>
     </ul>
   </div>
@@ -13,9 +14,10 @@
 <script setup lang="ts">
 import { EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../store/card'
-import { ComputedRef, inject } from 'vue'
+import { computed, ComputedRef, inject } from 'vue'
 import { SELECTED_CARD } from './utils'
 import type { ICard } from '../../../interface/card/types'
+import { useConfigStore } from '../../store/config'
 
 const props = withDefaults(defineProps<{ expression: string, deletable?: boolean }>(), { deletable: true })
 const emit = defineEmits<{ (e: 'delete'): void }>()
@@ -27,8 +29,9 @@ const onDelete = () => {
 }
 
 const cardStore = useCardStore()
-const onManualDiceRoll = () => {
-  cardStore.manualDiceRoll(props.expression, card.value.data)
+const onManualDiceRoll = (hidden = false) => {
+  const expression = hidden ? `h${props.expression}` : props.expression
+  cardStore.manualDiceRoll(expression, card.value.data)
   closeDropdown()
 }
 
@@ -44,4 +47,7 @@ const closeDropdown = () => {
   // @ts-ignore
   document.activeElement?.blur?.()
 }
+
+const configStore = useConfigStore()
+const hasBotOwner = computed(() => configStore.config?.botOwner)
 </script>

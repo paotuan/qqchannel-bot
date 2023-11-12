@@ -11,7 +11,7 @@
     </div>
     <div class="flex items-center gap-4 my-4">
       <input v-model="keyword" type="text" placeholder="搜索成员" class="input input-bordered input-sm w-full max-w-xs" />
-      <span>已选：{{ selectedUserIds.length }}/{{ userStore.list.length }}</span>
+      <span>已选：{{ selectedUserIds.length }}/{{ userStore.enabledUserList.length }}</span>
     </div>
     <div class="grid grid-cols-3 gap-2">
       <div
