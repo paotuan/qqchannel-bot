@@ -1,6 +1,7 @@
 import type { IMember, MessageToCreate } from 'qq-guild-bot'
 import { makeAutoObservable } from 'mobx'
 import type { QApi } from './index'
+import type { IMessage } from 'qq-guild-bot'
 
 /**
  * 频道用户实例
@@ -15,6 +16,7 @@ export class User {
   deleted = false // user 退出不能删除，只标记为 delete，因为其他地方可能还需要 user 的相关信息
   private readonly api: QApi
   private userGuildId?: string // 私信频道 id
+  lastMessage?: IMessage // 私信最新一条消息
 
   constructor(api: QApi, member: IMember, guildId?: string) {
     makeAutoObservable<this, 'api'>(this, { id: false, guildId: false, api: false })
@@ -58,6 +60,10 @@ export class User {
       if (!userGuildId) {
         userGuildId = await this.fetchUserGuildId()
       }
+      // 如没有指定发某条被动消息，则尝试尽量发被动
+      if (!msg.msg_id) {
+        msg.msg_id = this.getLastMessageIdForReply()
+      }
       const res = await this.api.qqClient.directMessageApi.postDirectMessage(userGuildId, msg)
       console.log('[Message] 私信发送成功 ' + msg.content)
       this.userGuildId = userGuildId // 测试多次调用返回结果是一样的，可以缓存
@@ -75,6 +81,20 @@ export class User {
     })
     console.log('[Message] 建立私信通道', data.guild_id)
     return data.guild_id
+  }
+
+  // 获取可用于回复的被动消息 id
+  private getLastMessageIdForReply() {
+    const lastMsgTime = this.lastMessage ? new Date(this.lastMessage.timestamp).getTime() : 0
+    const currentTime = new Date().getTime()
+    // 判断有没有超过被动消息有效期
+    if (currentTime - lastMsgTime <= 5 * 60 * 1000 - 2000) {
+      console.log('[Message] 命中被动消息缓存')
+      return this.lastMessage?.id
+    } else {
+      this.lastMessage = undefined
+      return undefined
+    }
   }
 
   // region 序列化相关

@@ -106,6 +106,9 @@ export class QApi {
       if (data.eventType === 'DIRECT_MESSAGE_CREATE') {
         this.guilds.addOrUpdateUserByMessage(data.msg)
       }
+      // 最近一条消息缓存到 user 对象中
+      const user = this.guilds.findUser(data.msg.author.id, data.msg.src_guild_id) // 因为前面已经 addOrUpdateUserByMessage，所以一定存在一个永久的 user 对象
+      user && (user.lastMessage = data.msg)
       // 串行触发消息处理器
       for (const listener of this.directMessageQueueListeners) {
         const consumed = await listener(data)
