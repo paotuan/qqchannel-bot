@@ -28,6 +28,7 @@ export function getInitialDefaultConfig(): IChannelConfig {
   ]
   return {
     version: VERSION_CODE,
+    botOwner: null,
     defaultRoll: { expression: 'd100', preferCard: true },
     specialDice: getSpecialDiceConfig(),
     parseRule: { convertCase: false, detectCardEntry: false, detectDefaultRoll: false },
@@ -182,7 +183,11 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     }
     // 新增配置
     config.parseRule = { convertCase: false, detectCardEntry: false, detectDefaultRoll: false }
-    config.version = 23 // 1.7.0
+    config.version = 23 // 1.6.1
+  }
+  if (config.version < 26) {
+    config.botOwner = null
+    config.version = 26 // 1.7.0
   }
   return config as IChannelConfig
 }

@@ -29,6 +29,10 @@ export class ChannelConfig {
     this.plugin = plugins
   }
 
+  get botOwner() {
+    return this.config.botOwner
+  }
+
   /**
    * 默认骰配置
    */

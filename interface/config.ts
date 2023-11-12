@@ -159,6 +159,7 @@ export interface IParseRuleConfig {
 
 export interface IChannelConfig {
   version: number
+  botOwner: string | null
   defaultRoll: { expression: string, preferCard: boolean } // d100/d20/4dF
   specialDice: ISpecialDiceConfig
   parseRule: IParseRuleConfig

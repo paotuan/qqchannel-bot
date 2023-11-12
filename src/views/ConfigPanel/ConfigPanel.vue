@@ -62,7 +62,7 @@ const menuList: { label: string, value: NavMenu }[] = [
   { label: '自定义文案', value: 'customText' },
   { label: '检定规则', value: 'rollDecider' },
   { label: '别名指令', value: 'aliasRoll' },
-  { label: '默认骰&特殊指令', value: 'others' },
+  { label: '特殊指令&杂项', value: 'others' },
 ]
 
 // quick set

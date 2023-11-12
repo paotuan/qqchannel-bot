@@ -212,12 +212,12 @@ export class DiceManager {
    */
   async manualDiceRollFromWeb(channelId: string, guildId: string, { expression, cardData }: IDiceRollReq) {
     try {
-      // 1. 投骰
-      const SYSTEM_USER_ID = 'system'
-      const systemCard = createCard(cardData)
-      const getCard = (userId: string) => userId === SYSTEM_USER_ID ? systemCard : this.wss.cards.getCard(channelId, userId)
       const config = this.wss.config.getChannelConfig(channelId)
-      const roller = createDiceRoll(expression, { channelId, userId: SYSTEM_USER_ID, username: cardData.name, userRole: 'admin', config, getCard })
+      // 1. 投骰
+      const systemUserId = config.botOwner || 'system'
+      const systemCard = createCard(cardData)
+      const getCard = (userId: string) => userId === systemUserId ? systemCard : this.wss.cards.getCard(channelId, userId)
+      const roll = createDiceRoll(expression, { channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard })
       // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
       // 特殊：保存先攻列表会把这个人当成玩家，目前也先不能保存
       // if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
@@ -226,11 +226,18 @@ export class DiceManager {
       // 2. 发消息
       const channel = this.api.guilds.findChannel(channelId, guildId)
       if (!channel) throw new Error('频道不存在')
-      // 也没有暗骰，因为不知道发给谁
-      const replyMsg = await channel.sendMessage({ content: roller.output })
-      // 如果是可供对抗的投骰，记录下缓存
-      if (replyMsg && roller instanceof StandardDiceRoll && roller.eligibleForOpposedRoll) {
-        this.opposedRollCache.set(replyMsg.id, roller)
+      if (roll instanceof StandardDiceRoll && roll.hidden && config.botOwner) { // 如果设置了 botOwner, 则可以处理暗骰
+        const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
+        channel.sendMessage({ content: channelMsg })
+        const user = this.api.guilds.findUser(config.botOwner, guildId)
+        if (!user) throw new Error('用户信息不存在')
+        user.sendMessage({ content: roll.output })
+      } else {
+        const replyMsg = await channel.sendMessage({ content: roll.output })
+        // 如果是可供对抗的投骰，记录下缓存
+        if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
+          this.opposedRollCache.set(replyMsg.id, roll)
+        }
       }
       return ''
     } catch (e: any) {
