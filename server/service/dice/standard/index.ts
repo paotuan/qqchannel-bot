@@ -1,5 +1,5 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { parseTemplate, parseDescriptions2 } from '../utils'
+import { parseTemplate, parseDescriptions2, removeTrailingOneSpace } from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import type { ICardEntry } from '../../../../interface/card/types'
@@ -166,7 +166,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       // 没有多轮投骰，将两个部分首位相连
       const lastLine = lines[lines.length - 1]
       const [first, ...rest] = rollLines[0]
-      lines[lines.length - 1] = `${lastLine.trim()} ${first}` // trim 以避免可能重复的空格
+      lines[lines.length - 1] = `${removeTrailingOneSpace(lastLine)} ${first}` // trim 以避免可能重复的空格
       lines.push(...rest)
     } else {
       // 有多轮投骰，就简单按行显示

@@ -188,6 +188,11 @@ describe('未关联人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 d% = 2 / 60 成功\nMaca 🎲 理智损失 0: 0 = 0')
   })
 
+  test('coc理智检定 有描述', () => {
+    const roller = createDiceRoll('sc0/1d10直面伟大的克苏鲁60', context)
+    expect(roller.output).toBe('Maca 🎲 直面伟大的克苏鲁 d% = 2 / 60 成功\nMaca 🎲 理智损失 0: 0 = 0')
+  })
+
   test('coc成长检定 列出', () => {
     const roller = createDiceRoll('en list', context)
     expect(roller.output).toBe('Maca 当前暂无可成长的技能或不支持成长')

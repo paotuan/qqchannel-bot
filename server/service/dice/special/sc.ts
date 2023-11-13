@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../index'
-import { parseDescriptions } from '../utils'
+import { parseDescriptions, removeTrailingOneSpace } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 
@@ -99,7 +99,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
     const firstStart = this.t('roll.start', firstArgs)
     const firstResult = this.t('roll.result.quiet', firstArgs)
     const firstTest = this.rollScResult ? this.ts(this.rollScResult.level, firstArgs) : this.t('roll.sc.unsupported', firstArgs)
-    let line = `${firstStart} ${firstResult}${firstTest}`
+    let line = `${removeTrailingOneSpace(firstStart)} ${firstResult}${firstTest}`
     if (!this.rollScResult) return line // 没有人物卡
     const secondArgs = this.getFormatArgs(this.rollLoss!, '理智损失')
     const secondStart = this.t('roll.start', secondArgs)
