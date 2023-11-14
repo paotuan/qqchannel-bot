@@ -118,6 +118,11 @@ export class Guild {
         user.deleted = false
         updated = true
       }
+      // nick 可能为空容错
+      if (!user.nick) {
+        user.nick = user.username
+        updated = true
+      }
       if (updated) {
         this.saveUsers()
       }

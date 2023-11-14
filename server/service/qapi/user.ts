@@ -114,7 +114,7 @@ export class User {
     const mockMember: IMember = {
       guild_id: data.guildId,
       joined_at: '', // useless
-      nick: data.nick,
+      nick: data.nick || data.username, // nick 可能为空容错
       user: {
         id: data.id,
         username: data.username,
