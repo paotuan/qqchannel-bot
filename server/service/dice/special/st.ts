@@ -1,10 +1,8 @@
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { IDiceRollContext, parseTemplate } from '../utils'
+import { at, AtUserPattern, IDiceRollContext, parseTemplate } from '../utils'
 import type { ICard } from '../../../../interface/card/types'
 import { DndCard } from '../../../../interface/card/dnd'
-
-const AtUserPattern = /^<@!(\d+)>/ // todo 后续配置注入
 
 // .st [@xx] xx +1d6，yy -2，zz 20  // 根据逗号或分号分隔。不支持自动探测，因为骰子表达式情况比较复杂，难以判断。而且也要考虑技能名特殊字符的情况
 // .st show [@xx] xx,xx,xx
@@ -138,7 +136,7 @@ export class StDiceRoll extends BasePtDiceRoll {
   private get formatArgs() {
     return {
       目标人物卡名: this.targetUserCard?.name,
-      目标用户: `<@!${this.targetUserId}>`,
+      目标用户: at(this.targetUserId),
       st: true
     }
   }

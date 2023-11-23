@@ -1,6 +1,6 @@
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { parseDescriptions, ParseFlags, parseTemplate } from '../utils'
+import { at, AtUserPattern, parseDescriptions, ParseFlags, parseTemplate } from '../utils'
 import type { IRiItem } from '../../../../interface/common'
 
 // ri [1d20+1] [username],[1d20] [username]
@@ -78,7 +78,6 @@ export class RiDiceRoll extends BasePtDiceRoll {
   }
 }
 
-const AtUserPattern = /^<@!(\d+)>/
 export class RiListDiceRoll extends BasePtDiceRoll {
 
   private clear = false
@@ -104,7 +103,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
   }
 
   private parseDelList(expression: string) {
-    const atSelf = `<@!${this.context.userId}>`
+    const atSelf = at(this.context.userId)
     const delList = expression.trim().split(/[\s,，;；]+/).map(name => name || atSelf) // 没指定相当于自己的 userId
     const uniqList = Array.from(new Set(delList))
     const uniqDelList = uniqList.length > 0 ? uniqList : [atSelf]
@@ -176,5 +175,5 @@ function compareSeq(a: number, b: number) {
 }
 
 function getRiName(type: 'npc' | 'actor', id: string) {
-  return type === 'npc' || id === 'system' ? id : `<@!${id}>`
+  return type === 'npc' || id === 'system' ? id : at(id)
 }

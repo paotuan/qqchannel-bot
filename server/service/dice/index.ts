@@ -2,7 +2,7 @@ import type { IDiceRollContext } from './utils'
 import type { ICard } from '../../../interface/card/types'
 import type { IRollDecideContext } from '../config/helpers/decider'
 import type { CustomTextKeys, SuccessLevel } from '../../../interface/config'
-import { convertSuccessLevel2CustomTextKey } from './utils'
+import { at, convertSuccessLevel2CustomTextKey } from './utils'
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -60,7 +60,7 @@ export abstract class BasePtDiceRoll {
     return {
       用户名: this.context.username,
       人物卡名: this.selfCard?.name ?? this.context.username,
-      at用户: this.context.userId === 'system' ? this.context.username : `<@!${this.context.userId}>`
+      at用户: this.context.userId === 'system' ? this.context.username : at(this.context.userId)
     }
   }
 }

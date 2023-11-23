@@ -2,6 +2,7 @@ import { StandardDiceRoll } from './index'
 import { DndCard, getPropOfSkill } from '../../../../interface/card/dnd'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
+import { at } from '../utils'
 
 export class DndDiceRoll extends StandardDiceRoll {
 
@@ -71,7 +72,7 @@ export class DndDiceRoll extends StandardDiceRoll {
       // 通用参数这里也要提供一下，因为对抗检定有[对方xxx]
       用户名: this.context.username,
       人物卡名: this.selfCard?.name ?? this.context.username,
-      at用户: this.context.userId === 'system' ? this.context.username : `<@!${this.context.userId}>`,
+      at用户: this.context.userId === 'system' ? this.context.username : at(this.context.userId),
       描述: test?.skill ?? '',
       掷骰结果: rollResult.roll.total,
       掷骰表达式: rollResult.roll.notation,

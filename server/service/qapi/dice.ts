@@ -2,7 +2,7 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import { convertRoleIds, createDiceRoll } from '../dice/utils'
+import { at, convertRoleIds, createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 import type { IRiItem, IDiceRollReq } from '../../../interface/common'
@@ -52,9 +52,9 @@ export class DiceManager {
     let fullExp = content // .d100 困难侦察
     let isInstruction = false
     // @机器人的消息
-    if (fullExp.startsWith(`<@!${botUserId}>`)) {
+    if (botUserId && fullExp.startsWith(at(botUserId))) {
       isInstruction = true
-      fullExp = fullExp.replace(`<@!${botUserId}>`, '').trim()
+      fullExp = fullExp.replace(at(botUserId), '').trim()
     }
     // 指令消息
     if (fullExp.startsWith('.') || fullExp.startsWith('。')) {

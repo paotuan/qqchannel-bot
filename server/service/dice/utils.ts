@@ -251,3 +251,7 @@ export function removeTrailingOneSpace(str: string) {
     return str
   }
 }
+
+// 处理 @ 相关
+export const AtUserPattern = /^<@!(\d+)>/
+export const at = (userId: string) => `<@!${userId}>`

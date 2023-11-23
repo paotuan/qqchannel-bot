@@ -4,7 +4,7 @@ import type { IMessage } from 'qq-guild-bot'
 import { render } from 'mustache'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
-import { convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
+import { at, convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
 import { ICustomReplyEnv } from '../../../interface/config'
 import { VERSION_NAME } from '../../../interface/version'
 
@@ -37,9 +37,9 @@ export class CustomReplyManager {
     let fullExp = content // .d100 困难侦察
     let isInstruction = false
     // @机器人的消息
-    if (fullExp.startsWith(`<@!${botUserId}>`)) {
+    if (botUserId && fullExp.startsWith(at(botUserId))) {
       isInstruction = true
-      fullExp = fullExp.replace(`<@!${botUserId}>`, '').trim()
+      fullExp = fullExp.replace(at(botUserId), '').trim()
     }
     // 指令消息. 自定义回复建议使用 qq 频道原生指令前缀 “/”
     if (fullExp.startsWith('/') || fullExp.startsWith('.') || fullExp.startsWith('。')) {
@@ -92,8 +92,8 @@ export class CustomReplyManager {
         nick: username,
         用户名: username,
         人物卡名: getCard(msg.author.id)?.name ?? username,
-        at: `<@!${msg.author.id}>`,
-        at用户: `<@!${msg.author.id}>`,
+        at: at(msg.author.id),
+        at用户: at(msg.author.id),
         version: VERSION_NAME,
       }
       const template = await replyFunc(env, matchGroups)
