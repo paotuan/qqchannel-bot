@@ -44,11 +44,14 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       this.rolls.push({
         roll,
         tests: this.skillsForTest.map(({ skill, tempValue }) => {
-          let result: IRollDecideResult | undefined = undefined
-          let cardEntry = this.selfCard?.getEntry(skill)
-          if (!cardEntry && !isNaN(tempValue)) {
+          let cardEntry: ICardEntry | undefined
+          // 如有临时值，则优先取临时值. 无临时值，则从人物卡读取
+          if (!isNaN(tempValue)) {
             cardEntry = { input: skill, key: skill, value: tempValue, isTemp: true }
+          } else {
+            cardEntry = this.selfCard?.getEntry(skill)
           }
+          let result: IRollDecideResult | undefined
           if (cardEntry) {
             result = this.decide({ baseValue: cardEntry.value, targetValue: cardEntry.value, roll: roll.total })
           }

@@ -41,9 +41,9 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 / 40 成功')
   })
 
-  test('忽略临时值', () => {
+  test('临时值优先于人物卡', () => {
     const roller = createDiceRoll('d100 侦察 50', context)
-    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 40 成功')
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 50 成功')
   })
 
   test('不存在技能仅回显', () => {
@@ -89,6 +89,12 @@ describe('已关联COC人物卡', () => {
   test('coc理智检定', () => {
     const roller = createDiceRoll('sc 0/d10', context)
     expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
+  })
+
+  test('coc理智检定 临时值优先', () => {
+    const roller = createDiceRoll('sc 1/d3 60', context)
+    roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 d% = 2 / 60 成功\nMaca 🎲 理智损失 1: 1 = 1\n理智变化：60 → 59')
   })
 
   test('coc理智检定 区分大成功', () => {

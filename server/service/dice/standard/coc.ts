@@ -1,7 +1,7 @@
 import { StandardDiceRoll } from './index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import { CocCard, getCocTempEntry, ICocCardEntry } from '../../../../interface/card/coc'
+import { CocCard, getCocTempEntry, type ICocCardEntry } from '../../../../interface/card/coc'
 import { at } from '../utils'
 
 export class CocDiceRoll extends StandardDiceRoll {
@@ -20,11 +20,13 @@ export class CocDiceRoll extends StandardDiceRoll {
       this.rolls.push({
         roll,
         tests: this.skillsForTest.map(({ skill, tempValue }) => {
-          let result: IRollDecideResult | undefined = undefined
-          let cardEntry = this.selfCard?.getEntry(skill)
-          if (!cardEntry && !isNaN(tempValue)) {
+          let cardEntry: ICocCardEntry | undefined
+          if (!isNaN(tempValue)) {
             cardEntry = getCocTempEntry(skill, tempValue)
+          } else {
+            cardEntry = this.selfCard?.getEntry(skill)
           }
+          let result: IRollDecideResult | undefined = undefined
           if (cardEntry) {
             result = this.decide({ baseValue: cardEntry.baseValue, targetValue: cardEntry.value, roll: roll.total })
             // 非临时值且检定成功，记录人物卡技能成长
