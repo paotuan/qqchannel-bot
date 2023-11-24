@@ -2,7 +2,7 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import { at, convertRoleIds, createDiceRoll } from '../dice/utils'
+import { at, AtUserPatternEnd, convertRoleIds, createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 import type { IRiItem, IDiceRollReq } from '../../../interface/common'
@@ -62,14 +62,29 @@ export class DiceManager {
       fullExp = fullExp.substring(1).trim()
     }
     if (!isInstruction) return false
+
+    // 是否是全局代骰
+    const substitute: { userId?: string, username?: string } = {}
+    const userIdMatch = fullExp.match(AtUserPatternEnd)
+    if (userIdMatch) {
+      substitute.userId = userIdMatch[1]
+      const user = this.api.guilds.findUser(substitute.userId, msg.guild_id)
+      substitute.username = user?.persona ?? substitute.userId
+      fullExp = fullExp.substring(0, userIdMatch.index).trim()
+    }
+
     // 转义 转义得放在 at 消息和 emoji 之类的后面
     fullExp = unescapeHTML(fullExp)
 
     // 投骰
-    const username = msg.member.nick || msg.author.username || msg.author.id
-    const replyMsgId = (msg as any).message_reference?.message_id
-    const userRole = convertRoleIds(msg.member.roles)
-    const roll = this.tryRollDice(fullExp, { userId: msg.author.id, channelId: msg.channel_id, username, replyMsgId, userRole })
+    const realUser = { userId: msg.author.id, username: msg.member.nick || msg.author.username || msg.author.id }
+    const roll = this.tryRollDice(fullExp, {
+      channelId: msg.channel_id,
+      userId: substitute.userId ?? realUser.userId,
+      username: substitute.username ?? realUser.username,
+      replyMsgId: (msg as any).message_reference?.message_id,
+      userRole: convertRoleIds(msg.member.roles)
+    })
     if (roll) {
       // 拼装结果，并发消息
       const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
@@ -77,7 +92,7 @@ export class DiceManager {
       if (roll instanceof StandardDiceRoll && roll.hidden) { // 处理暗骰
         const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
         channel.sendMessage({ content: channelMsg, msg_id: msg.id })
-        const user = this.api.guilds.findUser(msg.author.id, msg.guild_id)
+        const user = this.api.guilds.findUser(msg.author.id, msg.guild_id) // 暗骰始终发送给消息发送人，不考虑代骰
         if (!user) return true // 用户信息不存在
         user.sendMessage({ content: roll.output, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
       } else {
