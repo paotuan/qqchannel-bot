@@ -6,6 +6,7 @@ import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
 import type { ICard, ICardData } from '../../interface/card/types'
 import { createCard } from '../../interface/card'
+import type { ICardQuery } from '../../interface/config'
 
 const dir = './cards'
 const LINK_FILE_NAME = '/__link.json'
@@ -131,12 +132,41 @@ export class CardManager {
     }
   }
 
-  linkCard(client: WsClient, req: ICardLinkReq) {
+  handleLinkCard(client: WsClient, req: ICardLinkReq) {
     const { cardName, userId } = req
-    const channel = client.listenToChannelId
+    const channelId = client.listenToChannelId
     console.log('[Card] 关联人物卡', req)
+    this.linkCard(channelId, cardName, userId ?? undefined)
+  }
+
+  getLinkMap(channelId: string) {
+    if (!this.channelLinkMap[channelId]) {
+      this.channelLinkMap[channelId] = {}
+    }
+    return this.channelLinkMap[channelId]
+  }
+
+  private _getCardObj(cardData: ICardData) {
+    const cardName = cardData.name
+    if (!this.cardCache[cardName]) {
+      this.cardCache[cardName] = createCard(cardData)
+    }
+    return this.cardCache[cardName]
+  }
+
+  // 根据子频道和用户 id，获取该用户关联的人物卡
+  getCard(channelId: string, userId: string): ICard | undefined {
+    const linkMap = this.getLinkMap(channelId)
+    const cardName = linkMap[userId]
+    const cardData = this.cardMap[cardName]
+    if (!cardData) return undefined
+    return this._getCardObj(cardData)
+  }
+
+  // 根据子频道、用户 id、人物卡名，关联人物卡. 不传 userId 代表取消这张卡的关联
+  linkCard(channelId: string, cardName: string, userId?: string) {
     // 如果 cardName 之前关联的别的人，要删掉
-    const linkMap = this.getLinkMap(channel)
+    const linkMap = this.getLinkMap(channelId)
     const user2delete = Object.keys(linkMap).find(userId => linkMap[userId] === cardName)
     if (user2delete) {
       delete linkMap[user2delete]
@@ -147,23 +177,21 @@ export class CardManager {
     }
   }
 
-  getLinkMap(channelId: string) {
-    if (!this.channelLinkMap[channelId]) {
-      this.channelLinkMap[channelId] = {}
+  // 根据条件查询人物卡
+  queryCard(query: ICardQuery = {}) {
+    let list = this.cardList
+    if (typeof query.isTemplate === 'boolean') {
+      list = list.filter(data => data.isTemplate === query.isTemplate)
     }
-    return this.channelLinkMap[channelId]
-  }
-
-  // 根据子频道和用户 id，获取该用户关联的人物卡
-  getCard(channelId: string, userId: string): ICard | undefined {
-    const linkMap = this.getLinkMap(channelId)
-    const cardName = linkMap[userId]
-    const cardData = this.cardMap[cardName]
-    if (!cardData) return undefined
-    if (!this.cardCache[cardName]) {
-      this.cardCache[cardName] = createCard(cardData)
+    if (Array.isArray(query.type)) {
+      list = list.filter(data => query.type!.includes(data.type))
     }
-    return this.cardCache[cardName]
+    if (query.name) {
+      const keyword = query.name.toLowerCase()
+      list = list.filter(data => data.name.toLowerCase().includes(keyword))
+    }
+    // 符合条件的结果封装一层扔出去
+    return list.map(data => this._getCardObj(data))
   }
 }
 

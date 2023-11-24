@@ -41,6 +41,8 @@ export class PluginManager {
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
       getLinkedCardUserList: ({ channelId }) => Object.keys(this.wss.cards.getLinkMap(channelId)),
+      linkCard: ({ channelId, userId }, cardName) => this.wss.cards.linkCard(channelId, userId, cardName),
+      queryCard: (query) => this.wss.cards.queryCard(query),
       sendMessageToChannel: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {
         const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)
         if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)

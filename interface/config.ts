@@ -1,6 +1,7 @@
 import type { IMessage } from 'qq-guild-bot'
 import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from './card/types'
+import type { CardType } from './card/types'
 
 export type UserRole = 'admin' | 'manager' | 'user'
 
@@ -113,6 +114,12 @@ export interface ICustomTextConfig {
 }
 // endregion
 
+export interface ICardQuery {
+  name?: string
+  type?: CardType[]
+  isTemplate?: boolean
+}
+
 // region 插件相关
 export interface IPluginRegisterContext {
   versionName: string
@@ -122,6 +129,8 @@ export interface IPluginRegisterContext {
   getCard: (env: ICustomReplyEnv) => ICard | undefined
   saveCard: (card: ICard) => void
   getLinkedCardUserList: (env: ICustomReplyEnv) => string[] // 获取当前频道关联了人物卡的 user id 列表
+  linkCard: (env: ICustomReplyEnv, cardName: string) => void
+  queryCard: (query: ICardQuery) => ICard[]
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   _: any // lodash

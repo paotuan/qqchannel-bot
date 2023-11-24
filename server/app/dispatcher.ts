@@ -223,7 +223,7 @@ function handleCardDelete(client: WsClient, server: Wss, data: ICardDeleteReq) {
 
 function handleCardLink(client: WsClient, server: Wss, data: ICardLinkReq) {
   if (!client.listenToChannelId) return
-  server.cards.linkCard(client, data)
+  server.cards.handleLinkCard(client, data)
 }
 
 function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfigReq) {
