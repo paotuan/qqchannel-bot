@@ -23,8 +23,6 @@ const _ = Object.freeze<Record<string, ICustomTextMetaItem['args'][number]>>({
   掷骰表达式: { name: '掷骰表达式' },
   掷骰输出: { name: '掷骰输出' },
   目标值: { name: '目标值' },
-  目标用户: { name: '目标用户' },
-  目标人物卡名: { name: '目标人物卡名' },
   ds: { name: 'ds', section: true },
   en: { name: 'en', section: true },
   ri: { name: 'ri', section: true },
@@ -234,36 +232,36 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
     key: 'card.empty',
     name: '人物卡-未关联',
     description: '.st<br><u>@Maca 没有关联人物卡</u>',
-    defaultTemplate: '{{目标用户}}没有关联人物卡',
-    args: [_.用户名, _.人物卡名, _.at用户, _.目标用户]
+    defaultTemplate: '{{at用户}}没有关联人物卡',
+    args: [_.用户名, _.人物卡名, _.at用户]
   },
   {
     key: 'card.nopermission',
     name: '人物卡-无修改权限',
     description: '.st hp-1<br><u>Maca 没有修改人物卡的权限</u>',
     defaultTemplate: '{{用户名}} 没有修改人物卡的权限',
-    args: [_.用户名, _.人物卡名, _.at用户, _.目标用户, _.目标人物卡名]
+    args: [_.用户名, _.人物卡名, _.at用户]
   },
   {
     key: 'roll.st.prompt',
     name: '人物卡-设置提示',
     description: '.st<br><u>@Maca 请指定想要设置的属性名与属性值</u>',
     defaultTemplate: '{{at用户}}请指定想要设置的属性名与属性值',
-    args: [_.用户名, _.人物卡名, _.at用户, _.目标用户, _.目标人物卡名]
+    args: [_.用户名, _.人物卡名, _.at用户]
   },
   {
     key: 'roll.st.show',
     name: '人物卡-展示条目列表',
     description: '.st show 侦查，图书馆<br><u>@Maca (铃木翼):<br>侦查:60 图书馆:50</u>',
-    defaultTemplate: '{{目标用户}}({{目标人物卡名}}):\n{{#条目列表}}{{条目}}{{^last}} {{/last}}{{/条目列表}}',
-    args: [_.用户名, _.人物卡名, _.at用户, _.目标用户, _.目标人物卡名, { name: '条目列表', section: true }, { name: '条目' }, { name: '条目唯一', section: true }, _.last, { name: '展示全部', section: true }]
+    defaultTemplate: '{{at用户}}({{人物卡名}}):\n{{#条目列表}}{{条目}}{{^last}} {{/last}}{{/条目列表}}',
+    args: [_.用户名, _.人物卡名, _.at用户, { name: '条目列表', section: true }, { name: '条目' }, { name: '条目唯一', section: true }, _.last, { name: '展示全部', section: true }]
   },
   {
     key: 'roll.st.set',
     name: '人物卡-设置条目列表',
     description: '.st hp-1<br><u>@Maca (铃木翼) 设置:<br>hp 11-1: 11-1 = 10</u>',
-    defaultTemplate: '{{目标用户}}({{目标人物卡名}}) 设置:\n{{#条目列表}}{{条目}}{{^last}}\n{{/last}}{{/条目列表}}',
-    args: [_.用户名, _.人物卡名, _.at用户, _.目标用户, _.目标人物卡名, { name: '条目列表', section: true }, { name: '条目' }, { name: '条目唯一', section: true }, _.last]
+    defaultTemplate: '{{at用户}}({{人物卡名}}) 设置:\n{{#条目列表}}{{条目}}{{^last}}\n{{/last}}{{/条目列表}}',
+    args: [_.用户名, _.人物卡名, _.at用户, { name: '条目列表', section: true }, { name: '条目' }, { name: '条目唯一', section: true }, _.last]
   },
 ])
 
