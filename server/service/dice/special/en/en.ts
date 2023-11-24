@@ -2,38 +2,28 @@
 // en // all
 // en aa [tempvalue]
 
-import { BasePtDiceRoll } from '../index'
+import { BasePtDiceRoll } from '../../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { CocCard, getCocTempEntry } from '../../../../interface/card/coc'
+import { CocCard, getCocTempEntry, type ICocCardEntry } from '../../../../../interface/card/coc'
+import { getAllSkillsCanEn } from './utils'
 
 interface IGrowthDecideResult {
   firstRoll: DiceRoll // 首次 d% 结果
   targetValue: number // 技能目标值
   canGrowth: boolean // 是否能成长
   secondRoll?: DiceRoll // 二次 d10 结果
+  isTemp: boolean // 是否是临时值
 }
 
 export class EnDiceRoll extends BasePtDiceRoll {
 
-  private listMode = false
   private enSkillNames: string[] = []
   private tempValue = NaN
   // 先 d100 判断是否能成长，再 0/d10
   private readonly skill2Growth: Record<string, IGrowthDecideResult> = {}
 
-  // 如果关联了非 coc 人物卡，就提示不支持（如果无人物卡还是可以通过临时值来使用的）
-  // 另外不直接在外面解析前缀的时候拦掉，是为了进来的时候可以有不支持的提示
-  private get isCardUnsupported() {
-    return this.selfCard && !(this.selfCard instanceof CocCard)
-  }
-
-  private get allSkillsCanEn() {
-    const cardData = (this.selfCard as CocCard | undefined)?.data
-    return cardData ? Object.keys(cardData.meta.skillGrowth).filter(name => cardData.meta.skillGrowth[name]) : [] // 过滤掉值为 false 的
-  }
-
   override roll() {
-    if (this.isCardUnsupported) return this
+    // if (this.isCardUnsupported) return this
     const removeEn = this.rawExpression.slice(2).trim()
     this.parseMain(removeEn)
     this.realRoll()
@@ -41,10 +31,8 @@ export class EnDiceRoll extends BasePtDiceRoll {
   }
 
   private parseMain(expression: string) {
-    if (expression === 'list' || expression === 'l') {
-      this.listMode = true
-    } else if (!expression) {
-      this.enSkillNames = this.allSkillsCanEn
+    if (!expression) {
+      this.enSkillNames = getAllSkillsCanEn(this.selfCard)
     } else {
       // 根据第一个空格或数字区分技能名和后续的分界线
       const index = expression.search(/[\s\d]/)
@@ -55,46 +43,31 @@ export class EnDiceRoll extends BasePtDiceRoll {
         this.tempValue = parseInt(expression.slice(index), 10)
       }
     }
-    console.log('[Dice] 成长检定 原始指令', this.rawExpression, '列出', this.listMode, '技能', this.enSkillNames.join('|'), '临时值', this.tempValue)
+    console.log('[Dice] 成长检定 原始指令', this.rawExpression, '技能', this.enSkillNames.join('|'), '临时值', this.tempValue)
   }
 
   private realRoll() {
-    if (this.listMode) return
     this.enSkillNames.forEach(skill => {
-      let entry = (this.selfCard as CocCard | undefined)?.getEntry(skill)
-      if (!entry && !isNaN(this.tempValue)) {
+      let entry: ICocCardEntry | undefined
+      if (!isNaN(this.tempValue)) {
         entry = getCocTempEntry(skill, this.tempValue)
+      } else if (this.selfCard instanceof CocCard) {
+        entry = this.selfCard.getEntry(skill)
       }
-      if (!entry) return // 没有人物卡，也没有临时值，就忽略
+      if (!entry) return // 没有人物卡项，也没有临时值，就忽略
       const firstRoll = new DiceRoll('d%')
       const canGrowth = firstRoll.total > Math.min(95, entry.baseValue) // 大于技能数值才能增长
       this.skill2Growth[skill] = {
         firstRoll,
         canGrowth,
         targetValue: entry.baseValue,
-        secondRoll: canGrowth ? new DiceRoll('d10') : undefined
+        secondRoll: canGrowth ? new DiceRoll('d10') : undefined,
+        isTemp: entry.isTemp
       }
     })
   }
 
   override get output() {
-    // 不支持的人物卡
-    if (this.isCardUnsupported) {
-      return this.t('roll.en.empty')
-    }
-    // 列出技能模式
-    if (this.listMode) {
-      if (this.allSkillsCanEn.length > 0) {
-        return this.t('roll.en.list', {
-          技能列表: this.allSkillsCanEn.map((技能名, i) => ({ 技能名, last: i === this.allSkillsCanEn.length - 1 })),
-          技能唯一: this.allSkillsCanEn.length === 1,
-          技能名: this.allSkillsCanEn[0]
-        })
-      } else {
-        return this.t('roll.en.empty')
-      }
-    }
-    // 成长模式
     const skillsActualGrowth = Object.keys(this.skill2Growth)
     if (skillsActualGrowth.length === 0) {
       return this.t('roll.en.empty')
@@ -134,17 +107,15 @@ export class EnDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard() {
-    if (this.isCardUnsupported) return []
-    const card = this.selfCard as CocCard | undefined
-    if (!card) return []
+    const card = this.selfCard
+    if (!(card instanceof CocCard)) return []
     let updated = false
     Object.keys(this.skill2Growth).forEach(skill => {
-      const entry = card.getEntry(skill)
-      if (!entry) return // 没有 entry，说明可能用的是临时值
       // 成长
       const growthResult = this.skill2Growth[skill]
+      if (growthResult.isTemp) return // 用的是临时值，不修改人物卡
       if (growthResult.canGrowth) {
-        if (card.setEntry(skill, entry.baseValue + growthResult.secondRoll!.total)) {
+        if (card.setEntry(skill, growthResult.targetValue + growthResult.secondRoll!.total)) {
           updated = true
         }
       }

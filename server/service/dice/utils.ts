@@ -1,6 +1,5 @@
 import { StandardDiceRoll } from './standard'
 import { ScDiceRoll } from './special/sc'
-import { EnDiceRoll } from './special/en'
 import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { CocOpposedDiceRoll } from './standard/cocOppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
@@ -14,6 +13,7 @@ import { DndCard } from '../../../interface/card/dnd'
 import { DndDiceRoll } from './standard/dnd'
 import { DsDiceRoll } from './special/ds'
 import { DndOpposedRoll } from './standard/dndOppose'
+import { dispatchEn } from './special/en/utils'
 
 export interface IDiceRollContext {
   channelId?: string
@@ -161,7 +161,7 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
     return new ScDiceRoll(parsedExpression, context, inlineRolls).roll()
   } else if (expression.startsWith('en') && specialDiceConfig.enDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
-    return new EnDiceRoll(parsedExpression, context, inlineRolls).roll()
+    return dispatchEn(parsedExpression, context, inlineRolls).roll()
   } else if (expression.startsWith('ri') && specialDiceConfig.riDice.enabled) {
     // ri 由于基数给用户输入，可能包含 attributes，因此统一由内部 parseTemplate
     return new RiDiceRoll(expression, context, inlineRolls).roll()

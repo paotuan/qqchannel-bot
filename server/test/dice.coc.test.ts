@@ -128,6 +128,11 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 图书馆 d% = 2 / 70 失败')
   })
 
+  test('coc成长检定 临时值优先', () => {
+    const roller = createDiceRoll('en图书馆60', context)
+    expect(roller.output).toBe('Maca 🎲 图书馆 d% = 2 / 60 失败')
+  })
+
   test('st 展示指定技能', () => {
     const roller = createDiceRoll('st show 侦查', context)
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n侦查:40`)
