@@ -4,7 +4,6 @@ import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { CocOpposedDiceRoll } from './standard/cocOppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
-import { StDiceRoll } from './special/st'
 import type { CustomTextKeys, SuccessLevel, UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
 import { GeneralCard } from '../../../interface/card/general'
@@ -14,6 +13,7 @@ import { DndDiceRoll } from './standard/dnd'
 import { DsDiceRoll } from './special/ds'
 import { DndOpposedRoll } from './standard/dndOppose'
 import { dispatchEn } from './special/en/utils'
+import { dispatchSt } from './special/st/utils'
 
 export interface IDiceRollContext {
   channelId?: string
@@ -169,8 +169,8 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new RiListDiceRoll(parsedExpression, context, inlineRolls).roll()
   } else if (expression.startsWith('st') && specialDiceConfig.stDice.enabled) {
-    // st 由于可能要读取他人人物卡，也由内部 parseTemplate
-    return new StDiceRoll(expression, context, inlineRolls).roll()
+    // st 也由内部 parseTemplate
+    return dispatchSt(expression, context, inlineRolls).roll()
   } else if (['ds', '死亡豁免'].includes(expression) && specialDiceConfig.dsDice.enabled) {
     // 死亡豁免指令简单，无需 parse
     return new DsDiceRoll(expression, context, inlineRolls).roll()

@@ -1,32 +1,19 @@
-import { BasePtDiceRoll } from '../index'
+import { BasePtDiceRoll } from '../../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { at, IDiceRollContext, parseTemplate } from '../utils'
-import { DndCard } from '../../../../interface/card/dnd'
+import { at, type IDiceRollContext, parseTemplate } from '../../utils'
+import { DndCard } from '../../../../../interface/card/dnd'
 
 // .st xx +1d6，yy -2，zz 20  // 根据逗号或分号分隔。不支持自动探测，因为骰子表达式情况比较复杂，难以判断。而且也要考虑技能名特殊字符的情况
 // .st show xx,xx,xx
 export class StDiceRoll extends BasePtDiceRoll {
 
-  private show = false
-  private exp = ''
   private readonly rolls: { name: string, roll: DiceRoll }[] = []
-  private readonly shows: string[] = []
-  private showSummary = false
 
   override roll() {
-    this.exp = this.rawExpression.slice(2).trim()
-    // if is show mode
-    if (this.exp.startsWith('show')) {
-      this.show = true
-      this.exp = this.exp.slice(4).trim()
-    }
     // 是否有人物卡，如没有直接结束
     if (!this.selfCard) return this
-    if (this.show) {
-      this.rollShow()
-    } else if (this.hasEditPermission) {
-      this.rollSet()
-    }
+    const exp = this.rawExpression.slice(2).trim()
+    this.rollSet(exp)
     return this
   }
 
@@ -42,8 +29,8 @@ export class StDiceRoll extends BasePtDiceRoll {
     }
   }
 
-  private rollSet() {
-    const segments = this.exp.split(/[,，;；、]+/).filter(segment => !!segment.trim())
+  private rollSet(exp: string) {
+    const segments = exp.split(/[,，;；、]+/).filter(segment => !!segment.trim())
     // 解析表达式
     const context: IDiceRollContext = { ...this.context, userId: this.context.userId, username: this.context.username }
     segments.forEach(segment => {
@@ -69,55 +56,32 @@ export class StDiceRoll extends BasePtDiceRoll {
     })
   }
 
-  private rollShow() {
-    const segments = this.exp.split(/[,，;；、]+/).filter(segment => !!segment.trim())
-    if (segments.length > 0) {
-      this.shows.push(...segments.map(name => this.selfCard!.getEntryDisplay(name)))
-    } else {
-      // 不指定展示哪个，就默认展示全部
-      this.shows.push(this.selfCard!.getSummary())
-      this.showSummary = true
-    }
-  }
-
   override get output() {
     if (!this.selfCard) {
       return this.t('card.empty', this.formatArgs)
     }
-    if (this.show) {
-      // 展示
-      return this.t('roll.st.show', {
-        ...this.formatArgs,
-        条目列表: this.shows.map((条目, i) => ({ 条目, last: i === this.shows.length - 1 })),
-        条目唯一: this.shows.length === 1,
-        条目: this.shows[0],
-        展示全部: this.showSummary
-      })
+    // 权限判断
+    if (!this.hasEditPermission) {
+      return this.t('card.nopermission', this.formatArgs)
+    }
+    if (this.rolls.length === 0) {
+      return this.t('roll.st.prompt', this.formatArgs)
     } else {
-      // 设置
-      // 权限判断
-      if (!this.hasEditPermission) {
-        return this.t('card.nopermission', this.formatArgs)
-      }
-      if (this.rolls.length === 0) {
-        return this.t('roll.st.prompt', this.formatArgs)
-      } else {
-        const 条目列表 = this.rolls.map((item, i) => {
-          const rollOutput = this.t('roll.result', {
-            ...this.formatArgs,
-            掷骰结果: item.roll.total,
-            掷骰表达式: item.roll.notation,
-            掷骰输出: item.roll.output
-          })
-          return { 条目: `${item.name} ${rollOutput}`, last: i === this.rolls.length - 1 }
-        })
-        return this.t('roll.st.set', {
+      const 条目列表 = this.rolls.map((item, i) => {
+        const rollOutput = this.t('roll.result', {
           ...this.formatArgs,
-          条目列表,
-          条目唯一: this.rolls.length === 1,
-          条目: 条目列表[0],
+          掷骰结果: item.roll.total,
+          掷骰表达式: item.roll.notation,
+          掷骰输出: item.roll.output
         })
-      }
+        return { 条目: `${item.name} ${rollOutput}`, last: i === this.rolls.length - 1 }
+      })
+      return this.t('roll.st.set', {
+        ...this.formatArgs,
+        条目列表,
+        条目唯一: this.rolls.length === 1,
+        条目: 条目列表[0],
+      })
     }
   }
 
@@ -130,7 +94,6 @@ export class StDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard() {
-    if (this.show) return []
     if (!this.selfCard) return []
     if (this.rolls.length === 0) return []
     let modified = false
