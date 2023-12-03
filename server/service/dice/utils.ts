@@ -35,9 +35,6 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
   const selfCard = context.getCard(context.userId)
-  // 0. 是否需要智能探测，预处理指令
-  expression = context.config.detectCardEntry(expression, selfCard)
-  expression = context.config.detectDefaultRollCalculation(expression, selfCard)
   const getEntry = (key: string) => selfCard?.getEntry(key)?.value ?? ''
   const getAbility = (key: string) => selfCard?.getAbility(key)?.value ?? ''
   const InlineDiceRoll = getInlineDiceRollKlass()
@@ -152,10 +149,14 @@ export function parseDescriptions2(rawExp: string, parseExp = true) {
  * 工厂方法创建骰子实例
  */
 export function createDiceRoll(_expression: string, context: IDiceRollContext) {
-  const expression = context.config.convertCase(_expression)
+  const selfCard = context.getCard(context.userId)
+  // 预处理指令（仅在此处处理一次，后续可以改成 hook 插件。不放在 parseTemplate 里面，因为可能会被不同的指令处理器执行多次）
+  let expression = context.config.convertCase(_expression)
+  expression = context.config.detectCardEntry(expression, selfCard)
+  expression = context.config.detectDefaultRollCalculation(expression, selfCard)
+  // 根据指令前缀派发
   const specialDiceConfig = context.config.specialDice
   const inlineRolls: InlineDiceRoll[] = []
-  const selfCard = context.getCard(context.userId)
   if (expression.startsWith('sc') && specialDiceConfig.scDice.enabled) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new ScDiceRoll(parsedExpression, context, inlineRolls).roll()

@@ -66,6 +66,11 @@ describe('特殊解析规则', () => {
     expect(result).toBe('d20+{3}[力量]+{2}[熟练]')
   })
 
+  test('自动检测-不检测 st', () => {
+    const result = context.config.detectCardEntry('st力量+1', context.getCard(MockUserId))
+    expect(result).toBe('st力量+1')
+  })
+
   test('自动检测-掷骰', () => {
     const roller = createDiceRoll('1d3+db', context)
     expect(roller.output).toBe('Maca 🎲\n先是 🎲 db 0: 0 = 0\n最后 🎲 1d3+0: [2]+0 = 2')
