@@ -164,6 +164,7 @@ export class CardManager {
   }
 
   // 根据子频道、用户 id、人物卡名，关联人物卡. 不传 userId 代表取消这张卡的关联
+  // 注：目前不会校验 cardName 是否真的存在这张卡
   linkCard(channelId: string, cardName: string, userId?: string) {
     // 如果 cardName 之前关联的别的人，要删掉
     const linkMap = this.getLinkMap(channelId)

@@ -41,7 +41,24 @@ export class PluginManager {
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
       getLinkedCardUserList: ({ channelId }) => Object.keys(this.wss.cards.getLinkMap(channelId)),
-      linkCard: ({ channelId, userId }, cardName) => this.wss.cards.linkCard(channelId, userId, cardName),
+      linkCard: ({ channelId, userId }, cardName) => {
+        if (userId && !cardName) {
+          // 1. 如果传了 userId，没传 cardName，代表解除该 user 的卡关联
+          const cardName = this.wss.cards.getCard(channelId, userId)?.name
+          if (cardName) {
+            this.wss.cards.linkCard(channelId, cardName, userId)
+          }
+        } else if (cardName && !userId) {
+          // 2. 如果传了 cardName，没传 userId，代表解除该卡的 user 关联
+          this.wss.cards.linkCard(channelId, cardName, userId)
+        } else if (!cardName) {
+          // 3. userId 和 cardName 都不传，报错？
+          throw new Error('必须传入 userId 或 cardName')
+        } else {
+          // 4. 正常关联人物卡
+          this.wss.cards.linkCard(channelId, cardName, userId)
+        }
+      },
       queryCard: (query) => this.wss.cards.queryCard(query),
       sendMessageToChannel: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {
         const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)

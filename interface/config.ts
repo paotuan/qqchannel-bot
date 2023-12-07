@@ -129,7 +129,7 @@ export interface IPluginRegisterContext {
   getCard: (env: ICustomReplyEnv) => ICard | undefined
   saveCard: (card: ICard) => void
   getLinkedCardUserList: (env: ICustomReplyEnv) => string[] // 获取当前频道关联了人物卡的 user id 列表
-  linkCard: (env: ICustomReplyEnv, cardName: string) => void
+  linkCard: (env: ICustomReplyEnv, cardName?: string) => void
   queryCard: (query: ICardQuery) => ICard[]
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
