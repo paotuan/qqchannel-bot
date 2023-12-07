@@ -32,7 +32,6 @@ export class StDiceRoll extends BasePtDiceRoll {
   private rollSet(exp: string) {
     const segments = exp.split(/[,，;；、]+/).filter(segment => !!segment.trim())
     // 解析表达式
-    const context: IDiceRollContext = { ...this.context, userId: this.context.userId, username: this.context.username }
     segments.forEach(segment => {
       // 根据空格、+、—、数字来分隔，满足大多数的情况
       const index = segment.search(/[\s+\-\d]/)
@@ -51,7 +50,7 @@ export class StDiceRoll extends BasePtDiceRoll {
       // dnd 特殊处理 end
       const baseValue = `\${${name}}`
       const expression = value.startsWith('+') || value.startsWith('-') ? `${baseValue}${value}` : value
-      const parsed = parseTemplate(expression, context, this.inlineRolls)
+      const parsed = parseTemplate(expression, this.context, this.inlineRolls)
       this.rolls.push({ name, roll: new DiceRoll(parsed) })
     })
   }

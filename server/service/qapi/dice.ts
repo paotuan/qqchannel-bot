@@ -9,6 +9,7 @@ import type { IRiItem, IDiceRollReq } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
 import type { UserRole } from '../../../interface/config'
 import { createCard } from '../../../interface/card'
+import { DiceRollContext } from '../DiceRollContext'
 
 interface IMessageCache {
   text?: string
@@ -185,14 +186,12 @@ export class DiceManager {
   private tryRollDice(fullExp: string, { userId, channelId, username, replyMsgId, userRole }: { userId: string, channelId?: string, username: string, replyMsgId?: string, userRole?: UserRole }) {
     try {
       // console.time('dice')
-      // 是否有人物卡
-      const getCard = (userId: string) => channelId ? this.wss.cards.getCard(channelId, userId) : undefined
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : undefined
       // 配置
-      const config = this.wss.config.getChannelConfig(channelId || 'default')
+      const context = new DiceRollContext(this.wss, { channelId, userId, username, userRole, opposedRoll })
       // 投骰
-      const roller = createDiceRoll(fullExp, { channelId, userId, username, userRole: userRole ?? 'user', config, getCard, opposedRoll })
+      const roller = createDiceRoll(fullExp, context)
       // 保存人物卡更新
       const updatedCards = roller.applyToCard()
       updatedCards.forEach(card => {

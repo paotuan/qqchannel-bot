@@ -4,9 +4,10 @@ import type { IMessage } from 'qq-guild-bot'
 import { render } from 'mustache'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
-import { at, convertRoleIds, IDiceRollContext, parseTemplate } from '../dice/utils'
+import { at, convertRoleIds, parseTemplate } from '../dice/utils'
 import { ICustomReplyEnv } from '../../../interface/config'
 import { VERSION_NAME } from '../../../interface/version'
+import { DiceRollContext } from '../DiceRollContext'
 
 export class CustomReplyManager {
   private readonly api: QApi
@@ -98,9 +99,7 @@ export class CustomReplyManager {
       }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
-      const config = this.wss.config.getChannelConfig(channelId)
-      const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
-      return parseTemplate(template, context, [])
+      return parseTemplate(template, new DiceRollContext(this.wss, { channelId, userId, username, userRole }), [])
     } catch (e: any) {
       console.error('[Config] 自定义回复处理出错', e?.message)
       return undefined

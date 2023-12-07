@@ -15,7 +15,8 @@ import type { IPluginConfigDisplay } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '../../../interface/card/types'
 import { render } from 'mustache'
-import { IDiceRollContext, parseTemplate } from '../dice/utils'
+import { parseTemplate } from '../dice/utils'
+import { DiceRollContext } from '../DiceRollContext'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -65,10 +66,7 @@ export class PluginManager {
         if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
-          const config = this.wss.config.getChannelConfig(channelId)
-          const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
-          const content = parseTemplate(msg, context, [])
+          const content = parseTemplate(msg, new DiceRollContext(this.wss, { channelId, userId, username, userRole }), [])
           return channel.sendMessage({ content })
         } else {
           return channel.sendMessage({ image: msg })
@@ -79,10 +77,7 @@ export class PluginManager {
         if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const getCard = (_userId: string) => this.wss.cards.getCard(channelId, _userId)
-          const config = this.wss.config.getChannelConfig(channelId)
-          const context: IDiceRollContext = { channelId, userId, username, config, getCard, userRole }
-          const content = parseTemplate(msg, context, [])
+          const content = parseTemplate(msg, new DiceRollContext(this.wss, { channelId, userId, username, userRole }), [])
           return user.sendMessage({ content })
         } else {
           return user.sendMessage({ image: msg })
