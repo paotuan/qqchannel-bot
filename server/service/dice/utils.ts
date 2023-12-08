@@ -179,7 +179,7 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
   } else if (['ds', '死亡豁免'].includes(expression) && specialDiceConfig.dsDice.enabled) {
     // 死亡豁免指令简单，无需 parse
     return new DsDiceRoll(expression, context, inlineRolls).roll()
-  } else if (expression.startsWith('nn')) { // todo config
+  } else if (expression.startsWith('nn') && specialDiceConfig.nnDice.enabled) {
     // 我寻思 nn 就不用 parseTemplate 了，纯指令不包含掷骰
     return dispatchNn(expression, context, inlineRolls).roll()
   } else {

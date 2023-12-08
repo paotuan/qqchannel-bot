@@ -189,6 +189,10 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     config.botOwner = null
     config.version = 26 // 1.7.0
   }
+  if (config.version < 29) {
+    config.specialDice.nnDice = { enabled: true, writable: 'all' }
+    config.version = 29 // 1.7.3
+  }
   return config as IChannelConfig
 }
 
@@ -464,6 +468,7 @@ function getSpecialDiceConfig(): ISpecialDiceConfig {
     riDice: { enabled: true, baseRoll: 'd20' },
     stDice: { enabled: true, writable: 'all' },
     dsDice: { enabled: true },
+    nnDice: { enabled: true, writable: 'all' },
     opposeDice: { enabled: true },
     inMessageDice: { enabled: true } // 暂不处理
   }

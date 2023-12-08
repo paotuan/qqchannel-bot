@@ -11,6 +11,17 @@
         <d-native-select v-model="config.stDice.writable" :options="stOptions" select-class="select-bordered select-xs" class="w-24" />
       </span>
     </div>
+    <!-- nn -->
+    <div class="collapse-title flex justify-between">
+      <span class="flex items-center gap-2">
+        <input v-model="config.nnDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
+        <span>人物卡关联（nn）</span>
+      </span>
+      <span class="flex items-center gap-2 text-sm">
+        <span>谁能修改人物卡关联？</span>
+        <d-native-select v-model="config.nnDice.writable" :options="stOptions" select-class="select-bordered select-xs" class="w-24" />
+      </span>
+    </div>
     <!-- 对抗 -->
 <!--    <div class="collapse-title flex justify-between">-->
 <!--      <span class="flex items-center gap-2">-->

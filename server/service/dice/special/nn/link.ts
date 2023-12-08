@@ -18,6 +18,10 @@ export class NnLinkDiceRoll extends BasePtDiceRoll {
     return this.targetCard?.name
   }
 
+  private get hasLinkPermission() {
+    return this.hasPermission(this.context.config.specialDice.nnDice.writable)
+  }
+
   override roll() {
     this.keyword = this.rawExpression.slice(2).trim()
     this.availableCards = this.context.queryCard({ name: this.keyword, isTemplate: false })
@@ -25,7 +29,9 @@ export class NnLinkDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
-    if (this.availableCards.length === 0) {
+    if (!this.hasLinkPermission) {
+      return `${at(this.context.userId)}没有关联人物卡的权限`
+    } else if (this.availableCards.length === 0) {
       return `未找到名字包含"${this.keyword}"的人物卡`
     } else if (this.targetCardName) {
       return `${at(this.context.userId)}已关联人物卡：${this.targetCardName}`
@@ -36,6 +42,7 @@ export class NnLinkDiceRoll extends BasePtDiceRoll {
   }
 
   override applyToCard(): ICard[] {
+    if (!this.hasLinkPermission) return []
     if (this.availableCards.length === 1) {
       this.context.linkCard(this.targetCardName!, this.context.userId)
     }

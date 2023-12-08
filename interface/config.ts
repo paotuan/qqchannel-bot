@@ -150,11 +150,12 @@ export interface IPluginConfig {
 
 // 特殊指令配置
 export interface ISpecialDiceConfig {
-  enDice: { enabled: boolean },
-  scDice: { enabled: boolean },
+  enDice: { enabled: boolean }
+  scDice: { enabled: boolean }
   riDice: { enabled: boolean, baseRoll: string }
   stDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
   dsDice: { enabled: boolean }
+  nnDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
   opposeDice: { enabled: boolean }
   inMessageDice: { enabled: boolean }
 }

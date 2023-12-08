@@ -63,4 +63,16 @@ export abstract class BasePtDiceRoll {
       at用户: this.context.userId === 'system' ? this.context.username : at(this.context.userId)
     }
   }
+
+  // 判断当前用户是否有对应级别的权限
+  protected hasPermission(control: 'all' | 'none' | 'manager') {
+    const userRole = this.context.userRole
+    if (control === 'none') {
+      return false
+    } else if (control === 'all') {
+      return true
+    } else { // manager
+      return userRole !== 'user'
+    }
+  }
 }
