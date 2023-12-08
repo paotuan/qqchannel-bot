@@ -6,6 +6,7 @@ import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
 import type { CustomTextKeys, SuccessLevel, UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
+import type { ICardQuery } from '../../../interface/config'
 import { GeneralCard } from '../../../interface/card/general'
 import { CocDiceRoll } from './standard/coc'
 import { DndCard } from '../../../interface/card/dnd'
@@ -14,6 +15,7 @@ import { DsDiceRoll } from './special/ds'
 import { DndOpposedRoll } from './standard/dndOppose'
 import { dispatchEn } from './special/en/utils'
 import { dispatchSt } from './special/st/utils'
+import { dispatchNn } from './special/nn/utils'
 
 export interface IDiceRollContext {
   channelId?: string
@@ -22,6 +24,8 @@ export interface IDiceRollContext {
   userRole: UserRole
   config: ChannelConfig
   getCard: (userId: string) => ICard | undefined
+  linkCard: (cardName: string, userId?: string) => void
+  queryCard: (query: ICardQuery) => ICard[]
   opposedRoll?: StandardDiceRoll
 }
 
@@ -175,6 +179,9 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
   } else if (['ds', '死亡豁免'].includes(expression) && specialDiceConfig.dsDice.enabled) {
     // 死亡豁免指令简单，无需 parse
     return new DsDiceRoll(expression, context, inlineRolls).roll()
+  } else if (expression.startsWith('nn')) { // todo config
+    // 我寻思 nn 就不用 parseTemplate 了，纯指令不包含掷骰
+    return dispatchNn(expression, context, inlineRolls).roll()
   } else {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     // 对抗检定判断

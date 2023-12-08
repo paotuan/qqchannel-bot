@@ -188,10 +188,8 @@ export class DiceManager {
       // console.time('dice')
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : undefined
-      // 配置
-      const context = new DiceRollContext(this.wss, { channelId, userId, username, userRole, opposedRoll })
       // 投骰
-      const roller = createDiceRoll(fullExp, context)
+      const roller = createDiceRoll(fullExp, new DiceRollContext(this.wss, { channelId, userId, username, userRole, opposedRoll }))
       // 保存人物卡更新
       const updatedCards = roller.applyToCard()
       updatedCards.forEach(card => {
@@ -231,7 +229,11 @@ export class DiceManager {
       const systemUserId = config.botOwner || 'system'
       const systemCard = createCard(cardData)
       const getCard = (userId: string) => userId === systemUserId ? systemCard : this.wss.cards.getCard(channelId, userId)
-      const roll = createDiceRoll(expression, { channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard })
+      // 网页代骰暂不支持人物卡操作。毕竟网页代骰是等于绑定了自己人物卡的
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const linkCard = () => {}
+      const queryCard = () => []
+      const roll = createDiceRoll(expression, { channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard })
       // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
       // 特殊：保存先攻列表会把这个人当成玩家，目前也先不能保存
       // if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
