@@ -19,6 +19,8 @@ describe('特殊解析规则', () => {
     userRole: 'admin',
     config: new ChannelConfig(config),
     getCard: () => new CocCard(getCocCardProto()),
+    linkCard: () => {},
+    queryCard: () => []
   }
 
   test('不区分大小写', () => {

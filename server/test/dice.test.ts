@@ -16,6 +16,8 @@ describe('未关联人物卡', () => {
     userRole: 'admin',
     config: new ChannelConfig(getInitialDefaultConfig()),
     getCard: () => undefined,
+    linkCard: () => {},
+    queryCard: () => []
   }
 
   test('基础指令', () => {

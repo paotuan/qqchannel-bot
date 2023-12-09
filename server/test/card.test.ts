@@ -22,7 +22,9 @@ function createContext(card: ICard): IDiceRollContext {
     username: 'Maca',
     userRole: 'admin',
     config: new ChannelConfig(getInitialDefaultConfig()),
-    getCard: () => card
+    getCard: () => card,
+    linkCard: () => {},
+    queryCard: () => []
   }
 }
 
