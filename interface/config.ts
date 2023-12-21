@@ -18,6 +18,7 @@ export interface ICustomReplyEnv {
   at用户: string
   userRole: UserRole
   version: string
+  realUser: { userId: string, username: string } // 代骰场景提供真实发起人信息
 }
 
 export type CustomReplyHandler = (env: ICustomReplyEnv, matchGroup: Record<string, string>) => string | Promise<string>
@@ -165,6 +166,8 @@ export interface IParseRuleConfig {
   convertCase: boolean // 是否自动转换大小写
   detectCardEntry: boolean // 是否自动检测引用人物卡变量
   detectDefaultRoll: boolean // 是否自动检测默认骰加减值
+  customReplySubstitute: boolean // 是否支持自定义回复代骰
+  naiveInlineParseRule: boolean // 是否使用 naive 的中间骰解析策略
 }
 
 export interface IChannelConfig {

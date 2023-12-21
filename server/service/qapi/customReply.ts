@@ -4,7 +4,7 @@ import type { IMessage } from 'qq-guild-bot'
 import { render } from 'mustache'
 import { unescapeHTML } from '../../utils'
 import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
-import { at, convertRoleIds, parseTemplate } from '../dice/utils'
+import { at, AtUserPatternEnd, convertRoleIds, parseTemplate } from '../dice/utils'
 import { ICustomReplyEnv } from '../../../interface/config'
 import { VERSION_NAME } from '../../../interface/version'
 import { DiceRollContext } from '../DiceRollContext'
@@ -48,19 +48,32 @@ export class CustomReplyManager {
       fullExp = fullExp.substring(1).trim()
     }
     if (!isInstruction) return false
+
+    // 是否开启自定义回复代骰
+    const config = this.wss.config.getChannelConfig(msg.channel_id)
+    const substitute: { userId?: string, username?: string } = {}
+    if (config.config.parseRule.customReplySubstitute) {
+      const userIdMatch = fullExp.match(AtUserPatternEnd)
+      if (userIdMatch) {
+        substitute.userId = userIdMatch[1]
+        const user = this.api.guilds.findUser(substitute.userId, msg.guild_id)
+        substitute.username = user?.persona ?? substitute.userId
+        fullExp = fullExp.substring(0, userIdMatch.index).trim()
+      }
+    }
+
     // 转义 转义得放在 at 消息和 emoji 之类的后面
     fullExp = unescapeHTML(fullExp)
 
     // 获取配置列表
     const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
     if (!channel) return false
-    const config = this.wss.config.getChannelConfig(msg.channel_id)
     const processors = config.customReplyProcessors
     // 从上到下匹配
     for (const processor of processors) {
       const matchGroups = isMatch(processor, fullExp)
       if (!matchGroups) continue
-      const reply = await this.parseMessage(processor, matchGroups, msg)
+      const reply = await this.parseMessage(processor, matchGroups, msg, substitute)
       // 发消息
       if (reply) {
         channel.sendMessage({ content: reply, msg_id: msg.id })
@@ -71,13 +84,14 @@ export class CustomReplyManager {
     return false
   }
 
-  private async parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, msg: IMessage) {
+  private async parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, msg: IMessage, substitute: { userId?: string, username?: string }) {
     try {
       if (!processor.items && !processor.handler) throw new Error('没有处理自定义回复的方法')
       const handler = processor.handler ?? randomReplyItem(processor.items!).reply
       // 替换模板
-      const username = msg.member.nick || msg.author.username || msg.author.id
-      const userId = msg.author.id
+      const realUser = { userId: msg.author.id, username: msg.member.nick || msg.author.username || msg.author.id }
+      const username = substitute.username ?? realUser.username
+      const userId = substitute.userId ?? realUser.userId
       const channelId = msg.channel_id
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
         return render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
@@ -88,14 +102,15 @@ export class CustomReplyManager {
         botId: this.api.appid,
         channelId: msg.channel_id,
         guildId: msg.guild_id,
-        userId: msg.author.id,
+        userId,
         userRole,
         nick: username,
         用户名: username,
-        人物卡名: getCard(msg.author.id)?.name ?? username,
-        at: at(msg.author.id),
-        at用户: at(msg.author.id),
+        人物卡名: getCard(userId)?.name ?? username,
+        at: at(userId),
+        at用户: at(userId),
         version: VERSION_NAME,
+        realUser
       }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
