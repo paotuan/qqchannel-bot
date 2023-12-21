@@ -2,22 +2,7 @@
   <div class="flex-grow card bg-base-100 shadow-lg p-4 overflow-y-auto">
     <div class="flex gap-2">
       <CardImportDialogNew />
-      <div class="form-control">
-        <label class="input-group input-group-sm">
-          <span><MagnifyingGlassIcon class="w-4 h-4" /></span>
-          <input v-model="cardListFilters.keyword" type="text" placeholder="搜索人物卡名" class="input input-bordered input-sm" />
-        </label>
-      </div>
-      <d-native-select v-model="cardListFilters.linkState" :options="linkStateOptions" placeholder="关联状态" select-class="select-bordered select-sm" clearable />
-      <d-native-select v-model="cardListFilters.cardType" :options="cardTypeOptions" placeholder="人物卡类型" select-class="select-bordered select-sm" clearable />
-      <div class="dropdown">
-        <label tabindex="0" class="btn btn-outline btn-square btn-sm toggle-btn" :class="{ 'btn-active': !!cardListSorter.prop }"><ArrowsUpDownIcon class="w-4 h-4" /></label>
-        <ul tabindex="0" class="dropdown-content menu menu-compact shadow bg-base-100 rounded-md w-32 mt-1">
-          <li v-for="opt in sorterOptions" :key="opt.value">
-            <a :class="{ active: opt.value === cardListSorterVm }" @click="cardListSorterVm = opt.value">{{ opt.label }}</a>
-          </li>
-        </ul>
-      </div>
+      <CardFilters :filter="cardListFilters" :sorter="cardListSorter" />
     </div>
     <div class="mt-4 flex gap-12">
       <div class="flex flex-col gap-2">
@@ -54,65 +39,23 @@
   </div>
 </template>
 <script setup lang="ts">
-import { CheckCircleIcon, InformationCircleIcon, MagnifyingGlassIcon, ArrowsUpDownIcon } from '@heroicons/vue/24/outline'
+import { CheckCircleIcon, InformationCircleIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../store/card'
 import UserSelector from './UserSelector.vue'
 import CardTypeBadge from './CardTypeBadge.vue'
 import CardImportDialogNew from './CardImportDialogNew.vue'
 import CardDisplay from './display/CardDisplay.vue'
-import DNativeSelect from '../../dui/select/DNativeSelect.vue'
 import { storeToRefs } from 'pinia'
-import { computed, nextTick, reactive, watch } from 'vue'
+import { computed, nextTick, watch } from 'vue'
 import { orderBy } from 'lodash'
 import type { ICardData } from '../../../interface/card/types'
+import CardFilters from './filter/CardFilters.vue'
+import { useCardFilter } from './filter/useCardFilter'
 
 const cardStore = useCardStore()
 const { selectedCard, allCards } = storeToRefs(cardStore)
 
-// filters
-const cardListFilters = reactive({
-  linkState: '',
-  cardType: '',
-  keyword: ''
-})
-
-const linkStateOptions = [
-  { label: '已关联玩家', value: 'linked' },
-  { label: '未关联玩家', value: 'unlinked' }
-]
-
-const cardTypeOptions = [
-  { label: 'COC', value: 'coc' },
-  { label: 'DND', value: 'dnd' },
-  { label: '简单人物卡', value: 'general' }
-]
-
-// sort
-type Sorter = {
-  prop: 'created' | 'lastModified' | 'name' | '',
-  order: 'asc' | 'desc' | ''
-}
-const cardListSorter = reactive<Sorter>({ prop: '', order: '' })
-const cardListSorterVm = computed({
-  get() {
-    return cardListSorter.prop + ' ' + cardListSorter.order
-  },
-  set(value) {
-    const [prop, order] = value.split(' ')
-    cardListSorter.prop = prop as Sorter['prop']
-    cardListSorter.order = order as Sorter['order']
-  }
-})
-
-const sorterOptions = [
-  { label: '无排序', value: ' ' },
-  // { label: '名字 升序', value: 'name asc' },
-  // { label: '名字 降序', value: 'name desc' },
-  { label: '创建时间 升序', value: 'created asc' },
-  { label: '创建时间 降序', value: 'created desc' },
-  { label: '修改时间 升序', value: 'lastModified asc' },
-  { label: '修改时间 降序', value: 'lastModified desc' },
-]
+const { filter: cardListFilters, sorter: cardListSorter } = useCardFilter()
 
 const cardListAfterFilter = computed(() => {
   let list = allCards.value
