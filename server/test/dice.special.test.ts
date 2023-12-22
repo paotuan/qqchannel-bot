@@ -97,6 +97,18 @@ describe('特殊解析规则', () => {
     const roller = createDiceRoll('R1D100+D+Db+1', context)
     expect(roller.output).toBe('Maca 🎲\n先是 🎲 db 0: 0 = 0\n最后 🎲 1d100+d%+0+1: [2]+[2]+0+1 = 5')
   })
+
+  test('中间骰解析策略-1', () => {
+    context.config.config.parseRule.naiveInlineParseRule = true
+    const result = context.config.naiveParseInlineRolls('1d3+$db', context.getCard(MockUserId))
+    expect(result).toBe('1d3+(0)')
+  })
+
+  test('中间骰解析策略-2', () => {
+    context.config.config.parseRule.naiveInlineParseRule = true
+    const result = context.config.naiveParseInlineRolls('1d3+[[1d10+[[1+d6]]]]', context.getCard(MockUserId))
+    expect(result).toBe('1d3+(1d10+(1+d6))')
+  })
 })
 
 export {}
