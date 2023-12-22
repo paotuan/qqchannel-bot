@@ -2,13 +2,14 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import type { ILogPushResp, ILog } from '../../../interface/common'
+import { createLogger, transports, format, type Logger } from 'winston'
 
 export class LogManager {
   private readonly api: QApi
   private get wss() { return this.api.wss }
 
   constructor(api: QApi) {
-    makeAutoObservable<this, 'api' | 'wss'>(this, { api: false, wss: false })
+    makeAutoObservable<this, 'api' | 'wss' | 'backgroundLoggers'>(this, { api: false, wss: false, backgroundLoggers: false })
     this.api = api
     this.initListeners()
   }
@@ -61,6 +62,11 @@ export class LogManager {
       success: true,
       data: logs
     })
+
+    // 记录后台 log
+    if (this.backgroundLogEnabled[channelId]) {
+      this.backgroundLog(guildId, channelId, logs)
+    }
   }
 
   private initListeners() {
@@ -80,4 +86,52 @@ export class LogManager {
   private filtered(channelId: string) {
     return !this.wss.listeningChannels.includes(channelId)
   }
+
+  // region 后台 log
+  private backgroundLogEnabled: Record<string, boolean> = {}
+
+  // channelId => logger
+  private readonly backgroundLoggers: Record<string, Logger> = {}
+  // 上一次说话人 channelId => username
+  private readonly lastUser: Record<string, string> = {}
+
+  private getBackgroundLogger(guildId: string, channelId: string) {
+    if (!this.backgroundLoggers[channelId]) {
+      const channel = this.api.guilds.findChannel(channelId, guildId)
+      const channelName = channel?.name ?? channelId
+      this.backgroundLoggers[channelId] = createLogger({
+        format: backgroundLogFormatter,
+        transports: new transports.File({ filename: `logs/${channelName}.txt`, maxsize: 1024 * 1024 })
+      })
+    }
+    return this.backgroundLoggers[channelId]
+  }
+
+  private backgroundLog(guildId: string, channelId: string, logs: ILog[]) {
+    const logger = this.getBackgroundLogger(guildId, channelId)
+    logs.forEach(log => {
+      logger.info({ message: log, lastUser: this.lastUser[channelId] })
+      this.lastUser[channelId] = log.username || log.userId
+    })
+  }
+
+  setBackgroundLogEnabled(channelId: string, enabled: boolean) {
+    this.backgroundLogEnabled[channelId] = enabled
+  }
+  // endregion
 }
+
+const backgroundLogFormatter = format.printf(info => {
+  const message = info.message as ILog
+  const lastUser = info.lastUser as string | undefined
+  const user = message.username || message.userId
+  const content = message.msgType === 'text' ? message.content : `[图片](https://${message.content})`
+  if (user === lastUser) {
+    return content
+  } else {
+    const date = new Date(message.timestamp)
+    const pad2 = (v: number) => String(v).padStart(2, '0')
+    const timestamp = `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`
+    return `${user} ${timestamp}\n${content}`
+  }
+})
