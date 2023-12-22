@@ -21,6 +21,13 @@
       </div>
       <div class="text-sm text-base-content/60 pl-7 pt-1">使用【r/d/rd】掷默认骰时，支持参与进一步运算，例如【r+1】</div>
     </div>
+    <div class="collapse-title">
+      <div class="flex items-center gap-2">
+        <input v-model="config.customReplySubstitute" type="checkbox" class="checkbox checkbox-sm" @click.stop />
+        <span>自定义回复启用代骰</span>
+      </div>
+      <div class="text-sm text-base-content/60 pl-7 pt-1">使用自定义回复时，以 @xxx 结尾也视为代骰</div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">

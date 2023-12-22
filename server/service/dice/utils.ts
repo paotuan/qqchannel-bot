@@ -158,7 +158,7 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
   let expression = context.config.convertCase(_expression)
   expression = context.config.detectCardEntry(expression, selfCard)
   expression = context.config.detectDefaultRollCalculation(expression, selfCard)
-  expression = context.config.naiveParseInlineRolls(expression, selfCard)
+  // expression = context.config.naiveParseInlineRolls(expression, selfCard)
   // 根据指令前缀派发
   const specialDiceConfig = context.config.specialDice
   const inlineRolls: InlineDiceRoll[] = []

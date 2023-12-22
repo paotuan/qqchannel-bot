@@ -189,6 +189,7 @@ export class ChannelConfig {
    * 缺点是丧失了递归回溯（$1, $2）和 [[1d10]]d10 的拼接能力
    */
   naiveParseInlineRolls(expression: string, card?: ICard) {
+    // todo pending，还需要解决直接调用 ability【.徒手格斗】和括号（牺牲准确性换取美观）的功能。后续走插件处理
     if (this.config.parseRule.naiveInlineParseRule) {
       // 替换 entry
       const getEntry = (key: string) => card?.getEntry(key)?.value ?? ''
