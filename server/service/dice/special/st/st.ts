@@ -4,7 +4,6 @@ import { at, parseTemplate } from '../../utils'
 import { DndCard } from '../../../../../interface/card/dnd'
 
 // .st xx +1d6，yy -2，zz 20，ww=20  // 根据逗号或分号分隔。不支持自动探测，因为骰子表达式情况比较复杂，难以判断。而且也要考虑技能名特殊字符的情况
-// .st show xx,xx,xx
 export class StDiceRoll extends BasePtDiceRoll {
 
   private readonly rolls: { name: string, roll: DiceRoll }[] = []
@@ -53,23 +52,22 @@ export class StDiceRoll extends BasePtDiceRoll {
     }
     if (this.rolls.length === 0) {
       return this.t('roll.st.prompt', this.formatArgs)
-    } else {
-      const 条目列表 = this.rolls.map((item, i) => {
-        const rollOutput = this.t('roll.result', {
-          ...this.formatArgs,
-          掷骰结果: item.roll.total,
-          掷骰表达式: item.roll.notation,
-          掷骰输出: item.roll.output
-        })
-        return { 条目: `${item.name} ${rollOutput}`, last: i === this.rolls.length - 1 }
-      })
-      return this.t('roll.st.set', {
-        ...this.formatArgs,
-        条目列表,
-        条目唯一: this.rolls.length === 1,
-        条目: 条目列表[0],
-      })
     }
+    const 条目列表 = this.rolls.map((item, i) => {
+      const rollOutput = this.t('roll.result', {
+        ...this.formatArgs,
+        掷骰结果: item.roll.total,
+        掷骰表达式: item.roll.notation,
+        掷骰输出: item.roll.output
+      })
+      return { 条目: `${item.name} ${rollOutput}`, last: i === this.rolls.length - 1 }
+    })
+    return this.t('roll.st.set', {
+      ...this.formatArgs,
+      条目列表,
+      条目唯一: this.rolls.length === 1,
+      条目: 条目列表[0],
+    })
   }
 
   private get formatArgs() {

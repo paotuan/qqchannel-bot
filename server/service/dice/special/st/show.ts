@@ -1,6 +1,7 @@
 import { BasePtDiceRoll } from '../../index'
 import { at } from '../../utils'
 
+// .st show xx,xx,xx
 export class StShowDiceRoll extends BasePtDiceRoll {
 
   private readonly shows: string[] = []
