@@ -16,6 +16,7 @@ import { DndOpposedRoll } from './standard/dndOppose'
 import { dispatchEn } from './special/en/utils'
 import { dispatchSt } from './special/st/utils'
 import { dispatchNn } from './special/nn/utils'
+import { LogSettingDiceRoll } from './special/log'
 
 export interface IDiceRollContext {
   channelId?: string
@@ -27,6 +28,7 @@ export interface IDiceRollContext {
   linkCard: (cardName: string, userId?: string) => void
   queryCard: (query: ICardQuery) => ICard[]
   opposedRoll?: StandardDiceRoll
+  setBackgroundLogEnabled?: (enabled: boolean) => void
 }
 
 /**
@@ -183,6 +185,8 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
   } else if (expression.startsWith('nn') && specialDiceConfig.nnDice.enabled) {
     // 我寻思 nn 就不用 parseTemplate 了，纯指令不包含掷骰
     return dispatchNn(expression, context, inlineRolls).roll()
+  } else if (expression.startsWith('log')) {
+    return new LogSettingDiceRoll(expression, context, inlineRolls).roll()
   } else {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     // 对抗检定判断

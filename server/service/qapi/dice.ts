@@ -189,7 +189,7 @@ export class DiceManager {
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : undefined
       // 投骰
-      const roller = createDiceRoll(fullExp, new DiceRollContext(this.wss, { channelId, userId, username, userRole, opposedRoll }))
+      const roller = createDiceRoll(fullExp, new DiceRollContext(this.api, { channelId, userId, username, userRole, opposedRoll }))
       // 保存人物卡更新
       const updatedCards = roller.applyToCard()
       updatedCards.forEach(card => {
