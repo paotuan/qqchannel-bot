@@ -160,6 +160,11 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n拉拉 20: 20 = 20\n打架 30: 30 = 30`)
   })
 
+  test('st = 处理', () => {
+    const roller = createDiceRoll('st 侦察=99', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n侦察 99: 99 = 99`)
+  })
+
   test('coc 先攻默认骰', () => {
     const roller = createDiceRoll('ri', context)
     expect(roller.output).toBe('Maca 🎲 先攻 60: 60 = 60')
