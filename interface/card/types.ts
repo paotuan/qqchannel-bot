@@ -71,7 +71,17 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
   abstract setEntry(name: string, value: number): boolean
 
   getEntryDisplay(name: string): string {
+    // 是否是 entry
     const entry = this.getEntry(name)
-    return `${name}:${entry?.value ?? '-'}`
+    if (entry) {
+      return `${name}:${entry.value}`
+    }
+    // 是否是 ability
+    const ability = this.getAbility(name)
+    if (ability) {
+      return `${name}:${ability.value}`
+    }
+    // 啥也不是
+    return `${name}:-`
   }
 }

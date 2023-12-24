@@ -302,17 +302,23 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
 
   override getEntryDisplay(name: string): string {
     const entry = this.getEntry(name)
-    if (!entry) return `${name}:-`
-    // 熟练标记
-    const isExperienced = !!this.data.meta.experienced[entry.key]
-    // 技能特殊展示 总值（调整值）
-    if (entry.type === 'skills' && entry.postfix === 'none') {
-      const skillModifier = this.data.skills[entry.key as keyof IDndCardData['skills']]
-      const skillSign = skillModifier > 0 ? '+' : ''
-      return `${name}${isExperienced ? '*' : ''}:${entry.value}(${skillSign}${skillModifier})`
-    } else {
-      return `${name}${isExperienced ? '*' : ''}:${entry.value}`
+    if (entry) {
+      // 熟练标记
+      const isExperienced = !!this.data.meta.experienced[entry.key]
+      // 技能特殊展示 总值（调整值）
+      if (entry.type === 'skills' && entry.postfix === 'none') {
+        const skillModifier = this.data.skills[entry.key as keyof IDndCardData['skills']]
+        const skillSign = skillModifier > 0 ? '+' : ''
+        return `${name}${isExperienced ? '*' : ''}:${entry.value}(${skillSign}${skillModifier})`
+      } else {
+        return `${name}${isExperienced ? '*' : ''}:${entry.value}`
+      }
     }
+    const ability = this.getAbility(name)
+    if (ability) {
+      return `${name}:${ability.value}`
+    }
+    return `${name}:-`
   }
 
   override getSummary(): string {

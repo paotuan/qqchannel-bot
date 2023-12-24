@@ -340,8 +340,15 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
 
   override getEntryDisplay(name: string): string {
     const entry = this.getEntry(name)
-    const isSkillGrowth = !!(entry && entry.type === 'skills' && this.data.meta.skillGrowth[entry.key]) // 是否有技能成长标记
-    return `${name}${isSkillGrowth ? '*' : ''}:${entry?.value ?? '-'}`
+    if (entry) {
+      const isSkillGrowth = (entry && entry.type === 'skills' && this.data.meta.skillGrowth[entry.key]) // 是否有技能成长标记
+      return `${name}${isSkillGrowth ? '*' : ''}:${entry.value}`
+    }
+    const ability = this.getAbility(name)
+    if (ability) {
+      return `${name}:${ability.value}`
+    }
+    return `${name}:-`
   }
 
   override getSummary() {

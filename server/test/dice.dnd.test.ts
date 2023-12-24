@@ -158,6 +158,11 @@ describe('已关联DND人物卡', () => {
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n力量*:17`)
   })
 
+  test('st 展示技能', () => {
+    const roller = createDiceRoll('st show 战斧命中', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n战斧命中:d20+$力量调整+$熟练`)
+  })
+
   test('st技能应展示总值和修正值', () => {
     const roller = createDiceRoll('st show 运动', context)
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n运动*:5(0)`)

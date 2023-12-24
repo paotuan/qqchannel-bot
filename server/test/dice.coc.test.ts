@@ -140,6 +140,11 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n侦查:40`)
   })
 
+  test('st 展示指定表达式', () => {
+    const roller = createDiceRoll('st show 徒手格斗', context)
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n徒手格斗:1d3+$db`)
+  })
+
   test('st 未指定', () => {
     const roller = createDiceRoll('st', context)
     expect(roller.output).toBe(`<@!${MockUserId}>请指定想要设置的属性名与属性值`)
