@@ -1,5 +1,12 @@
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { parseTemplate, parseDescriptions2, removeTrailingOneSpace } from '../utils'
+import {
+  parseTemplate,
+  parseDescriptions2,
+  removeTrailingOneSpace,
+  ParseFlagsAll,
+  ParseFlags,
+  TestRequest
+} from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import type { ICardEntry } from '../../../../interface/card/types'
@@ -26,7 +33,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   protected expression = ''
 
   // 当次请求检定的技能和临时值
-  /*protected*/ readonly skillsForTest: { skill: string, tempValue: number }[] = []
+  /*protected*/ readonly skillsForTest: TestRequest[] = []
 
   // 掷骰描述
   get description() {
@@ -103,7 +110,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   protected parseDescriptions(expression: string) {
     // 如果是 alias dice，则 expression 已经在 parseAlias 中指定，剩下的内容都当成技能名和临时值来解析
     if (this.isAlias) {
-      const { skills } = parseDescriptions2(expression, false)
+      const { skills } = parseDescriptions2(expression, ParseFlagsAll ^ ParseFlags.PARSE_EXP)
       this.skillsForTest.push(...skills)
       return
     }
@@ -111,7 +118,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
     const { exp, skills } = parseDescriptions2(expression)
     // 如果只有单独的一条 description，没有 exp，判断一下是否是直接调用人物卡的表达式
     // 例如【.徒手格斗】直接替换成【.1d3+$db】. 而【.$徒手格斗】走通用逻辑，求值后【.const】
-    if (!exp && skills.length === 1 && isNaN(skills[0].tempValue)) {
+    if (!exp && skills.length === 1 && isNaN(skills[0].tempValue) && isNaN(skills[0].modifiedValue)) {
       const ability = this.selfCard?.getAbility(skills[0].skill)
       if (ability) {
         this.expression = parseTemplate(ability.value, this.context, this.inlineRolls)

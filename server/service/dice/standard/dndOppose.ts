@@ -13,7 +13,7 @@ export class DndOpposedRoll extends DndDiceRoll {
     if (this.skillsForTest.length === 0 && this.opposedRoll.skillsForTest.length > 0) {
       const skill = this.opposedRoll.skillsForTest[0].skill
       // 只取 skill，tempValue 是 dnd 的 dc，在对抗时是没有意义的
-      this.skillsForTest.push({ skill, tempValue: NaN })
+      this.skillsForTest.push({ skill, tempValue: NaN, modifiedValue: NaN })
     }
   }
 
