@@ -2,6 +2,7 @@ import { BasePtDiceRoll } from '../../index'
 import { CocCard } from '../../../../../interface/card/coc'
 import { getAllSkillsCanEn } from './utils'
 
+// en list / enl 列出
 export class EnListDiceRoll extends BasePtDiceRoll {
 
   // 如果未关联 CocCard，认为不支持

@@ -309,6 +309,15 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
   }
 
   /**
+   * 清除所有技能成长标记
+   */
+  clearSkillGrowth() {
+    const count = Object.keys(this.data.meta.skillGrowth).length
+    this.data.meta.skillGrowth = {}
+    return count > 0
+  }
+
+  /**
    * 如果人物卡未设置一些值，则以默认值填充
    */
   applyDefaultValues() {

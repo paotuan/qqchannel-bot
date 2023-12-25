@@ -165,6 +165,16 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n侦察 99: 99 = 99`)
   })
 
+  test('st 设置 ability', () => {
+    const roller = createDiceRoll('st &徒手格斗1d10+$db,命中d100', context)
+    roller.applyToCard()
+    expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼) 设置:\n徒手格斗 1d10+$db\n命中 d100`)
+    const ability1 = card.getAbility('徒手格斗')
+    expect(ability1?.value).toBe('1d10+$db')
+    const ability2 = card.getAbility('命中')
+    expect(ability2?.value).toBe('d100')
+  })
+
   test('coc 先攻默认骰', () => {
     const roller = createDiceRoll('ri', context)
     expect(roller.output).toBe('Maca 🎲 先攻 60: 60 = 60')

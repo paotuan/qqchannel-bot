@@ -1,7 +1,3 @@
-// en list / enl 列出
-// en // all
-// en aa [tempvalue]
-
 import { BasePtDiceRoll } from '../../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { CocCard, getCocTempEntry, type ICocCardEntry } from '../../../../../interface/card/coc'
@@ -15,6 +11,8 @@ interface IGrowthDecideResult {
   isTemp: boolean // 是否是临时值
 }
 
+// en // all
+// en aa [tempvalue]
 export class EnDiceRoll extends BasePtDiceRoll {
 
   private enSkillNames: string[] = []

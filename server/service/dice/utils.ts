@@ -168,8 +168,8 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new ScDiceRoll(parsedExpression, context, inlineRolls).roll()
   } else if (expression.startsWith('en') && specialDiceConfig.enDice.enabled) {
-    const parsedExpression = parseTemplate(expression, context, inlineRolls)
-    return dispatchEn(parsedExpression, context, inlineRolls).roll()
+    // todo en 基本上无需 parseTemplate，除非临时值需要计算，但那也是很少的情况，先不处理了
+    return dispatchEn(expression, context, inlineRolls).roll()
   } else if (expression.startsWith('ri') && specialDiceConfig.riDice.enabled) {
     // ri 由于基数给用户输入，可能包含 attributes，因此统一由内部 parseTemplate
     return new RiDiceRoll(expression, context, inlineRolls).roll()
@@ -186,6 +186,7 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
     // 我寻思 nn 就不用 parseTemplate 了，纯指令不包含掷骰
     return dispatchNn(expression, context, inlineRolls).roll()
   } else if (expression.startsWith('log')) {
+    // log 也不需要 parseTemplate
     return new LogSettingDiceRoll(expression, context, inlineRolls).roll()
   } else {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
