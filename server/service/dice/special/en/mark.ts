@@ -15,7 +15,7 @@ export class EnMarkDiceRoll extends BasePtDiceRoll {
   }
 
   override roll() {
-    if (!this.isCardUnsupported) return this
+    if (this.isCardUnsupported) return this
     const removeEn = this.rawExpression.slice(2).trim()
     const [mode, removeMode] = parseMode(removeEn)
     this.mode = mode

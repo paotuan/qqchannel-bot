@@ -135,6 +135,32 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 图书馆 d% = 2 / 60 失败')
   })
 
+  test('coc成长检定 +标记', () => {
+    const roller = createDiceRoll('en+侦查 图书馆', context)
+    roller.applyToCard()
+    // expect(roller.output).toBe('') todo
+    expect(card.data.meta.skillGrowth.侦查).toBe(true)
+    expect(card.data.meta.skillGrowth.图书馆).toBe(true)
+  })
+
+  test('coc成长检定 -标记', () => {
+    card.data.meta.skillGrowth.侦查 = true
+    card.data.meta.skillGrowth.图书馆 = true
+    const roller = createDiceRoll('en-侦查 图书馆', context)
+    roller.applyToCard()
+    // expect(roller.output).toBe('') todo
+    expect(card.data.meta.skillGrowth.侦查).toBeFalsy()
+    expect(card.data.meta.skillGrowth.图书馆).toBeFalsy()
+  })
+
+  test('coc成长检定 清除', () => {
+    card.data.meta.skillGrowth.侦查 = true
+    card.data.meta.skillGrowth.图书馆 = true
+    const roller = createDiceRoll('enx', context)
+    roller.applyToCard()
+    expect(card.data.meta.skillGrowth).toMatchObject({})
+  })
+
   test('st 展示指定技能', () => {
     const roller = createDiceRoll('st show 侦查', context)
     expect(roller.output).toBe(`<@!${MockUserId}>(铃木翼):\n侦查:40`)
