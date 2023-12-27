@@ -20,7 +20,7 @@ export class DndDiceRoll extends StandardDiceRoll {
         continue
       }
       // 2. 根据描述拿 entry
-      this.skillsForTest.forEach(({ skill, tempValue: dc }) => {
+      this.skillsForTest.forEach(({ skill, tempValue: dc, modifiedValue }) => {
         const entry = this.selfCard?.getEntry(skill)
         let finalExpression: string
         // 根据 entry 类型拼接真正掷骰的 expression
@@ -48,11 +48,12 @@ export class DndDiceRoll extends StandardDiceRoll {
         // 3. 掷骰，如传了 dc 则进行检定
         const roll = new DiceRoll(finalExpression)
         let result: IRollDecideResult | undefined = undefined
+        const targetValue = dc + (modifiedValue || 0) // 如有 dc 调整值则加上。如没有 dc 即 dc=NaN，结果也是 NaN
         if (!isNaN(dc)) {
-          result = this.decide({ baseValue: dc, targetValue: dc, roll: roll.total })
+          result = this.decide({ baseValue: dc, targetValue, roll: roll.total })
         }
         // 4. 加入结果
-        this.rolls.push({ roll, tests: [{ skill, targetValue: dc, cardEntry: entry, result }] }) // 这里传的 entry 目前不重要
+        this.rolls.push({ roll, tests: [{ skill, targetValue, cardEntry: entry, result }] }) // 这里传的 entry 目前不重要
       })
     }
     return this

@@ -45,6 +45,16 @@ describe('未关联人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 50 成功')
   })
 
+  test('检定调整值', () => {
+    const roller = createDiceRoll('d100侦察50+10', context)
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 60 成功')
+  })
+
+  test('检定未指定数值，忽略调整值', () => {
+    const roller = createDiceRoll('d100侦察+10', context)
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2')
+  })
+
   test('默认骰1', () => {
     const roller = createDiceRoll('r', context)
     expect(roller.output).toBe('Maca 🎲 d100: [2] = 2')

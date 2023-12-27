@@ -57,6 +57,11 @@ describe('已关联DND人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 力量 d20+3: [12]+3 = 15 / 10 成功')
   })
 
+  test('DC + 调整值', () => {
+    const roller = createDiceRoll('力量10+2', context)
+    expect(roller.output).toBe('Maca 🎲 力量 d20+3: [12]+3 = 15 / 12 成功')
+  })
+
   test('指定表达式检定', () => {
     const roller = createDiceRoll('2d20k1力量10', context)
     expect(roller.output).toBe('Maca 🎲 力量 2d20k1+3: [12d, 12]+3 = 15 / 10 成功')

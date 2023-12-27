@@ -19,15 +19,17 @@ export class CocDiceRoll extends StandardDiceRoll {
       const roll = new DiceRoll(this.expression)
       this.rolls.push({
         roll,
-        tests: this.skillsForTest.map(({ skill, tempValue }) => {
+        tests: this.skillsForTest.map(({ skill, tempValue, modifiedValue }) => {
           let cardEntry: ICocCardEntry | undefined
           if (!isNaN(tempValue)) {
             cardEntry = getCocTempEntry(skill, tempValue)
           } else {
             cardEntry = this.selfCard?.getEntry(skill)
           }
-          let result: IRollDecideResult | undefined = undefined
+          // 如有 entry，则进行检定
+          let result: IRollDecideResult | undefined
           if (cardEntry) {
+            cardEntry.value += modifiedValue || 0 // 如有调整值，则调整目标值
             result = this.decide({ baseValue: cardEntry.baseValue, targetValue: cardEntry.value, roll: roll.total })
             // 非临时值且检定成功，记录人物卡技能成长
             if (!cardEntry.isTemp && cardEntry.type === 'skills' && result?.success) {
@@ -82,7 +84,7 @@ export class CocDiceRoll extends StandardDiceRoll {
       掷骰输出: rollResult.roll.output,
       // 以下都是 coc 特有
       技能值: entry.baseValue, // coc 特有的因为可能存在难度前缀导致目标值与技能值不同
-      目标值: entry.value, //entry.baseValue,
+      目标值: entry.value,
       成功等级: decideResult.level,
       成功: ['大成功', '极难成功', '困难成功', '成功'].includes(decideResult.level),
       大成功: decideResult.level === '大成功',

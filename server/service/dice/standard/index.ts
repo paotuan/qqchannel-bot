@@ -16,7 +16,6 @@ interface IRollResult {
   // 一次 roll 可能同时检定多个技能，也可能没有
   tests: {
     skill: string
-    // tempValue: number // NaN 代表无 // 似乎没用
     targetValue?: number // 目标值。coc：cardEntry.value / dnd: dc
     cardEntry?: ICardEntry
     result?: IRollDecideResult
@@ -50,7 +49,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
       const roll = new DiceRoll(this.expression)
       this.rolls.push({
         roll,
-        tests: this.skillsForTest.map(({ skill, tempValue }) => {
+        tests: this.skillsForTest.map(({ skill, tempValue, modifiedValue }) => {
           let cardEntry: ICardEntry | undefined
           // 如有临时值，则优先取临时值. 无临时值，则从人物卡读取
           if (!isNaN(tempValue)) {
@@ -58,11 +57,14 @@ export class StandardDiceRoll extends BasePtDiceRoll {
           } else {
             cardEntry = this.selfCard?.getEntry(skill)
           }
+          // 如有 entry，则进行检定
+          let targetValue: number | undefined
           let result: IRollDecideResult | undefined
           if (cardEntry) {
-            result = this.decide({ baseValue: cardEntry.value, targetValue: cardEntry.value, roll: roll.total })
+            targetValue = cardEntry.value + modifiedValue || 0 // 如有调整值，则调整目标值
+            result = this.decide({ baseValue: cardEntry.value, targetValue, roll: roll.total })
           }
-          return { skill, targetValue: cardEntry?.value, cardEntry, result }
+          return { skill, targetValue, cardEntry, result }
         })
       })
     }

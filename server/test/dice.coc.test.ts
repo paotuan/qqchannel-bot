@@ -33,6 +33,11 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 40 成功')
   })
 
+  test('检定+调整值', () => {
+    const roller = createDiceRoll('d100 侦察 + 10', context)
+    expect(roller.output).toBe('Maca 🎲 侦察 d100: [2] = 2 / 50 成功')
+  })
+
   test('默认骰检定', () => {
     const roller = createDiceRoll('d侦察', context)
     expect(roller.output).toBe('Maca 🎲 侦察 d%: [2] = 2 / 40 成功')
