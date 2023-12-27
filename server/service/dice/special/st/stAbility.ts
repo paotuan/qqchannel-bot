@@ -19,7 +19,7 @@ export class StAbilityDiceRoll extends BasePtDiceRoll {
   }
 
   private rollSet(exp: string) {
-    const segments = exp.split(/[,，;；、]+/).filter(segment => !!segment.trim())
+    const segments = exp.split(/[,，;；、]+/).map(segment => segment.trim()).filter(segment => !!segment)
     // 解析表达式
     segments.forEach(segment => {
       const [name, value] = splitSegment(segment)
