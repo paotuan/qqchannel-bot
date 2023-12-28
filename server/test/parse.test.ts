@@ -86,8 +86,8 @@ describe('组合检定表达式解析', () =>{
     expect(res).toEqual({ exp: 'd100', skills: [{ skill: '侦查', tempValue: 60, modifiedValue: 10 }] })
   })
 
-  test('单调整值视为临时值', () => {
+  test('单调整值, 无临时值', () => {
     const res = parseDescriptions2('d100 -10')
-    expect(res).toEqual({ exp: 'd100', skills: [{ skill: '', tempValue: -10, modifiedValue: NaN }] })
+    expect(res).toEqual({ exp: 'd100', skills: [{ skill: '', tempValue: NaN, modifiedValue: -10 }] })
   })
 })

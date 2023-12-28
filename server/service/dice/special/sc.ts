@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../index'
-import { parseDescriptions, removeTrailingOneSpace } from '../utils'
+import { parseDescriptions2, removeTrailingOneSpace } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import type { ICardEntry } from '../../../../interface/card/types'
@@ -12,6 +12,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   private expression2 = ''
   private description = ''
   private tempValue = NaN
+  private modifiedValue = NaN
 
   private scEntry?: ICardEntry // 是否人物卡有 sc 项 / 有临时值，可以骰 sc
   private rollSc?: DiceRoll
@@ -24,6 +25,12 @@ export class ScDiceRoll extends BasePtDiceRoll {
 
   private get scLoss() {
     return this.rollLoss?.total || 0
+  }
+
+  // 检定目标值
+  private get scTargetValue() {
+    if (!this.scEntry) return undefined
+    return this.scEntry.value + (this.modifiedValue || 0)
   }
 
   // sc1d10/1d100直视伟大的克苏鲁
@@ -41,8 +48,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
       this.scEntry = this.selfCard?.getEntry(SC_CARD_ENTRY_NAME)
     }
     if (this.scEntry) {
-      const targetValue = this.scEntry.value
-      this.rollScResult = this.decide({ baseValue: targetValue, targetValue: targetValue, roll: this.rollSc.total })
+      this.rollScResult = this.decide({ baseValue: this.scEntry.value, targetValue: this.scTargetValue!, roll: this.rollSc.total })
       if (this.rollScResult) {
         if (this.rollScResult.level === '大失败') {
           const maxLoss = new DiceRoll(this.expression2).maxTotal
@@ -79,12 +85,15 @@ export class ScDiceRoll extends BasePtDiceRoll {
       this.expression1 = expression.slice(0, firstSplitIndex).trim()
       exp2andDesc = expression.slice(firstSplitIndex + 1).trim()
     }
-    // 没有 / 的时候就认为 exp1=exp2 吧
-    const [exp, desc, tempValue] = parseDescriptions(exp2andDesc)
+
+    const { exp, skills } = parseDescriptions2(exp2andDesc)
+    // 如果有人在 sc 的时候使用组合技能检定，也只关心第一个
+    const { skill: desc = '', tempValue = NaN, modifiedValue = NaN } = skills[0] || {}
     this.expression2 = exp
-    this.expression1 ||= exp
+    this.expression1 ||= exp // 没有 / 的时候就认为 exp1=exp2 吧
     this.description = desc
     this.tempValue = tempValue
+    this.modifiedValue = modifiedValue
   }
 
   private detectDefaultRoll() {
@@ -97,7 +106,7 @@ export class ScDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
-    const firstArgs = this.getFormatArgs(this.rollSc!, this.description, this.scEntry?.value)
+    const firstArgs = this.getFormatArgs(this.rollSc!, this.description, this.scTargetValue)
     const firstStart = this.t('roll.start', firstArgs)
     const firstResult = this.t('roll.result.quiet', firstArgs)
     const firstTest = this.rollScResult ? this.ts(this.rollScResult.level, firstArgs) : this.t('roll.sc.unsupported', firstArgs)

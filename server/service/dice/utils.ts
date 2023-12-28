@@ -163,12 +163,7 @@ export function parseDescriptions2(rawExp: string, flag = ParseFlagsAll): { exp:
         const skill = groups.skill || ''
         const tempValue = parseInt(groups.tempValue, 10) // NaN 代表没设
         const modifiedValue = parseInt((groups.modified || '').replace(/\s+/g, '')) // NaN 代表没设。允许 +/- 和数字之间带空格
-        if (!skill && isNaN(tempValue)) {
-          // 无技能名和临时值，只有调整值的特殊处理：将调整值视为临时值
-          return { skill, tempValue: modifiedValue, modifiedValue: NaN }
-        } else {
-          return { skill, tempValue, modifiedValue }
-        }
+        return { skill, tempValue, modifiedValue }
       })
   return { exp, skills: matchResult }
 }
@@ -190,7 +185,7 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
     const parsedExpression = parseTemplate(expression, context, inlineRolls)
     return new ScDiceRoll(parsedExpression, context, inlineRolls).roll()
   } else if (expression.startsWith('en') && specialDiceConfig.enDice.enabled) {
-    // todo en 基本上无需 parseTemplate，除非临时值需要计算，但那也是很少的情况，先不处理了
+    // en 基本上无需 parseTemplate，除非临时值需要计算，但那也是很少的情况，可用 inline roll 实现
     return dispatchEn(expression, context, inlineRolls).roll()
   } else if (expression.startsWith('ri') && specialDiceConfig.riDice.enabled) {
     // ri 由于基数给用户输入，可能包含 attributes，因此统一由内部 parseTemplate
