@@ -152,8 +152,8 @@ export class ChannelConfig {
    * 智能探测指令中可能出现的 entry/ability 并加上 $ 前缀
    */
   detectCardEntry(expression: string, card?: ICard) {
-    // 特殊：【.st力量+1】 st 指令需要排除
-    if (expression.startsWith('st')) {
+    // 特殊：【.st力量+1】 st 指令需要排除 // 【.en+侦察】en 也排除
+    if (expression.startsWith('st') || expression.startsWith('en')) {
       return expression
     }
     if (this.config.parseRule.detectCardEntry && card) {
