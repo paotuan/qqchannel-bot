@@ -97,6 +97,8 @@ export type CustomTextKeys =
   | 'roll.en.empty'
   | 'roll.en.list'
   | 'roll.en.extra'
+  | 'roll.en.mark'
+  | 'roll.en.markclear'
   | 'roll.ri.unsupported'
   | 'roll.ri.del'
   | 'roll.ri.clear'

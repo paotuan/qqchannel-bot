@@ -200,6 +200,20 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
     defaultTemplate: '\n{{描述}}变化：{{旧值}} → {{新值}}',
     args: [_.用户名, _.人物卡名, _.at用户, { name: '旧值' }, { name: '新值' }, { name: '变化值' }, _.原始指令, _.描述, _.掷骰结果, _.掷骰表达式, _.掷骰输出]
   },
+  {
+    key: 'roll.en.mark',
+    name: '成长检定-打标记',
+    description: '.en+侦查 图书馆<br><u>Maca 已添加以下技能成长标记：<br>侦查、图书馆</u>',
+    defaultTemplate: '{{用户名}} 已{{#添加}}添加{{/添加}}{{^添加}}移除{{/添加}}以下技能成长标记：\n{{#技能列表}}{{技能名}}{{^last}}、{{/last}}{{/技能列表}}',
+    args: [_.用户名, _.人物卡名, _.at用户, { name: '添加', section: true }, { name: '技能列表', section: true }, { name: '技能名' }, { name: '技能唯一', section: true }, _.last]
+  },
+  {
+    key: 'roll.en.markclear',
+    name: '成长检定-清除所有标记',
+    description: '.en clear<br><u>Maca 已移除所有的技能成长标记</u>',
+    defaultTemplate: '{{用户名}} 已移除所有的技能成长标记',
+    args: [_.用户名, _.人物卡名, _.at用户]
+  },
   // {
   //   key: 'roll.ri.unsupported',
   //   name: '先攻-不支持',

@@ -1,6 +1,5 @@
 import { BasePtDiceRoll } from '../../index'
 import { CocCard } from '../../../../../interface/card/coc'
-import { at } from '../../utils'
 
 type MarkMode = 'add' | 'remove' | 'clear'
 
@@ -38,9 +37,15 @@ export class EnMarkDiceRoll extends BasePtDiceRoll {
       return this.t('roll.en.empty')
     }
     if (this.mode === 'clear') {
-      return `${at(this.context.userId)}已移除所有的技能成长标记`
+      return this.t('roll.en.markclear')
     }
-    return `${at(this.context.userId)}已${this.mode === 'add' ? '添加' : '移除'}以下技能成长标记：${this.skillNames.join('、')}`
+    const skills = this.skillNames
+    return this.t('roll.en.mark', {
+      技能列表: skills.map((技能名, i) => ({ 技能名, last: i === skills.length - 1 })),
+      技能唯一: skills.length === 1,
+      技能名: skills[0],
+      添加: this.mode === 'add'
+    })
   }
 
   override applyToCard() {

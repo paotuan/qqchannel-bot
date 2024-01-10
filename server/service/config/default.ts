@@ -206,10 +206,14 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
   }
   if (config.version < 32) {
     // 修改文案
+    const embedText = getEmbedCustomText()
     const texts = config.embedPlugin.customText![0].texts
     if (Array.isArray(texts['roll.sc.extra']) && texts['roll.sc.extra'].length === 1 && texts['roll.sc.extra'][0].text === '\n{{#损失值}}理智变化：{{旧值}} → {{新值}}{{/损失值}}') {
-      texts['roll.sc.extra'] = getEmbedCustomText().texts['roll.sc.extra']
+      texts['roll.sc.extra'] = embedText.texts['roll.sc.extra']
     }
+    // 新增文案
+    texts['roll.en.mark'] = embedText.texts['roll.en.mark']
+    texts['roll.en.markclear'] = embedText.texts['roll.en.markclear']
     config.version = 32 // 1.8.0
   }
   return config as IChannelConfig
@@ -467,12 +471,14 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.en.empty': s('{{用户名}} 当前暂无可成长的技能或不支持成长'),
     'roll.en.list': s('{{用户名}} 当前可成长的技能：\n{{#技能列表}}{{技能名}}{{^last}}、{{/last}}{{/技能列表}}'),
     'roll.en.extra': s('\n{{描述}}变化：{{旧值}} → {{新值}}'),
+    'roll.en.mark': s('{{用户名}} 已{{#添加}}添加{{/添加}}{{^添加}}移除{{/添加}}以下技能成长标记：\n{{#技能列表}}{{技能名}}{{^last}}、{{/last}}{{/技能列表}}'),
+    'roll.en.markclear': s('{{用户名}} 已移除所有的技能成长标记'),
     'roll.ri.unsupported': s('当前场景不支持先攻列表'),
     'roll.ri.del': s('{{用户名}} 删除先攻：{{#人物列表}}{{人物名}}{{^last}}、{{/last}}{{/人物列表}}'),
     'roll.ri.clear': s('*先攻列表已清空'),
     'roll.sc.unsupported': s(' ……未指定理智值，成功了吗？'),
     'roll.sc.extra': s('\n{{#掷骰结果}}理智变化：{{旧值}} → {{新值}}{{/掷骰结果}}'),
-    'card.empty': s('{{目标用户}}没有关联人物卡'),
+    'card.empty': s('{{at用户}}没有关联人物卡'),
     'card.nopermission': s('{{用户名}} 没有修改人物卡的权限'),
     'roll.st.prompt': s('{{at用户}}请指定想要设置的属性名与属性值'),
     'roll.st.show': s('{{目标用户}}({{目标人物卡名}}):\n{{#条目列表}}{{条目}}{{^last}} {{/last}}{{/条目列表}}'),

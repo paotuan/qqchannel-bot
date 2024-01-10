@@ -168,7 +168,7 @@ describe('已关联COC人物卡', () => {
   test('coc成长检定 +标记', () => {
     const roller = createDiceRoll('en+侦查 图书馆', context)
     roller.applyToCard()
-    // expect(roller.output).toBe('') todo
+    expect(roller.output).toBe('Maca 已添加以下技能成长标记：\n侦查、图书馆')
     expect(card.data.meta.skillGrowth.侦查).toBe(true)
     expect(card.data.meta.skillGrowth.图书馆).toBe(true)
   })
@@ -178,7 +178,7 @@ describe('已关联COC人物卡', () => {
     card.data.meta.skillGrowth.图书馆 = true
     const roller = createDiceRoll('en-侦查 图书馆', context)
     roller.applyToCard()
-    // expect(roller.output).toBe('') todo
+    expect(roller.output).toBe('Maca 已移除以下技能成长标记：\n侦查、图书馆')
     expect(card.data.meta.skillGrowth.侦查).toBeFalsy()
     expect(card.data.meta.skillGrowth.图书馆).toBeFalsy()
   })
@@ -188,6 +188,7 @@ describe('已关联COC人物卡', () => {
     card.data.meta.skillGrowth.图书馆 = true
     const roller = createDiceRoll('enx', context)
     roller.applyToCard()
+    expect(roller.output).toBe('Maca 已移除所有的技能成长标记')
     expect(card.data.meta.skillGrowth).toMatchObject({})
   })
 
