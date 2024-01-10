@@ -204,6 +204,14 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     config.parseRule.naiveInlineParseRule = false
     config.version = 30 // 1.7.4
   }
+  if (config.version < 32) {
+    // 修改文案
+    const texts = config.embedPlugin.customText![0].texts
+    if (Array.isArray(texts['roll.sc.extra']) && texts['roll.sc.extra'].length === 1 && texts['roll.sc.extra'][0].text === '\n{{#损失值}}理智变化：{{旧值}} → {{新值}}{{/损失值}}') {
+      texts['roll.sc.extra'] = getEmbedCustomText().texts['roll.sc.extra']
+    }
+    config.version = 32 // 1.8.0
+  }
   return config as IChannelConfig
 }
 
@@ -462,7 +470,7 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.ri.del': s('{{用户名}} 删除先攻：{{#人物列表}}{{人物名}}{{^last}}、{{/last}}{{/人物列表}}'),
     'roll.ri.clear': s('*先攻列表已清空'),
     'roll.sc.unsupported': s(' ……未指定理智值，成功了吗？'),
-    'roll.sc.extra': s('\n{{#损失值}}理智变化：{{旧值}} → {{新值}}{{/损失值}}'),
+    'roll.sc.extra': s('\n{{#掷骰结果}}理智变化：{{旧值}} → {{新值}}{{/掷骰结果}}'),
     'card.empty': s('{{目标用户}}没有关联人物卡'),
     'card.nopermission': s('{{用户名}} 没有修改人物卡的权限'),
     'roll.st.prompt': s('{{at用户}}请指定想要设置的属性名与属性值'),

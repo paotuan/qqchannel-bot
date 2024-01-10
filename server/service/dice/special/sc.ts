@@ -24,7 +24,15 @@ export class ScDiceRoll extends BasePtDiceRoll {
   private newSan = -1
 
   private get scLoss() {
-    return this.rollLoss?.total || 0
+    const roll = this.rollLoss
+    if (!roll) return 0
+    // 当结果可能为正时（例如 1d10-2），认为目的是扣除理智。此时若结果为负数则变为 0
+    // 当结果始终 ≤ 0 时，认为目的是利用 sc 补理智。此时若结果为负数则不处理
+    if (roll.maxTotal > 0) {
+      return Math.max(roll.total, 0)
+    } else {
+      return roll.total
+    }
   }
 
   // 检定目标值
@@ -118,13 +126,13 @@ export class ScDiceRoll extends BasePtDiceRoll {
     line += `\n${secondStart} ${secondResult}`
     // 如果发生了真实的损失，则加入附加语
     if (this.oldSan >= 0) {
-      const extra = this.t('roll.sc.extra', { 旧值: this.oldSan, 新值: this.newSan, 损失值: this.scLoss })
+      const extra = this.t('roll.sc.extra', this.getFormatArgs(this.rollLoss!))
       line += extra
     }
     return line
   }
 
-  private getFormatArgs(roll: DiceRoll, skill: string, targetValue?: number) {
+  private getFormatArgs(roll: DiceRoll, skill?: string, targetValue?: number) {
     return {
       原始指令: this.rawExpression,
       描述: skill,
@@ -132,6 +140,9 @@ export class ScDiceRoll extends BasePtDiceRoll {
       掷骰结果: roll.total,
       掷骰表达式: roll.notation,
       掷骰输出: roll.output,
+      旧值: this.oldSan,
+      新值: this.newSan,
+      损失值: this.scLoss,
       sc: true,
       coc: true
     }

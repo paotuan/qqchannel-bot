@@ -90,12 +90,14 @@ describe('已关联COC人物卡', () => {
 
   test('coc理智检定 默认骰', () => {
     const roller = createDiceRoll('sc', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
+    roller.applyToCard()
+    expect(roller.output.trim()).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
   })
 
   test('coc理智检定', () => {
     const roller = createDiceRoll('sc 0/d10', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
+    roller.applyToCard()
+    expect(roller.output.trim()).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 0: 0 = 0')
   })
 
   test('coc理智检定 临时值优先', () => {
@@ -113,7 +115,17 @@ describe('已关联COC人物卡', () => {
   test('coc理智检定 区分大成功', () => {
     resetRandomEngine(0)
     const roller = createDiceRoll('sc 0/d10', context)
-    expect(roller.output).toBe('Maca 🎲 d% = 1 大成功\nMaca 🎲 理智损失 0: 0 = 0')
+    roller.applyToCard()
+    expect(roller.output.trim()).toBe('Maca 🎲 d% = 1 大成功\nMaca 🎲 理智损失 0: 0 = 0')
+  })
+
+  test('coc理智检定 负数特殊处理', () => {
+    const roller = createDiceRoll('sc d10-3', context)
+    roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 d10-3: [2]-3 = -1\n理智变化：30 → 30')
+    const roller2 = createDiceRoll('sc d10-30', context)
+    roller2.applyToCard()
+    expect(roller2.output).toBe('Maca 🎲 d% = 2 / 30 成功\nMaca 🎲 理智损失 d10-30: [2]-30 = -28\n理智变化：30 → 58')
   })
 
   test('coc理智检定 inline 嵌套', () => {
