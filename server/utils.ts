@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import * as publicIp from 'public-ip'
 
 // https://www.zhangxinxu.com/wordpress/2021/01/dom-api-html-encode-decode/
 export function unescapeHTML(str: string) {
@@ -21,5 +22,13 @@ export function copyFolderSync(from: string, to: string) {
     } else {
       copyFolderSync(path.join(from, element), path.join(to, element))
     }
+  })
+}
+
+export function detectPublicIP() {
+  publicIp.v4({ onlyHttps: true }).then((addr: string) => {
+    console.log('您当前的公网 IP 是：' + addr)
+  }).catch(() => {
+    console.error('获取公网 IP 失败')
   })
 }

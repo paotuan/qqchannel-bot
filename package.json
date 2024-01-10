@@ -35,6 +35,7 @@
     "nanoid": "^4.0.0",
     "node-fetch": "^2.6.7",
     "pinia": "^2.0.22",
+    "public-ip": "^4.0.4",
     "qq-guild-bot": "^2.9.5",
     "sortablejs": "^1.15.0",
     "vue": "^3.2.37",
