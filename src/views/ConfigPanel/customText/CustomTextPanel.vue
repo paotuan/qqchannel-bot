@@ -11,11 +11,15 @@
       <p class="mt-2">有关自定义文案的更多说明，敬请<a class="link" @click="openHelpDoc('/config/customtext/')">参阅文档</a>。</p>
     </HelpCollapseArea>
     <!-- 配置项 -->
-    <div class="card card-compact w-full bg-base-100 shadow-lg">
-      <div v-if="textMap" class="divider-y">
-        <CustomTextEditor v-for="item in customTextMeta" :key="item.key" :meta="item" />
-      </div>
-    </div>
+    <template v-for="(group, i) in customTextMeta" :key="group.name">
+      <HelpCollapseArea :title="group.name" :main="true" :default-expand="i === 0">
+        <div class="card card-compact w-full bg-base-100 shadow-lg">
+          <div v-if="textMap" class="divider-y">
+            <CustomTextEditor v-for="item in group.items" :key="item.key" :meta="item" />
+          </div>
+        </div>
+      </HelpCollapseArea>
+    </template>
     <plugin-edit
         v-model:visible="pluginEditVisible"
         :list="pluginList"
