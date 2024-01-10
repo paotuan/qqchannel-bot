@@ -109,6 +109,10 @@ export type CustomTextKeys =
   | 'roll.st.prompt'
   | 'roll.st.show'
   | 'roll.st.set'
+  | 'nn.show'
+  | 'nn.link'
+  | 'nn.clear'
+  | 'nn.search'
 
 export interface ICustomTextConfig {
   id: string // 短 id

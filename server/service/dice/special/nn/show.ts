@@ -1,5 +1,4 @@
 import { BasePtDiceRoll } from '../../index'
-import { at } from '../../utils'
 
 export class NnShowDiceRoll extends BasePtDiceRoll {
 
@@ -8,10 +7,6 @@ export class NnShowDiceRoll extends BasePtDiceRoll {
   }
 
   get output(): string {
-    if (this.selfCard) {
-      return `${at(this.context.userId)}当前已关联人物卡：${this.selfCard.name}`
-    } else {
-      return `${at(this.context.userId)}当前未关联人物卡`
-    }
+    return this.t('nn.show', { 人物卡名: this.selfCard?.name })
   }
 }

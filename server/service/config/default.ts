@@ -214,6 +214,10 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     // 新增文案
     texts['roll.en.mark'] = embedText.texts['roll.en.mark']
     texts['roll.en.markclear'] = embedText.texts['roll.en.markclear']
+    texts['nn.show'] = embedText.texts['nn.show']
+    texts['nn.link'] = embedText.texts['nn.link']
+    texts['nn.clear'] = embedText.texts['nn.clear']
+    texts['nn.search'] = embedText.texts['nn.search']
     config.version = 32 // 1.8.0
   }
   return config as IChannelConfig
@@ -479,10 +483,14 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.sc.unsupported': s(' ……未指定理智值，成功了吗？'),
     'roll.sc.extra': s('\n{{#掷骰结果}}理智变化：{{旧值}} → {{新值}}{{/掷骰结果}}'),
     'card.empty': s('{{at用户}}没有关联人物卡'),
-    'card.nopermission': s('{{用户名}} 没有修改人物卡的权限'),
+    'card.nopermission': s('{{用户名}} 没有操作人物卡的权限'),
     'roll.st.prompt': s('{{at用户}}请指定想要设置的属性名与属性值'),
-    'roll.st.show': s('{{目标用户}}({{目标人物卡名}}):\n{{#条目列表}}{{条目}}{{^last}} {{/last}}{{/条目列表}}'),
-    'roll.st.set': s('{{目标用户}}({{目标人物卡名}}) 设置:\n{{#条目列表}}{{条目}}{{^last}}\n{{/last}}{{/条目列表}}')
+    'roll.st.show': s('{{at用户}}({{人物卡名}}):\n{{#条目列表}}{{条目}}{{^last}} {{/last}}{{/条目列表}}'),
+    'roll.st.set': s('{{at用户}}({{人物卡名}}) 设置:\n{{#条目列表}}{{条目}}{{^last}}\n{{/last}}{{/条目列表}}'),
+    'nn.show': s('{{at用户}}当前{{#人物卡名}}已关联人物卡：{{人物卡名}}{{/人物卡名}}{{^人物卡名}}未关联人物卡{{/人物卡名}}'),
+    'nn.link': s('{{at用户}}已关联人物卡：{{人物卡名}}'),
+    'nn.clear': s('{{at用户}}已取消关联人物卡'),
+    'nn.search': s('{{#人物卡列表}}{{at用户}}请选择想要关联的人物卡：\n{{人物卡名}}{{^last}}\n{{/last}}{{/人物卡列表}}\n{{^人物卡列表}}未找到名字包含{{关键词}}的人物卡{{/人物卡列表}}')
   }
   return { id: 'default', name: '默认文案', texts }
 }

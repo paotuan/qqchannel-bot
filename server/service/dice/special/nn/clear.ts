@@ -1,22 +1,24 @@
 import { BasePtDiceRoll } from '../../index'
-import { at } from '../../utils'
-import { ICard } from '../../../../../interface/card/types'
+import type { ICard } from '../../../../../interface/card/types'
 
 export class NnClearDiceRoll extends BasePtDiceRoll {
+
+  private originCardName?: string
 
   private get hasLinkPermission() {
     return this.hasPermission(this.context.config.specialDice.nnDice.writable)
   }
 
   roll() {
+    this.originCardName = this.selfCard?.name
     return this
   }
 
   get output(): string {
     if (!this.hasLinkPermission) {
-      return `${at(this.context.userId)}没有关联人物卡的权限`
+      return this.t('card.nopermission')
     } else {
-      return `${at(this.context.userId)}已取消关联人物卡`
+      return this.t('nn.clear', { 人物卡名: this.originCardName })
     }
   }
 

@@ -1,6 +1,5 @@
 import { BasePtDiceRoll } from '../../index'
 import type { ICard } from '../../../../../interface/card/types'
-import { at } from '../../utils'
 
 export class NnLinkDiceRoll extends BasePtDiceRoll {
 
@@ -30,14 +29,14 @@ export class NnLinkDiceRoll extends BasePtDiceRoll {
 
   override get output() {
     if (!this.hasLinkPermission) {
-      return `${at(this.context.userId)}没有关联人物卡的权限`
+      return this.t('card.nopermission')
     } else if (this.availableCards.length === 0) {
-      return `未找到名字包含"${this.keyword}"的人物卡`
+      return this.t('nn.search', { 人物卡列表: [], 关键词: this.keyword })
     } else if (this.targetCardName) {
-      return `${at(this.context.userId)}已关联人物卡：${this.targetCardName}`
+      return this.t('nn.link', { 人物卡名: this.targetCardName, 关键词: this.keyword })
     } else {
-      const availableList = this.availableCards.map(card => card.name)
-      return `${at(this.context.userId)}请选择想要关联的人物卡：\n${availableList.join('\n')}`
+      const availableList = this.availableCards.map((card, i) => ({ 人物卡名: card.name, last: i === this.availableCards.length - 1 }))
+      return this.t('nn.search', { 人物卡列表: availableList, 关键词: this.keyword })
     }
   }
 

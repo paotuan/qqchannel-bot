@@ -259,8 +259,8 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
   {
     key: 'card.nopermission',
     name: '人物卡-无修改权限',
-    description: '.st hp-1<br><u>Maca 没有修改人物卡的权限</u>',
-    defaultTemplate: '{{用户名}} 没有修改人物卡的权限',
+    description: '.st hp-1<br><u>Maca 没有操作人物卡的权限</u>',
+    defaultTemplate: '{{用户名}} 没有操作人物卡的权限',
     args: [_.用户名, _.人物卡名, _.at用户]
   },
   {
@@ -283,6 +283,34 @@ const customTextMeta = Object.freeze<ICustomTextMetaItem>([
     description: '.st hp-1<br><u>@Maca (铃木翼) 设置:<br>hp 11-1: 11-1 = 10</u>',
     defaultTemplate: '{{at用户}}({{人物卡名}}) 设置:\n{{#条目列表}}{{条目}}{{^last}}\n{{/last}}{{/条目列表}}',
     args: [_.用户名, _.人物卡名, _.at用户, { name: '条目列表', section: true }, { name: '条目' }, { name: '条目唯一', section: true }, _.last]
+  },
+  {
+    key: 'nn.show',
+    name: '人物卡关联-展示已关联人物卡',
+    description: '.nn<br><u>@Maca 当前已关联人物卡：铃木翼</u>',
+    defaultTemplate: '{{at用户}}当前{{#人物卡名}}已关联人物卡：{{人物卡名}}{{/人物卡名}}{{^人物卡名}}未关联人物卡{{/人物卡名}}',
+    args: [_.用户名, _.人物卡名, _.at用户]
+  },
+  {
+    key: 'nn.link',
+    name: '人物卡关联-关联成功',
+    description: '.nn 铃木翼<br><u>@Maca 已关联人物卡：铃木翼</u>',
+    defaultTemplate: '{{at用户}}已关联人物卡：{{人物卡名}}',
+    args: [_.用户名, _.人物卡名, _.at用户]
+  },
+  {
+    key: 'nn.clear',
+    name: '人物卡关联-取消关联',
+    description: '.nn clear<br><u>@Maca 已取消关联人物卡</u>',
+    defaultTemplate: '{{at用户}}已取消关联人物卡',
+    args: [_.用户名, _.人物卡名, _.at用户]
+  },
+  {
+    key: 'nn.search',
+    name: '人物卡关联-关键词搜索',
+    description: '.nn 木<br><u>@Maca 请选择想要关联的人物卡：<br>铃木翼a<br>铃木翼b</u>',
+    defaultTemplate: '{{#人物卡列表}}{{at用户}}请选择想要关联的人物卡：\n{{人物卡名}}{{^last}}\n{{/last}}{{/人物卡列表}}\n{{^人物卡列表}}未找到名字包含{{关键词}}的人物卡{{/人物卡列表}}',
+    args: [_.用户名, _.人物卡名, _.at用户, { name: '人物卡列表' }, { name: '关键词' }]
   },
 ])
 
