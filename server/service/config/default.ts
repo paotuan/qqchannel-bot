@@ -466,6 +466,7 @@ export function getEmbedCustomText(): ICustomTextConfig {
     'roll.ds.todeath': s('\n失败三次，去世了'),
     'roll.en.empty': s('{{用户名}} 当前暂无可成长的技能或不支持成长'),
     'roll.en.list': s('{{用户名}} 当前可成长的技能：\n{{#技能列表}}{{技能名}}{{^last}}、{{/last}}{{/技能列表}}'),
+    'roll.en.extra': s('\n{{描述}}变化：{{旧值}} → {{新值}}'),
     'roll.ri.unsupported': s('当前场景不支持先攻列表'),
     'roll.ri.del': s('{{用户名}} 删除先攻：{{#人物列表}}{{人物名}}{{^last}}、{{/last}}{{/人物列表}}'),
     'roll.ri.clear': s('*先攻列表已清空'),

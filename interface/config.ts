@@ -96,6 +96,7 @@ export type CustomTextKeys =
   | 'roll.ds.todeath'
   | 'roll.en.empty'
   | 'roll.en.list'
+  | 'roll.en.extra'
   | 'roll.ri.unsupported'
   | 'roll.ri.del'
   | 'roll.ri.clear'

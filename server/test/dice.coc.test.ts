@@ -153,6 +153,13 @@ describe('已关联COC人物卡', () => {
     expect(roller.output).toBe('Maca 🎲 图书馆 d% = 2 / 70 失败')
   })
 
+  test('coc成长检定 成功', () => {
+    resetRandomEngine(70)
+    const roller = createDiceRoll('en图书馆', context)
+    roller.applyToCard()
+    expect(roller.output).toBe('Maca 🎲 图书馆 d% = 71 / 70 成功\nMaca 🎲 图书馆成长 d10 = 1\n图书馆变化：70 → 71')
+  })
+
   test('coc成长检定 临时值优先', () => {
     const roller = createDiceRoll('en图书馆60', context)
     expect(roller.output).toBe('Maca 🎲 图书馆 d% = 2 / 60 失败')

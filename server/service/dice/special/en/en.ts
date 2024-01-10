@@ -9,6 +9,7 @@ interface IGrowthDecideResult {
   canGrowth: boolean // 是否能成长
   secondRoll?: DiceRoll // 二次 d10 结果
   isTemp: boolean // 是否是临时值
+  newValue?: number // 以下 apply to card 后设置. 由于可能存在 clamp 等特殊情况，不一定等于 targetValue + secondRoll.total
 }
 
 // en // all
@@ -83,7 +84,17 @@ export class EnDiceRoll extends BasePtDiceRoll {
           const secondArgs = this.getFormatArgs(`${skill}成长`, result.secondRoll!)
           const secondStart = this.t('roll.start', secondArgs)
           const secondResult = this.t('roll.result.quiet', secondArgs)
-          lines.push(`${secondStart} ${secondResult}`)
+          if (typeof result.newValue === 'number') { // 理论上 canGrowth 肯定满足
+            const secondExtra = this.t('roll.en.extra', {
+              ...this.getFormatArgs(skill, result.secondRoll!),
+              旧值: result.targetValue,
+              新值: result.newValue,
+              变化值: result.newValue - result.targetValue
+            })
+            lines.push(`${secondStart} ${secondResult}${secondExtra}`)
+          } else {
+            lines.push(`${secondStart} ${secondResult}`)
+          }
         }
       })
       return lines.join('\n')
@@ -116,6 +127,8 @@ export class EnDiceRoll extends BasePtDiceRoll {
         if (card.setEntry(skill, growthResult.targetValue + growthResult.secondRoll!.total)) {
           updated = true
         }
+        // 获取最新值
+        growthResult.newValue = card.getEntry(skill)?.value
       }
       // 取消标记
       if (card.cancelSkillGrowth(skill)) {
