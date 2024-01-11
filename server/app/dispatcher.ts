@@ -92,7 +92,7 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
   // 1. 记录 appid
   client.appid = data.appid
   // 2. 连接 qq 服务器
-  server.qApis.login(data.appid, data.token)
+  server.qApis.login(data.appid, data.token, data.sandbox)
   // 3. 返回登录成功
   client.send({ cmd: 'bot/login', success: true, data: null })
   // 4. watch bot info

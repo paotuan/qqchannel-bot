@@ -27,6 +27,7 @@ ws.on('bot/login', message => {
   // 极端情况下会有异步的问题，不过这里很快，就不管了
   localStorage.setItem('appid', bot.appid)
   localStorage.setItem('token', bot.token)
+  localStorage.setItem('sandbox', String(bot.sandbox))
 })
 
 ws.on('bot/info', message => {

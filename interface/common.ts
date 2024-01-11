@@ -47,6 +47,7 @@ export interface IBotInfo {
 export interface ILoginReq {
   appid: string
   token: string
+  sandbox: boolean
 }
 
 export type IBotInfoResp = IBotInfo

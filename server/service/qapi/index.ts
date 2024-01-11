@@ -17,6 +17,7 @@ type QueueListener = (data: unknown) => Promise<boolean>
 export class QApi {
   readonly appid: string
   readonly token: string
+  readonly sandbox: boolean
   readonly qqClient: ReturnType<typeof createOpenAPI>
   private readonly qqWs: ReturnType<typeof createWebsocket>
   readonly wss: Wss
@@ -29,7 +30,7 @@ export class QApi {
 
   botInfo: IBotInfo | null = null
 
-  constructor(appid: string, token: string, wss: Wss) {
+  constructor(appid: string, token: string, sandbox: boolean, wss: Wss) {
     makeAutoObservable<this, 'qqWs' | 'eventEmitter'>(this, {
       appid: false,
       token: false,
@@ -41,6 +42,7 @@ export class QApi {
 
     this.appid = appid
     this.token = token
+    this.sandbox = sandbox
     this.wss = wss
 
     const botConfig = {
@@ -53,7 +55,7 @@ export class QApi {
         AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS,
         AvailableIntentsEventsEnum.DIRECT_MESSAGE
       ],
-      sandbox: false,
+      sandbox: sandbox,
     }
     this.qqClient = createOpenAPI(botConfig)
     this.qqWs = createWebsocket(botConfig)
@@ -132,7 +134,9 @@ export class QApi {
   }
 
   disconnect() {
+    this.qqWs.removeAllListeners()
     this.qqWs.disconnect()
+    this.eventEmitter.removeAllListeners()
   }
 
   // nativeOn
