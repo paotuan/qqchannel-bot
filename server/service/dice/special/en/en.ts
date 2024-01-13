@@ -9,7 +9,7 @@ interface IGrowthDecideResult {
   canGrowth: boolean // 是否能成长
   secondRoll?: DiceRoll // 二次 d10 结果
   isTemp: boolean // 是否是临时值
-  newValue?: number // 以下 apply to card 后设置. 由于可能存在 clamp 等特殊情况，不一定等于 targetValue + secondRoll.total
+  newValue: number // 成长后的值
 }
 
 // en // all
@@ -56,12 +56,14 @@ export class EnDiceRoll extends BasePtDiceRoll {
       if (!entry) return // 没有人物卡项，也没有临时值，就忽略
       const firstRoll = new DiceRoll('d%')
       const canGrowth = firstRoll.total > Math.min(95, entry.baseValue) // 大于技能数值才能增长
+      const secondRoll = canGrowth ? new DiceRoll('d10') : undefined
       this.skill2Growth[skill] = {
         firstRoll,
         canGrowth,
         targetValue: entry.baseValue,
-        secondRoll: canGrowth ? new DiceRoll('d10') : undefined,
-        isTemp: entry.isTemp
+        secondRoll,
+        isTemp: entry.isTemp,
+        newValue: entry.baseValue + (secondRoll?.total ?? 0) // 先以简单加法算出来一个值
       }
     })
   }
@@ -127,8 +129,11 @@ export class EnDiceRoll extends BasePtDiceRoll {
         if (card.setEntry(skill, growthResult.targetValue + growthResult.secondRoll!.total)) {
           updated = true
         }
-        // 获取最新值
-        growthResult.newValue = card.getEntry(skill)?.value
+        // 如果有人物卡，由于可能存在 clamp 等特殊情况，重新获取一下最精确的新值
+        const entry = card.getEntry(skill)
+        if (entry) {
+          growthResult.newValue = entry.value
+        }
       }
       // 取消标记
       if (card.cancelSkillGrowth(skill)) {
