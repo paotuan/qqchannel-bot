@@ -53,7 +53,7 @@
     </div>
     <!-- en -->
     <div class="collapse-title flex items-center gap-2">
-      <input v-model="config.scDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
+      <input v-model="config.enDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
       <span>COC 成长检定（en）</span>
     </div>
     <!-- ds -->
