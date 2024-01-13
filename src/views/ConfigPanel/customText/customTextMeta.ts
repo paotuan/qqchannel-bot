@@ -224,7 +224,7 @@ const customTextMeta = Object.freeze<ICustomTextMetaGroup>([
         key: 'nn.search',
         name: '人物卡关联-关键词搜索',
         description: '.nn 木<br><u>@Maca 请选择想要关联的人物卡：<br>铃木翼a<br>铃木翼b</u>',
-        defaultTemplate: '{{#人物卡列表}}{{at用户}}请选择想要关联的人物卡：\n{{人物卡名}}{{^last}}\n{{/last}}{{/人物卡列表}}\n{{^人物卡列表}}未找到名字包含{{关键词}}的人物卡{{/人物卡列表}}',
+        defaultTemplate: '{{at用户}}请选择想要关联的人物卡：\n{{#人物卡列表}}{{人物卡名}}{{^last}}\n{{/last}}{{/人物卡列表}}\n{{^人物卡列表}}未找到名字包含{{关键词}}的人物卡{{/人物卡列表}}',
         args: [_.用户名, _.人物卡名, _.at用户, { name: '人物卡列表' }, { name: '关键词' }]
       },
     ]
