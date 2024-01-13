@@ -212,6 +212,7 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       texts['roll.sc.extra'] = embedText.texts['roll.sc.extra']
     }
     // 新增文案
+    texts['roll.en.extra'] =  embedText.texts['roll.en.extra']
     texts['roll.en.mark'] = embedText.texts['roll.en.mark']
     texts['roll.en.markclear'] = embedText.texts['roll.en.markclear']
     texts['nn.show'] = embedText.texts['nn.show']
