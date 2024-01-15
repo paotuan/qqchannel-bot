@@ -145,7 +145,7 @@ export interface IPluginRegisterContext {
   _context: any // 逃生通道，通常不要使用
 }
 
-export interface IPluginConfig {
+export interface IPlugin {
   id: string
   name?: string
   version?: number
@@ -177,6 +177,13 @@ export interface IParseRuleConfig {
   naiveInlineParseRule: boolean // 是否使用 naive 的中间骰解析策略
 }
 
+// 插件开启状态和私有配置
+export interface IPluginConfig {
+  id: string
+  enabled: boolean
+  preference: Record<string, string>
+}
+
 export interface IChannelConfig {
   version: number
   botOwner: string | null
@@ -188,6 +195,7 @@ export interface IChannelConfig {
   rollDeciderId: string  // full id 单选
   rollDeciderIds: string[] // full id
   customTextIds: string[] // full id。 不包含 default
-  embedPlugin: IPluginConfig // id = io.paotuan.embed.xx
+  embedPlugin: IPlugin // id = io.paotuan.embed.xx
+  plugins: IPluginConfig[] // 管理第三方插件配置 => config
   lastModified: number // ms
 }

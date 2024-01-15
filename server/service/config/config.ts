@@ -27,6 +27,14 @@ export class ChannelConfig {
     makeAutoObservable<this, 'plugin'>(this, { plugin: false })
     this.config = config
     this.plugin = plugins
+    // 新增的 plugins 默认启用
+    if (plugins) {
+      plugins.allPluginNames.forEach(pluginId => {
+        if (!this.config.plugins.find(plugin => plugin.id === pluginId)) {
+          this.config.plugins.push({ id: pluginId, enabled: true, preference: {} })
+        }
+      })
+    }
   }
 
   get botOwner() {

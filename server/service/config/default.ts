@@ -52,6 +52,7 @@ export function getInitialDefaultConfig(): IChannelConfig {
       rollDecider: rollDeciders,
       customText: [customText] // embed 默认只有一份
     },
+    plugins: [],
     lastModified: 0
   }
 }
@@ -220,6 +221,10 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     texts['nn.clear'] = embedText.texts['nn.clear']
     texts['nn.search'] = embedText.texts['nn.search']
     config.version = 32 // 1.8.0
+  }
+  if (config.version < 33) {
+    config.plugins = []
+    config.version = 33
   }
   return config as IChannelConfig
 }

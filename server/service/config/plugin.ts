@@ -1,6 +1,6 @@
 import type { Wss } from '../../app/wss'
 import type {
-  IPluginConfig,
+  IPlugin,
   ICustomReplyConfig,
   IPluginRegisterContext,
   IAliasRollConfig, ICustomTextConfig
@@ -23,7 +23,7 @@ const PLUGIN_DIR = './plugins'
 
 export class PluginManager {
   private readonly wss: Wss
-  private readonly pluginMap: Record<string, IPluginConfig> = {}
+  private readonly pluginMap: Record<string, IPlugin> = {}
 
   constructor(wss: Wss) {
     makeAutoObservable<this, 'wss'>(this, { wss: false })
@@ -122,7 +122,7 @@ export class PluginManager {
       try {
         const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const plugin = require(fullPath)(this.pluginRegisterContext) as IPluginConfig
+        const plugin = require(fullPath)(this.pluginRegisterContext) as IPlugin
         console.log('[Plugin] 加载插件', pluginName, '->', plugin.id)
         this.pluginMap[plugin.id] = plugin
       } catch (e) {
@@ -138,7 +138,7 @@ export class PluginManager {
       // 注意不能完全避免问题，仍然有副作用重复执行或内存泄露的风险
       delete require.cache[fullPath]
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const plugin = require(fullPath)(this.pluginRegisterContext) as IPluginConfig
+      const plugin = require(fullPath)(this.pluginRegisterContext) as IPlugin
       console.log('[Plugin] 重新加载插件', pluginName, '->',plugin.id)
       this.pluginMap[plugin.id] = plugin
     } catch (e) {
@@ -188,6 +188,10 @@ export class PluginManager {
         description: item.description
       }))
     }))
+  }
+
+  get allPluginNames() {
+    return Object.keys(this.pluginMap)
   }
 
   // 提供 custom reply 的列表: fullId => config
