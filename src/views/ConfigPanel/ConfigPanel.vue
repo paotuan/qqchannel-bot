@@ -26,6 +26,9 @@
       <template v-else-if="currentMenu === 'others'">
         <OthersPanel />
       </template>
+      <template v-else-if="currentMenu === 'plugin'">
+        <PluginPanel />
+      </template>
     </div>
     <!-- 底部栏 -->
     <div class="fixed left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
@@ -50,12 +53,13 @@ import CustomReplyPanel from './customReply/CustomReplyPanel.vue'
 import RollDeciderPanel from './rollDecider/RollDeciderPanel.vue'
 import AliasRollPanel from './aliasRoll/AliasRollPanel.vue'
 import CustomTextPanel from './customText/CustomTextPanel.vue'
+import PluginPanel from './plugin/PluginPanel.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
 
 // nav
-type NavMenu = 'aliasRoll' | 'customReply' | 'rollDecider' | 'customText' | 'others'
+type NavMenu = 'aliasRoll' | 'customReply' | 'rollDecider' | 'customText' | 'others' | 'plugin'
 const currentMenu = ref<NavMenu>('customReply')
 const menuList: { label: string, value: NavMenu }[] = [
   { label: '自定义回复', value: 'customReply' },
@@ -63,6 +67,7 @@ const menuList: { label: string, value: NavMenu }[] = [
   { label: '检定规则', value: 'rollDecider' },
   { label: '别名指令', value: 'aliasRoll' },
   { label: '特殊指令&杂项', value: 'others' },
+  { label: '插件管理', value: 'plugin' }
 ]
 
 // quick set

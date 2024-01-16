@@ -14,6 +14,10 @@ export type PluginItemType = 'customReply' | 'rollDecider' | 'aliasRoll' | 'cust
 export const usePluginStore = defineStore('plugin', () => {
   const plugins = ref<IPluginConfigDisplay[]>([])
 
+  const getPlugin = (fullId: string) => {
+    return plugins.value.find(plugin => plugin.id === fullId)
+  }
+
   // @private fullId => config
   const plugin2map = (type: PluginItemType) => {
     const map: Record<string, IPluginItemConfigForDisplay> = {}
@@ -61,6 +65,7 @@ export const usePluginStore = defineStore('plugin', () => {
     rollDeciderMap,
     aliasRollMap,
     customTextMap,
+    getPlugin,
     getPluginCustomReplyProcessor,
     getPluginRollDeciderConfig,
     getPluginAliasRollProcessor,
