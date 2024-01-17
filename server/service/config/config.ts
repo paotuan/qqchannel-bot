@@ -17,7 +17,6 @@ import { renderCustomText } from './helpers/customText'
 import type { ICard } from '../../../interface/card/types'
 
 // 频道配置文件封装
-// !只读 config，不要写 config
 export class ChannelConfig {
   config: IChannelConfig
   private readonly plugin?: PluginManager // todo plugin 后续和 wss 解耦？
@@ -27,14 +26,55 @@ export class ChannelConfig {
     makeAutoObservable<this, 'plugin'>(this, { plugin: false })
     this.config = config
     this.plugin = plugins
-    // 新增的 plugins 默认启用
-    if (plugins) {
-      plugins.allPluginNames.forEach(pluginId => {
-        if (!this.config.plugins.find(plugin => plugin.id === pluginId)) {
-          this.config.plugins.push({ id: pluginId, enabled: true, preference: {} })
+    this.updateConfigByPluginManifest()
+  }
+
+  // 把插件里的各个项目开启状态保存到 config 对象中
+  updateConfigByPluginManifest() {
+    if (!this.plugin) return
+    const manifest = this.plugin.pluginListManifest
+    // 记录一下当前每个功能的 id，用于第三部 purge
+    const existIds = {
+      customReplyIds: new Set<string>(),
+      aliasRollIds: new Set<string>(),
+      customTextIds: new Set<string>(),
+    }
+    manifest.forEach(plugin => {
+      // 1. 新增的 plugins 默认启用
+      const pluginConfig = this.config.plugins.find(_plugin => _plugin.id === plugin.id)
+      if (!pluginConfig) {
+        this.config.plugins.push({ id: plugin.id, enabled: true, preference: {} })
+      }
+      // 2. 处理 plugin 内每个功能的开启状态
+      // 如果是 disabled 状态的 plugin，不处理. disabled 状态的 plugin 下所有功能都应该不存在，不出现在 config 里
+      if (pluginConfig && !pluginConfig.enabled) return
+      plugin.customReply.forEach(config => {
+        const id = `${plugin.id}.${config.id}`
+        existIds.customReplyIds.add(id)
+        if (!this.config.customReplyIds.find(_config => _config.id === id)) {
+          this.config.customReplyIds.push({ id, enabled: true })
         }
       })
-    }
+      // rollDecider 先忽略
+      plugin.aliasRoll.forEach(config => {
+        const id = `${plugin.id}.${config.id}`
+        existIds.aliasRollIds.add(id)
+        if (!this.config.aliasRollIds.find(_config => _config.id === id)) {
+          this.config.aliasRollIds.push({ id, enabled: true })
+        }
+      })
+      plugin.customText.forEach(config => {
+        const id = `${plugin.id}.${config.id}`
+        existIds.customTextIds.add(id)
+        if (!this.config.customTextIds.find(_config => _config.id === id)) {
+          this.config.customTextIds.push({ id, enabled: true })
+        }
+      })
+    })
+    // 3. 如有 plugin 中已经不存在的功能，但 config 中还存在的，需要从 config 中去掉
+    ;(['customReplyIds', 'aliasRollIds', 'customTextIds'] as const).forEach(prop => {
+      this.config[prop] = this.config[prop].filter(config => existIds[prop].has(config.id))
+    })
   }
 
   get botOwner() {
@@ -122,7 +162,7 @@ export class ChannelConfig {
   // 子频道自定义文案配置
   private get customTextMap() {
     const embed = this.config.embedPlugin.customText?.[0] ?? getEmbedCustomText() // 理论上有且只有一个 embed 配置，但做个兜底
-    const pluginList = this.config.customTextIds.map(id => this.plugin?.pluginCustomTextMap?.[id])
+    const pluginList = this.config.customTextIds.filter(item => item.enabled).map(item => this.plugin?.pluginCustomTextMap?.[item.id])
     const validConfigList = [embed, ...pluginList].filter(conf => !!conf) as ICustomTextConfig[]
     // 后面的配置覆盖前面的配置
     return validConfigList.map(config => config.texts).reduce((all, textMap) => Object.assign(all, textMap), {})

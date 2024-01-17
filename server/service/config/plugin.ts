@@ -123,7 +123,8 @@ export class PluginManager {
         const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const plugin = require(fullPath)(this.pluginRegisterContext) as IPlugin
-        console.log('[Plugin] 加载插件', pluginName, '->', plugin.id)
+        plugin.id ||= pluginName
+        console.log('[Plugin] 加载插件', plugin.id)
         this.pluginMap[plugin.id] = plugin
       } catch (e) {
         console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
@@ -139,7 +140,8 @@ export class PluginManager {
       delete require.cache[fullPath]
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const plugin = require(fullPath)(this.pluginRegisterContext) as IPlugin
-      console.log('[Plugin] 重新加载插件', pluginName, '->',plugin.id)
+      plugin.id ||= pluginName
+      console.log('[Plugin] 重新加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
     } catch (e) {
       console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
@@ -162,9 +164,10 @@ export class PluginManager {
     })
   }
 
-  get pluginListForDisplay(): IPluginConfigDisplay[] {
+  // 获取插件内容清单（不含插件具体逻辑，用于展示和更新 config）
+  get pluginListManifest(): IPluginConfigDisplay[] {
     return Object.values(this.pluginMap).map<IPluginConfigDisplay>(plugin => ({
-      id: plugin.id || '--', // 以防万一空值容错
+      id: plugin.id,
       name: plugin.name || plugin.id || '--',
       customReply: (plugin.customReply || []).map(item => ({
         id: item.id,
@@ -188,10 +191,6 @@ export class PluginManager {
         description: item.description
       }))
     }))
-  }
-
-  get allPluginNames() {
-    return Object.keys(this.pluginMap)
   }
 
   // 提供 custom reply 的列表: fullId => config

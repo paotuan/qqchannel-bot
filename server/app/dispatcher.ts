@@ -118,7 +118,7 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
     }
   })
   // 5. 返回插件信息
-  client.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListForDisplay })
+  client.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
 }
 
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {

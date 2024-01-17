@@ -194,7 +194,7 @@ export interface IChannelConfig {
   aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选
   rollDeciderIds: string[] // full id
-  customTextIds: string[] // full id。 不包含 default
+  customTextIds: { id: string, enabled: boolean }[] // full id。 不包含 default
   embedPlugin: IPlugin // id = io.paotuan.embed.xx
   plugins: IPluginConfig[] // 管理第三方插件配置 => config
   lastModified: number // ms

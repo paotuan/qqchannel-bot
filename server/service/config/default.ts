@@ -224,6 +224,7 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
   }
   if (config.version < 33) {
     config.plugins = []
+    config.customTextIds = config.customTextIds.map(id => ({ id: id as unknown as string, enabled: true }))
     config.version = 33
   }
   return config as IChannelConfig
