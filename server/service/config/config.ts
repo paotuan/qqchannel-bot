@@ -71,9 +71,9 @@ export class ChannelConfig {
         }
       })
     })
-    // 3. 如有 plugin 中已经不存在的功能，但 config 中还存在的，需要从 config 中去掉
+    // 3. 如有 plugin 中已经不存在的功能，但 config 中还存在的，需要从 config 中去掉. (embed 须保留)
     ;(['customReplyIds', 'aliasRollIds', 'customTextIds'] as const).forEach(prop => {
-      this.config[prop] = this.config[prop].filter(config => existIds[prop].has(config.id))
+      this.config[prop] = this.config[prop].filter(config => config.id.startsWith('io.paotuan.embed') || existIds[prop].has(config.id))
     })
   }
 
