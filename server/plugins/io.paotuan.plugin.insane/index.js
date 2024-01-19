@@ -235,7 +235,7 @@ const 狂躁症状 = [
 module.exports = () => ({
   id: 'io.paotuan.plugin.insane',
   name: '疯狂症状',
-  version: 2,
+  version: 3,
   customReply: [
     {
       id: 'ti',
@@ -293,6 +293,7 @@ module.exports = () => ({
       id: 'phobia',
       name: '恐惧症状',
       description: '/恐惧症状 抽取恐惧症状',
+      defaultEnabled: false,
       command: '^\\s*恐惧症状',
       trigger: 'regex',
       items: [
@@ -309,6 +310,7 @@ module.exports = () => ({
       id: 'mania',
       name: '狂躁症状',
       description: '/狂躁症状 抽取狂躁症状',
+      defaultEnabled: false,
       command: '^\\s*狂躁症状',
       trigger: 'regex',
       items: [

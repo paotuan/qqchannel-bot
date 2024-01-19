@@ -52,7 +52,7 @@ export class ChannelConfig {
         const id = `${plugin.id}.${config.id}`
         existIds.customReplyIds.add(id)
         if (!this.config.customReplyIds.find(_config => _config.id === id)) {
-          this.config.customReplyIds.push({ id, enabled: true })
+          this.config.customReplyIds.push({ id, enabled: config.defaultEnabled })
         }
       })
       // rollDecider 先忽略
@@ -60,14 +60,14 @@ export class ChannelConfig {
         const id = `${plugin.id}.${config.id}`
         existIds.aliasRollIds.add(id)
         if (!this.config.aliasRollIds.find(_config => _config.id === id)) {
-          this.config.aliasRollIds.push({ id, enabled: true })
+          this.config.aliasRollIds.push({ id, enabled: config.defaultEnabled })
         }
       })
       plugin.customText.forEach(config => {
         const id = `${plugin.id}.${config.id}`
         existIds.customTextIds.add(id)
         if (!this.config.customTextIds.find(_config => _config.id === id)) {
-          this.config.customTextIds.push({ id, enabled: true })
+          this.config.customTextIds.push({ id, enabled: config.defaultEnabled })
         }
       })
     })

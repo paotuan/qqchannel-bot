@@ -5,6 +5,13 @@ import type { CardType } from './card/types'
 
 export type UserRole = 'admin' | 'manager' | 'user'
 
+interface IPluginElementCommonInfo {
+  id: string // 短 id
+  name: string
+  description?: string
+  defaultEnabled?: boolean
+}
+
 // region 自定义回复
 export interface ICustomReplyEnv {
   botId: string
@@ -28,10 +35,7 @@ export interface ICustomReplyConfigItem {
   reply: string | CustomReplyHandler
 }
 
-export interface ICustomReplyConfig {
-  id: string // 短 id
-  name: string
-  description?: string
+export interface ICustomReplyConfig extends IPluginElementCommonInfo {
   command: string // 触发词
   trigger: 'exact' | 'startWith' | 'include' | 'regex'
   items?: ICustomReplyConfigItem[] // 给 gui 使用
@@ -42,10 +46,7 @@ export interface ICustomReplyConfig {
 // region 指令别名
 type AliasRollNaiveTrigger = { trigger: 'naive', replacer: string } // {{X=1}} => (?<X>\d*) => replacer: {{X}}
 type AliasRollRegexTrigger = { trigger: 'regex', replacer: ((matchResult: RegExpMatchArray) => string) }
-export type IAliasRollConfig = {
-  id: string // 短 id
-  name: string
-  description?: string
+export type IAliasRollConfig = IPluginElementCommonInfo & {
   command: string // 触发指令
 } & (AliasRollNaiveTrigger | AliasRollRegexTrigger)
 // endregion
@@ -58,10 +59,7 @@ export interface IRollDeciderRule {
   expression: string
 }
 
-export interface IRollDeciderConfig {
-  id: string // 短 id
-  name: string
-  description?: string
+export interface IRollDeciderConfig extends IPluginElementCommonInfo {
   rules: IRollDeciderRule[]
 }
 // endregion
@@ -114,10 +112,7 @@ export type CustomTextKeys =
   | 'nn.clear'
   | 'nn.search'
 
-export interface ICustomTextConfig {
-  id: string // 短 id
-  name: string
-  description?: string
+export interface ICustomTextConfig extends IPluginElementCommonInfo {
   texts: Partial<Record<CustomTextKeys, ICustomTextItem[] | ICustomTextHandler>>
 }
 // endregion

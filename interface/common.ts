@@ -170,7 +170,8 @@ export interface ICardTestResp {
 interface IPluginItemConfig {
   id: string // 短 id
   name: string
-  description?: string
+  description: string
+  defaultEnabled: boolean
 }
 
 export interface IPluginConfigDisplay {

@@ -172,7 +172,8 @@ export class PluginManager {
       customReply: (plugin.customReply || []).map(item => ({
         id: item.id,
         name: item.name,
-        description: item.description
+        description: item.description ?? '',
+        defaultEnabled: item.defaultEnabled ?? true
       })),
       // rollDecider: (plugin.rollDecider || []).map(item => ({
       //   id: item.id,
@@ -183,12 +184,14 @@ export class PluginManager {
       aliasRoll: (plugin.aliasRoll || []).map(item => ({
         id: item.id,
         name: item.name,
-        description: item.description
+        description: item.description ?? '',
+        defaultEnabled: item.defaultEnabled ?? true
       })),
       customText: (plugin.customText || []).map(item => ({
         id: item.id,
         name: item.name,
-        description: item.description
+        description: item.description ?? '',
+        defaultEnabled: item.defaultEnabled ?? true
       }))
     }))
   }
@@ -244,7 +247,7 @@ export class PluginManager {
 
 const officialPluginsVersions = {
   'io.paotuan.plugin.namegen': 1,
-  'io.paotuan.plugin.insane': 2,
+  'io.paotuan.plugin.insane': 3,
   'io.paotuan.plugin.cardgen': 3,
   'io.paotuan.plugin.draw': 1,
   // 'io.paotuan.plugin.cocrules': 1,
