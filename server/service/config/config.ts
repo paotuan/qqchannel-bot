@@ -29,6 +29,20 @@ export class ChannelConfig {
     this.updateConfigByPluginManifest()
   }
 
+  // 确保某个 plugin 在配置中存在
+  private _ensurePluginConfig(pluginId: string) {
+    const pluginConfig = this.config.plugins.find(_plugin => _plugin.id === pluginId)
+    if (pluginConfig) {
+      return pluginConfig
+    }
+    // 新增的 plugins 默认启用
+    const newPluginConfig = { id: pluginId, enabled: true, preference: {} }
+    this.config.plugins.push(newPluginConfig)
+    // 如果是新增的 plugin，不能直接返回 pluginConfig，应该是因为内部做了代理，要返回代理后的对象
+    // 否则后面对 config 的修改会不生效
+    return this.config.plugins.find(_plugin => _plugin.id === pluginId)!
+  }
+
   // 把插件里的各个项目开启状态保存到 config 对象中
   updateConfigByPluginManifest() {
     if (!this.plugin) return
@@ -40,14 +54,17 @@ export class ChannelConfig {
       customTextIds: new Set<string>(),
     }
     manifest.forEach(plugin => {
-      // 1. 新增的 plugins 默认启用
-      const pluginConfig = this.config.plugins.find(_plugin => _plugin.id === plugin.id)
-      if (!pluginConfig) {
-        this.config.plugins.push({ id: plugin.id, enabled: true, preference: {} })
-      }
+      // 0. 确保 plugin 在配置中存在
+      const pluginConfig = this._ensurePluginConfig(plugin.id)
+      // 1. 写入/更新 preference，确保 preference 的 key 在配置中存在，以便在前端双向绑定
+      const preference: Record<string, string> = {}
+      plugin.preference.forEach(pref => {
+        preference[pref.key] = pluginConfig.preference[pref.key] ?? pref.defaultValue
+      })
+      pluginConfig.preference = preference
       // 2. 处理 plugin 内每个功能的开启状态
       // 如果是 disabled 状态的 plugin，不处理. disabled 状态的 plugin 下所有功能都应该不存在，不出现在 config 里
-      if (pluginConfig && !pluginConfig.enabled) return
+      if (!pluginConfig.enabled) return
       plugin.customReply.forEach(config => {
         const id = `${plugin.id}.${config.id}`
         existIds.customReplyIds.add(id)

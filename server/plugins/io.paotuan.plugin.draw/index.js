@@ -44,7 +44,15 @@ module.exports = (context) => {
   return {
     id: 'io.paotuan.plugin.draw',
     name: '牌堆',
-    version: 1,
+    description: '牌堆插件。使用方法详见 www.paotuan.io/plugin/draw.html',
+    version: 2,
+    preference: [
+      {
+        key: 'deckList',
+        label: '牌堆-列出',
+        defaultValue: '可用牌堆列表：'
+      }
+    ],
     customReply: [
       {
         id: 'draw',
@@ -53,6 +61,7 @@ module.exports = (context) => {
         command: '^\\s*draw(?<content>.*)',
         trigger: 'regex',
         handler(env, matchGroup) {
+          const pref = context.getPreference(env)
           const { deckName, hidden, isReset, isList } = parse(matchGroup.content)
           const formatArgs = { ...env, 牌堆名: deckName }
           // reset
@@ -67,7 +76,7 @@ module.exports = (context) => {
           // list
           if (isList) {
             const listNames = getAllDeckNames()
-            return render(texts.deckList) + '\n' + listNames.join('\n')
+            return render(pref.deckList) + '\n' + listNames.join('\n')
           }
           // draw
           try {

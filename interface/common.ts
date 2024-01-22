@@ -177,6 +177,12 @@ interface IPluginItemConfig {
 export interface IPluginConfigDisplay {
   id: string
   name: string
+  description: string
+  preference: {
+    key: string
+    label: string
+    defaultValue: string
+  }[]
   customReply: IPluginItemConfig[]
   aliasRoll: IPluginItemConfig[]
   rollDecider: IPluginItemConfig[]

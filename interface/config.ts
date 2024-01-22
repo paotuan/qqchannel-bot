@@ -136,6 +136,7 @@ export interface IPluginRegisterContext {
   queryCard: (query: ICardQuery) => ICard[]
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  getPreference: ({ channelId }: { channelId: string }) => Record<string, string>
   _: any // lodash
   _context: any // 逃生通道，通常不要使用
 }
@@ -143,7 +144,13 @@ export interface IPluginRegisterContext {
 export interface IPlugin {
   id: string
   name?: string
+  description?: string
   version?: number
+  preference?: {
+    key: string
+    label?: string
+    defaultValue?: string
+  }[]
   customReply?: ICustomReplyConfig[]
   aliasRoll?: IAliasRollConfig[]
   rollDecider?: IRollDeciderConfig[]

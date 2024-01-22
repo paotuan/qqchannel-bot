@@ -33,7 +33,8 @@ export class PluginManager {
     this.checkOfficialPluginsUpdate()
   }
 
-  private get pluginRegisterContext(): IPluginRegisterContext {
+  private getPluginRegisterContext(): IPluginRegisterContext {
+    const wss = this.wss
     return {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
@@ -83,7 +84,15 @@ export class PluginManager {
           return user.sendMessage({ image: msg })
         }
       },
-      _context: this.wss,
+      getPreference({ channelId }) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore 使用 trick 的方式为这个方法绑定上 pluginId, 可无需保证 plugin id 与文件夹名非得一致，还可以支持未来以其他形式加载插件
+        const pluginId = this.pluginId as string
+        const channelConfig = wss.config.getChannelConfig(channelId)
+        const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginId)
+        return pluginConfig?.preference ?? {}
+      },
+      _context: wss,
       _ // provide lodash for convenience
     } // todo: getItem/setItem
   }
@@ -121,9 +130,11 @@ export class PluginManager {
     pluginNames.forEach(pluginName => {
       try {
         const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
+        const context = this.getPluginRegisterContext()
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const plugin = require(fullPath)(this.pluginRegisterContext) as IPlugin
+        const plugin = require(fullPath)(context) as IPlugin
         plugin.id ||= pluginName
+        context.getPreference = context.getPreference.bind({ pluginId: plugin.id })
         console.log('[Plugin] 加载插件', plugin.id)
         this.pluginMap[plugin.id] = plugin
       } catch (e) {
@@ -138,9 +149,11 @@ export class PluginManager {
       const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
       // 注意不能完全避免问题，仍然有副作用重复执行或内存泄露的风险
       delete require.cache[fullPath]
+      const context = this.getPluginRegisterContext()
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const plugin = require(fullPath)(this.pluginRegisterContext) as IPlugin
+      const plugin = require(fullPath)(context) as IPlugin
       plugin.id ||= pluginName
+      context.getPreference = context.getPreference.bind({ pluginId: plugin.id })
       console.log('[Plugin] 重新加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
     } catch (e) {
@@ -169,6 +182,12 @@ export class PluginManager {
     return Object.values(this.pluginMap).map<IPluginConfigDisplay>(plugin => ({
       id: plugin.id,
       name: plugin.name || plugin.id || '--',
+      description: plugin.description ?? '',
+      preference: (plugin.preference ?? []).map(pref => ({
+        key: pref.key,
+        label: pref.label ?? pref.key,
+        defaultValue: pref.defaultValue ?? ''
+      })),
       customReply: (plugin.customReply || []).map(item => ({
         id: item.id,
         name: item.name,

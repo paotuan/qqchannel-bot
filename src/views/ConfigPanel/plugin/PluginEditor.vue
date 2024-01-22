@@ -18,7 +18,21 @@
       </span>
     </div>
     <div class="collapse-content">
-      <!-- todo description 和 preference -->
+      <div class="pl-10">
+        <div>
+          <div v-for="(line, i) in (plugin.description || '作者什么说明都没有留下').split('\n')" :key="i">{{ line }}</div>
+        </div>
+        <!-- preference -->
+        <div v-if="plugin.preference.length > 0" class="mt-4">
+          <div>插件偏好设置：</div>
+          <div v-for="pref in plugin.preference" :key="pref.key" class="form-control">
+            <label class="label">
+              <span class="label-text">{{ pref.label }}</span>
+            </label>
+            <textarea v-model="pluginPref[pref.key]" class="textarea textarea-bordered w-full"></textarea>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -37,6 +51,7 @@ const pluginStore = usePluginStore()
 const plugin = computed(() => pluginStore.getPlugin(item.value.id))
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!)
+const pluginPref = computed(() => config.value.plugins.find(plugin => plugin.id === item.value.id)!.preference)
 
 // 面板展开状态
 const isOpen = ref(props.defaultOpen)
@@ -67,5 +82,11 @@ const reloadPlugin = (id: string) => {
 <style scoped>
 .collapse-title {
   padding-right: 1rem;
+}
+
+.textarea {
+  padding: 0 0.75rem;
+  min-height: 2rem;
+  height: 2rem;
 }
 </style>
