@@ -33,7 +33,7 @@ export class PluginManager {
     this.checkOfficialPluginsUpdate()
   }
 
-  private getPluginRegisterContext(): IPluginRegisterContext {
+  private getPluginRegisterContext(pluginId: string): IPluginRegisterContext {
     const wss = this.wss
     return {
       versionName: VERSION_NAME,
@@ -84,10 +84,7 @@ export class PluginManager {
           return user.sendMessage({ image: msg })
         }
       },
-      getPreference({ channelId }) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore 使用 trick 的方式为这个方法绑定上 pluginId, 可无需保证 plugin id 与文件夹名非得一致，还可以支持未来以其他形式加载插件
-        const pluginId = this.pluginId as string
+      getPreference: ({ channelId }) => {
         const channelConfig = wss.config.getChannelConfig(channelId)
         const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginId)
         return pluginConfig?.preference ?? {}
@@ -138,11 +135,10 @@ export class PluginManager {
       const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
       // 注意不能完全避免问题，仍然有副作用重复执行或内存泄露的风险
       delete require.cache[fullPath]
-      const context = this.getPluginRegisterContext()
+      const context = this.getPluginRegisterContext(pluginName) // 此处依赖 plugin.id 与文件夹名称需保持一致
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const plugin = require(fullPath)(context) as IPlugin
+      const plugin = require(fullPath)(context) as IPlugin // 未来可以通过 require(fullPath).id 等方式解除文件夹名称的限制
       plugin.id ||= pluginName
-      context.getPreference = context.getPreference.bind({ pluginId: plugin.id })
       console.log('[Plugin] 加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
     } catch (e) {
