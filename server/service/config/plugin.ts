@@ -268,9 +268,9 @@ export class PluginManager {
 }
 
 const officialPluginsVersions = {
-  'io.paotuan.plugin.namegen': 1,
+  'io.paotuan.plugin.namegen': 2,
   'io.paotuan.plugin.insane': 3,
-  'io.paotuan.plugin.cardgen': 3,
-  'io.paotuan.plugin.draw': 1,
+  'io.paotuan.plugin.cardgen': 4,
+  'io.paotuan.plugin.draw': 2,
   // 'io.paotuan.plugin.cocrules': 1,
 }
