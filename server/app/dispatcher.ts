@@ -121,7 +121,9 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
     }
   })
   // 5. 返回插件信息
-  client.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
+  client.autorun(ws => {
+    ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
+  })
 }
 
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
@@ -316,5 +318,6 @@ function handleUserDelete(client: WsClient, server: Wss, data: IUserDeleteReq) {
 
 function handlePluginReload(client: WsClient, server: Wss, data: IPluginReloadReq) {
   server.plugin.manualReloadPlugins(data)
+  server.config.updateByPluginManifest()
   client.send<string>({ cmd: 'plugin/reload', success: true, data: '' })
 }
