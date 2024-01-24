@@ -41,6 +41,8 @@ import { computed, ref, toRefs } from 'vue'
 import { usePluginStore } from '../../../store/plugin'
 import { ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
+import ws from '../../../api/ws'
+import { IPluginReloadReq } from '../../../../interface/common'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
 
@@ -75,7 +77,7 @@ const toggleEnabled = (enabled: boolean) => {
 
 // reload
 const reloadPlugin = (id: string) => {
-  // todo
+  ws.send<IPluginReloadReq>({ cmd: 'plugin/reload', data: [id] })
 }
 
 </script>

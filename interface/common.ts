@@ -22,6 +22,7 @@ export type Command =
   | 'card/link'  // req/res
   | 'card/test' // res
   | 'plugin/list' // res
+  | 'plugin/reload' // req/ res: string
   | 'scene/sendBattleLog' // req/ res: string
   | 'scene/sendMapImage' // req/ res: string
   | 'ri/list' // res
@@ -188,6 +189,8 @@ export interface IPluginConfigDisplay {
   rollDecider: IPluginItemConfig[]
   customText: IPluginItemConfig[]
 }
+
+export type IPluginReloadReq = string[]
 // endregion plugin
 
 // region scene

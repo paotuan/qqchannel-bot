@@ -128,22 +128,11 @@ export class PluginManager {
 
   private loadPlugins(pluginNames: string[]) {
     pluginNames.forEach(pluginName => {
-      try {
-        const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
-        const context = this.getPluginRegisterContext()
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const plugin = require(fullPath)(context) as IPlugin
-        plugin.id ||= pluginName
-        context.getPreference = context.getPreference.bind({ pluginId: plugin.id })
-        console.log('[Plugin] 加载插件', plugin.id)
-        this.pluginMap[plugin.id] = plugin
-      } catch (e) {
-        console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
-      }
+      this.loadPlugin(pluginName)
     })
   }
 
-  private reloadPlugin(pluginName: string) {
+  private loadPlugin(pluginName: string) {
     try {
       // require.cache 的 key 是带 index.js 的，因此组装路径时也要带上
       const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
@@ -154,7 +143,7 @@ export class PluginManager {
       const plugin = require(fullPath)(context) as IPlugin
       plugin.id ||= pluginName
       context.getPreference = context.getPreference.bind({ pluginId: plugin.id })
-      console.log('[Plugin] 重新加载插件', plugin.id)
+      console.log('[Plugin] 加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
     } catch (e) {
       console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
@@ -172,9 +161,27 @@ export class PluginManager {
         // fs.rmdirSync(path.join(PLUGIN_DIR, name), { recursive: true })
         copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
         // 再次加载插件
-        this.reloadPlugin(name)
+        this.loadPlugin(name)
       }
     })
+  }
+
+  // 手动重载插件
+  public manualReloadPlugins(pluginNames: string[]) {
+    if (pluginNames.length > 0) {
+      // 如果是 develop mode，需要先复制一遍
+      if (process.env.NODE_ENV === 'development') {
+        pluginNames.forEach(name => {
+          copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
+        })
+      }
+      // 重载指定的插件
+      this.loadPlugins(pluginNames)
+    } else {
+      // 读取并载入所有的插件
+      const pluginNames = this.extractOfficialPluginsIfNeed()
+      this.loadPlugins(pluginNames)
+    }
   }
 
   // 获取插件内容清单（不含插件具体逻辑，用于展示和更新 config）

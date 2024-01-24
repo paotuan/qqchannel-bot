@@ -170,3 +170,7 @@ ws.on('dice/roll', data => {
     Toast.error(data.data as string)
   }
 })
+
+ws.on('plugin/reload', () => {
+  Toast.success('插件已重载')
+})
