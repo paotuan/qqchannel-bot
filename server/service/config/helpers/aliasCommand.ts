@@ -1,5 +1,6 @@
 import { SyncLruCache } from '../sync-lru-cache'
 import { IAliasRollConfig } from '../../../../interface/config'
+import { render } from 'mustache'
 
 // 原生 regex 缓存
 const RegexCommandCache = new SyncLruCache<string, RegExp>({
@@ -41,7 +42,9 @@ export function parseAliasForCommand(processors: IAliasRollConfig[], command: st
         if (!match) continue
         matchedAlias = true
         if (typeof config.replacer === 'string') {
-          result = result.replace(regex, config.replacer)
+          // result = result.replace(regex, config.replacer) // 这里不直接 replace 了，而是用 matchGroup 替换，这样和自定义回复保持一致
+          const matchGroups = match.groups || {}
+          result = render(config.replacer, matchGroups, undefined, { escape: value => value })
         } else {
           result = config.replacer(match)
         }
