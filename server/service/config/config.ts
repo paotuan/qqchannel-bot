@@ -11,10 +11,11 @@ import type { PluginManager } from './plugin'
 import { decideRoll, IRollDecideContext } from './helpers/decider'
 import type { IDiceRollContext } from '../dice/utils'
 import type { InlineDiceRoll } from '../dice/standard/inline'
-import { parseAlias } from './helpers/alias'
+import { parseAliasForExpression } from './helpers/alias'
 import { getEmbedCustomText } from './default'
 import { renderCustomText } from './helpers/customText'
 import type { ICard } from '../../../interface/card/types'
+import { parseAliasForCommand } from './helpers/aliasCommand'
 
 // 频道配置文件封装
 export class ChannelConfig {
@@ -166,14 +167,25 @@ export class ChannelConfig {
     return this.config.aliasRollIds
       .filter(item => item.enabled)
       .map(item => this.embedAliasRollMap[item.id] || this.plugin?.pluginAliasRollMap[item.id])
-      .filter(conf => !!conf)
+  }
+
+  private get aliasRollProcessors_expression() {
+    return this.aliasRollProcessors.filter(conf => conf?.scope === 'expression')
+  }
+
+  private get aliasRollProcessors_command() {
+    return this.aliasRollProcessors.filter(conf => conf?.scope === 'command')
   }
 
   /**
    * 解析别名指令
    */
-  parseAliasRoll(expression: string, context: IDiceRollContext, inlineRolls: InlineDiceRoll[]) {
-    return parseAlias(this.aliasRollProcessors, expression, context, inlineRolls)
+  parseAliasRoll_expression(expression: string, context: IDiceRollContext, inlineRolls: InlineDiceRoll[]) {
+    return parseAliasForExpression(this.aliasRollProcessors_expression, expression, context, inlineRolls)
+  }
+
+  parseAliasRoll_command(command: string) {
+    return parseAliasForCommand(this.aliasRollProcessors_command, command)
   }
 
   // 子频道自定义文案配置

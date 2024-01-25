@@ -83,7 +83,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   // 解析别名指令
   private parseAlias(expression: string) {
-    const parsed = this.context.config.parseAliasRoll(expression, this.context, this.inlineRolls)
+    const parsed = this.context.config.parseAliasRoll_expression(expression, this.context, this.inlineRolls)
     if (parsed && expression !== parsed.expression) { // 解析前后不相等，代表命中了别名解析逻辑
       this.isAlias = true
       this.expression = parsed.expression

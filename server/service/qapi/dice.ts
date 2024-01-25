@@ -77,6 +77,10 @@ export class DiceManager {
     // 转义 转义得放在 at 消息和 emoji 之类的后面
     fullExp = unescapeHTML(fullExp)
 
+    // 整体别名指令处理
+    const config = this.wss.config.getChannelConfig(msg.channel_id)
+    fullExp = config.parseAliasRoll_command(fullExp)
+
     // 投骰
     const realUser = { userId: msg.author.id, username: msg.member.nick || msg.author.username || msg.author.id }
     const roll = this.tryRollDice(fullExp, {

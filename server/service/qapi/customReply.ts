@@ -65,6 +65,9 @@ export class CustomReplyManager {
     // 转义 转义得放在 at 消息和 emoji 之类的后面
     fullExp = unescapeHTML(fullExp)
 
+    // 整体别名指令处理
+    fullExp = config.parseAliasRoll_command(fullExp)
+
     // 获取配置列表
     const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
     if (!channel) return false

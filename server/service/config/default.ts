@@ -225,7 +225,9 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
   if (config.version < 33) {
     config.plugins = []
     config.customTextIds = config.customTextIds.map(id => ({ id: id as unknown as string, enabled: true }))
-    config.version = 33
+    config.embedPlugin.aliasRoll?.forEach(alias => alias.scope = 'expression')
+    // todo 追加优势劣势
+    config.version = 33 // 1.8.1
   }
   return config as IChannelConfig
 }
@@ -305,6 +307,7 @@ function getEmbedAliasRoll(): IAliasRollConfig[] {
       id: 'ra',
       name: 'ra',
       description: '兼容指令，等价于 d%',
+      scope: 'expression',
       command: 'ra',
       trigger: 'naive',
       replacer: 'd%'
@@ -313,6 +316,7 @@ function getEmbedAliasRoll(): IAliasRollConfig[] {
       id: 'rc',
       name: 'rc',
       description: '兼容指令，等价于 d%',
+      scope: 'expression',
       command: 'rc',
       trigger: 'naive',
       replacer: 'd%'
@@ -321,6 +325,7 @@ function getEmbedAliasRoll(): IAliasRollConfig[] {
       id: 'rb',
       name: '奖励骰（rb）',
       description: 'rb - 一个奖励骰，rbX - X个奖励骰',
+      scope: 'expression',
       command: 'rb{{X}}',
       trigger: 'naive',
       replacer: '{{X+1}}d%kl1'
@@ -329,6 +334,7 @@ function getEmbedAliasRoll(): IAliasRollConfig[] {
       id: 'rp',
       name: '惩罚骰（rp）',
       description: 'rp - 一个惩罚骰，rpX - X个惩罚骰',
+      scope: 'expression',
       command: 'rp{{X}}',
       trigger: 'naive',
       replacer: '{{X+1}}d%kh1' // new Function 吧，只解析 {{}} 内部的部分，防止外部的内容也被当成代码
@@ -337,6 +343,7 @@ function getEmbedAliasRoll(): IAliasRollConfig[] {
       id: 'wwa',
       name: '骰池（wwXaY）',
       description: '投 X 个 d10，每有一个骰子 ≥ Y，则可多投一次。最后计算点数 ≥ 8 的骰子数',
+      scope: 'expression',
       command: 'ww{{X}}a{{Y=10}}',
       trigger: 'naive',
       replacer: '{{X}}d10!>={{Y}}>=8'
@@ -345,6 +352,7 @@ function getEmbedAliasRoll(): IAliasRollConfig[] {
       id: 'ww',
       name: '骰池（wwX）',
       description: '骰池（wwXaY）的简写，默认 Y=10',
+      scope: 'expression',
       command: 'ww{{X}}',
       trigger: 'naive',
       replacer: 'ww{{X}}a10'
