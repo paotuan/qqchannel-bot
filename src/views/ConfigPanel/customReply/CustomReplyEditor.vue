@@ -12,7 +12,7 @@
           <PencilSquareIcon class="w-4 h-4 flex-none" />
         </button>
       </span>
-      <span class="flex-grow text-right">
+      <span v-if="!fromPlugin" class="flex-grow text-right">
         <button class="btn btn-circle btn-outline btn-xs" @click.stop="deleteSelf">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
@@ -26,17 +26,17 @@
         <template v-if="!fromPlugin">
           <div class="py-2 flex items-center">
             当用户的指令
-            <d-native-select v-model="processor.trigger" :options="matchOptions" select-class="select-bordered select-sm" class="w-32 ml-2" placeholder="选择匹配方式" />
-            <input v-model="processor.command" type="text" placeholder="请输入匹配词" class="input input-bordered input-sm w-60 mx-2" />
+            <d-native-select v-model="processorLocal.trigger" :options="matchOptions" select-class="select-bordered select-sm" class="w-32 ml-2" placeholder="选择匹配方式" />
+            <input v-model="processorLocal.command" type="text" placeholder="请输入匹配词" class="input input-bordered input-sm w-60 mx-2" />
             时，回复：
           </div>
-          <div v-for="(item, i) in processor.items" :key="i" class="flex items-center mb-2">
+          <div v-for="(item, i) in processorLocal.items" :key="i" class="flex items-center mb-2">
             <label class="input-group input-group-sm w-40">
               <span class="px-2">权重</span>
               <d-number-input v-model="item.weight" class="input-sm input-bordered w-20" />
             </label>
             <textarea v-model="item.reply as string" class="textarea textarea-bordered w-full custom-reply" placeholder="请输入回复内容" />
-            <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: (processor.items || []).length <= 1 }" @click="deleteReplyItem(i)">
+            <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: (processorLocal.items || []).length <= 1 }" @click="deleteReplyItem(i)">
               <XMarkIcon class="w-4 h-4" />
             </button>
           </div>
@@ -70,6 +70,7 @@ const configStore = useConfigStore()
 const pluginStore = usePluginStore()
 const processor = computed(() => configStore.getCustomReplyProcessor(item.value.id) || pluginStore.getPluginCustomReplyProcessor(item.value.id))
 const fromPlugin = computed(() => (processor.value as unknown as IPluginItemConfigForDisplay).fromPlugin) // 如果是插件，则取插件名
+const processorLocal = computed(() => processor.value as ICustomReplyConfig) // 给模板的 ts 推导使用
 
 // 面板展开状态
 const isOpen = ref(props.defaultOpen)

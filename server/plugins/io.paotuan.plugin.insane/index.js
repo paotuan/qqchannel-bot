@@ -232,29 +232,63 @@ const 狂躁症状 = [
   '动物狂：疯狂地喜爱动物。',
 ]
 
-module.exports = () => ({
+module.exports = ({ render, getPreference }) => ({
   id: 'io.paotuan.plugin.insane',
   name: '疯狂症状',
-  version: 2,
+  description: '抽取 COC 疯狂症状',
+  version: 3,
+  preference: [
+    {
+      key: 'text.ti',
+      label: '抽取临时疯狂症状',
+      defaultValue: '{{at用户}}抽取临时疯狂症状：'
+    },
+    {
+      key: 'text.li',
+      label: '抽取总结疯狂症状',
+      defaultValue: '{{at用户}}抽取总结疯狂症状：'
+    },
+    {
+      key: 'text.phobia.extra',
+      label: '抽取恐惧症状-附加语',
+      defaultValue: '抽取恐惧症状：'
+    },
+    {
+      key: 'text.mania.extra',
+      label: '抽取狂躁症状-附加语',
+      defaultValue: '抽取狂躁症状：'
+    },
+    {
+      key: 'text.phobia',
+      label: '单独抽取恐惧症状',
+      defaultValue: '{{at用户}}抽取恐惧症状：'
+    },
+    {
+      key: 'text.mania',
+      label: '单独抽取狂躁症状',
+      defaultValue: '{{at用户}}抽取狂躁症状：'
+    },
+  ],
   customReply: [
     {
       id: 'ti',
       name: '临时疯狂症状',
       description: '/ti 抽取临时疯狂症状',
-      command: '^\\s*ti',
+      command: /^\s*ti/.source, //'^\\s*ti',
       trigger: 'regex',
       items: [
         {
           weight: 1,
           reply(env) {
+            const pref = getPreference(env)
             const [str, index] = rand(即时症状)
             let extra = ''
             if (index === 8) {
-              extra = '抽取恐惧症状：' + rand(恐惧症状)[0]
+              extra = render(pref['text.phobia.extra'], env) + rand(恐惧症状)[0]
             } else if (index === 9) {
-              extra = '抽取狂躁症状：' + rand(狂躁症状)[0]
+              extra = render(pref['text.mania.extra'], env) + rand(狂躁症状)[0]
             }
-            let resp = `${env.at}抽取临时疯狂症状：\n${str}`
+            let resp = `${render(pref['text.ti'], env)}\n${str}`
             if (extra) {
               resp += '\n' + extra
             }
@@ -267,20 +301,21 @@ module.exports = () => ({
       id: 'li',
       name: '总结疯狂症状',
       description: '/li 抽取总结疯狂症状',
-      command: '^\\s*li',
+      command: /^\s*li/.source, //'^\\s*li',
       trigger: 'regex',
       items: [
         {
           weight: 1,
           reply(env) {
+            const pref = getPreference(env)
             const [str, index] = rand(总结症状)
             let extra = ''
             if (index === 8) {
-              extra = '抽取恐惧症状：' + rand(恐惧症状)[0]
+              extra = render(pref['text.phobia.extra'], env) + rand(恐惧症状)[0]
             } else if (index === 9) {
-              extra = '抽取狂躁症状：' + rand(狂躁症状)[0]
+              extra = render(pref['text.mania.extra'], env) + rand(狂躁症状)[0]
             }
-            let resp = `${env.at}抽取总结疯狂症状：\n${str}`
+            let resp = `${render(pref['text.li'], env)}\n${str}`
             if (extra) {
               resp += '\n' + extra
             }
@@ -293,14 +328,16 @@ module.exports = () => ({
       id: 'phobia',
       name: '恐惧症状',
       description: '/恐惧症状 抽取恐惧症状',
-      command: '^\\s*恐惧症状',
+      defaultEnabled: false,
+      command: /^\s*恐惧症状/.source, //'^\\s*恐惧症状',
       trigger: 'regex',
       items: [
         {
           weight: 1,
           reply(env) {
+            const pref = getPreference(env)
             const [str] = rand(恐惧症状)
-            return `${env.at}抽取恐惧症状：\n${str}`
+            return `${render(pref['text.phobia'], env)}\n${str}`
           }
         }
       ]
@@ -309,14 +346,16 @@ module.exports = () => ({
       id: 'mania',
       name: '狂躁症状',
       description: '/狂躁症状 抽取狂躁症状',
-      command: '^\\s*狂躁症状',
+      defaultEnabled: false,
+      command: /^\s*狂躁症状/.source, //'^\\s*狂躁症状',
       trigger: 'regex',
       items: [
         {
           weight: 1,
           reply(env) {
+            const pref = getPreference(env)
             const [str] = rand(狂躁症状)
-            return `${env.at}抽取狂躁症状：\n${str}`
+            return `${render(pref['text.mania'], env)}\n${str}`
           }
         }
       ]

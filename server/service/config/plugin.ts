@@ -1,6 +1,6 @@
 import type { Wss } from '../../app/wss'
 import type {
-  IPluginConfig,
+  IPlugin,
   ICustomReplyConfig,
   IPluginRegisterContext,
   IAliasRollConfig, ICustomTextConfig
@@ -23,7 +23,7 @@ const PLUGIN_DIR = './plugins'
 
 export class PluginManager {
   private readonly wss: Wss
-  private readonly pluginMap: Record<string, IPluginConfig> = {}
+  private readonly pluginMap: Record<string, IPlugin> = {}
 
   constructor(wss: Wss) {
     makeAutoObservable<this, 'wss'>(this, { wss: false })
@@ -33,7 +33,8 @@ export class PluginManager {
     this.checkOfficialPluginsUpdate()
   }
 
-  private get pluginRegisterContext(): IPluginRegisterContext {
+  private getPluginRegisterContext(pluginId: string): IPluginRegisterContext {
+    const wss = this.wss
     return {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
@@ -83,7 +84,12 @@ export class PluginManager {
           return user.sendMessage({ image: msg })
         }
       },
-      _context: this.wss,
+      getPreference: ({ channelId }) => {
+        const channelConfig = wss.config.getChannelConfig(channelId)
+        const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginId)
+        return pluginConfig?.preference ?? {}
+      },
+      _context: wss,
       _ // provide lodash for convenience
     } // todo: getItem/setItem
   }
@@ -119,27 +125,21 @@ export class PluginManager {
 
   private loadPlugins(pluginNames: string[]) {
     pluginNames.forEach(pluginName => {
-      try {
-        const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const plugin = require(fullPath)(this.pluginRegisterContext) as IPluginConfig
-        console.log('[Plugin] 加载插件', pluginName, '->', plugin.id)
-        this.pluginMap[plugin.id] = plugin
-      } catch (e) {
-        console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
-      }
+      this.loadPlugin(pluginName)
     })
   }
 
-  private reloadPlugin(pluginName: string) {
+  private loadPlugin(pluginName: string) {
     try {
       // require.cache 的 key 是带 index.js 的，因此组装路径时也要带上
       const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
       // 注意不能完全避免问题，仍然有副作用重复执行或内存泄露的风险
       delete require.cache[fullPath]
+      const context = this.getPluginRegisterContext(pluginName) // 此处依赖 plugin.id 与文件夹名称需保持一致
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const plugin = require(fullPath)(this.pluginRegisterContext) as IPluginConfig
-      console.log('[Plugin] 重新加载插件', pluginName, '->',plugin.id)
+      const plugin = require(fullPath)(context) as IPlugin // 未来可以通过 require(fullPath).id 等方式解除文件夹名称的限制
+      plugin.id ||= pluginName
+      console.log('[Plugin] 加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
     } catch (e) {
       console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
@@ -157,19 +157,45 @@ export class PluginManager {
         // fs.rmdirSync(path.join(PLUGIN_DIR, name), { recursive: true })
         copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
         // 再次加载插件
-        this.reloadPlugin(name)
+        this.loadPlugin(name)
       }
     })
   }
 
-  get pluginListForDisplay(): IPluginConfigDisplay[] {
+  // 手动重载插件
+  public manualReloadPlugins(pluginNames: string[]) {
+    if (pluginNames.length > 0) {
+      // 如果是 develop mode，需要先复制一遍
+      if (process.env.NODE_ENV === 'development') {
+        pluginNames.forEach(name => {
+          copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
+        })
+      }
+      // 重载指定的插件
+      this.loadPlugins(pluginNames)
+    } else {
+      // 读取并载入所有的插件
+      const pluginNames = this.extractOfficialPluginsIfNeed()
+      this.loadPlugins(pluginNames)
+    }
+  }
+
+  // 获取插件内容清单（不含插件具体逻辑，用于展示和更新 config）
+  get pluginListManifest(): IPluginConfigDisplay[] {
     return Object.values(this.pluginMap).map<IPluginConfigDisplay>(plugin => ({
-      id: plugin.id || '--', // 以防万一空值容错
+      id: plugin.id,
       name: plugin.name || plugin.id || '--',
+      description: plugin.description ?? '',
+      preference: (plugin.preference ?? []).map(pref => ({
+        key: pref.key,
+        label: pref.label ?? pref.key,
+        defaultValue: pref.defaultValue ?? ''
+      })),
       customReply: (plugin.customReply || []).map(item => ({
         id: item.id,
         name: item.name,
-        description: item.description
+        description: item.description ?? '',
+        defaultEnabled: item.defaultEnabled ?? true
       })),
       // rollDecider: (plugin.rollDecider || []).map(item => ({
       //   id: item.id,
@@ -180,12 +206,14 @@ export class PluginManager {
       aliasRoll: (plugin.aliasRoll || []).map(item => ({
         id: item.id,
         name: item.name,
-        description: item.description
+        description: item.description ?? '',
+        defaultEnabled: item.defaultEnabled ?? true
       })),
       customText: (plugin.customText || []).map(item => ({
         id: item.id,
         name: item.name,
-        description: item.description
+        description: item.description ?? '',
+        defaultEnabled: item.defaultEnabled ?? true
       }))
     }))
   }
@@ -240,9 +268,9 @@ export class PluginManager {
 }
 
 const officialPluginsVersions = {
-  'io.paotuan.plugin.namegen': 1,
-  'io.paotuan.plugin.insane': 2,
-  'io.paotuan.plugin.cardgen': 3,
-  'io.paotuan.plugin.draw': 1,
+  'io.paotuan.plugin.namegen': 2,
+  'io.paotuan.plugin.insane': 3,
+  'io.paotuan.plugin.cardgen': 4,
+  'io.paotuan.plugin.draw': 2,
   // 'io.paotuan.plugin.cocrules': 1,
 }

@@ -1,9 +1,0 @@
-{
-  "hidden": "{{at用户}}偷偷抽取了牌堆！",
-  "resetSuccess": "{{at用户}}重置牌堆{{牌堆名}}成功",
-  "error.notFound": "找不到牌堆：{{牌堆名}}",
-  "error.initializeFailed": "牌堆未初始化或初始化失败",
-  "error.empty": "牌堆：{{牌堆名}} 为空",
-  "error.allEmpty": "可用牌堆为空",
-  "deckList": "可用牌堆列表："
-}

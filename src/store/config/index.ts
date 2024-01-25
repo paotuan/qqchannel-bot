@@ -7,6 +7,7 @@ import { useCustomReply } from './useCustomReply'
 import { gtagEvent } from '../../utils'
 import { useRollDecider } from './useRollDecider'
 import { useAliasRoll } from './useAliasRoll'
+import { useCustomText } from './useCustomText'
 
 export const useConfigStore = defineStore('config', () => {
   const state = reactive({ config: null as IChannelConfig | null })
@@ -47,6 +48,8 @@ export const useConfigStore = defineStore('config', () => {
   const rollDeciderApis = useRollDecider(config)
   // 别名指令相关功能
   const aliasRollApis = useAliasRoll(config)
+  // 自定义文案相关功能
+  const customTextApis = useCustomText(config)
 
   // 快捷设置
   const quickSet = (mode: 'coc' | 'dnd') => {
@@ -77,6 +80,7 @@ export const useConfigStore = defineStore('config', () => {
     ...customReplyApis,
     ...rollDeciderApis,
     ...aliasRollApis,
+    ...customTextApis,
     quickSet
   }
 })

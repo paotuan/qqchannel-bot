@@ -97,4 +97,9 @@ export class ConfigManager {
       }
     })
   }
+
+  // 插件热更新后，重载插件的 config
+  updateByPluginManifest() {
+    Object.values(this.configMap).forEach(config => config.updateConfigByPluginManifest())
+  }
 }

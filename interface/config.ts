@@ -5,6 +5,13 @@ import type { CardType } from './card/types'
 
 export type UserRole = 'admin' | 'manager' | 'user'
 
+interface IPluginElementCommonInfo {
+  id: string // 短 id
+  name: string
+  description?: string
+  defaultEnabled?: boolean
+}
+
 // region 自定义回复
 export interface ICustomReplyEnv {
   botId: string
@@ -28,10 +35,7 @@ export interface ICustomReplyConfigItem {
   reply: string | CustomReplyHandler
 }
 
-export interface ICustomReplyConfig {
-  id: string // 短 id
-  name: string
-  description?: string
+export interface ICustomReplyConfig extends IPluginElementCommonInfo {
   command: string // 触发词
   trigger: 'exact' | 'startWith' | 'include' | 'regex'
   items?: ICustomReplyConfigItem[] // 给 gui 使用
@@ -42,10 +46,7 @@ export interface ICustomReplyConfig {
 // region 指令别名
 type AliasRollNaiveTrigger = { trigger: 'naive', replacer: string } // {{X=1}} => (?<X>\d*) => replacer: {{X}}
 type AliasRollRegexTrigger = { trigger: 'regex', replacer: ((matchResult: RegExpMatchArray) => string) }
-export type IAliasRollConfig = {
-  id: string // 短 id
-  name: string
-  description?: string
+export type IAliasRollConfig = IPluginElementCommonInfo & {
   command: string // 触发指令
 } & (AliasRollNaiveTrigger | AliasRollRegexTrigger)
 // endregion
@@ -58,10 +59,7 @@ export interface IRollDeciderRule {
   expression: string
 }
 
-export interface IRollDeciderConfig {
-  id: string // 短 id
-  name: string
-  description?: string
+export interface IRollDeciderConfig extends IPluginElementCommonInfo {
   rules: IRollDeciderRule[]
 }
 // endregion
@@ -114,10 +112,7 @@ export type CustomTextKeys =
   | 'nn.clear'
   | 'nn.search'
 
-export interface ICustomTextConfig {
-  id: string // 短 id
-  name: string
-  description?: string
+export interface ICustomTextConfig extends IPluginElementCommonInfo {
   texts: Partial<Record<CustomTextKeys, ICustomTextItem[] | ICustomTextHandler>>
 }
 // endregion
@@ -141,14 +136,21 @@ export interface IPluginRegisterContext {
   queryCard: (query: ICardQuery) => ICard[]
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  getPreference: ({ channelId }: { channelId: string }) => Record<string, string>
   _: any // lodash
   _context: any // 逃生通道，通常不要使用
 }
 
-export interface IPluginConfig {
+export interface IPlugin {
   id: string
   name?: string
+  description?: string
   version?: number
+  preference?: {
+    key: string
+    label?: string
+    defaultValue?: string
+  }[]
   customReply?: ICustomReplyConfig[]
   aliasRoll?: IAliasRollConfig[]
   rollDecider?: IRollDeciderConfig[]
@@ -177,6 +179,13 @@ export interface IParseRuleConfig {
   naiveInlineParseRule: boolean // 是否使用 naive 的中间骰解析策略
 }
 
+// 插件开启状态和私有配置
+export interface IPluginConfig {
+  id: string
+  enabled: boolean
+  preference: Record<string, string>
+}
+
 export interface IChannelConfig {
   version: number
   botOwner: string | null
@@ -187,7 +196,8 @@ export interface IChannelConfig {
   aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选
   rollDeciderIds: string[] // full id
-  customTextIds: string[] // full id。 不包含 default
-  embedPlugin: IPluginConfig // id = io.paotuan.embed.xx
+  customTextIds: { id: string, enabled: boolean }[] // full id。 不包含 default
+  embedPlugin: IPlugin // id = io.paotuan.embed.xx
+  plugins: IPluginConfig[] // 管理第三方插件配置 => config
   lastModified: number // ms
 }

@@ -25,7 +25,7 @@ import type {
   IRiListResp,
   IRiSetReq,
   IRiDeleteReq,
-  IDiceRollReq, IUserDeleteReq,
+  IDiceRollReq, IUserDeleteReq, IPluginReloadReq,
 } from '../../interface/common'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -84,6 +84,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'user/delete':
     handleUserDelete(client, server, request.data as IUserDeleteReq)
     break
+  case 'plugin/reload':
+    handlePluginReload(client, server, request.data as IPluginReloadReq)
+    break
   }
 }
 
@@ -118,7 +121,9 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
     }
   })
   // 5. 返回插件信息
-  client.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListForDisplay })
+  client.autorun(ws => {
+    ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
+  })
 }
 
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
@@ -309,4 +314,10 @@ function handleUserDelete(client: WsClient, server: Wss, data: IUserDeleteReq) {
       guild.deleteUsersBatch(data.ids)
     }
   }
+}
+
+function handlePluginReload(client: WsClient, server: Wss, data: IPluginReloadReq) {
+  server.plugin.manualReloadPlugins(data)
+  server.config.updateByPluginManifest()
+  client.send<string>({ cmd: 'plugin/reload', success: true, data: '' })
 }

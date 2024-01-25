@@ -1,6 +1,6 @@
 /* eslint-env node */
 
-module.exports = ({ roll, sendMessageToChannel }) => {
+module.exports = ({ roll, sendMessageToChannel, render, getPreference }) => {
 
   function randCoc(roll) {
     const list = ['3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '(2d6+6)*5', '3d6*5'].map(exp => roll(exp).total)
@@ -38,18 +38,32 @@ module.exports = ({ roll, sendMessageToChannel }) => {
   return {
     id: 'io.paotuan.plugin.cardgen',
     name: '人物作成',
-    version: 3,
+    description: '随机生成 COC/DND 人物属性',
+    version: 4,
+    preference: [
+      {
+        key: 'text.cardgen',
+        label: '人物作成',
+        defaultValue: '{{at用户}}人物作成：'
+      },
+      {
+        key: 'text.cardgen.dnd.extra',
+        label: '人物作成-DND-附加语',
+        defaultValue: '\n请{{#count}}选择一组，{{/count}}任意分配到力量、敏捷、体质、智力、感知、魅力上'
+      },
+    ],
     customReply: [
       {
         id: 'coc',
         name: 'COC 人物作成',
         description: '/coc 随机人物作成，/coc [数量] 一次作成多个\n由于发消息存在频控，建议单次作成数量 ≤ 5',
-        command: '^\\s*coc\\s*(?<count>\\d+)?',
+        command: /^\s*coc\s*(?<count>\d+)?/.source, //'^\\s*coc\\s*(?<count>\\d+)?',
         trigger: 'regex',
         items: [
           {
             weight: 1,
             async reply(env, matchGroup) {
+              const pref = getPreference(env)
               const count = parseInt(matchGroup.count || '1', 10)
               const result = new Array(count).fill('').map(() => randCoc(roll))
               for (let i = 0; i < result.length; i++) {
@@ -57,7 +71,7 @@ module.exports = ({ roll, sendMessageToChannel }) => {
                 if (i > 0 && i % 5 === 0) {
                   await new Promise(resolve => setTimeout(resolve, 1000))
                 }
-                sendMessageToChannel(env, `${env.at}人物作成：\n${result[i]}`)
+                sendMessageToChannel(env, `${render(pref['text.cardgen'], env)}\n${result[i]}`)
               }
               return ''
             }
@@ -68,15 +82,16 @@ module.exports = ({ roll, sendMessageToChannel }) => {
         id: 'dnd',
         name: 'DND 人物作成',
         description: '/dnd 随机人物作成，/dnd [数量] 一次作成多个',
-        command: '^\\s*dnd\\s*(?<count>\\d+)?',
+        command: /^\s*dnd\s*(?<count>\d+)?/.source, // '^\\s*dnd\\s*(?<count>\\d+)?',
         trigger: 'regex',
         items: [
           {
             weight: 1,
             reply(env, matchGroup) {
+              const pref = getPreference(env)
               const count = parseInt(matchGroup.count || '1', 10)
               const result = new Array(count).fill('').map(() => randDnd(roll)).join('\n')
-              return `${env.at}人物作成：\n` + result + `\n请${count > 1 ? '选择一组，' : ''}任意分配到力量、敏捷、体质、智力、感知、魅力上`
+              return `${render(pref['text.cardgen'], env)}\n` + result + render(pref['text.cardgen.dnd.extra'], { ...env, count })
             }
           }
         ]

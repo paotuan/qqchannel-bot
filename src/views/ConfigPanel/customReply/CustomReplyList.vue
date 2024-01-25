@@ -12,7 +12,6 @@
   </div>
   <div class="p-2 border-t border-base-content/10 flex items-center gap-2">
     <button class="btn btn-sm btn-ghost gap-1" @click="newEmbedConfig"><PlusIcon class="w-4 h-4" />新增自定义回复</button>
-    <button class="btn btn-sm btn-ghost gap-1" @click="pluginEditVisible = true"><SquaresPlusIcon class="w-4 h-4" />从插件新增</button>
   </div>
   <config-name-edit
     v-model:mode="editForm.mode"
@@ -21,22 +20,14 @@
     :default-desc="editForm.desc"
     @submit="submitEditForm"
   />
-  <plugin-edit
-    v-model:visible="pluginEditVisible"
-    :list="pluginList"
-    :default-select="pluginSelectedList"
-    @submit="onEditPlugins"
-  />
 </template>
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import Sortable from 'sortablejs'
-import { SquaresPlusIcon, PlusIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
 import CustomReplyEditor from './CustomReplyEditor.vue'
 import ConfigNameEdit from '../ConfigNameEdit.vue'
-import { usePluginStore } from '../../../store/plugin'
-import PluginEdit from '../PluginEdit.vue'
 
 const configStore = useConfigStore()
 const customReplyIds = computed(() => configStore.config!.customReplyIds)
@@ -89,30 +80,5 @@ const editConfig = ({ id, name, desc }: { id: string, name: string, desc: string
   editForm.id = id
   editForm.name = name
   editForm.desc = desc
-}
-
-// 插件配置
-const pluginEditVisible = ref(false)
-const pluginStore = usePluginStore()
-const pluginList = computed(() => Object.values(pluginStore.customReplyMap))
-const pluginSelectedList = computed(() => customReplyIds.value.map(item => item.id))
-
-const onEditPlugins = (newPluginIds: string[]) => {
-  pluginList.value.forEach(plugin => {
-    const pluginFullId = plugin.id
-    // 这个插件是否原本已经被选中
-    const pluginIndex = configStore.config!.customReplyIds.findIndex(item => item.id === pluginFullId)
-    if (newPluginIds.includes(pluginFullId)) {
-      if (pluginIndex < 0) {
-        // 原来不存在，新增
-        configStore.config!.customReplyIds.push({ id: pluginFullId, enabled: true })
-      }
-    } else {
-      if (pluginIndex >= 0) {
-        // 原来存在，删除
-        configStore.config!.customReplyIds.splice(pluginIndex, 1)
-      }
-    }
-  })
 }
 </script>

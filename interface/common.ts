@@ -22,6 +22,7 @@ export type Command =
   | 'card/link'  // req/res
   | 'card/test' // res
   | 'plugin/list' // res
+  | 'plugin/reload' // req/ res: string
   | 'scene/sendBattleLog' // req/ res: string
   | 'scene/sendMapImage' // req/ res: string
   | 'ri/list' // res
@@ -170,17 +171,26 @@ export interface ICardTestResp {
 interface IPluginItemConfig {
   id: string // 短 id
   name: string
-  description?: string
+  description: string
+  defaultEnabled: boolean
 }
 
 export interface IPluginConfigDisplay {
   id: string
   name: string
+  description: string
+  preference: {
+    key: string
+    label: string
+    defaultValue: string
+  }[]
   customReply: IPluginItemConfig[]
   aliasRoll: IPluginItemConfig[]
   rollDecider: IPluginItemConfig[]
   customText: IPluginItemConfig[]
 }
+
+export type IPluginReloadReq = string[]
 // endregion plugin
 
 // region scene
