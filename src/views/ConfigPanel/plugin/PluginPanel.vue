@@ -4,10 +4,11 @@
       <h2>插件管理：</h2>
       <HelpButton path="/config/alias/" />
     </div>
-    <div class="mb-4 flex justify-between">
-      <div class="tooltip" data-tip="敬请期待">
-        <button class="btn btn-primary gap-2" disabled><PlusCircleIcon class="w-6 h-6"/>插件市场</button>
-      </div>
+    <div class="mb-4 flex justify-between -mt-10">
+<!--      <div class="tooltip" data-tip="敬请期待">-->
+<!--        <button class="btn btn-primary gap-2" disabled><PlusCircleIcon class="w-6 h-6"/>插件市场</button>-->
+<!--      </div>-->
+      <div />
       <button class="btn btn-ghost gap-2" @click="reloadAllPlugins"><ArrowPathIcon class="h-4 w-4" />重载所有插件</button>
     </div>
     <div class="card card-compact w-full bg-base-100 shadow-lg">

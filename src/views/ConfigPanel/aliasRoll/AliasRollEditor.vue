@@ -25,21 +25,38 @@
         </div>
         <template v-if="!fromPlugin">
           <div class="py-2 flex items-center">
-            当指令匹配
-            <input v-model="processor.command" type="text" placeholder="请输入匹配指令" class="input input-bordered input-sm w-60 mx-2" />
-            时，将它解析为：
-            <input v-model="processor.replacer" type="text" placeholder="请输入解析后的指令" class="input input-bordered input-sm w-60 mx-2" />
+            应用范围：
+            <d-native-select :model-value="processorLocal.scope" :options="scopeOptions" select-class="select-bordered select-sm" class="w-32 ml-2" @update:model-value="onUpdateScopeOption" />
           </div>
+          <template v-if="processorLocal.scope === 'expression'">
+            <div class="flex items-center">
+              当表达式匹配
+              <input v-model="processorLocal.command" type="text" placeholder="请输入匹配表达式" class="input input-bordered input-sm w-60 mx-2" />
+              时，将它解析为：
+              <input v-model="processorLocal.replacer" type="text" placeholder="请输入解析后的表达式" class="input input-bordered input-sm w-60 mx-2" />
+            </div>
+          </template>
+          <template v-else>
+            <div class="flex items-center">
+              当指令
+              <d-native-select v-model="processorLocal.trigger" :options="matchOptions" select-class="select-bordered select-sm" class="w-32 ml-2" placeholder="选择匹配方式" />
+              <input v-model="processorLocal.command" type="text" placeholder="请输入匹配指令" class="input input-bordered input-sm w-60 mx-2" />
+              时，将它解析为：
+              <input v-model="processorLocal.replacer" type="text" placeholder="请输入解析后的指令" class="input input-bordered input-sm w-60 mx-2" />
+            </div>
+          </template>
         </template>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, toRefs } from 'vue'
+import { computed, ComputedRef, ref, toRefs } from 'vue'
 import { Bars3Icon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
 import { IPluginItemConfigForDisplay, usePluginStore } from '../../../store/plugin'
+import { IAliasRollConfig } from '../../../../interface/config'
+import DNativeSelect from '../../../dui/select/DNativeSelect.vue'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
 interface Emits {
@@ -56,6 +73,29 @@ const configStore = useConfigStore()
 const pluginStore = usePluginStore()
 const processor = computed(() => configStore.getAliasRollProcessor(item.value.id) || pluginStore.getPluginAliasRollProcessor(item.value.id))
 const fromPlugin = computed(() => (processor.value as unknown as IPluginItemConfigForDisplay).fromPlugin) // 如果是插件，则取插件名
+const processorLocal = processor as ComputedRef<IAliasRollConfig> // 给模板的 ts 推导使用, 用于 !fromPlugin
+
+// 应用范围
+type ScopeOptions = { label: string, value: IAliasRollConfig['scope'] }
+const scopeOptions: ScopeOptions[] = [
+  { label: '整条指令', value: 'command' },
+  { label: '表达式', value: 'expression' }
+]
+const onUpdateScopeOption = (value: ScopeOptions['value']) => {
+  processorLocal.value.scope = value
+  if (value === 'command') {
+    processorLocal.value.trigger = 'startWith'
+  } else if (value === 'expression') {
+    processorLocal.value.trigger = 'naive'
+  }
+}
+
+// 匹配方式
+type MatchOptions = { label: string, value: IAliasRollConfig['trigger'] }
+const matchOptions: /* Object.freeze */ MatchOptions[] = [
+  { label: '开头是', value: 'startWith' },
+  { label: '正则匹配', value: 'regex' }
+]
 
 // 面板展开状态
 const isOpen = ref(props.defaultOpen)

@@ -50,8 +50,9 @@ export function useAliasRoll(config: ComputedRef<IChannelConfig | null>) {
       id: nanoid(),
       name: name,
       description: desc,
+      scope: 'command',
       command: '',
-      trigger: 'naive',
+      trigger: 'startWith',
       replacer: ''
     }
     // 写入 embed 插件
