@@ -2,7 +2,7 @@
   <section>
     <div class="flex items-center">
       <h2>插件管理：</h2>
-      <HelpButton path="/config/alias/" />
+      <HelpButton path="/plugin/" />
     </div>
     <div class="mb-4 flex justify-between -mt-10">
 <!--      <div class="tooltip" data-tip="敬请期待">-->
