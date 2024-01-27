@@ -8,9 +8,10 @@
 <script setup lang="ts">
 import { useConfigStore } from '../../../store/config'
 import PluginEditor from './PluginEditor.vue'
+import { computed } from 'vue'
 
 const configStore = useConfigStore()
-const pluginConfigList = configStore.config!.plugins
+const pluginConfigList = computed(() => configStore.config!.plugins)
 </script>
 <style scoped>
 
