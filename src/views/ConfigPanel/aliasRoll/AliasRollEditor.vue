@@ -81,8 +81,8 @@ const scopeOptions: ScopeOptions[] = [
   { label: '整条指令', value: 'command' },
   { label: '表达式', value: 'expression' }
 ]
-const onUpdateScopeOption = (value: ScopeOptions['value']) => {
-  processorLocal.value.scope = value
+const onUpdateScopeOption = (value: string) => {
+  processorLocal.value.scope = value as ScopeOptions['value']
   if (value === 'command') {
     processorLocal.value.trigger = 'startWith'
   } else if (value === 'expression') {

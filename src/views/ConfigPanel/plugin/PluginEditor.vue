@@ -1,7 +1,7 @@
 <template>
   <div v-if="plugin" class="collapse" :class="{ 'collapse-open': isOpen, 'collapse-close': !isOpen }">
     <div class="collapse-title text-md font-medium flex items-center gap-2 cursor-pointer" @click="isOpen = !isOpen">
-      <input v-model="item.enabled" type="checkbox" class="toggle toggle-sm" @click.stop @change="toggleEnabled($event.target.checked)" />
+      <input v-model="item.enabled" type="checkbox" class="toggle toggle-sm" @click.stop @change="toggleEnabled" />
       <span class="inline-flex items-center gap-1 group">{{ plugin.name }}</span>
       <span>
         <span v-if="plugin.customReply.length > 0" class="bg-red-100 text-red-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">自定义回复</span>
@@ -12,7 +12,7 @@
 <!--        <span class="bg-pink-100 text-pink-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Pink</span>-->
       </span>
       <span class="flex-grow text-right">
-        <button class="btn btn-circle btn-ghost btn-sm" @click.stop="reloadPlugin(plugin.id)">
+        <button class="btn btn-circle btn-ghost btn-sm" @click.stop="reloadPlugin(plugin!.id)">
           <ArrowPathIcon class="h-4 w-4" />
         </button>
       </span>
@@ -59,7 +59,8 @@ const pluginPref = computed(() => config.value.plugins.find(plugin => plugin.id 
 const isOpen = ref(props.defaultOpen)
 
 // 切换插件的开关状态
-const toggleEnabled = (enabled: boolean) => {
+const toggleEnabled = (event: Event) => {
+  const enabled = (event.target as HTMLInputElement).checked
   const manifest = plugin.value!
   if (enabled) {
     manifest.customReply.forEach(elem => config.value.customReplyIds.push({ id: `${manifest.id}.${elem.id}`, enabled: elem.defaultEnabled }))
