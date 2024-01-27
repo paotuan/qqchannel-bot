@@ -227,10 +227,10 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     config.customTextIds = config.customTextIds.map(id => ({ id: id as unknown as string, enabled: true }))
     config.embedPlugin.aliasRoll!.forEach(alias => alias.scope = 'expression')
     // 追加优势劣势
-    const aliasRolls = getEmbedAliasRoll()
-    const advs = aliasRolls.filter(r => r.id === 'advantage' || r.id === 'disadvantage')
-    config.embedPlugin.aliasRoll!.push(...advs)
-    config.aliasRollIds.push({ id: `${embedPluginId}.advantage`, enabled: true }, { id: `${embedPluginId}.disadvantage`, enabled: true })
+    // const aliasRolls = getEmbedAliasRoll()
+    // const advs = aliasRolls.filter(r => r.id === 'advantage' || r.id === 'disadvantage')
+    // config.embedPlugin.aliasRoll!.push(...advs)
+    // config.aliasRollIds.push({ id: `${embedPluginId}.advantage`, enabled: true }, { id: `${embedPluginId}.disadvantage`, enabled: true })
     config.version = 33 // 1.8.1
   }
   return config as IChannelConfig
@@ -343,24 +343,24 @@ function getEmbedAliasRoll(): IAliasRollConfig[] {
       trigger: 'naive',
       replacer: '{{X+1}}d%kh1' // new Function 吧，只解析 {{}} 内部的部分，防止外部的内容也被当成代码
     },
-    {
-      id: 'advantage',
-      name: '优势',
-      description: 'DND 优势掷骰',
-      scope: 'command',
-      command: '优势',
-      trigger: 'startWith',
-      replacer: '2d20kh1'
-    },
-    {
-      id: 'disadvantage',
-      name: '劣势',
-      description: 'DND 劣势掷骰',
-      scope: 'command',
-      command: '劣势',
-      trigger: 'startWith',
-      replacer: '2d20kl1'
-    },
+    // {
+    //   id: 'advantage',
+    //   name: '优势',
+    //   description: 'DND 优势掷骰',
+    //   scope: 'command',
+    //   command: '优势',
+    //   trigger: 'startWith',
+    //   replacer: '2d20kh1'
+    // },
+    // {
+    //   id: 'disadvantage',
+    //   name: '劣势',
+    //   description: 'DND 劣势掷骰',
+    //   scope: 'command',
+    //   command: '劣势',
+    //   trigger: 'startWith',
+    //   replacer: '2d20kl1'
+    // },
     {
       id: 'wwa',
       name: '骰池（wwXaY）',

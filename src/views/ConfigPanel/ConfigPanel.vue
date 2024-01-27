@@ -74,13 +74,13 @@ const menuList: { label: string, value: NavMenu }[] = [
 const cocDesc = [
   '默认骰设为 d100；',
   '检定规则设为 COC 默认规则（若有）；',
-  '禁用无关的指令和自定义回复'
+  '禁用死亡豁免检定'
 ]
 
 const dndDesc = [
   '默认骰设为 d20；',
   '检定规则设为 DND 默认规则（若有）；',
-  '禁用无关的指令和自定义回复'
+  '禁用理智检定、成长检定'
 ]
 
 const quickSet = (mode: 'coc' | 'dnd') => {

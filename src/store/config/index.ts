@@ -64,51 +64,51 @@ export const useConfigStore = defineStore('config', () => {
       config.rollDeciderId = ruleId
     }
     // 别名指令
-    const aliasRollIds = {
-      toEnable: [
-        mode === 'coc' ? 'io.paotuan.embed.rb' : 'io.paotuan.embed.advantage',
-        mode === 'coc' ? 'io.paotuan.embed.rp' : 'io.paotuan.embed.disadvantage'
-      ],
-      toDisable: [
-        mode === 'dnd' ? 'io.paotuan.embed.rb' : 'io.paotuan.embed.advantage',
-        mode === 'dnd' ? 'io.paotuan.embed.rp' : 'io.paotuan.embed.disadvantage',
-        'io.paotuan.embed.wwa',
-        'io.paotuan.embed.ww'
-      ]
-    }
-    ;(['toEnable', 'toDisable'] as const).forEach(prop => {
-      aliasRollIds[prop].forEach(id => {
-        const conf = config.aliasRollIds.find(c => c.id === id)
-        if (conf) {
-          conf.enabled = prop === 'toEnable'
-        }
-      })
-    })
+    // const aliasRollIds = {
+    //   toEnable: [
+    //     mode === 'coc' ? 'io.paotuan.embed.rb' : 'io.paotuan.embed.advantage',
+    //     mode === 'coc' ? 'io.paotuan.embed.rp' : 'io.paotuan.embed.disadvantage'
+    //   ],
+    //   toDisable: [
+    //     mode === 'dnd' ? 'io.paotuan.embed.rb' : 'io.paotuan.embed.advantage',
+    //     mode === 'dnd' ? 'io.paotuan.embed.rp' : 'io.paotuan.embed.disadvantage',
+    //     'io.paotuan.embed.wwa',
+    //     'io.paotuan.embed.ww'
+    //   ]
+    // }
+    // ;(['toEnable', 'toDisable'] as const).forEach(prop => {
+    //   aliasRollIds[prop].forEach(id => {
+    //     const conf = config.aliasRollIds.find(c => c.id === id)
+    //     if (conf) {
+    //       conf.enabled = prop === 'toEnable'
+    //     }
+    //   })
+    // })
     // 自定义回复
-    const _customReplyCocOnly = [
-      'io.paotuan.plugin.insane.ti',
-      'io.paotuan.plugin.insane.li',
-      'io.paotuan.plugin.insane.phobia',
-      'io.paotuan.plugin.insane.mania',
-    ]
-    const customReplyIds = {
-      toEnable: [
-        mode === 'coc' ? 'io.paotuan.plugin.cardgen.coc' : 'io.paotuan.plugin.cardgen.dnd',
-        ...(mode === 'coc' ? _customReplyCocOnly : [])
-      ],
-      toDisable: [
-        mode === 'dnd' ? 'io.paotuan.plugin.cardgen.coc' : 'io.paotuan.plugin.cardgen.dnd',
-        ...(mode === 'dnd' ? _customReplyCocOnly : [])
-      ]
-    }
-    ;(['toEnable', 'toDisable'] as const).forEach(prop => {
-      customReplyIds[prop].forEach(id => {
-        const conf = config.customReplyIds.find(c => c.id === id)
-        if (conf) {
-          conf.enabled = prop === 'toEnable'
-        }
-      })
-    })
+    // const _customReplyCocOnly = [
+    //   'io.paotuan.plugin.insane.ti',
+    //   'io.paotuan.plugin.insane.li',
+    //   'io.paotuan.plugin.insane.phobia',
+    //   'io.paotuan.plugin.insane.mania',
+    // ]
+    // const customReplyIds = {
+    //   toEnable: [
+    //     mode === 'coc' ? 'io.paotuan.plugin.cardgen.coc' : 'io.paotuan.plugin.cardgen.dnd',
+    //     ...(mode === 'coc' ? _customReplyCocOnly : [])
+    //   ],
+    //   toDisable: [
+    //     mode === 'dnd' ? 'io.paotuan.plugin.cardgen.coc' : 'io.paotuan.plugin.cardgen.dnd',
+    //     ...(mode === 'dnd' ? _customReplyCocOnly : [])
+    //   ]
+    // }
+    // ;(['toEnable', 'toDisable'] as const).forEach(prop => {
+    //   customReplyIds[prop].forEach(id => {
+    //     const conf = config.customReplyIds.find(c => c.id === id)
+    //     if (conf) {
+    //       conf.enabled = prop === 'toEnable'
+    //     }
+    //   })
+    // })
     // 特殊指令
     // config.specialDice.opposeDice.refineSuccessLevels = mode === 'coc'
     // config.specialDice.riDice.baseRoll = mode === 'coc' ? '$敏捷' : 'd20'
