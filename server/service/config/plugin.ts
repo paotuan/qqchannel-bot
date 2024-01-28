@@ -139,6 +139,7 @@ export class PluginManager {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const plugin = require(fullPath)(context) as IPlugin // 未来可以通过 require(fullPath).id 等方式解除文件夹名称的限制
       plugin.id ||= pluginName
+      handlePluginCompatibility(plugin)
       console.log('[Plugin] 加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
     } catch (e) {
@@ -265,6 +266,14 @@ export class PluginManager {
     })
     return ret
   }
+}
+
+// plugin 兼容性处理
+function handlePluginCompatibility(plugin: IPlugin) {
+  // alias roll scope 默认值为 expression
+  plugin.aliasRoll?.forEach(r => {
+    r.scope ||= 'expression'
+  })
 }
 
 const officialPluginsVersions = {

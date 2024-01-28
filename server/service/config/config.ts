@@ -170,8 +170,7 @@ export class ChannelConfig {
   }
 
   private get aliasRollProcessors_expression() {
-    // 未设置 scope 也认为是 expression，用于兼容旧插件
-    return this.aliasRollProcessors.filter(conf => conf?.scope === 'expression' || !conf?.scope)
+    return this.aliasRollProcessors.filter(conf => conf?.scope === 'expression')
   }
 
   private get aliasRollProcessors_command() {
