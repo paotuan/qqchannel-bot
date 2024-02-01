@@ -68,16 +68,6 @@
               <option>gpt-4</option>
             </select>
           </div>
-          <label class="label cursor-pointer">
-            <span class="label-text pr-4 inline-flex items-center">
-              流式输出
-              <div class="tooltip tooltip-left" data-tip="如使用代理地址，请确认代理地址是否支持流式输出">
-                <ExclamationCircleIcon class="w-4 h-4" />
-              </div>
-            </span>
-            <!-- 增加 tip，如果使用代理地址，请确认代理地址是否支持流式输出 -->
-            <input v-model="chatStore.useStream" type="checkbox" class="toggle" />
-          </label>
         </div>
       </template>
       <div class="form-control">

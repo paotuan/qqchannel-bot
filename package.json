@@ -19,6 +19,7 @@
     "@heroicons/vue": "^2.0.11",
     "@vuepic/vue-datepicker": "^5.4.0",
     "@vueuse/core": "^9.13.0",
+    "api2d": "file:../api2d",
     "chalk": "4",
     "daisyui": "^2.51.3",
     "dotenv": "^16.0.2",
