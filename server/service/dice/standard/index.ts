@@ -61,7 +61,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
           let targetValue: number | undefined
           let result: IRollDecideResult | undefined
           if (cardEntry) {
-            targetValue = cardEntry.value + modifiedValue || 0 // 如有调整值，则调整目标值
+            targetValue = cardEntry.value + (modifiedValue || 0) // 如有调整值，则调整目标值
             result = this.decide({ baseValue: cardEntry.value, targetValue, roll: roll.total })
           }
           return { skill, targetValue, cardEntry, result }
