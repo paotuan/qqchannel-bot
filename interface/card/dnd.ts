@@ -395,7 +395,8 @@ const _SKILL_ALIAS = Object.freeze([
   ['铂金币', 'PP'],
   ['说服', '游说'],
   ['医疗', '医药'],
-  ['生存', '求生']
+  ['生存', '求生'],
+  ['体操', '特技']
 ])
 
 const SKILL_ALIAS: Record<string, string[]> = _SKILL_ALIAS

@@ -40,6 +40,7 @@
         </template>
         <template v-else-if="cardType === 'dnd'">
           <li>5E半自动人物卡1.0.2（SAS）-by喵拜 <a class="link" href="https://www.xn--rss892n.top:8080/externalLinksController/chain/5E%E5%8D%8A%E8%87%AA%E5%8A%A8%E4%BA%BA%E7%89%A9%E5%8D%A11.0.2%EF%BC%88SAS%EF%BC%89-by%E5%96%B5%E6%8B%9C.xlsx?ckey=eq%2BqZcNqTnnyQDtOpi6%2FHtEjFyGdQGdCbBnzbMtN6WD6ixhekJSxK9Wlh%2FtK6Nq%2B" target="_blank">点击下载</a></li>
+          <li>DND5E 半自动人物卡 太易&熊妈妈版 v1.81δ <a class="link" href="https://pocketbear.lanzouy.com/b013kunkd" target="_blank">点击下载</a> (密码：tybr)</li>
         </template>
       </ul>
     </template>
