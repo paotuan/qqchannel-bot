@@ -135,7 +135,11 @@ export class QApi {
 
   disconnect() {
     this.qqWs.removeAllListeners()
-    this.qqWs.disconnect()
+    try {
+      this.qqWs.disconnect()
+    } catch (e) {
+      console.error('断开连接出错。若出现功能异常，请重启程序，否则可以无视。', e)
+    }
     this.eventEmitter.removeAllListeners()
   }
 
