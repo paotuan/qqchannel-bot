@@ -1,12 +1,11 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { render } from 'mustache'
-import type { ICustomReplyConfig, ICustomReplyConfigItem } from '../../../interface/config'
+import type { ICustomReplyConfig, ICustomReplyConfigItem, ParseUserCommandResult, IMessage, ISubstituteUser } from '../../../interface/config'
 import { at, parseTemplate } from '../dice/utils'
 import { ICustomReplyEnv } from '../../../interface/config'
 import { VERSION_NAME } from '../../../interface/version'
 import { DiceRollContext } from '../DiceRollContext'
-import { ParseUserCommandResult, IMessage, ISubstituteUser } from './utils'
 
 export class CustomReplyManager {
   private readonly api: QApi

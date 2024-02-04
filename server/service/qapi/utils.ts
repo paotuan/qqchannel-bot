@@ -2,24 +2,7 @@ import type { QApi } from './index'
 import type { IMessage as IQQMessage } from 'qq-guild-bot'
 import { at, AtUserPatternEnd, convertRoleIds } from '../dice/utils'
 import { unescapeHTML } from '../../utils'
-import type { UserRole } from '../../../interface/config'
-
-export interface IMessage {
-  userId: string
-  username: string
-  userRole: UserRole
-  msgId: string
-  guildId: string
-  channelId: string
-  replyMsgId?: string
-}
-
-export interface ISubstituteUser {
-  userId: string
-  username: string
-}
-
-export type ParseUserCommandResult = { command: string, message: IMessage, substitute?: ISubstituteUser }
+import type { ParseUserCommandResult, ISubstituteUser } from '../../../interface/config'
 
 // 统一处理用户的原始输入文字
 export function parseUserCommand(api: QApi, msg: IQQMessage): ParseUserCommandResult | false {

@@ -1,9 +1,10 @@
-import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { CardType, ICard } from '../card/types'
-import { IMessage } from 'qq-guild-bot'
-import { ICustomReplyConfig, ICustomReplyEnv } from './customReply'
-import { IAliasRollConfig, IRollDeciderConfig } from './aliasRoll'
-import { ICustomTextConfig } from './customText'
+import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
+import type { CardType, ICard } from '../card/types'
+import type { IMessage } from 'qq-guild-bot'
+import type { ICustomReplyConfig, ICustomReplyEnv } from './customReply'
+import type { IAliasRollConfig, IRollDeciderConfig } from './aliasRoll'
+import type { ICustomTextConfig } from './customText'
+import type { IHookFunctionConfig } from './hook'
 
 export interface ICardQuery {
   name?: string
@@ -42,4 +43,5 @@ export interface IPlugin {
   aliasRoll?: IAliasRollConfig[]
   rollDecider?: IRollDeciderConfig[]
   customText?: ICustomTextConfig[]
+  hook?: IHookFunctionConfig
 }

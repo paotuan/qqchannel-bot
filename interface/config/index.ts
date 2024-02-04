@@ -1,13 +1,17 @@
 import type { IPlugin, IPluginRegisterContext, ICardQuery } from './plugin'
-import type { UserRole, IPluginElementCommonInfo } from './utils'
+import type { UserRole, IPluginElementCommonInfo, IMessage, ISubstituteUser, ParseUserCommandResult } from './utils'
 import type { ICustomReplyEnv, ICustomReplyConfigItem, ICustomReplyConfig } from './customReply'
 import type { IAliasRollConfig, SuccessLevel, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextItem, ICustomTextHandler, CustomTextKeys, ICustomTextConfig } from './customText'
+import type { IHookFunctionConfig } from './hook'
 
 export type {
   // utils
   UserRole,
   IPluginElementCommonInfo,
+  IMessage,
+  ISubstituteUser,
+  ParseUserCommandResult,
   // plugin
   IPlugin,
   IPluginRegisterContext,
@@ -24,7 +28,9 @@ export type {
   ICustomTextItem,
   ICustomTextHandler,
   CustomTextKeys,
-  ICustomTextConfig
+  ICustomTextConfig,
+  // hook
+  IHookFunctionConfig
 }
 
 // 每个子频道对应一份配置
