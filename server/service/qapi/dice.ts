@@ -2,7 +2,7 @@ import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
 import * as LRUCache from 'lru-cache'
-import { at, AtUserPatternEnd, convertRoleIds, createDiceRoll } from '../dice/utils'
+import { createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 import type { IRiItem, IDiceRollReq } from '../../../interface/common'
@@ -10,6 +10,7 @@ import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
 import type { UserRole } from '../../../interface/config'
 import { createCard } from '../../../interface/card'
 import { DiceRollContext } from '../DiceRollContext'
+import { ParseUserCommandResult } from './utils'
 
 interface IMessageCache {
   text?: string
@@ -43,65 +44,28 @@ export class DiceManager {
   /**
    * 处理子频道骰子指令
    */
-  private async handleGuildMessage(msg: IMessage) {
-    // 无视非文本消息
-    const content = msg.content?.trim()
-    if (!content) return false
-
-    // 提取出指令体，无视非指令消息
-    const botUserId = this.api.botInfo?.id
-    let fullExp = content // .d100 困难侦察
-    let isInstruction = false
-    // @机器人的消息
-    if (botUserId && fullExp.startsWith(at(botUserId))) {
-      isInstruction = true
-      fullExp = fullExp.replace(at(botUserId), '').trim()
-    }
-    // 指令消息
-    if (fullExp.startsWith('.') || fullExp.startsWith('。')) {
-      isInstruction = true
-      fullExp = fullExp.substring(1).trim()
-    }
-    if (!isInstruction) return false
-
-    // 是否是全局代骰
-    const substitute: { userId?: string, username?: string } = {}
-    const userIdMatch = fullExp.match(AtUserPatternEnd)
-    if (userIdMatch) {
-      substitute.userId = userIdMatch[1]
-      const user = this.api.guilds.findUser(substitute.userId, msg.guild_id)
-      substitute.username = user?.persona ?? substitute.userId
-      fullExp = fullExp.substring(0, userIdMatch.index).trim()
-    }
-
-    // 转义 转义得放在 at 消息和 emoji 之类的后面
-    fullExp = unescapeHTML(fullExp)
-
-    // 整体别名指令处理
-    const config = this.wss.config.getChannelConfig(msg.channel_id)
-    fullExp = config.parseAliasRoll_command(fullExp)
-
+  private async handleGuildMessage({ command, message, substitute }: ParseUserCommandResult) {
     // 投骰
-    const realUser = { userId: msg.author.id, username: msg.member.nick || msg.author.username || msg.author.id }
-    const roll = this.tryRollDice(fullExp, {
-      channelId: msg.channel_id,
-      userId: substitute.userId ?? realUser.userId,
-      username: substitute.username ?? realUser.username,
-      replyMsgId: (msg as any).message_reference?.message_id,
-      userRole: convertRoleIds(msg.member.roles)
+    const realUser = { userId: message.userId, username: message.username }
+    const roll = this.tryRollDice(command, {
+      channelId: message.channelId,
+      userId: substitute?.userId ?? realUser.userId,
+      username: substitute?.username ?? realUser.username,
+      replyMsgId: message.replyMsgId,
+      userRole: message.userRole
     })
     if (roll) {
       // 拼装结果，并发消息
-      const channel = this.api.guilds.findChannel(msg.channel_id, msg.guild_id)
+      const channel = this.api.guilds.findChannel(message.channelId, message.guildId)
       if (!channel) return true // channel 信息不存在
       if (roll instanceof StandardDiceRoll && roll.hidden) { // 处理暗骰
         const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
-        channel.sendMessage({ content: channelMsg, msg_id: msg.id })
-        const user = this.api.guilds.findUser(msg.author.id, msg.guild_id) // 暗骰始终发送给消息发送人，不考虑代骰
+        channel.sendMessage({ content: channelMsg, msg_id: message.msgId })
+        const user = this.api.guilds.findUser(message.userId, message.guildId) // 暗骰始终发送给消息发送人，不考虑代骰
         if (!user) return true // 用户信息不存在
-        user.sendMessage({ content: roll.output, msg_id: msg.id }) // 似乎填 channel 的消息 id 也可以认为是被动
+        user.sendMessage({ content: roll.output, msg_id: message.msgId }) // 似乎填 channel 的消息 id 也可以认为是被动
       } else {
-        const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: msg.id })
+        const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: message.msgId })
         // 如果是可供对抗的投骰，记录下缓存
         if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
           this.opposedRollCache.set(replyMsg.id, roll)
@@ -267,14 +231,8 @@ export class DiceManager {
   }
 
   private initListeners() {
-    this.api.onGuildMessage(async (data: any) => {
-      switch (data.eventType) {
-      case 'MESSAGE_CREATE':
-        return await this.handleGuildMessage(data.msg as IMessage)
-      case 'MESSAGE_DELETE':
-      default:
-        return false
-      }
+    this.api.onGuildCommand(async (data) => {
+      return await this.handleGuildMessage(data)
     })
     this.api.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data: any) => {
       if (this.filtered(data.msg.channel_id)) return

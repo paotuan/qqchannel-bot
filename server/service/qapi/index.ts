@@ -8,8 +8,10 @@ import { EventEmitter } from 'events'
 import { NoteManager } from './note'
 import { DiceManager } from './dice'
 import { CustomReplyManager } from './customReply'
+import { parseUserCommand, ParseUserCommandResult } from './utils'
 
 type QueueListener = (data: unknown) => Promise<boolean>
+type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
 
 /**
  * A bot connection to QQ
@@ -94,11 +96,14 @@ export class QApi {
       if (!this.wss.listeningChannels.includes(channelId)) return
       // 最近一条消息缓存到 channel 对象中
       const channel = this.guilds.findChannel(channelId, msg.guild_id)
-      channel && (channel.lastMessage = data.msg)
-      // 串行触发消息处理器
-      for (const listener of this.guildMessageQueueListeners) {
-        const consumed = await listener(data)
-        if (consumed) return
+      channel && (channel.lastMessage = msg)
+
+      // 只处理 MESSAGE_CREATE 事件，进行指令处理
+      if (data.eventType === 'MESSAGE_CREATE') {
+        // 统一对消息进行 parse，判断是否是需要处理的指令
+        const parseResult = parseUserCommand(this, msg)
+        if (!parseResult) return
+        await this.dispatchCommand(parseResult)
       }
     })
 
@@ -148,14 +153,23 @@ export class QApi {
     this.eventEmitter.on(intent, listener)
   }
 
-  private readonly guildMessageQueueListeners: QueueListener[] = []
+  private readonly guildMessageQueueListeners: CommandListener[] = []
   private readonly directMessageQueueListeners: QueueListener[] = []
 
-  onGuildMessage(listener: QueueListener) {
+  onGuildCommand(listener: CommandListener) {
     this.guildMessageQueueListeners.push(listener)
   }
 
   onDirectMessage(listener: QueueListener) {
     this.directMessageQueueListeners.push(listener)
+  }
+
+  // 分派命令
+  async dispatchCommand(parseResult: ParseUserCommandResult) {
+    // 串行触发消息处理器
+    for (const listener of this.guildMessageQueueListeners) {
+      const consumed = await listener(parseResult)
+      if (consumed) return
+    }
   }
 }
