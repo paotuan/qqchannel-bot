@@ -3,7 +3,7 @@ import type { UserRole, IPluginElementCommonInfo, IMessage, ISubstituteUser, Par
 import type { ICustomReplyEnv, ICustomReplyConfigItem, ICustomReplyConfig } from './customReply'
 import type { IAliasRollConfig, SuccessLevel, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextItem, ICustomTextHandler, CustomTextKeys, ICustomTextConfig } from './customText'
-import type { IHookFunctionConfig } from './hook'
+import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback } from './hook'
 
 export type {
   // utils
@@ -30,7 +30,9 @@ export type {
   CustomTextKeys,
   ICustomTextConfig,
   // hook
-  IHookFunctionConfig
+  IHookFunctionConfig,
+  IHookFunction,
+  OnReceiveCommandCallback
 }
 
 // 每个子频道对应一份配置

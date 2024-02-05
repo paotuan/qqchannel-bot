@@ -8,7 +8,8 @@ import { EventEmitter } from 'events'
 import { NoteManager } from './note'
 import { DiceManager } from './dice'
 import { CustomReplyManager } from './customReply'
-import { parseUserCommand, ParseUserCommandResult } from './utils'
+import { parseUserCommand } from './utils'
+import type { ParseUserCommandResult } from '../../../interface/config'
 
 type QueueListener = (data: unknown) => Promise<boolean>
 type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
@@ -101,7 +102,7 @@ export class QApi {
       // 只处理 MESSAGE_CREATE 事件，进行指令处理
       if (data.eventType === 'MESSAGE_CREATE') {
         // 统一对消息进行 parse，判断是否是需要处理的指令
-        const parseResult = parseUserCommand(this, msg)
+        const parseResult = await parseUserCommand(this, msg)
         if (!parseResult) return
         await this.dispatchCommand(parseResult)
       }

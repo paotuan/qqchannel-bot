@@ -4,7 +4,9 @@ import type {
   ICustomReplyConfig,
   IPluginRegisterContext,
   IAliasRollConfig, ICustomTextConfig,
-  IPluginElementCommonInfo
+  IPluginElementCommonInfo,
+  IHookFunction,
+  OnReceiveCommandCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
@@ -251,6 +253,19 @@ export class PluginManager {
     })
     return ret
   }
+
+  // 提供 hook: onReceiveCommand
+  // fullId => IHookFunction<OnReceiveCommandCallback>
+  get hookOnReceiveCommandMap(): Record<string, IHookFunction<OnReceiveCommandCallback>> {
+    const ret: Record<string, IHookFunction<OnReceiveCommandCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.onReceiveCommand) return
+      plugin.hook.onReceiveCommand.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
 }
 
 // plugin 兼容性处理
@@ -277,4 +292,6 @@ const officialPluginsVersions = {
   'io.paotuan.plugin.cardgen': 4,
   'io.paotuan.plugin.draw': 2,
   // 'io.paotuan.plugin.cocrules': 1,
+  'io.paotuan.plugin.globalflags': 1
+  // 'io.paotuan.plugin.compatible'
 }

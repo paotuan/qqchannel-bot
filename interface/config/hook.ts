@@ -1,10 +1,10 @@
 import { IPluginElementCommonInfo, ParseUserCommandResult } from './utils'
 
-interface IHookFunction<T> extends IPluginElementCommonInfo {
+export interface IHookFunction<T> extends IPluginElementCommonInfo {
   handler: T
 }
 
-type OnReceiveCommandCallback = (parsed: ParseUserCommandResult) => void | Promise<void>
+export type OnReceiveCommandCallback = (result: ParseUserCommandResult) => boolean | Promise<boolean>
 
 export interface IHookFunctionConfig {
   onReceiveCommand?: IHookFunction<OnReceiveCommandCallback>[]

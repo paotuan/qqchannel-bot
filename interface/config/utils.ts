@@ -15,7 +15,13 @@ export interface ISubstituteUser {
   username: string
 }
 
-export type ParseUserCommandResult = { command: string, message: IMessage, substitute?: ISubstituteUser }
+export type ParseUserCommandResult = {
+  command: string,
+  message: IMessage,
+  substitute?: ISubstituteUser,
+  // 给插件使用，可附加自定义信息
+  [key: string | number | symbol]: unknown
+}
 
 export interface IPluginElementCommonInfo {
   id: string // 短 id

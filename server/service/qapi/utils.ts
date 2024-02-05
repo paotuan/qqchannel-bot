@@ -5,7 +5,7 @@ import { unescapeHTML } from '../../utils'
 import type { ParseUserCommandResult, ISubstituteUser } from '../../../interface/config'
 
 // 统一处理用户的原始输入文字
-export function parseUserCommand(api: QApi, msg: IQQMessage): ParseUserCommandResult | false {
+export async function parseUserCommand(api: QApi, msg: IQQMessage): Promise<ParseUserCommandResult | false> {
   // 无视非文本消息
   const content = msg.content?.trim()
   if (!content) return false
@@ -42,12 +42,8 @@ export function parseUserCommand(api: QApi, msg: IQQMessage): ParseUserCommandRe
   // 转义 转义得放在 at 消息和 emoji 之类的后面
   fullExp = unescapeHTML(fullExp)
 
-  // 整体别名指令处理
-  const config = api.wss.config.getChannelConfig(msg.channel_id)
-  fullExp = config.parseAliasRoll_command(fullExp)
-
-  // 可以处理
-  return {
+  // 组装结构体
+  const result = {
     command: fullExp,
     message: {
       userId: msg.author.id,
@@ -60,4 +56,15 @@ export function parseUserCommand(api: QApi, msg: IQQMessage): ParseUserCommandRe
     },
     substitute
   }
+
+  const config = api.wss.config.getChannelConfig(result.message.channelId)
+
+  // hook: OnReceiveCommandCallback 处理
+  await config.hook_onReceiveCommand(result)
+
+  // 整体别名指令处理
+  result.command = config.parseAliasRoll_command(result.command)
+
+  // 下一步处理
+  return result
 }

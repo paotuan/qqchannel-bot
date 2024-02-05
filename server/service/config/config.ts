@@ -4,7 +4,8 @@ import type {
   ICustomReplyConfig,
   ICustomTextConfig,
   IRollDeciderConfig,
-  CustomTextKeys
+  CustomTextKeys, ParseUserCommandResult,
+  IHookFunction, OnReceiveCommandCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import type { PluginManager } from './plugin'
@@ -16,6 +17,7 @@ import { getEmbedCustomText } from './default'
 import { renderCustomText } from './helpers/customText'
 import type { ICard } from '../../../interface/card/types'
 import { parseAliasForCommand } from './helpers/aliasCommand'
+import { handleOnReceiveCommand } from './helpers/hook'
 
 // 频道配置文件封装
 export class ChannelConfig {
@@ -215,6 +217,21 @@ export class ChannelConfig {
    */
   formatCustomText(key: CustomTextKeys, args: Record<string, any>, context: any) {
     return renderCustomText(this.customTextMap, key, args, context)
+  }
+
+  // 子频道 hook 处理器
+  private get hookOnReceiveCommandProcessors(): IHookFunction<OnReceiveCommandCallback>[] {
+    return this.config.hookIds.onReceiveCommand
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookOnReceiveCommandMap[item.id] as IHookFunction<OnReceiveCommandCallback>)
+      .filter(conf => !!conf)
+  }
+
+  /**
+   * Hook 处理
+   */
+  async hook_onReceiveCommand(result: ParseUserCommandResult) {
+    await handleOnReceiveCommand(this.hookOnReceiveCommandProcessors, result)
   }
 
   /**

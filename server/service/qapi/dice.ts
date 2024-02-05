@@ -7,10 +7,9 @@ import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 import type { IRiItem, IDiceRollReq } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
-import type { UserRole } from '../../../interface/config'
+import type { UserRole, ParseUserCommandResult } from '../../../interface/config'
 import { createCard } from '../../../interface/card'
 import { DiceRollContext } from '../DiceRollContext'
-import { ParseUserCommandResult } from './utils'
 
 interface IMessageCache {
   text?: string
