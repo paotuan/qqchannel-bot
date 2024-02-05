@@ -29,7 +29,7 @@ export class CocDiceRoll extends StandardDiceRoll {
           // 如有 entry，则进行检定
           let result: IRollDecideResult | undefined
           if (cardEntry) {
-            cardEntry.value += modifiedValue || 0 // 如有调整值，则调整目标值
+            cardEntry.value += (modifiedValue || 0) // 如有调整值，则调整目标值
             result = this.decide({ baseValue: cardEntry.baseValue, targetValue: cardEntry.value, roll: roll.total })
             // 非临时值 && 非调整值为正 && 检定成功，记录人物卡技能成长 todo 奖励骰的启发式判断（见 project）还是在别名指令里面引入新的配置标志位？
             if (!cardEntry.isTemp && !((modifiedValue || 0) > 0) && cardEntry.type === 'skills' && result?.success) {
