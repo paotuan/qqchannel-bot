@@ -45,6 +45,9 @@ export function getInitialDefaultConfig(): IChannelConfig {
     rollDeciderId: `${embedPluginId}.${rollDeciders[0].id}`,
     rollDeciderIds: rollDeciders.map(item => `${embedPluginId}.${item.id}`),
     customTextIds: [],
+    hookIds: {
+      onReceiveCommand: []
+    },
     embedPlugin: {
       id: embedPluginId,
       customReply: customReplies,
@@ -232,6 +235,12 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     // config.embedPlugin.aliasRoll!.push(...advs)
     // config.aliasRollIds.push({ id: `${embedPluginId}.advantage`, enabled: true }, { id: `${embedPluginId}.disadvantage`, enabled: true })
     config.version = 33 // 1.8.1
+  }
+  if (config.version < 35) {
+    config.hookIds = {
+      onReceiveCommand: []
+    }
+    config.version = 35 // 1.9.0
   }
   return config as IChannelConfig
 }

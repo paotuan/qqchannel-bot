@@ -53,6 +53,9 @@ export class ChannelConfig {
       customReplyIds: new Set<string>(),
       aliasRollIds: new Set<string>(),
       customTextIds: new Set<string>(),
+      hookIds: {
+        onReceiveCommand: new Set<string>()
+      }
     }
     manifest.forEach(plugin => {
       // 0. 确保 plugin 在配置中存在
@@ -88,10 +91,20 @@ export class ChannelConfig {
           this.config.customTextIds.push({ id, enabled: config.defaultEnabled })
         }
       })
+      plugin.hook.onReceiveCommand.forEach(config =>{
+        const id = `${plugin.id}.${config.id}`
+        existIds.hookIds.onReceiveCommand.add(id)
+        if (!this.config.hookIds.onReceiveCommand.find(_config => _config.id === id)) {
+          this.config.hookIds.onReceiveCommand.push({ id, enabled: config.defaultEnabled })
+        }
+      })
     })
     // 3. 如有 plugin 中已经不存在的功能，但 config 中还存在的，需要从 config 中去掉. (embed 须保留)
     ;(['customReplyIds', 'aliasRollIds', 'customTextIds'] as const).forEach(prop => {
       this.config[prop] = this.config[prop].filter(config => config.id.startsWith('io.paotuan.embed') || existIds[prop].has(config.id))
+    })
+    ;(['onReceiveCommand'] as const).forEach(prop => {
+      this.config.hookIds[prop] = this.config.hookIds[prop].filter(config => existIds.hookIds[prop].has(config.id))
     })
   }
 

@@ -3,7 +3,8 @@ import type {
   IPlugin,
   ICustomReplyConfig,
   IPluginRegisterContext,
-  IAliasRollConfig, ICustomTextConfig
+  IAliasRollConfig, ICustomTextConfig,
+  IPluginElementCommonInfo
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
@@ -192,30 +193,14 @@ export class PluginManager {
         label: pref.label ?? pref.key,
         defaultValue: pref.defaultValue ?? ''
       })),
-      customReply: (plugin.customReply || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description ?? '',
-        defaultEnabled: item.defaultEnabled ?? true
-      })),
-      // rollDecider: (plugin.rollDecider || []).map(item => ({
-      //   id: item.id,
-      //   name: item.name,
-      //   description: item.description
-      // })),
+      customReply: (plugin.customReply || []).map(withDefaults),
+      // rollDecider: (plugin.rollDecider || []).map(withDefaults),
       rollDecider: [],
-      aliasRoll: (plugin.aliasRoll || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description ?? '',
-        defaultEnabled: item.defaultEnabled ?? true
-      })),
-      customText: (plugin.customText || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description ?? '',
-        defaultEnabled: item.defaultEnabled ?? true
-      }))
+      aliasRoll: (plugin.aliasRoll || []).map(withDefaults),
+      customText: (plugin.customText || []).map(withDefaults),
+      hook: {
+        onReceiveCommand: (plugin.hook?.onReceiveCommand || []).map(withDefaults)
+      }
     }))
   }
 
@@ -274,6 +259,16 @@ function handlePluginCompatibility(plugin: IPlugin) {
   plugin.aliasRoll?.forEach(r => {
     r.scope ||= 'expression'
   })
+}
+
+// IPluginElementCommonInfo 附加默认信息，供展示和索引使用
+function withDefaults(pluginItem: IPluginElementCommonInfo) {
+  return {
+    id: pluginItem.id,
+    name: pluginItem.name,
+    description: pluginItem.description ?? '',
+    defaultEnabled: pluginItem.defaultEnabled ?? true
+  }
 }
 
 const officialPluginsVersions = {

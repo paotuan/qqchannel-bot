@@ -45,6 +45,9 @@ export interface IChannelConfig {
   rollDeciderId: string  // full id 单选
   rollDeciderIds: string[] // full id
   customTextIds: { id: string, enabled: boolean }[] // full id。 不包含 default
+  hookIds: {
+    onReceiveCommand: { id: string, enabled: boolean }[] // full id
+  }
   embedPlugin: IPlugin // id = io.paotuan.embed.xx
   plugins: IPluginConfig[] // 管理第三方插件配置 => config
   lastModified: number // ms

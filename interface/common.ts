@@ -188,6 +188,9 @@ export interface IPluginConfigDisplay {
   aliasRoll: IPluginItemConfig[]
   rollDecider: IPluginItemConfig[]
   customText: IPluginItemConfig[]
+  hook: {
+    onReceiveCommand: IPluginItemConfig[]
+  }
 }
 
 export type IPluginReloadReq = string[]
