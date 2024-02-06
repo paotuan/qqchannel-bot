@@ -25,11 +25,9 @@
 请参考 [Linux 部署](https://paotuan.io/setup/download/linux.html)
 
 ### Docker部署
-#### 1.通过dockerfile文件部署
-将[Dockerfile](https://raw.githubusercontent.com/monthwolf/qqchannel-bot/master/Dockerfile)拷贝至本地环境中，并在该路径下运行命令`docker build -t paotuan:latest .`编译镜像文件(注意命令结尾的 **.** 不要漏掉)  
-dockerfile文件可以自行修改再编译，编译的镜像参考 **方式二** 命令运行,只需要把`monthwolf/paotuan:latest`改成`paotuan:latest`
 
-#### 2.拉取镜像运行  
+
+#### 1.拉取镜像运行  
 1)拉取镜像 
 ```
 docker pull monthwolf/paotuan:latest
@@ -51,6 +49,19 @@ docker run -d --net=host \
 -e WEB_PORT=端口2 \
 --name paotuan monthwolf/paotuan:latest
 ```  
+
+#### 2.自构建镜像部署
+1)脚本部署 **(推荐)**  
+下载项目中的build.sh脚本，给予权限并运行
+```bash
+chmod 777 build.sh
+./build.sh #运行后根据提示输入信息构建镜像，并自行选择是否直接启动
+```
+
+
+2)通过dockerfile文件部署  
+将整个项目源码拷贝至本地环境中，解压后，进入项目文件夹并在该路径下运行命令`docker build -t paotuan:latest .`编译镜像文件(注意命令结尾的 **.** 不要漏掉)  
+dockerfile文件可以自行修改再编译，编译的镜像参考 **方式二** 命令运行,只需要把`monthwolf/paotuan:latest`改成`paotuan:latest`
 
 ### 本地开发
 require Node >= 14.18
