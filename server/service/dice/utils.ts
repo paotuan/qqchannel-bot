@@ -186,12 +186,13 @@ export function parseDescriptions2(rawExp: string, flag = ParseFlagsAll): { exp:
 /**
  * 工厂方法创建骰子实例
  */
-export function createDiceRoll(_expression: string, context: IDiceRollContext) {
+export function createDiceRoll(expression: string, context: IDiceRollContext) {
   const selfCard = context.getCard(context.userId)
   // 预处理指令（仅在此处处理一次，后续可以改成 hook 插件。不放在 parseTemplate 里面，因为可能会被不同的指令处理器执行多次）
-  let expression = context.config.convertCase(_expression)
-  expression = context.config.detectCardEntry(expression, selfCard)
-  expression = context.config.detectDefaultRollCalculation(expression, selfCard)
+  // todo 指令前缀支持大小写？enabled && /sc/i
+  // let expression = context.config.convertCase(_expression)
+  // expression = context.config.detectCardEntry(expression, selfCard)
+  // expression = context.config.detectDefaultRollCalculation(expression, selfCard)
   // expression = context.config.naiveParseInlineRolls(expression, selfCard)
   // 根据指令前缀派发
   const specialDiceConfig = context.config.specialDice

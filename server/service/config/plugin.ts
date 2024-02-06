@@ -88,6 +88,7 @@ export class PluginManager {
           return user.sendMessage({ image: msg })
         }
       },
+      getConfig: ({ channelId }) => wss.config.getChannelConfig(channelId).config,
       getPreference: ({ channelId }) => {
         const channelConfig = wss.config.getChannelConfig(channelId)
         const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginId)
@@ -309,5 +310,5 @@ const officialPluginsVersions = {
   'io.paotuan.plugin.draw': 2,
   // 'io.paotuan.plugin.cocrules': 1,
   // 'io.paotuan.plugin.globalflags': 1
-  // 'io.paotuan.plugin.compatible'
+  'io.paotuan.plugin.compatible': 1
 }

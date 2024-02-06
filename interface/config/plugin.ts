@@ -6,6 +6,7 @@ import type { IAliasRollConfig, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextConfig } from './customText'
 import type { IHookFunctionConfig } from './hook'
 import type { ParseUserCommandResult } from './utils'
+import type { IChannelConfig } from './index'
 
 export interface ICardQuery {
   name?: string
@@ -25,6 +26,7 @@ export interface IPluginRegisterContext {
   queryCard: (query: ICardQuery) => ICard[]
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  getConfig: (context: { channelId: string }) => IChannelConfig
   getPreference: (context: { channelId: string }) => Record<string, string>
   dispatchUserCommand: (context: ParseUserCommandResult) => Promise<void>
   _: any // lodash
