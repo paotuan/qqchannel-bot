@@ -5,7 +5,7 @@ import { unescapeHTML } from '../../utils'
 import type { IUserCommandContext, ParseUserCommandResult } from '../../../interface/config'
 
 // 统一处理用户的原始输入文字
-export async function parseUserCommand(api: QApi, msg: IQQMessage): Promise<ParseUserCommandResult | false> {
+export function parseUserCommand(api: QApi, msg: IQQMessage): ParseUserCommandResult | false {
   // 无视非文本消息
   const content = msg.content?.trim()
   if (!content) return false

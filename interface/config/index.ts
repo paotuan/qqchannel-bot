@@ -1,9 +1,9 @@
 import type { IPlugin, IPluginRegisterContext, ICardQuery } from './plugin'
-import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, ParseUserCommandResult } from './utils'
+import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, ParseUserCommandResult, DiceCommand } from './utils'
 import type { ICustomReplyEnv, ICustomReplyConfigItem, ICustomReplyConfig } from './customReply'
 import type { IAliasRollConfig, SuccessLevel, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextItem, ICustomTextHandler, CustomTextKeys, ICustomTextConfig } from './customText'
-import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback } from './hook'
+import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback, BeforeParseDiceRollCallback } from './hook'
 
 export type {
   // utils
@@ -11,6 +11,7 @@ export type {
   IPluginElementCommonInfo,
   IUserCommandContext,
   ParseUserCommandResult,
+  DiceCommand,
   // plugin
   IPlugin,
   IPluginRegisterContext,
@@ -31,7 +32,8 @@ export type {
   // hook
   IHookFunctionConfig,
   IHookFunction,
-  OnReceiveCommandCallback
+  OnReceiveCommandCallback,
+  BeforeParseDiceRollCallback
 }
 
 // 每个子频道对应一份配置
@@ -48,6 +50,7 @@ export interface IChannelConfig {
   customTextIds: { id: string, enabled: boolean }[] // full id。 不包含 default
   hookIds: {
     onReceiveCommand: { id: string, enabled: boolean }[] // full id
+    beforeParseDiceRoll: { id: string, enabled: boolean }[] // full id
   }
   embedPlugin: IPlugin // id = io.paotuan.embed.xx
   plugins: IPluginConfig[] // 管理第三方插件配置 => config

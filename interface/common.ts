@@ -190,6 +190,7 @@ export interface IPluginConfigDisplay {
   customText: IPluginItemConfig[]
   hook: {
     onReceiveCommand: IPluginItemConfig[]
+    beforeParseDiceRoll: IPluginItemConfig[]
   }
 }
 

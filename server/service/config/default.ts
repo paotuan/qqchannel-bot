@@ -46,7 +46,8 @@ export function getInitialDefaultConfig(): IChannelConfig {
     rollDeciderIds: rollDeciders.map(item => `${embedPluginId}.${item.id}`),
     customTextIds: [],
     hookIds: {
-      onReceiveCommand: []
+      onReceiveCommand: [],
+      beforeParseDiceRoll: []
     },
     embedPlugin: {
       id: embedPluginId,
@@ -238,7 +239,8 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
   }
   if (config.version < 35) {
     config.hookIds = {
-      onReceiveCommand: []
+      onReceiveCommand: [],
+      beforeParseDiceRoll: []
     }
     config.version = 35 // 1.9.0
   }

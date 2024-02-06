@@ -102,7 +102,7 @@ export class QApi {
       // 只处理 MESSAGE_CREATE 事件，进行指令处理
       if (data.eventType === 'MESSAGE_CREATE') {
         // 统一对消息进行 parse，判断是否是需要处理的指令
-        const parseResult = await parseUserCommand(this, msg)
+        const parseResult = parseUserCommand(this, msg)
         if (!parseResult) return
         await this.dispatchCommand(parseResult)
       }

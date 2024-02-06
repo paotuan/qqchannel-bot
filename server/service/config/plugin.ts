@@ -6,7 +6,8 @@ import type {
   IAliasRollConfig, ICustomTextConfig,
   IPluginElementCommonInfo,
   IHookFunction,
-  OnReceiveCommandCallback
+  OnReceiveCommandCallback,
+  BeforeParseDiceRollCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
@@ -202,7 +203,8 @@ export class PluginManager {
       aliasRoll: (plugin.aliasRoll || []).map(withDefaults),
       customText: (plugin.customText || []).map(withDefaults),
       hook: {
-        onReceiveCommand: (plugin.hook?.onReceiveCommand || []).map(withDefaults)
+        onReceiveCommand: (plugin.hook?.onReceiveCommand || []).map(withDefaults),
+        beforeParseDiceRoll: (plugin.hook?.beforeParseDiceRoll || []).map(withDefaults),
       }
     }))
   }
@@ -262,6 +264,19 @@ export class PluginManager {
     Object.values(this.pluginMap).forEach(plugin => {
       if (!plugin.hook?.onReceiveCommand) return
       plugin.hook.onReceiveCommand.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: beforeParseDiceRoll
+  // fullId => IHookFunction<BeforeParseDiceRollCallback>
+  get hookBeforeParseDiceRollMap(): Record<string, IHookFunction<BeforeParseDiceRollCallback>> {
+    const ret: Record<string, IHookFunction<BeforeParseDiceRollCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.beforeParseDiceRoll) return
+      plugin.hook.beforeParseDiceRoll.forEach(item => {
         ret[`${plugin.id}.${item.id}`] = item
       })
     })

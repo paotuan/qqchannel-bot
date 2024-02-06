@@ -4,7 +4,7 @@ import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { CocOpposedDiceRoll } from './standard/cocOppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
-import type { CustomTextKeys, SuccessLevel, UserRole } from '../../../interface/config'
+import type { CustomTextKeys, DiceCommand, SuccessLevel, UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
 import type { ICardQuery } from '../../../interface/config'
 import { GeneralCard } from '../../../interface/card/general'
@@ -40,6 +40,21 @@ const HISTORY_ROLL_REGEX = /\$(\d+)/g // match $1 $2...
 export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], depth = 0): string {
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
+
+  // region hook 处理
+  const diceCommand: DiceCommand = {
+    command: expression,
+    context: {
+      channelId: context.channelId,
+      userId: context.userId,
+      username: context.username,
+      userRole: context.userRole
+    }
+  }
+  context.config.hook_beforeParseDiceRoll(diceCommand)
+  expression = diceCommand.command
+  // endregion
+
   const selfCard = context.getCard(context.userId)
   const getEntry = (key: string) => selfCard?.getEntry(key)?.value ?? ''
   const getAbility = (key: string) => selfCard?.getAbility(key)?.value ?? ''
