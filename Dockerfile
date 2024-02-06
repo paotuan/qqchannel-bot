@@ -3,7 +3,7 @@ WORKDIR /usr/local
 EXPOSE 4174 4175
 ENV WS_SERVER_ADDR=0.0.0.0 WS_SERVER_PORT=4174 WEB_PORT=4175
 COPY . qqchannel-bot/
-RUN apt-get update && chmod 777 /usr/local/ && \
+RUN chmod 777 /usr/local/ && \
 npm i yarn -g --force && \
 yarn config set registry https://registry.npmmirror.com/ && \
 cd qqchannel-bot && yarn install
