@@ -1,7 +1,12 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { render } from 'mustache'
-import type { ICustomReplyConfig, ICustomReplyConfigItem, ParseUserCommandResult, IMessage, ISubstituteUser } from '../../../interface/config'
+import type {
+  ICustomReplyConfig,
+  ICustomReplyConfigItem,
+  ParseUserCommandResult,
+  IUserCommandContext
+} from '../../../interface/config'
 import { at, parseTemplate } from '../dice/utils'
 import { ICustomReplyEnv } from '../../../interface/config'
 import { VERSION_NAME } from '../../../interface/version'
@@ -20,20 +25,20 @@ export class CustomReplyManager {
     })
   }
 
-  private async handleGuildMessage({ command, message, substitute }: ParseUserCommandResult) {
+  private async handleGuildMessage({ command, context }: ParseUserCommandResult) {
     // 获取配置列表
-    const config = this.api.wss.config.getChannelConfig(message.channelId)
-    const channel = this.api.guilds.findChannel(message.channelId, message.guildId)
+    const config = this.api.wss.config.getChannelConfig(context.channelId)
+    const channel = this.api.guilds.findChannel(context.channelId, context.guildId)
     if (!channel) return false
     const processors = config.customReplyProcessors
     // 从上到下匹配
     for (const processor of processors) {
       const matchGroups = isMatch(processor, command)
       if (!matchGroups) continue
-      const reply = await this.parseMessage(processor, matchGroups, message, substitute)
+      const reply = await this.parseMessage(processor, matchGroups, context)
       // 发消息
       if (reply) {
-        channel.sendMessage({ content: reply, msg_id: message.msgId })
+        channel.sendMessage({ content: reply, msg_id: context.msgId })
       }
       return true
     }
@@ -41,24 +46,23 @@ export class CustomReplyManager {
     return false
   }
 
-  private async parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, msg: IMessage, substitute?: ISubstituteUser) {
+  private async parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, context: IUserCommandContext) {
     try {
       if (!processor.items && !processor.handler) throw new Error('没有处理自定义回复的方法')
       const handler = processor.handler ?? randomReplyItem(processor.items!).reply
       // 替换模板
-      const realUser = { userId: msg.userId, username: msg.username }
-      const username = substitute?.username ?? realUser.username
-      const userId = substitute?.userId ?? realUser.userId
-      const userRole = msg.userRole
-      const channelId = msg.channelId
+      const username = context.username
+      const userId = context.userId
+      const userRole = context.userRole
+      const channelId = context.channelId
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
         return render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
       })
-      const getCard = (_userId: string) => this.wss.cards.getCard(msg.channelId, _userId)
+      const getCard = (_userId: string) => this.wss.cards.getCard(context.channelId, _userId)
       const env: ICustomReplyEnv = {
-        botId: this.api.appid,
-        channelId: msg.channelId,
-        guildId: msg.guildId,
+        botId: context.botId,
+        channelId: context.channelId,
+        guildId: context.guildId,
         userId,
         userRole,
         nick: username,
@@ -67,7 +71,7 @@ export class CustomReplyManager {
         at: at(userId),
         at用户: at(userId),
         version: VERSION_NAME,
-        realUser
+        realUser: context.realUser
       }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls

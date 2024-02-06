@@ -167,6 +167,14 @@ export class QApi {
 
   // 分派命令
   async dispatchCommand(parseResult: ParseUserCommandResult) {
+    const config = this.wss.config.getChannelConfig(parseResult.context.channelId)
+
+    // hook: OnReceiveCommandCallback 处理
+    await config.hook_onReceiveCommand(parseResult)
+
+    // 整体别名指令处理
+    parseResult.command = config.parseAliasRoll_command(parseResult.command)
+
     // 串行触发消息处理器
     for (const listener of this.guildMessageQueueListeners) {
       const consumed = await listener(parseResult)

@@ -43,28 +43,21 @@ export class DiceManager {
   /**
    * 处理子频道骰子指令
    */
-  private async handleGuildMessage({ command, message, substitute }: ParseUserCommandResult) {
+  private async handleGuildMessage({ command, context }: ParseUserCommandResult) {
     // 投骰
-    const realUser = { userId: message.userId, username: message.username }
-    const roll = this.tryRollDice(command, {
-      channelId: message.channelId,
-      userId: substitute?.userId ?? realUser.userId,
-      username: substitute?.username ?? realUser.username,
-      replyMsgId: message.replyMsgId,
-      userRole: message.userRole
-    })
+    const roll = this.tryRollDice(command, context)
     if (roll) {
       // 拼装结果，并发消息
-      const channel = this.api.guilds.findChannel(message.channelId, message.guildId)
+      const channel = this.api.guilds.findChannel(context.channelId, context.guildId)
       if (!channel) return true // channel 信息不存在
       if (roll instanceof StandardDiceRoll && roll.hidden) { // 处理暗骰
         const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
-        channel.sendMessage({ content: channelMsg, msg_id: message.msgId })
-        const user = this.api.guilds.findUser(message.userId, message.guildId) // 暗骰始终发送给消息发送人，不考虑代骰
+        channel.sendMessage({ content: channelMsg, msg_id: context.msgId })
+        const user = this.api.guilds.findUser(context.realUser.userId, context.guildId) // 暗骰始终发送给消息发送人，不考虑代骰
         if (!user) return true // 用户信息不存在
-        user.sendMessage({ content: roll.output, msg_id: message.msgId }) // 似乎填 channel 的消息 id 也可以认为是被动
+        user.sendMessage({ content: roll.output, msg_id: context.msgId }) // 似乎填 channel 的消息 id 也可以认为是被动
       } else {
-        const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: message.msgId })
+        const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: context.msgId })
         // 如果是可供对抗的投骰，记录下缓存
         if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
           this.opposedRollCache.set(replyMsg.id, roll)

@@ -2,7 +2,7 @@ import type { QApi } from './index'
 import type { IMessage as IQQMessage } from 'qq-guild-bot'
 import { at, AtUserPatternEnd, convertRoleIds } from '../dice/utils'
 import { unescapeHTML } from '../../utils'
-import type { ParseUserCommandResult, ISubstituteUser } from '../../../interface/config'
+import type { IUserCommandContext, ParseUserCommandResult } from '../../../interface/config'
 
 // 统一处理用户的原始输入文字
 export async function parseUserCommand(api: QApi, msg: IQQMessage): Promise<ParseUserCommandResult | false> {
@@ -27,7 +27,7 @@ export async function parseUserCommand(api: QApi, msg: IQQMessage): Promise<Pars
   if (!isInstruction) return false
 
   // 是否是全局代骰
-  let substitute: ISubstituteUser | undefined = undefined
+  let substitute: IUserCommandContext['realUser'] | undefined = undefined
   // if (config.config.parseRule.customReplySubstitute) {
   const userIdMatch = fullExp.match(AtUserPatternEnd)
   if (userIdMatch) {
@@ -43,28 +43,23 @@ export async function parseUserCommand(api: QApi, msg: IQQMessage): Promise<Pars
   fullExp = unescapeHTML(fullExp)
 
   // 组装结构体
-  const result = {
+  const realUser = {
+    userId: msg.author.id,
+    username: msg.member.nick || msg.author.username || msg.author.id
+  }
+
+  return {
     command: fullExp,
-    message: {
-      userId: msg.author.id,
-      username: msg.member.nick || msg.author.username || msg.author.id,
+    context: {
+      botId: api.appid,
+      userId: substitute?.userId ?? realUser.userId,
+      username: substitute?.username ?? realUser.username,
       userRole: convertRoleIds(msg.member.roles),
       msgId: msg.id,
       guildId: msg.guild_id,
       channelId: msg.channel_id,
-      replyMsgId: (msg as any).message_reference?.message_id
-    },
-    substitute
+      replyMsgId: (msg as any).message_reference?.message_id,
+      realUser
+    }
   }
-
-  const config = api.wss.config.getChannelConfig(result.message.channelId)
-
-  // hook: OnReceiveCommandCallback 处理
-  await config.hook_onReceiveCommand(result)
-
-  // 整体别名指令处理
-  result.command = config.parseAliasRoll_command(result.command)
-
-  // 下一步处理
-  return result
 }

@@ -1,6 +1,7 @@
 export type UserRole = 'admin' | 'manager' | 'user'
 
-export interface IMessage {
+export interface IUserCommandContext {
+  botId: string
   userId: string
   username: string
   userRole: UserRole
@@ -8,17 +9,15 @@ export interface IMessage {
   guildId: string
   channelId: string
   replyMsgId?: string
-}
-
-export interface ISubstituteUser {
-  userId: string
-  username: string
+  realUser: {
+    userId: string
+    username: string
+  }
 }
 
 export type ParseUserCommandResult = {
   command: string,
-  message: IMessage,
-  substitute?: ISubstituteUser,
+  context: IUserCommandContext
   // 给插件使用，可附加自定义信息
   [key: string | number | symbol]: unknown
 }
