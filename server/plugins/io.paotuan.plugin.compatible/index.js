@@ -1,12 +1,12 @@
 /* eslint-env node */
 
 // match 独立出现的疑似人物卡引用（前后不为数字或 $，前向匹配简化了）
-const MAYBE_ENTRY_REGEX = /(?<=[+\-*/({])([a-zA-Z\p{Unified_Ideograph}]+)(?![\d$])/gu
+const MAYBE_ENTRY_REGEX = /(?<=[+\-*/(])([a-zA-Z\p{Unified_Ideograph}]+)(?![\d$])/gu
 const MAYBE_ENTRY_REGEX_AT_START = /^([a-zA-Z\p{Unified_Ideograph}]+)(?=[+\-*/])/gu
 
 // match 疑似默认骰
 const DEFAULT_ROLL_REGEX = /^(r|d|rd)$/
-const MAYBE_INCLUDE_DEFAULT_ROLL_REGEX = /(?<=^|[+\-*/({])(r|d|rd)(?=$|[+\-*/)}])/g
+const MAYBE_INCLUDE_DEFAULT_ROLL_REGEX = /(?<=^|[+\-*/(])(r|d|rd)(?=$|[+\-*/)}])/g
 
 module.exports = ({ getCard, getConfig }) => {
   return {
@@ -15,6 +15,15 @@ module.exports = ({ getCard, getConfig }) => {
     description: '以下设置并非绝对严谨，可能会与现有的指令体系产生冲突。但在大部分场景下，这些设置可以一定程度方便用户的操作。包含：\n- 指令对大小写不敏感\n- 智能探测指令中引用的人物卡条目\n- 默认骰支持加减值',
     version: 1,
     hook: {
+      onReceiveCommand: [
+        // 处理指令前缀的大小写
+        {
+          id: 'convertCase-Prefix',
+          name: '指令对大小写不敏感',
+          description: '能够识别【1D100】之类的大写表达式，并转换成小写进行解析',
+          handler: (diceCommand) => convertCase(diceCommand)
+        }
+      ],
       beforeParseDiceRoll: [
         {
           id: 'convertCase',
