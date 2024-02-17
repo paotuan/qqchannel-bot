@@ -16,6 +16,7 @@ import HookList from './HookList.vue'
 
 const moduleList: { label: string, value: HookModule }[] = [
   { label: '收到指令', value: 'onReceiveCommand' },
-  { label: '解析骰子指令前', value: 'beforeParseDiceRoll' }
+  { label: '解析骰子指令前', value: 'beforeParseDiceRoll' },
+  { label: '人物卡数值变化', value: 'onCardEntryChange' }
 ]
 </script>

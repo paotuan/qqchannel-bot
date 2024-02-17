@@ -10,6 +10,7 @@ import { DiceManager } from './dice'
 import { CustomReplyManager } from './customReply'
 import { parseUserCommand } from './utils'
 import type { ParseUserCommandResult } from '../../../interface/config'
+import type { ICardEntryChangeEvent } from '../../../interface/card/types'
 
 type QueueListener = (data: unknown) => Promise<boolean>
 type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
@@ -169,6 +170,10 @@ export class QApi {
   async dispatchCommand(parseResult: ParseUserCommandResult) {
     const config = this.wss.config.getChannelConfig(parseResult.context.channelId)
 
+    // 注册监听器
+    const cardEntryChangeListener = (e: ICardEntryChangeEvent) => config.hook_onCardEntryChange(e)
+    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
+
     // hook: OnReceiveCommandCallback 处理
     await config.hook_onReceiveCommand(parseResult)
 
@@ -180,5 +185,8 @@ export class QApi {
       const consumed = await listener(parseResult)
       if (consumed) return
     }
+
+    // 取消监听器
+    this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
   }
 }

@@ -3,7 +3,7 @@ import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, ParseUser
 import type { ICustomReplyEnv, ICustomReplyConfigItem, ICustomReplyConfig } from './customReply'
 import type { IAliasRollConfig, SuccessLevel, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextItem, ICustomTextHandler, CustomTextKeys, ICustomTextConfig } from './customText'
-import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback, BeforeParseDiceRollCallback } from './hook'
+import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback, BeforeParseDiceRollCallback, OnCardEntryChangeCallback } from './hook'
 
 export type {
   // utils
@@ -33,7 +33,8 @@ export type {
   IHookFunctionConfig,
   IHookFunction,
   OnReceiveCommandCallback,
-  BeforeParseDiceRollCallback
+  BeforeParseDiceRollCallback,
+  OnCardEntryChangeCallback
 }
 
 // 每个子频道对应一份配置
@@ -50,6 +51,7 @@ export interface IChannelConfig {
   hookIds: {
     onReceiveCommand: { id: string, enabled: boolean }[] // full id
     beforeParseDiceRoll: { id: string, enabled: boolean }[] // full id
+    onCardEntryChange: { id: string, enabled: boolean }[] // full id
   }
   embedPlugin: IPlugin // id = io.paotuan.embed.xx
   plugins: IPluginConfig[] // 管理第三方插件配置 => config

@@ -43,6 +43,8 @@ export interface ICard<D extends ICardData = ICardData, E extends ICardEntry = I
   removeAbility(name: string): boolean
   getSummary(): string // 用于骰子指令展示人物卡信息
   getEntryDisplay(name: string): string // 同上
+  addCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void): void
+  removeCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void): void
 }
 
 export interface ICardEntryChangeEvent {
@@ -95,7 +97,7 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
   }
 
   // region events
-  private emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
+  private readonly emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
 
   protected emitCardEntryChange(key: string, value: number | undefined, oldValue: number | undefined) {
     this.emitter.emit('EntryChange', {

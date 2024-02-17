@@ -191,6 +191,7 @@ export interface IPluginConfigDisplay {
   hook: {
     onReceiveCommand: IPluginItemConfig[]
     beforeParseDiceRoll: IPluginItemConfig[]
+    onCardEntryChange: IPluginItemConfig[]
   }
 }
 

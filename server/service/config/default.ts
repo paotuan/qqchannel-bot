@@ -40,7 +40,8 @@ export function getInitialDefaultConfig(): IChannelConfig {
     customTextIds: [],
     hookIds: {
       onReceiveCommand: [],
-      beforeParseDiceRoll: []
+      beforeParseDiceRoll: [],
+      onCardEntryChange: []
     },
     embedPlugin: {
       id: embedPluginId,
@@ -233,7 +234,8 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
   if (config.version < 35) {
     config.hookIds = {
       onReceiveCommand: [],
-      beforeParseDiceRoll: []
+      beforeParseDiceRoll: [],
+      onCardEntryChange: []
     }
     config.version = 35 // 1.9.0
   }

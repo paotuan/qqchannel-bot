@@ -49,3 +49,9 @@ export async function handleHooksAsync<T>(processors: IHookFunction<(arg: T) => 
     }
   }
 }
+
+export function handleVoidHooks<T>(processors: IHookFunction<(arg: T) => void>[], arg: T) {
+  for (const processor of processors) {
+    processor.handler(arg)
+  }
+}

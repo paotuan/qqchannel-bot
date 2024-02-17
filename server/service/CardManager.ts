@@ -4,9 +4,10 @@ import { globSync } from 'fast-glob'
 import { autorun, makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
-import type { ICard, ICardData } from '../../interface/card/types'
+import type { ICard, ICardData, ICardEntryChangeEvent } from '../../interface/card/types'
 import { createCard } from '../../interface/card'
 import type { ICardQuery } from '../../interface/config'
+import mitt from 'mitt'
 
 const dir = './cards'
 const LINK_FILE_NAME = '/__link.json'
@@ -21,6 +22,7 @@ export class CardManager {
   private readonly cardMap: Record<string, ICardData> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
   private readonly cardCache: Record<string, ICard> = {} // 由于 mobx 不会把类实例变为响应式，我们只把 plain data 作为响应性，类只用于缓存，手动管理
   private readonly channelLinkMap: Record<string, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
+  private readonly emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
 
   get cardList() { return Object.values(this.cardMap) }
 
@@ -149,7 +151,10 @@ export class CardManager {
   private _getCardObj(cardData: ICardData) {
     const cardName = cardData.name
     if (!this.cardCache[cardName]) {
-      this.cardCache[cardName] = createCard(cardData)
+      const card = createCard(cardData)
+      // add card listener 理论上是整个生命周期的，无需 remove
+      card.addCardEntryChangeListener(e => this.emitter.emit('EntryChange', e))
+      this.cardCache[cardName] = card
     }
     return this.cardCache[cardName]
   }
@@ -193,6 +198,15 @@ export class CardManager {
     }
     // 符合条件的结果封装一层扔出去
     return list.map(data => this._getCardObj(data))
+  }
+
+  // 人物卡变化事件
+  addCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void) {
+    this.emitter.on('EntryChange', listener)
+  }
+
+  removeCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void) {
+    this.emitter.off('EntryChange', listener)
   }
 }
 
