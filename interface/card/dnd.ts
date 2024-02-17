@@ -230,6 +230,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
         // 判断是否是真的改变了，因为可能被 setter 拦下来，实际未改变
         if (oldValue !== newValue) {
           this.data.lastModified = Date.now()
+          this.emitCardEntryChange(entry.key, newValue, oldValue)
           return true
         } else {
           return false
@@ -240,8 +241,10 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     if (entry) {
       // set 的时候就不考虑后缀了。dnd 的特殊之处在于 set 技能名时实际修改的是技能的修正值，因此在 st 指令中要做些特殊处理
       if (value !== entry.value) {
-        (this.data[entry.type] as Record<string, number>)[entry.key] = value
+        const oldValue = entry.value
+        ;(this.data[entry.type] as Record<string, number>)[entry.key] = value
         this.data.lastModified = Date.now()
+        this.emitCardEntryChange(entry.key, value, oldValue)
         return true
       } else {
         return false
@@ -250,6 +253,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
       // 新增条目，认为是 items，且统一大写
       this.data.items[_input] = value
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(_input, value, undefined)
       return true
     }
   }
@@ -260,8 +264,10 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     if (postfix !== 'none') return false // 有特殊后缀的也不处理吧
     const entry = this.getEntry(name)
     if (entry && entry.type === 'items' && !['CP', 'SP', 'GP', 'EP', 'PP'].includes(entry.key)) {
+      const oldValue = entry.value
       delete this.data.items[entry.key]
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(entry.key, undefined, oldValue)
       return true
     } else {
       return false

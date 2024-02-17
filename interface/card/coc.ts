@@ -239,6 +239,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
         // 判断是否是真的改变了，因为可能被 setter 拦下来，实际未改变
         if (oldValue !== newValue) {
           this.data.lastModified = Date.now()
+          this.emitCardEntryChange(rawEntry.key, newValue, oldValue)
           return true
         } else {
           return false
@@ -249,8 +250,10 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     const targetValue = calculateTargetValueWithDifficulty(value, difficulty, true)
     if (rawEntry && !rawEntry.readonly) {
       if (targetValue !== rawEntry.baseValue) {
-        (this.data[rawEntry.type] as Record<string, number>)[rawEntry.key] = targetValue
+        const oldValue = rawEntry.baseValue
+        ;(this.data[rawEntry.type] as Record<string, number>)[rawEntry.key] = targetValue
         this.data.lastModified = Date.now()
+        this.emitCardEntryChange(rawEntry.key, targetValue, oldValue)
         return true
       } else {
         return false
@@ -259,6 +262,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
       // 新增条目，认为是 skill，且统一大写
       this.data.skills[_input] = targetValue
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(_input, targetValue, undefined)
       return true
     }
   }
@@ -268,8 +272,10 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     if (!skillWithoutDifficulty) return false
     const entry = this.getRawEntry(skillWithoutDifficulty)
     if (entry && entry.type === 'skills' && !entry.readonly) {
+      const oldValue = entry.baseValue
       delete this.data.skills[entry.key]
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(entry.key, undefined, oldValue)
       return true
     } else {
       return false

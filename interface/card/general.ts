@@ -69,9 +69,11 @@ export class GeneralCard extends BaseCard<IGeneralCardData> {
 
   setEntry(name: string, value: number) {
     const key = name.toUpperCase()
-    if (this.data.skills[key] !== value) {
+    const oldValue = this.data.skills[key]
+    if (oldValue !== value) {
       this.data.skills[key] = value
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(key, value, oldValue)
       return true
     }
     return false
@@ -79,9 +81,11 @@ export class GeneralCard extends BaseCard<IGeneralCardData> {
 
   removeEntry(name: string) {
     const key = name.toUpperCase()
-    if (typeof this.data.skills[key] !== 'undefined') {
+    const oldValue = this.data.skills[key]
+    if (typeof oldValue !== 'undefined') {
       delete this.data.skills[key]
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(key, undefined, oldValue)
       return true
     } else {
       return false

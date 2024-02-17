@@ -1,3 +1,5 @@
+import mitt from 'mitt'
+
 export type CardType = 'general' | 'coc' | 'dnd'
 
 export interface ICardData {
@@ -43,6 +45,13 @@ export interface ICard<D extends ICardData = ICardData, E extends ICardEntry = I
   getEntryDisplay(name: string): string // 同上
 }
 
+export interface ICardEntryChangeEvent {
+  key: string
+  value: number | undefined
+  oldValue: number | undefined
+  card: BaseCard<any>
+}
+
 export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICardEntry, A extends ICardAbility = ICardAbility> implements ICard<D, E, A> {
   readonly data: D
 
@@ -84,4 +93,25 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
     // 啥也不是
     return `${name}:-`
   }
+
+  // region events
+  private emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
+
+  protected emitCardEntryChange(key: string, value: number | undefined, oldValue: number | undefined) {
+    this.emitter.emit('EntryChange', {
+      key,
+      value,
+      oldValue,
+      card: this
+    })
+  }
+
+  addCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void) {
+    this.emitter.on('EntryChange', listener)
+  }
+
+  removeCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void) {
+    this.emitter.off('EntryChange', listener)
+  }
+  // endregion
 }
