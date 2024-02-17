@@ -31,13 +31,6 @@ export function getInitialDefaultConfig(): IChannelConfig {
     botOwner: null,
     defaultRoll: { expression: 'd100', preferCard: true },
     specialDice: getSpecialDiceConfig(),
-    parseRule: {
-      convertCase: false,
-      detectCardEntry: false,
-      detectDefaultRoll: false,
-      customReplySubstitute: false,
-      naiveInlineParseRule: false
-    },
     customReplyIds: customReplies
       .map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
       .concat(customReplyPlugins.map(id => ({ id, enabled: true }))),
@@ -193,7 +186,7 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       })
     }
     // 新增配置
-    config.parseRule = { convertCase: false, detectCardEntry: false, detectDefaultRoll: false, customReplySubstitute: false, naiveInlineParseRule: false }
+    // config.parseRule = { convertCase: false, detectCardEntry: false, detectDefaultRoll: false, customReplySubstitute: false, naiveInlineParseRule: false }
     config.version = 23 // 1.6.1
   }
   if (config.version < 26) {
@@ -205,8 +198,8 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     config.version = 29 // 1.7.3
   }
   if (config.version < 30) {
-    config.parseRule.customReplySubstitute = false
-    config.parseRule.naiveInlineParseRule = false
+    // config.parseRule.customReplySubstitute = false
+    // config.parseRule.naiveInlineParseRule = false
     config.version = 30 // 1.7.4
   }
   if (config.version < 32) {

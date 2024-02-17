@@ -55,6 +55,7 @@ module.exports = ({ getCard, getConfig }) => {
             if (parsed === expression) {
               return false
             } else {
+              console.log('智能探测', expression, '->', parsed)
               diceCommand.command = parsed
               return true
             }
@@ -77,6 +78,7 @@ module.exports = ({ getCard, getConfig }) => {
             if (parsed === expression) {
               return false
             } else {
+              console.log('默认骰替换', expression, '->', parsed)
               diceCommand.command = parsed
               return true
             }
@@ -109,6 +111,7 @@ function convertCase(obj) {
   if (parsed === expression) {
     return false
   } else {
+    console.log('指令兼容大小写', expression, '->', parsed)
     obj.command = parsed
     return true
   }
@@ -116,7 +119,7 @@ function convertCase(obj) {
 
 function getDefaultRoll(config, card) {
   if (config.defaultRoll.preferCard && card) {
-    return card.defaultRoll
+    return card.defaultRoll || 'd%'
   }
   return config.defaultRoll.expression || 'd%'
 }

@@ -42,7 +42,6 @@ export interface IChannelConfig {
   botOwner: string | null
   defaultRoll: { expression: string, preferCard: boolean } // d100/d20/4dF
   specialDice: ISpecialDiceConfig
-  parseRule: IParseRuleConfig
   customReplyIds: { id: string, enabled: boolean }[] // full id
   aliasRollIds: { id: string, enabled: boolean }[] // full id
   rollDeciderId: string  // full id 单选
@@ -67,15 +66,6 @@ export interface ISpecialDiceConfig {
   nnDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
   opposeDice: { enabled: boolean }
   inMessageDice: { enabled: boolean }
-}
-
-// 解析规则配置
-export interface IParseRuleConfig {
-  convertCase: boolean // 是否自动转换大小写
-  detectCardEntry: boolean // 是否自动检测引用人物卡变量
-  detectDefaultRoll: boolean // 是否自动检测默认骰加减值
-  customReplySubstitute: boolean // 是否支持自定义回复代骰
-  naiveInlineParseRule: boolean // 是否使用 naive 的中间骰解析策略
 }
 
 // 插件开启状态和私有配置

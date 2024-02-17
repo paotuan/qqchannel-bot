@@ -242,114 +242,12 @@ export class ChannelConfig {
    * Hook 处理
    */
   async hook_onReceiveCommand(result: ParseUserCommandResult) {
+    console.log('[Hook] 收到指令')
     await handleHooksAsync(this.hookOnReceiveCommandProcessors, result)
   }
 
   hook_beforeParseDiceRoll(diceCommand: DiceCommand) {
+    console.log('[Hook] 解析骰子指令前')
     handleHooks(this.hookBeforeParseDiceRollProcessors, diceCommand)
   }
-
-  /**
-   * 指令兼容大小写
-   * 目前的实现是简单粗暴转全小写（引用人物卡的部分本来就不区分大小写，因此只用考虑骰子指令和描述部分）
-   * 针对 dF 特殊处理
-   */
-  convertCase(expression: string) {
-    if (this.config.parseRule.convertCase) {
-      const dFIndexes = Array.from(expression.matchAll(/dF/g)).map(result => result.index)
-      const result = expression.toLowerCase()
-      if (dFIndexes.length === 0) return result
-      const arr = result.split('')
-      dFIndexes.forEach(index => {
-        if (typeof index === 'number') {
-          arr[index + 1] = 'F'
-        }
-      })
-      return arr.join('')
-    }
-    return expression
-  }
-
-  /**
-   * 智能探测指令中可能出现的 entry/ability 并加上 $ 前缀
-   */
-  detectCardEntry(expression: string, card?: ICard) {
-    // 特殊：【.st力量+1】 st 指令需要排除 // 【.en+侦察】en 也排除
-    if (expression.startsWith('st') || expression.startsWith('en')) {
-      return expression
-    }
-    if (this.config.parseRule.detectCardEntry && card) {
-      const replacer = (key: string) => {
-        if (card.getEntry(key) || card.getAbility(key)) {
-          return '$' + key
-        } else {
-          return key
-        }
-      }
-      return expression.replace(MAYBE_ENTRY_REGEX, replacer).replace(MAYBE_ENTRY_REGEX_AT_START, replacer)
-    }
-    return expression
-  }
-
-  /**
-   * 智能探测默认骰参与加减值运算，并替换默认骰为表达式
-   */
-  detectDefaultRollCalculation(expression: string, card?: ICard) {
-    if (this.config.parseRule.detectDefaultRoll) {
-      // 纯默认骰不处理，交给原来的逻辑处理
-      if (expression.match(DEFAULT_ROLL_REGEX)) return expression
-      const defaultRoll = this.defaultRoll(card)
-      return expression.replace(MAYBE_INCLUDE_DEFAULT_ROLL_REGEX, () => defaultRoll)
-    }
-    return expression
-  }
-
-  /**
-   * 使用 naive 的循环策略解析 inline 和 expression 引用
-   * e.g. [[1d3+1]] => (1d3+1); $db => (1d3)
-   * 作用是一次性把表达式打平，在掷骰输出时更为简洁明了
-   * 缺点是丧失了递归回溯（$1, $2）和 [[1d10]]d10 的拼接能力
-   */
-  naiveParseInlineRolls(expression: string, card?: ICard) {
-    // todo pending，还需要解决直接调用 ability【.徒手格斗】和括号（牺牲准确性换取美观）的功能。后续走插件处理
-    if (this.config.parseRule.naiveInlineParseRule) {
-      // 替换 entry
-      const getEntry = (key: string) => card?.getEntry(key)?.value ?? ''
-      const getAbility = (key: string) => card?.getAbility(key)?.value ?? ''
-      let depth = 0
-      while (ENTRY_REGEX.test(expression)) {
-        expression = expression.replace(ENTRY_REGEX, (_, key1: string, key2: string) => {
-          const key = key1 ?? key2 ?? ''
-          const abilityExpression = getAbility(key)
-          if (abilityExpression) {
-            return `(${abilityExpression})`
-          }
-          const skillValue = getEntry(key)
-          return String(skillValue ?? '')
-        })
-
-        if (++depth > 99) {
-          console.error('stackoverflow in naiveParseInlineRolls')
-          break
-        }
-      }
-      // 替换 inline roll
-      while (INLINE_ROLL_REGEX.test(expression)) {
-        expression = expression.replace(INLINE_ROLL_REGEX, (_, notation: string) => `(${notation})`)
-      }
-    }
-    return expression
-  }
 }
-
-// match 独立出现的疑似人物卡引用（前后不为数字或 $，前向匹配简化了）
-const MAYBE_ENTRY_REGEX = /(?<=[+\-*/({])([a-zA-Z\p{Unified_Ideograph}]+)(?![\d$])/gu
-const MAYBE_ENTRY_REGEX_AT_START = /^([a-zA-Z\p{Unified_Ideograph}]+)(?=[+\-*/])/gu
-
-// match 疑似默认骰
-const DEFAULT_ROLL_REGEX = /^(r|d|rd)$/
-const MAYBE_INCLUDE_DEFAULT_ROLL_REGEX = /(?<=^|[+\-*/({])(r|d|rd)(?=$|[+\-*/)}])/g
-
-// match inline roll 和 attribute
-const ENTRY_REGEX = /\$\{(.*?)\}|\$([a-zA-Z\p{Unified_Ideograph}]+)/gu // match ${ any content } or $AnyContent
-const INLINE_ROLL_REGEX = /\[\[([^[\]]+)]]/ // match [[ any content ]]
