@@ -2,7 +2,9 @@
   <section>
     <template v-for="module in moduleList" :key="module.value">
       <HelpCollapseArea :title="module.label" :main="true" :default-expand="true">
-        <HookList :module="module.value" />
+        <div class="card card-compact w-full bg-base-100 shadow-lg">
+          <HookList :module="module.value" />
+        </div>
       </HelpCollapseArea>
     </template>
   </section>

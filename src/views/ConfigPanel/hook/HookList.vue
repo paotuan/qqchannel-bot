@@ -1,6 +1,8 @@
 <template>
   <div ref="sortableRef" class="divider-y">
-
+    <template v-for="item in items" :key="item.id">
+      <HookEditor :item="item" :module="module" :default-open="true" />
+    </template>
   </div>
 </template>
 <script setup lang="ts">
@@ -8,6 +10,7 @@ import type { HookModule } from './types'
 import { useConfigStore } from '../../../store/config'
 import { computed, onMounted, ref } from 'vue'
 import Sortable from 'sortablejs'
+import HookEditor from './HookEditor.vue'
 
 const props = defineProps<{ module: HookModule }>()
 const configStore = useConfigStore()
