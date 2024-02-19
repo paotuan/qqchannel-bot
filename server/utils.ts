@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as publicIp from 'public-ip'
+import publicIp from 'public-ip'
 
 // https://www.zhangxinxu.com/wordpress/2021/01/dom-api-html-encode-decode/
 export function unescapeHTML(str: string) {

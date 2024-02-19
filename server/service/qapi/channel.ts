@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx'
 import type { QApi } from './index'
 import type { ChannelType, IMessage, MessageToCreate } from 'qq-guild-bot'
 import type { MessageType } from '../../../interface/common'
-import * as FormData from 'form-data'
+import FormData from 'form-data'
 import fetch from 'node-fetch'
 
 /**

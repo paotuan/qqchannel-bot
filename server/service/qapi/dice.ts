@@ -1,7 +1,7 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
-import * as LRUCache from 'lru-cache'
+import LRUCache from 'lru-cache'
 import { createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'

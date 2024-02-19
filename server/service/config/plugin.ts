@@ -12,7 +12,7 @@ import type {
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
