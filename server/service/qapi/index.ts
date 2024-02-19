@@ -15,6 +15,15 @@ import type { ICardEntryChangeEvent } from '../../../interface/card/types'
 type QueueListener = (data: unknown) => Promise<boolean>
 type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
 
+interface IMessageReaction {
+  eventId: string
+  channelId: string
+  guildId: string
+  replyMsgId: string
+  userId: string
+}
+type MessageReactionListener = (reaction: IMessageReaction) => Promise<boolean>
+
 /**
  * A bot connection to QQ
  */
@@ -118,10 +127,39 @@ export class QApi {
       // 最近一条消息缓存到 user 对象中
       const user = this.guilds.findUser(data.msg.author.id, data.msg.src_guild_id) // 因为前面已经 addOrUpdateUserByMessage，所以一定存在一个永久的 user 对象
       user && (user.lastMessage = data.msg)
-      // 串行触发消息处理器
-      for (const listener of this.directMessageQueueListeners) {
-        const consumed = await listener(data)
-        if (consumed) return
+
+      // 只处理 DIRECT_MESSAGE_CREATE 事件
+      if (data.eventType === 'DIRECT_MESSAGE_CREATE') {
+        // 串行触发消息处理器
+        for (const listener of this.directMessageQueueListeners) {
+          const consumed = await listener(data)
+          if (consumed) return
+        }
+      }
+    })
+
+    this.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS,  async (data: any) => {
+      const msg = data.msg
+      // 过滤掉未监听的频道消息
+      if (!this.wss.listeningChannels.includes(msg.channel_id)) return
+      console.log(`[QApi][表情表态事件][${data.eventType}]`)
+
+      // 只处理 MESSAGE_REACTION_ADD 事件
+      if (data.eventType === 'MESSAGE_REACTION_ADD') {
+        const reaction: IMessageReaction = {
+          eventId: data.eventId as string,
+          channelId: msg.channel_id as string,
+          guildId: msg.guild_id as string,
+          replyMsgId: msg.target.id as string,
+          userId: msg.user_id as string
+        }
+
+        // todo 注册监听器 & 插件逻辑
+
+        for (const listener of this.messageReactionListeners) {
+          const consumed = await listener(reaction)
+          if (consumed) return
+        }
       }
     })
   }
@@ -157,6 +195,7 @@ export class QApi {
 
   private readonly guildMessageQueueListeners: CommandListener[] = []
   private readonly directMessageQueueListeners: QueueListener[] = []
+  private readonly messageReactionListeners: MessageReactionListener[] = []
 
   onGuildCommand(listener: CommandListener) {
     this.guildMessageQueueListeners.push(listener)
@@ -164,6 +203,10 @@ export class QApi {
 
   onDirectMessage(listener: QueueListener) {
     this.directMessageQueueListeners.push(listener)
+  }
+
+  onMessageReaction(listener: MessageReactionListener) {
+    this.messageReactionListeners.push(listener)
   }
 
   // 分派命令

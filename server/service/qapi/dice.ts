@@ -1,6 +1,6 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
-import { AvailableIntentsEventsEnum, IMessage } from 'qq-guild-bot'
+import type { IMessage } from 'qq-guild-bot'
 import LRUCache from 'lru-cache'
 import { createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
@@ -107,11 +107,7 @@ export class DiceManager {
   /**
    * 处理表情表态快速投骰
    */
-  private async handleGuildReactions(eventId: string, reaction: any) {
-    const channelId = reaction.channel_id as string
-    const guildId = reaction.guild_id as string
-    const msgId = reaction.target.id as string
-    const userId = reaction.user_id as string
+  private async handleGuildReactions({ eventId, channelId, guildId, replyMsgId: msgId, userId }: { eventId: string, channelId: string, guildId: string, replyMsgId: string, userId: string }) {
     // 获取原始消息
     const cacheMsg = await this.msgCache.fetch(`${channelId}-${msgId}`)
     if (!cacheMsg || cacheMsg.instruction === null) return
@@ -226,30 +222,14 @@ export class DiceManager {
     this.api.onGuildCommand(async (data) => {
       return await this.handleGuildMessage(data)
     })
-    this.api.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS, (data: any) => {
-      if (this.filtered(data.msg.channel_id)) return
-      console.log(`[QApi][表情表态事件][${data.eventType}]`)
-      switch (data.eventType) {
-      case 'MESSAGE_REACTION_ADD':
-        this.handleGuildReactions(data.eventId, data.msg)
-        break
-      default:
-        break
-      }
+    this.api.onMessageReaction(async (data) => {
+      this.handleGuildReactions(data)
+      return false
     })
     this.api.onDirectMessage(async (data: any) => {
-      switch (data.eventType) {
-      case 'DIRECT_MESSAGE_CREATE':
-        this.handleDirectMessage(data.msg as IMessage)
-        return false
-      default:
-        return false
-      }
+      this.handleDirectMessage(data.msg as IMessage)
+      return false
     })
-  }
-
-  private filtered(channelId: string) {
-    return !this.wss.listeningChannels.includes(channelId)
   }
 }
 
