@@ -1,5 +1,5 @@
 import type { IPlugin, IPluginRegisterContext, ICardQuery } from './plugin'
-import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, ParseUserCommandResult, DiceCommand } from './utils'
+import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, ParseUserCommandResult, DiceCommand, CardEntryChange } from './utils'
 import type { ICustomReplyEnv, ICustomReplyConfigItem, ICustomReplyConfig } from './customReply'
 import type { IAliasRollConfig, SuccessLevel, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextItem, ICustomTextHandler, CustomTextKeys, ICustomTextConfig } from './customText'
@@ -12,6 +12,7 @@ export type {
   IUserCommandContext,
   ParseUserCommandResult,
   DiceCommand,
+  CardEntryChange,
   // plugin
   IPlugin,
   IPluginRegisterContext,

@@ -1,3 +1,5 @@
+import type { ICardEntryChangeEvent } from '../card/types'
+
 export type UserRole = 'admin' | 'manager' | 'user'
 
 export interface IUserCommandContext {
@@ -33,6 +35,11 @@ export type DiceCommand = {
   }
   // 给插件使用，可附加自定义信息
   [key: string | number | symbol]: unknown
+}
+
+export type CardEntryChange = {
+  event: ICardEntryChangeEvent
+  context: IUserCommandContext
 }
 
 // 各个插件的 item 的通用字段

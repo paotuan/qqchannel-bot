@@ -1,5 +1,4 @@
-import type { DiceCommand, IPluginElementCommonInfo, ParseUserCommandResult } from './utils'
-import type { ICardEntryChangeEvent } from '../card/types'
+import type { DiceCommand, IPluginElementCommonInfo, ParseUserCommandResult, CardEntryChange } from './utils'
 
 export interface IHookFunction<T> extends IPluginElementCommonInfo {
   handler: T
@@ -7,7 +6,7 @@ export interface IHookFunction<T> extends IPluginElementCommonInfo {
 
 export type OnReceiveCommandCallback = (result: ParseUserCommandResult) => boolean | Promise<boolean>
 export type BeforeParseDiceRollCallback = (diceCommand: DiceCommand) => boolean
-export type OnCardEntryChangeCallback = (event: ICardEntryChangeEvent) => void
+export type OnCardEntryChangeCallback = (change: CardEntryChange) => void
 
 export interface IHookFunctionConfig {
   onReceiveCommand?: IHookFunction<OnReceiveCommandCallback>[]

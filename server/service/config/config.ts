@@ -6,7 +6,7 @@ import type {
   IRollDeciderConfig,
   CustomTextKeys, ParseUserCommandResult,
   IHookFunction, OnReceiveCommandCallback,
-  BeforeParseDiceRollCallback, DiceCommand, OnCardEntryChangeCallback
+  BeforeParseDiceRollCallback, DiceCommand, OnCardEntryChangeCallback, CardEntryChange
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import type { PluginManager } from './plugin'
@@ -16,7 +16,7 @@ import type { InlineDiceRoll } from '../dice/standard/inline'
 import { parseAliasForExpression } from './helpers/alias'
 import { getEmbedCustomText } from './default'
 import { renderCustomText } from './helpers/customText'
-import type { ICard, ICardEntryChangeEvent } from '../../../interface/card/types'
+import type { ICard } from '../../../interface/card/types'
 import { parseAliasForCommand } from './helpers/aliasCommand'
 import { handleHooks, handleHooksAsync, handleVoidHooks } from './helpers/hook'
 
@@ -259,7 +259,7 @@ export class ChannelConfig {
     handleHooks(this.hookBeforeParseDiceRollProcessors, diceCommand)
   }
 
-  hook_onCardEntryChange(e: ICardEntryChangeEvent) {
+  hook_onCardEntryChange(e: CardEntryChange) {
     console.log('[Hook] 人物卡数值变化')
     handleVoidHooks(this.hookOnCardEntryChangeProcessors, e)
   }

@@ -171,7 +171,9 @@ export class QApi {
     const config = this.wss.config.getChannelConfig(parseResult.context.channelId)
 
     // 注册监听器
-    const cardEntryChangeListener = (e: ICardEntryChangeEvent) => config.hook_onCardEntryChange(e)
+    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
+      config.hook_onCardEntryChange({ event, context: parseResult.context })
+    }
     this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
 
     // hook: OnReceiveCommandCallback 处理
