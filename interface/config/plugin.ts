@@ -14,6 +14,11 @@ export interface ICardQuery {
   isTemplate?: boolean
 }
 
+type SendMessageOptions = {
+  msgType?: 'text' | 'image'
+  skipParse?: boolean
+}
+
 export interface IPluginRegisterContext {
   versionName: string
   versionCode: number
@@ -24,8 +29,8 @@ export interface IPluginRegisterContext {
   getLinkedCardUserList: (env: ICustomReplyEnv) => string[] // 获取当前频道关联了人物卡的 user id 列表
   linkCard: (env: ICustomReplyEnv, cardName?: string) => void
   queryCard: (query: ICardQuery) => ICard[]
-  sendMessageToChannel: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
-  sendMessageToUser: (env: ICustomReplyEnv, msg: string, msgType?: 'text' | 'image') => Promise<IMessage | null>
+  sendMessageToChannel: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<IMessage | null>
+  sendMessageToUser: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<IMessage | null>
   getConfig: (context: { channelId: string }) => IChannelConfig
   getPreference: (context: { channelId: string }) => Record<string, string>
   dispatchUserCommand: (context: ParseUserCommandResult) => Promise<void>

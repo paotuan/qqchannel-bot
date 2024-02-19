@@ -34,7 +34,7 @@ module.exports = ({ sendMessageToChannel, getPreference, render }) => {
               } // 兼容处理
               setTimeout(() => {
                 const text = getPreference(context).text
-                sendMessageToChannel(env, render(text, env))
+                sendMessageToChannel(env, render(text, env), { skipParse: true })
               }, 100)
             }
           }
