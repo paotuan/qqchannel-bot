@@ -17,12 +17,19 @@ const getRegex = pattern => {
 
 const handled = Symbol()
 
-module.exports = ({ dispatchUserCommand, _ }) => {
+module.exports = ({ dispatchUserCommand, getPreference, _ }) => {
   return {
     id: 'io.paotuan.plugin.globalflags',
     name: '全局指令选项',
     description: '在任意指令结尾加上 -x2 可进行连续掷骰',
     version: 1,
+    preference: [
+      {
+        key: 'pattern',
+        label: '触发格式',
+        defaultValue: '\\-x'
+      },
+    ],
     hook: {
       onReceiveCommand: [
         {
@@ -35,7 +42,7 @@ module.exports = ({ dispatchUserCommand, _ }) => {
               return false
             }
             result[handled] = true
-            const pattern = '\\-x'
+            const pattern = getPreference(result.context).pattern
             const regex = getRegex(pattern)
             const matchResult = result.command.match(regex)
             if (matchResult && matchResult.groups) {

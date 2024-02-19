@@ -185,7 +185,7 @@ export class QApi {
     // 串行触发消息处理器
     for (const listener of this.guildMessageQueueListeners) {
       const consumed = await listener(parseResult)
-      if (consumed) return
+      if (consumed) break
     }
 
     // 取消监听器
