@@ -9,20 +9,12 @@ import { NoteManager } from './note'
 import { DiceManager } from './dice'
 import { CustomReplyManager } from './customReply'
 import { parseUserCommand } from './utils'
-import type { ParseUserCommandResult } from '../../../interface/config'
+import type { ParseUserCommandResult, IUserCommandContext } from '../../../interface/config'
 import type { ICardEntryChangeEvent } from '../../../interface/card/types'
 
 type QueueListener = (data: unknown) => Promise<boolean>
 type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
-
-interface IMessageReaction {
-  eventId: string
-  channelId: string
-  guildId: string
-  replyMsgId: string
-  userId: string
-}
-type MessageReactionListener = (reaction: IMessageReaction) => Promise<boolean>
+type MessageReactionListener = (context: IUserCommandContext) => Promise<boolean>
 
 /**
  * A bot connection to QQ
@@ -146,20 +138,23 @@ export class QApi {
 
       // 只处理 MESSAGE_REACTION_ADD 事件
       if (data.eventType === 'MESSAGE_REACTION_ADD') {
-        const reaction: IMessageReaction = {
-          eventId: data.eventId as string,
+        const userId = msg.user_id as string
+        const guildId = msg.guild_id as string
+        const user = this.guilds.findUser(userId, guildId)
+        const username = user?.username ?? userId
+        const context: IUserCommandContext = {
+          botId: this.appid,
+          userId,
+          username,
+          userRole: 'user', // todo 表情表态暂时不处理权限的问题，不方便拿到而且几乎不会用到
+          msgId: data.eventId as string, // 用于回复被动消息，表情标题用的是 event id
+          guildId,
           channelId: msg.channel_id as string,
-          guildId: msg.guild_id as string,
-          replyMsgId: msg.target.id as string,
-          userId: msg.user_id as string
+          replyMsgId: msg.target.id as string, // 表情表态回复的消息
+          realUser: { userId, username }
         }
 
-        // todo 注册监听器 & 插件逻辑
-
-        for (const listener of this.messageReactionListeners) {
-          const consumed = await listener(reaction)
-          if (consumed) return
-        }
+        await this.dispatchMessageReaction(context)
       }
     })
   }
@@ -228,6 +223,27 @@ export class QApi {
     // 串行触发消息处理器
     for (const listener of this.guildMessageQueueListeners) {
       const consumed = await listener(parseResult)
+      if (consumed) break
+    }
+
+    // 取消监听器
+    this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
+  }
+
+  // 分派表情
+  async dispatchMessageReaction(context: IUserCommandContext) {
+    const config = this.wss.config.getChannelConfig(context.channelId)
+
+    // 注册监听器
+    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
+      config.hook_onCardEntryChange({ event, context })
+    }
+    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
+
+    // todo 插件逻辑
+
+    for (const listener of this.messageReactionListeners) {
+      const consumed = await listener(context)
       if (consumed) break
     }
 

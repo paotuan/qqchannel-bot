@@ -7,7 +7,7 @@ import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 import type { IRiItem, IDiceRollReq } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
-import type { UserRole, ParseUserCommandResult } from '../../../interface/config'
+import type { UserRole, ParseUserCommandResult, IUserCommandContext } from '../../../interface/config'
 import { createCard } from '../../../interface/card'
 import { DiceRollContext } from '../DiceRollContext'
 
@@ -107,7 +107,7 @@ export class DiceManager {
   /**
    * 处理表情表态快速投骰
    */
-  private async handleGuildReactions({ eventId, channelId, guildId, replyMsgId: msgId, userId }: { eventId: string, channelId: string, guildId: string, replyMsgId: string, userId: string }) {
+  private async handleGuildReactions({ msgId: eventId, channelId, guildId, replyMsgId: msgId, userId, username, userRole }: IUserCommandContext) {
     // 获取原始消息
     const cacheMsg = await this.msgCache.fetch(`${channelId}-${msgId}`)
     if (!cacheMsg || cacheMsg.instruction === null) return
@@ -115,9 +115,7 @@ export class DiceManager {
       cacheMsg.instruction = detectInstruction(cacheMsg.text || '')
     }
     if (!cacheMsg.instruction) return
-    const user = this.api.guilds.findUser(userId, guildId)
-    // todo 表情表态暂时不处理权限的问题，不方便拿到而且几乎不会用到
-    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username: user?.persona ?? userId })
+    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username, userRole })
     if (roll) {
       // 表情表态也没有暗骰
       const channel = this.api.guilds.findChannel(channelId, guildId)
@@ -222,8 +220,8 @@ export class DiceManager {
     this.api.onGuildCommand(async (data) => {
       return await this.handleGuildMessage(data)
     })
-    this.api.onMessageReaction(async (data) => {
-      this.handleGuildReactions(data)
+    this.api.onMessageReaction(async (context) => {
+      this.handleGuildReactions(context)
       return false
     })
     this.api.onDirectMessage(async (data: any) => {
