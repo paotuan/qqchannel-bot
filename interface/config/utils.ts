@@ -42,6 +42,8 @@ export type CardEntryChange = {
   context: IUserCommandContext
 }
 
+export type MessageReaction = { context: IUserCommandContext }
+
 // 各个插件的 item 的通用字段
 export interface IPluginElementCommonInfo {
   id: string // 短 id

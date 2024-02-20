@@ -240,11 +240,14 @@ export class QApi {
     }
     this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
 
-    // todo 插件逻辑
-
-    for (const listener of this.messageReactionListeners) {
-      const consumed = await listener(context)
-      if (consumed) break
+    // hook: OnMessageReaction 处理
+    const handled = await config.hook_onMessageReaction({ context })
+    // 这里给个特殊逻辑，如果由插件处理过，就不走默认的逻辑了（自动检测技能检定），否则会显得奇怪
+    if (!handled) {
+      for (const listener of this.messageReactionListeners) {
+        const consumed = await listener(context)
+        if (consumed) break
+      }
     }
 
     // 取消监听器

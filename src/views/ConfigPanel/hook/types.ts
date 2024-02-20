@@ -1,1 +1,1 @@
-export type HookModule = 'onReceiveCommand' | 'beforeParseDiceRoll' | 'onCardEntryChange'
+export type HookModule = 'onReceiveCommand' | 'beforeParseDiceRoll' | 'onCardEntryChange' | 'onMessageReaction'

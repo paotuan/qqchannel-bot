@@ -192,6 +192,7 @@ export interface IPluginConfigDisplay {
     onReceiveCommand: IPluginItemConfig[]
     beforeParseDiceRoll: IPluginItemConfig[]
     onCardEntryChange: IPluginItemConfig[]
+    onMessageReaction: IPluginItemConfig[]
   }
 }
 

@@ -61,10 +61,11 @@ export const usePluginStore = defineStore('plugin', () => {
     const map: Record<HookModule, Record<string, IPluginItemConfigForDisplay>> = {
       onReceiveCommand: {},
       beforeParseDiceRoll: {},
-      onCardEntryChange: {}
+      onCardEntryChange: {},
+      onMessageReaction: {}
     }
     plugins.value.forEach(plugin => {
-      (['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange'] as const).forEach(type => {
+      (['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction'] as const).forEach(type => {
         plugin.hook[type].forEach(item => {
           const id = `${plugin.id}.${item.id}`
           map[type][id] = {

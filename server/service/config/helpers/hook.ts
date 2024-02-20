@@ -55,3 +55,13 @@ export function handleVoidHooks<T>(processors: IHookFunction<(arg: T) => void>[]
     processor.handler(arg)
   }
 }
+
+export async function handleLinearHooksAsync<T>(processors: IHookFunction<(arg: T) => boolean | Promise<boolean>>[], arg: T) {
+  let anyHandled = false
+  // 从上到下处理
+  for (const processor of processors) {
+    const handled = await processor.handler(arg)
+    anyHandled ||= handled
+  }
+  return anyHandled
+}

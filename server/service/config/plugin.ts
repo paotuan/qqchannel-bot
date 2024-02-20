@@ -7,7 +7,7 @@ import type {
   IPluginElementCommonInfo,
   IHookFunction,
   OnReceiveCommandCallback,
-  BeforeParseDiceRollCallback, OnCardEntryChangeCallback
+  BeforeParseDiceRollCallback, OnCardEntryChangeCallback, OnMessageReactionCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
@@ -216,7 +216,8 @@ export class PluginManager {
       hook: {
         onReceiveCommand: (plugin.hook?.onReceiveCommand || []).map(withDefaults),
         beforeParseDiceRoll: (plugin.hook?.beforeParseDiceRoll || []).map(withDefaults),
-        onCardEntryChange: (plugin.hook?.onCardEntryChange || []).map(withDefaults)
+        onCardEntryChange: (plugin.hook?.onCardEntryChange || []).map(withDefaults),
+        onMessageReaction: (plugin.hook?.onMessageReaction || []).map(withDefaults),
       }
     }))
   }
@@ -302,6 +303,19 @@ export class PluginManager {
     Object.values(this.pluginMap).forEach(plugin => {
       if (!plugin.hook?.onCardEntryChange) return
       plugin.hook.onCardEntryChange.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: onMessageReaction
+  // fullId => IHookFunction<OnMessageReactionCallback>
+  get hookOnMessageReactionMap(): Record<string, IHookFunction<OnMessageReactionCallback>> {
+    const ret: Record<string, IHookFunction<OnMessageReactionCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.onMessageReaction) return
+      plugin.hook.onMessageReaction.forEach(item => {
         ret[`${plugin.id}.${item.id}`] = item
       })
     })

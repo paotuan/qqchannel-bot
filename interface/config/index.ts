@@ -1,9 +1,9 @@
 import type { IPlugin, IPluginRegisterContext, ICardQuery } from './plugin'
-import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, ParseUserCommandResult, DiceCommand, CardEntryChange } from './utils'
+import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, ParseUserCommandResult, DiceCommand, CardEntryChange, MessageReaction } from './utils'
 import type { ICustomReplyEnv, ICustomReplyConfigItem, ICustomReplyConfig } from './customReply'
 import type { IAliasRollConfig, SuccessLevel, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextItem, ICustomTextHandler, CustomTextKeys, ICustomTextConfig } from './customText'
-import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback, BeforeParseDiceRollCallback, OnCardEntryChangeCallback } from './hook'
+import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback, BeforeParseDiceRollCallback, OnCardEntryChangeCallback, OnMessageReactionCallback } from './hook'
 
 export type {
   // utils
@@ -13,6 +13,7 @@ export type {
   ParseUserCommandResult,
   DiceCommand,
   CardEntryChange,
+  MessageReaction,
   // plugin
   IPlugin,
   IPluginRegisterContext,
@@ -35,7 +36,8 @@ export type {
   IHookFunction,
   OnReceiveCommandCallback,
   BeforeParseDiceRollCallback,
-  OnCardEntryChangeCallback
+  OnCardEntryChangeCallback,
+  OnMessageReactionCallback
 }
 
 // 每个子频道对应一份配置
@@ -53,6 +55,7 @@ export interface IChannelConfig {
     onReceiveCommand: { id: string, enabled: boolean }[] // full id
     beforeParseDiceRoll: { id: string, enabled: boolean }[] // full id
     onCardEntryChange: { id: string, enabled: boolean }[] // full id
+    onMessageReaction: { id: string, enabled: boolean }[] // full id
   }
   embedPlugin: IPlugin // id = io.paotuan.embed.xx
   plugins: IPluginConfig[] // 管理第三方插件配置 => config
