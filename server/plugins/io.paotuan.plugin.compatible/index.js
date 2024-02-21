@@ -19,8 +19,8 @@ module.exports = ({ getCard, getConfig }) => {
         // 处理指令前缀的大小写
         {
           id: 'convertCase-Prefix',
-          name: '指令对大小写不敏感',
-          description: '能够识别【1D100】之类的大写表达式，并转换成小写进行解析',
+          name: '指令对大小写不敏感（处理指令前缀）',
+          description: '将指令前缀转换成小写进行解析',
           handler: (diceCommand) => convertCase(diceCommand)
         }
       ],
@@ -33,7 +33,7 @@ module.exports = ({ getCard, getConfig }) => {
         },
         {
           id: 'detectCardEntry',
-          name: '智能探测指令中引用的人物卡条目',
+          name: '探测指令中引用的人物卡条目',
           description: '指令引用人物卡条目时，可不加【$】前缀，如【1d3+db】。系统会自动探测指令中包含的人物卡条目，并替换为对应的值',
           handler: (diceCommand) => {
             // 特殊：【.st力量+1】 st 指令需要排除 // 【.en+侦察】en 也排除 // 目前应该不需要了

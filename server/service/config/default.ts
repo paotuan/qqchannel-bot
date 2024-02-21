@@ -239,7 +239,14 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       onCardEntryChange: [],
       onMessageReaction: []
     }
-    config.version = 35 // 1.9.0
+    // 迁移旧的实验性配置
+    if ((config as any).parseRule) {
+      config.hookIds.onReceiveCommand.push({ id: 'io.paotuan.plugin.compatible.convertCase-Prefix', enabled: !!(config as any).parseRule.convertCase })
+      config.hookIds.beforeParseDiceRoll.push({ id: 'io.paotuan.plugin.compatible.convertCase', enabled: !!(config as any).parseRule.convertCase })
+      config.hookIds.beforeParseDiceRoll.push({ id: 'io.paotuan.plugin.compatible.detectCardEntry', enabled: !!(config as any).parseRule.detectCardEntry })
+      config.hookIds.beforeParseDiceRoll.push({ id: 'io.paotuan.plugin.compatible.detectDefaultRoll', enabled: !!(config as any).parseRule.detectDefaultRoll })
+    }
+    config.version = 35 // 1.8.3
   }
   return config as IChannelConfig
 }
