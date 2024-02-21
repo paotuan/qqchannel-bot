@@ -1,10 +1,12 @@
 /* eslint-env node */
 
-module.exports = ({ sendMessageToChannel, getPreference, render }) => {
+module.exports = ({ sendMessageToChannel, getPreference, render, dispatchUserCommand }) => {
+  const scBroadcastMessageIds = [] // 保存理智损失播报的消息 id
+
   return {
     id: 'io.paotuan.plugin.scbroadcast',
     name: '理智损失播报',
-    description: '当理智损失 5 点或更多时，进行一次播报',
+    description: '当理智损失 5 点或更多时，进行一次播报。表情回复播报消息，进行一次智力检定。',
     version: 1,
     preference: [
       {
@@ -32,11 +34,28 @@ module.exports = ({ sendMessageToChannel, getPreference, render }) => {
                 人物卡名: event.card.name,
                 at用户: `<@!${context.userId}>`
               }
-              setTimeout(() => {
+              setTimeout(async () => {
                 const text = getPreference(context).text
-                sendMessageToChannel(env, render(text, env), { skipParse: true })
-              }, 100)
+                const resp = await sendMessageToChannel(env, render(text, env), { skipParse: true })
+                if (resp && resp.id) {
+                  scBroadcastMessageIds.push(resp.id)
+                }
+              }, 500)
             }
+          }
+        }
+      ],
+      onMessageReaction: [
+        {
+          id: 'rollint',
+          name: '理智损失播报后，进行智力检定',
+          handler: ({ context }) => {
+            const msgId = context.replyMsgId
+            if (scBroadcastMessageIds.includes(msgId)) {
+              dispatchUserCommand({ command: '智力', context })
+              return true
+            }
+            return false
           }
         }
       ]

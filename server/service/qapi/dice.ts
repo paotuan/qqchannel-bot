@@ -248,7 +248,7 @@ function detectInstruction(text: string) {
     const skill = skillMatch[0]
     const difficultyMatch = text.match(DIFFICULTY_REGEX)
     const difficulty = difficultyMatch ? difficultyMatch[0] : ''
-    return 'd' + difficulty + skill
+    return difficulty + skill // 拼装检定表达式
   }
   return null
 }
