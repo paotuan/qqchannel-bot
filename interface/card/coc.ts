@@ -137,9 +137,8 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
   }
 
   override getAbility(input: string) {
-    const _input = input.toUpperCase()
     // 获取所有可能的别名
-    const possibleNames = SKILL_ALIAS[_input] ?? [_input]
+    const possibleNames = this.getAliases(input)
     // 是否从配置表里找得到这个 ability
     for (const key of possibleNames) {
       const ability = this.data.abilities.find(item => item.name.toUpperCase() === key)
@@ -191,8 +190,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
 
   // 不包含困难前缀的获取
   private getRawEntry(input: string): ICocCardEntryRaw | undefined {
-    const _input = input.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
+    const possibleSkills = this.getAliases(input) // 获取所有可能的属性/技能别名
     // 遍历 basic，props 和 skills 尝试获取. 先判断 skills，因为可能有用户输入同名属性，优先级更高
     for (const key of possibleSkills) {
       for (const type of ['skills', 'basic', 'props'] as const) {
@@ -303,8 +301,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
    */
   cancelSkillGrowth(skill: string) {
     let updated = false
-    const _input = skill.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input]
+    const possibleSkills = this.getAliases(skill)
     possibleSkills.forEach(skill => { // 把所有的别名都干掉
       if (this.data.meta.skillGrowth[skill]) {
         delete this.data.meta.skillGrowth[skill]
@@ -380,6 +377,11 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')
     const abilities = this.data.abilities.map(item => `${item.name}:${item.expression}`).join('\n')
     return '角色：' + this.name + '\n' + basic + '\n' + props + '\n' + skills + '\n' + abilities
+  }
+
+  override getAliases(name: string) {
+    const _input = name.toUpperCase()
+    return SKILL_ALIAS[_input] ?? [_input]
   }
 }
 

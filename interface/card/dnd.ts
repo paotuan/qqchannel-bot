@@ -127,9 +127,8 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   }
 
   override getAbility(input: string): IDndCardAbility | undefined {
-    const _input = input.toUpperCase()
     // 获取所有可能的别名
-    const possibleNames = SKILL_ALIAS[_input] ?? [_input]
+    const possibleNames = this.getAliases(input)
     for (const key of possibleNames) {
       for (const type of ['spells', 'equips'] as const) {
         const ability = this.data[type].find(item => item.name.toUpperCase() === key)
@@ -197,8 +196,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   override getEntry(input: string): IDndCardEntry | undefined {
     const [skillName, postfix] = parseInput(input)
     if (!skillName) return undefined
-    const _input = skillName.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
+    const possibleSkills = this.getAliases(skillName) // 获取所有可能的属性/技能别名
     // 遍历尝试获取
     for (const key of possibleSkills) {
       // 先判断 items，因为可能有用户输入同名属性，优先级更高
@@ -295,8 +293,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
    */
   cancelExperienced(skill: string) {
     let updated = false
-    const _input = skill.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input]
+    const possibleSkills = this.getAliases(skill)
     possibleSkills.forEach(skill => { // 把所有的别名都干掉
       if (this.data.meta.experienced[skill]) {
         delete this.data.meta.experienced[skill]
@@ -338,6 +335,11 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')
     const items = Object.entries(this.data.items).map(([k ,v]) => `${k}:${v}`).join(' ')
     return '角色：' + this.name + '\n' + basic + '\n' + props + '\n' + skills + '\n' + items
+  }
+
+  override getAliases(name: string) {
+    const _input = name.toUpperCase()
+    return SKILL_ALIAS[_input] ?? [_input]
   }
 }
 
