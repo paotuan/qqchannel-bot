@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
-import Api2d from 'api2d'
+import Api2d from '@paotuan/api2d'
 
 interface IMessage {
   id: string

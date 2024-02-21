@@ -663,6 +663,18 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@paotuan/api2d@0.1.41":
+  version "0.1.41"
+  resolved "https://registry.npmmirror.com/@paotuan/api2d/-/api2d-0.1.41.tgz#9caa0080af13449bded495803fcac953cf1c7d54"
+  integrity sha512-W6jyspjC8aPb9O/myZKT2hIaTLbQcqBIIP9npVgc2ogHqFXY83K3ThZsAOMxEOun/buZpfHIFT3OXUEpMAjmbw==
+  dependencies:
+    "@microsoft/fetch-event-source" "^2.0.1"
+    axios "^1.3.6"
+    eventsource-parser "^1.0.0"
+    formdata-node "^5.0.0"
+    https-proxy-agent "^7.0.1"
+    node-fetch "2"
+
 "@sinclair/typebox@^0.25.16":
   version "0.25.24"
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.25.24.tgz#8c7688559979f7079aacaf31aa881c3aa410b718"
@@ -1306,16 +1318,6 @@ anymatch@~3.1.2:
   dependencies:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
-
-"api2d@file:../api2d":
-  version "0.1.39"
-  dependencies:
-    "@microsoft/fetch-event-source" "^2.0.1"
-    axios "^1.3.6"
-    eventsource-parser "^1.0.0"
-    formdata-node "^5.0.0"
-    https-proxy-agent "^7.0.1"
-    node-fetch "2"
 
 arg@^4.1.0:
   version "4.1.3"
