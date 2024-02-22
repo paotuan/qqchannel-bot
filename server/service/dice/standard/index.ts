@@ -44,9 +44,9 @@ export class StandardDiceRoll extends BasePtDiceRoll {
 
   /* final */ override roll() {
     this.parse()
-    // todo events
+    this.emitDiceRollEvent('BeforeDiceRoll') // mitt 看源码是同步调用的，应该没什么问题
     this.doRoll()
-    // todo events
+    this.emitDiceRollEvent('AfterDiceRoll')
     return this
   }
 

@@ -10,6 +10,8 @@ import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
 import type { UserRole, ParseUserCommandResult, IUserCommandContext } from '../../../interface/config'
 import { createCard } from '../../../interface/card'
 import { DiceRollContext } from '../DiceRollContext'
+import mitt from 'mitt'
+import type { BasePtDiceRoll } from '../dice'
 
 interface IMessageCache {
   text?: string
@@ -22,6 +24,10 @@ export class DiceManager {
   private readonly msgCache: LRUCache<string, IMessageCache>
   private readonly opposedRollCache: LRUCache<string, StandardDiceRoll> // 对抗检定缓存 msgid => roll
   private readonly riListCache: Record<string, IRiItem[]> // 先攻列表缓存 channelId => ri list
+  // 掷骰事件相关
+  private readonly emitter = mitt<{ BeforeDiceRoll: BasePtDiceRoll, AfterDiceRoll: BasePtDiceRoll }>()
+  private readonly beforeDiceRollListener = (roll: BasePtDiceRoll) => this.emitter.emit('BeforeDiceRoll', roll)
+  private readonly afterDiceRollListener = (roll: BasePtDiceRoll) => this.emitter.emit('AfterDiceRoll', roll)
 
   constructor(api: QApi) {
     makeAutoObservable<this, 'api' | 'wss'>(this, { api: false, wss: false })
@@ -143,7 +149,11 @@ export class DiceManager {
       // 是否有回复消息(目前仅用于对抗检定)
       const opposedRoll = replyMsgId ? this.opposedRollCache.get(replyMsgId) : undefined
       // 投骰
-      const roller = createDiceRoll(fullExp, new DiceRollContext(this.api, { channelId, userId, username, userRole, opposedRoll }))
+      const roller = createDiceRoll(
+        fullExp,
+        new DiceRollContext(this.api, { channelId, userId, username, userRole, opposedRoll }),
+        { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
+      )
       // 保存人物卡更新
       const updatedCards = roller.applyToCard()
       updatedCards.forEach(card => {
@@ -187,7 +197,11 @@ export class DiceManager {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       const linkCard = () => {}
       const queryCard = () => []
-      const roll = createDiceRoll(expression, { channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard })
+      const roll = createDiceRoll(
+        expression,
+        { channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard },
+        { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
+      )
       // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
       // 特殊：保存先攻列表会把这个人当成玩家，目前也先不能保存
       // if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
