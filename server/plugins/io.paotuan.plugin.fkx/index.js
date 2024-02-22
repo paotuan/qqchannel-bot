@@ -74,7 +74,7 @@ module.exports = ({ sendMessageToChannel, getPreference, render, getCard, saveCa
                 if (resp && resp.id) {
                   fkxBroadcastMessageIds.push(resp.id)
                 }
-              }, 500)
+              }, 200)
             }
           }
         }

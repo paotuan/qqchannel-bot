@@ -40,7 +40,7 @@ module.exports = ({ sendMessageToChannel, getPreference, render, dispatchUserCom
                 if (resp && resp.id) {
                   scBroadcastMessageIds.push(resp.id)
                 }
-              }, 500)
+              }, 200)
             }
           }
         }
