@@ -12,8 +12,7 @@ export class CocDiceRoll extends StandardDiceRoll {
     return super.selfCard as CocCard | undefined // 如果有 card，必须是 coc card
   }
 
-  override roll() {
-    super.parse()
+  override doRoll() {
     // 掷骰
     for (let i = 0; i < this.times; i++) {
       const roll = new DiceRoll(this.expression)
@@ -40,7 +39,6 @@ export class CocDiceRoll extends StandardDiceRoll {
         })
       })
     }
-    return this
   }
 
   override applyToCard() {

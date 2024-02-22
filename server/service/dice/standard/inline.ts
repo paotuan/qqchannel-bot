@@ -17,11 +17,9 @@ function initClass() {
   return class InlineDiceRoll extends StandardDiceRoll {
     private diceRoll: DiceRoll | undefined = undefined
 
-    override roll() {
-      super.parse()
+    override doRoll() {
       // inline roll 只取第一个，不考虑其他花里胡哨的因素
       this.diceRoll = new DiceRoll(this.expression)
-      return this
     }
 
     get total() {

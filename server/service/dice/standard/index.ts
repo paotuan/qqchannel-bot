@@ -42,8 +42,15 @@ export class StandardDiceRoll extends BasePtDiceRoll {
   // 掷骰结果
   protected readonly rolls: IRollResult[] = []
 
-  override roll() {
+  /* final */ override roll() {
     this.parse()
+    // todo events
+    this.doRoll()
+    // todo events
+    return this
+  }
+
+  protected doRoll() {
     // 掷骰。此处是 general 的实现，子类可基于不同的规则决定怎么使用这些解析出来的部分
     for (let i = 0; i < this.times; i++) {
       const roll = new DiceRoll(this.expression)
@@ -68,7 +75,6 @@ export class StandardDiceRoll extends BasePtDiceRoll {
         })
       })
     }
-    return this
   }
 
   // 解析指令，最终结果存入 this.expression
