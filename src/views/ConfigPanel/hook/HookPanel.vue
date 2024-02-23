@@ -19,6 +19,8 @@ import HookList from './HookList.vue'
 const moduleList: { label: string, value: HookModule }[] = [
   { label: '收到指令', value: 'onReceiveCommand' },
   { label: '解析骰子指令前', value: 'beforeParseDiceRoll' },
+  { label: '掷骰/检定前', value: 'beforeDiceRoll' },
+  { label: '掷骰/检定后', value: 'afterDiceRoll' },
   { label: '人物卡数值变化', value: 'onCardEntryChange' },
   { label: '收到表情表态', value: 'onMessageReaction' }
 ]

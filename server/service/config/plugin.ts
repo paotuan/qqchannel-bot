@@ -3,11 +3,16 @@ import type {
   IPlugin,
   ICustomReplyConfig,
   IPluginRegisterContext,
-  IAliasRollConfig, ICustomTextConfig,
+  IAliasRollConfig,
+  ICustomTextConfig,
   IPluginElementCommonInfo,
   IHookFunction,
   OnReceiveCommandCallback,
-  BeforeParseDiceRollCallback, OnCardEntryChangeCallback, OnMessageReactionCallback
+  BeforeParseDiceRollCallback,
+  OnCardEntryChangeCallback,
+  OnMessageReactionCallback,
+  BeforeDiceRollCallback,
+  AfterDiceRollCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
@@ -218,6 +223,8 @@ export class PluginManager {
         beforeParseDiceRoll: (plugin.hook?.beforeParseDiceRoll || []).map(withDefaults),
         onCardEntryChange: (plugin.hook?.onCardEntryChange || []).map(withDefaults),
         onMessageReaction: (plugin.hook?.onMessageReaction || []).map(withDefaults),
+        beforeDiceRoll: (plugin.hook?.beforeDiceRoll || []).map(withDefaults),
+        afterDiceRoll: (plugin.hook?.afterDiceRoll || []).map(withDefaults),
       }
     }))
   }
@@ -316,6 +323,32 @@ export class PluginManager {
     Object.values(this.pluginMap).forEach(plugin => {
       if (!plugin.hook?.onMessageReaction) return
       plugin.hook.onMessageReaction.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: beforeDiceRoll
+  // fullId => IHookFunction<BeforeDiceRollCallback>
+  get hookBeforeDiceRollMap(): Record<string, IHookFunction<BeforeDiceRollCallback>> {
+    const ret: Record<string, IHookFunction<BeforeDiceRollCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.beforeDiceRoll) return
+      plugin.hook.beforeDiceRoll.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: afterDiceRoll
+  // fullId => IHookFunction<AfterDiceRollCallback>
+  get hookAfterDiceRollMap(): Record<string, IHookFunction<AfterDiceRollCallback>> {
+    const ret: Record<string, IHookFunction<AfterDiceRollCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.afterDiceRoll) return
+      plugin.hook.afterDiceRoll.forEach(item => {
         ret[`${plugin.id}.${item.id}`] = item
       })
     })

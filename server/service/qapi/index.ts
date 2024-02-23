@@ -11,6 +11,7 @@ import { CustomReplyManager } from './customReply'
 import { parseUserCommand } from './utils'
 import type { ParseUserCommandResult, IUserCommandContext } from '../../../interface/config'
 import type { ICardEntryChangeEvent } from '../../../interface/card/types'
+import type { BasePtDiceRoll } from '../dice'
 
 type QueueListener = (data: unknown) => Promise<boolean>
 type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
@@ -209,10 +210,7 @@ export class QApi {
     const config = this.wss.config.getChannelConfig(parseResult.context.channelId)
 
     // 注册监听器
-    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
-      config.hook_onCardEntryChange({ event, context: parseResult.context })
-    }
-    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
+    const unregisterListeners = this.registerCommonCommandProcessListeners(parseResult.context)
 
     // hook: OnReceiveCommandCallback 处理
     await config.hook_onReceiveCommand(parseResult)
@@ -227,7 +225,7 @@ export class QApi {
     }
 
     // 取消监听器
-    this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
+    unregisterListeners()
   }
 
   // 分派表情
@@ -235,10 +233,7 @@ export class QApi {
     const config = this.wss.config.getChannelConfig(context.channelId)
 
     // 注册监听器
-    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
-      config.hook_onCardEntryChange({ event, context })
-    }
-    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
+    const unregisterListeners = this.registerCommonCommandProcessListeners(context)
 
     // hook: OnMessageReaction 处理
     const handled = await config.hook_onMessageReaction({ context })
@@ -251,6 +246,28 @@ export class QApi {
     }
 
     // 取消监听器
-    this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
+    unregisterListeners()
+  }
+
+  private registerCommonCommandProcessListeners(context: IUserCommandContext) {
+    const config = this.wss.config.getChannelConfig(context.channelId)
+    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
+      config.hook_onCardEntryChange({ event, context })
+    }
+    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
+    const beforeDiceRollListener = (roll: BasePtDiceRoll) => {
+      config.hook_beforeDiceRoll(roll)
+    }
+    const afterDiceRollListener = (roll: BasePtDiceRoll) => {
+      config.hook_afterDiceRoll(roll)
+    }
+    this.dice.addDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
+    this.dice.addDiceRollListener('AfterDiceRoll', afterDiceRollListener)
+
+    return () => {
+      this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
+      this.dice.removeDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
+      this.dice.removeDiceRollListener('AfterDiceRoll', afterDiceRollListener)
+    }
   }
 }

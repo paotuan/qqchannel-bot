@@ -193,6 +193,8 @@ export interface IPluginConfigDisplay {
     beforeParseDiceRoll: IPluginItemConfig[]
     onCardEntryChange: IPluginItemConfig[]
     onMessageReaction: IPluginItemConfig[]
+    beforeDiceRoll: IPluginItemConfig[]
+    afterDiceRoll: IPluginItemConfig[]
   }
 }
 

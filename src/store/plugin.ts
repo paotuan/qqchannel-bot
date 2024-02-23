@@ -62,10 +62,13 @@ export const usePluginStore = defineStore('plugin', () => {
       onReceiveCommand: {},
       beforeParseDiceRoll: {},
       onCardEntryChange: {},
-      onMessageReaction: {}
+      onMessageReaction: {},
+      beforeDiceRoll: {},
+      afterDiceRoll: {}
     }
+    const hookTypes = Object.keys(map) as HookModule[]
     plugins.value.forEach(plugin => {
-      (['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction'] as const).forEach(type => {
+      hookTypes.forEach(type => {
         plugin.hook[type].forEach(item => {
           const id = `${plugin.id}.${item.id}`
           map[type][id] = {

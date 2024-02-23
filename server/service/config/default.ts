@@ -42,7 +42,9 @@ export function getInitialDefaultConfig(): IChannelConfig {
       onReceiveCommand: [],
       beforeParseDiceRoll: [],
       onCardEntryChange: [],
-      onMessageReaction: []
+      onMessageReaction: [],
+      beforeDiceRoll: [],
+      afterDiceRoll: []
     },
     embedPlugin: {
       id: embedPluginId,
@@ -237,7 +239,9 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       onReceiveCommand: [],
       beforeParseDiceRoll: [],
       onCardEntryChange: [],
-      onMessageReaction: []
+      onMessageReaction: [],
+      beforeDiceRoll: [],
+      afterDiceRoll: []
     }
     // 迁移旧的实验性配置
     if ((config as any).parseRule) {

@@ -8,7 +8,8 @@ import type {
   IHookFunction, OnReceiveCommandCallback,
   BeforeParseDiceRollCallback, DiceCommand,
   OnCardEntryChangeCallback, CardEntryChange,
-  OnMessageReactionCallback, MessageReaction
+  OnMessageReactionCallback, MessageReaction,
+  BeforeDiceRollCallback, AfterDiceRollCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import type { PluginManager } from './plugin'
@@ -53,7 +54,7 @@ export class ChannelConfig {
   updateConfigByPluginManifest() {
     if (!this.plugin) return
     const manifest = this.plugin.pluginListManifest
-    // 记录一下当前每个功能的 id，用于第三部 purge
+    // 记录一下当前每个功能的 id，用于第三步 purge
     const existIds = {
       customReplyIds: new Set<string>(),
       aliasRollIds: new Set<string>(),
@@ -62,7 +63,9 @@ export class ChannelConfig {
         onReceiveCommand: new Set<string>(),
         beforeParseDiceRoll: new Set<string>(),
         onCardEntryChange: new Set<string>(),
-        onMessageReaction: new Set<string>()
+        onMessageReaction: new Set<string>(),
+        beforeDiceRoll: new Set<string>(),
+        afterDiceRoll: new Set<string>()
       }
     }
     manifest.forEach(plugin => {
@@ -99,7 +102,7 @@ export class ChannelConfig {
           this.config.customTextIds.push({ id, enabled: config.defaultEnabled })
         }
       })
-      ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction'] as const).forEach(prop => {
+      ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction', 'beforeDiceRoll', 'afterDiceRoll'] as const).forEach(prop => {
         plugin.hook[prop].forEach(config =>{
           const id = `${plugin.id}.${config.id}`
           existIds.hookIds[prop].add(id)
@@ -113,7 +116,7 @@ export class ChannelConfig {
     ;(['customReplyIds', 'aliasRollIds', 'customTextIds'] as const).forEach(prop => {
       this.config[prop] = this.config[prop].filter(config => config.id.startsWith('io.paotuan.embed') || existIds[prop].has(config.id))
     })
-    ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction'] as const).forEach(prop => {
+    ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction', 'beforeDiceRoll', 'afterDiceRoll'] as const).forEach(prop => {
       this.config.hookIds[prop] = this.config.hookIds[prop].filter(config => existIds.hookIds[prop].has(config.id))
     })
   }
@@ -256,6 +259,20 @@ export class ChannelConfig {
       .filter(conf => !!conf)
   }
 
+  private get hookBeforeDiceRollProcessors(): IHookFunction<BeforeDiceRollCallback>[] {
+    return this.config.hookIds.beforeDiceRoll
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookBeforeDiceRollMap[item.id] as IHookFunction<BeforeDiceRollCallback>)
+      .filter(conf => !!conf)
+  }
+
+  private get hookAfterDiceRollProcessors(): IHookFunction<AfterDiceRollCallback>[] {
+    return this.config.hookIds.afterDiceRoll
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookAfterDiceRollMap[item.id] as IHookFunction<AfterDiceRollCallback>)
+      .filter(conf => !!conf)
+  }
+
   /**
    * Hook 处理
    */
@@ -277,5 +294,15 @@ export class ChannelConfig {
   hook_onMessageReaction(e: MessageReaction) {
     console.log('[Hook] 收到表情表态')
     return handleLinearHooksAsync(this.hookOnMessageReactionProcessors, e)
+  }
+
+  hook_beforeDiceRoll(roll: unknown) {
+    console.log('[Hook] 掷骰/检定前')
+    handleHooks(this.hookBeforeDiceRollProcessors, roll)
+  }
+
+  hook_afterDiceRoll(roll: unknown) {
+    console.log('[Hook] 掷骰/检定后')
+    handleVoidHooks(this.hookAfterDiceRollProcessors, roll)
   }
 }
