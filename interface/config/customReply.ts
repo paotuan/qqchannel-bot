@@ -5,6 +5,7 @@ export interface ICustomReplyEnv {
   guildId: string
   channelId: string
   userId: string
+  username: string
   nick: string // deprecated
   用户名: string
   人物卡名: string

@@ -71,8 +71,9 @@ export class PluginManager {
         }
       },
       queryCard: (query) => this.wss.cards.queryCard(query),
-      sendMessageToChannel: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, options = {}) => {
-        const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)
+      sendMessageToChannel: ({ channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
+        const qApi = this.wss.qApis.find(botId)
+        const channel = qApi?.guilds.findChannel(channelId, guildId)
         if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
         // 兼容旧接口
         if (typeof options === 'string') {
@@ -81,14 +82,15 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(this.wss, { channelId, userId, username, userRole }), [])
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { guildId, channelId, userId, username, userRole }), [])
           return channel.sendMessage({ content })
         } else {
           return channel.sendMessage({ image: msg })
         }
       },
-      sendMessageToUser: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, options = {}) => {
-        const user = this.wss.qApis.find(botId)?.guilds.findUser(userId, guildId)
+      sendMessageToUser: ({ channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
+        const qApi = this.wss.qApis.find(botId)
+        const user = qApi?.guilds.findUser(userId, guildId)
         if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
         // 兼容旧接口
         if (typeof options === 'string') {
@@ -97,7 +99,7 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(this.wss, { channelId, userId, username, userRole }), [])
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { guildId, channelId, userId, username, userRole }), [])
           return user.sendMessage({ content })
         } else {
           return user.sendMessage({ image: msg })

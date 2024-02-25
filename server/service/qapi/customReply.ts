@@ -54,6 +54,7 @@ export class CustomReplyManager {
       const username = context.username
       const userId = context.userId
       const userRole = context.userRole
+      const guildId = context.guildId
       const channelId = context.channelId
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
         return render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
@@ -65,6 +66,7 @@ export class CustomReplyManager {
         guildId: context.guildId,
         userId,
         userRole,
+        username,
         nick: username,
         用户名: username,
         人物卡名: getCard(userId)?.name ?? username,
@@ -75,7 +77,7 @@ export class CustomReplyManager {
       }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
-      return parseTemplate(template, new DiceRollContext(this.api, { channelId, userId, username, userRole }), [])
+      return parseTemplate(template, new DiceRollContext(this.api, { guildId, channelId, userId, username, userRole }), [])
     } catch (e: any) {
       console.error('[Config] 自定义回复处理出错', e?.message)
       return undefined

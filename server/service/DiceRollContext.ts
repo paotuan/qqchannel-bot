@@ -10,8 +10,9 @@ type InitDiceRollContextArgs = Partial<IDiceRollContext> & { userId: string }
 // 简化一些通用方法和配置的获取
 export class DiceRollContext implements IDiceRollContext {
 
-  private readonly qApi?: QApi
+  private readonly qApi: QApi
   private readonly wss: Wss
+  guildId?: string
   channelId?: string
   userId: string
   username: string
@@ -23,10 +24,10 @@ export class DiceRollContext implements IDiceRollContext {
   opposedRoll?: StandardDiceRoll
   setBackgroundLogEnabled: IDiceRollContext['setBackgroundLogEnabled']
 
-  constructor(qapiOrWss: Wss | QApi, args: InitDiceRollContextArgs) {
-    // FIXME 这里暂时两个都能接受，后面要梳理一下
-    this.qApi = qapiOrWss instanceof QApi ? qapiOrWss : undefined
-    this.wss = qapiOrWss instanceof QApi ? qapiOrWss.wss : qapiOrWss
+  constructor(qapi: QApi, args: InitDiceRollContextArgs) {
+    this.qApi = qapi
+    this.wss = qapi.wss
+    this.guildId = args.guildId
     this.channelId = args.channelId
     this.userId = args.userId
     this.username = args.username ?? args.userId
@@ -37,6 +38,10 @@ export class DiceRollContext implements IDiceRollContext {
     this.queryCard = args.queryCard ?? this._queryCard.bind(this)
     this.opposedRoll = args.opposedRoll
     this.setBackgroundLogEnabled = args.setBackgroundLogEnabled ?? this._setBackgroundLogEnabled.bind(this)
+  }
+
+  get botId() {
+    return this.qApi.appid // todo 暂时不从外部读了，反正后面要重构
   }
 
   private _getCard(userId: string) {

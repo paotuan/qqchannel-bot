@@ -20,6 +20,8 @@ import { LogSettingDiceRoll } from './special/log'
 import type { DiceRollEventListenerMap } from './index'
 
 export interface IDiceRollContext {
+  botId: string
+  guildId?: string
   channelId?: string
   userId: string
   username: string

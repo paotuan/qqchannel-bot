@@ -121,7 +121,7 @@ export class DiceManager {
       cacheMsg.instruction = detectInstruction(cacheMsg.text || '')
     }
     if (!cacheMsg.instruction) return
-    const roll = this.tryRollDice(cacheMsg.instruction, { userId, channelId, username, userRole })
+    const roll = this.tryRollDice(cacheMsg.instruction, { userId, guildId, channelId, username, userRole })
     if (roll) {
       // 表情表态也没有暗骰
       const channel = this.api.guilds.findChannel(channelId, guildId)
@@ -138,12 +138,13 @@ export class DiceManager {
    * 投骰
    * @param fullExp 指令表达式
    * @param userId 投骰用户的 id
+   * @param guildId 投骰所在的频道，选填
    * @param channelId 投骰所在的子频道，选填。若存在子频道说明不是私信场景，会去判断人物卡数值
    * @param username 用户昵称，用于拼接结果字符串
    * @param replyMsgId 回复的消息 id，选填，用于区分通过回复进行的对抗检定
    * @param userRole 用户权限。目前仅用于 st dice 的权限控制
    */
-  private tryRollDice(fullExp: string, { userId, channelId, username, replyMsgId, userRole }: { userId: string, channelId?: string, username: string, replyMsgId?: string, userRole?: UserRole }) {
+  private tryRollDice(fullExp: string, { userId, guildId, channelId, username, replyMsgId, userRole }: { userId: string, guildId?: string, channelId?: string, username: string, replyMsgId?: string, userRole?: UserRole }) {
     try {
       // console.time('dice')
       // 是否有回复消息(目前仅用于对抗检定)
@@ -151,7 +152,7 @@ export class DiceManager {
       // 投骰
       const roller = createDiceRoll(
         fullExp,
-        new DiceRollContext(this.api, { channelId, userId, username, userRole, opposedRoll }),
+        new DiceRollContext(this.api, { guildId, channelId, userId, username, userRole, opposedRoll }),
         { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
       )
       // 保存人物卡更新
@@ -199,7 +200,7 @@ export class DiceManager {
       const queryCard = () => []
       const roll = createDiceRoll(
         expression,
-        { channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard },
+        { botId: this.api.appid, guildId, channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard },
         { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
       )
       // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
