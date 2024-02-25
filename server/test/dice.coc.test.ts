@@ -3,10 +3,12 @@ import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
 import { CocCard } from '../../interface/card/coc'
-import { getCocCardProto, MockChannelId, MockUserId, resetRandomEngine } from './utils'
+import { getCocCardProto, MockBotId, MockChannelId, MockGuildId, MockUserId, resetRandomEngine } from './utils'
 
 function createContext(card: ICard): IDiceRollContext {
   return {
+    botId: MockBotId,
+    guildId: MockGuildId,
     channelId: MockChannelId,
     userId: MockUserId,
     username: 'Maca',

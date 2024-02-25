@@ -4,12 +4,14 @@ import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
 import type { IRiItem } from '../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../service/dice/special/ri'
-import { MockChannelId, MockUserId, resetRandomEngine } from './utils'
+import { MockBotId, MockChannelId, MockGuildId, MockUserId, resetRandomEngine } from './utils'
 
 resetRandomEngine(1)
 
 describe('未关联人物卡', () => {
   const context: IDiceRollContext = {
+    botId: MockBotId,
+    guildId: MockGuildId,
     channelId: MockChannelId,
     userId: MockUserId,
     username: 'Maca',

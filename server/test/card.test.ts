@@ -2,8 +2,8 @@
 import {
   getCocCardProto,
   getDndCardProto,
-  getGeneralCardProto,
-  MockChannelId,
+  getGeneralCardProto, MockBotId,
+  MockChannelId, MockGuildId,
   MockUserId,
   resetRandomEngine
 } from './utils'
@@ -17,6 +17,8 @@ import { DndCard } from '../../interface/card/dnd'
 
 function createContext(card: ICard): IDiceRollContext {
   return {
+    botId: MockBotId,
+    guildId: MockGuildId,
     channelId: MockChannelId,
     userId: MockUserId,
     username: 'Maca',

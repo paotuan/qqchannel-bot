@@ -4,6 +4,8 @@ import { ICocCardData } from '../../interface/card/coc'
 import { NumberGenerator } from '@dice-roller/rpg-dice-roller'
 import { IGeneralCardData } from '../../interface/card/general'
 
+export const MockBotId = '__mock_bot_id__'
+export const MockGuildId = '__mock_guild_id__'
 export const MockChannelId = '__mock_channel_id__'
 export const MockUserId = '__mock_user_id__'
 

@@ -3,7 +3,7 @@ import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
 import { DndCard } from '../../interface/card/dnd'
-import { getDndCardProto, MockChannelId, MockUserId, resetRandomEngine } from './utils'
+import { getDndCardProto, MockBotId, MockChannelId, MockGuildId, MockUserId, resetRandomEngine } from './utils'
 
 function createContext(card: ICard): IDiceRollContext {
   // 修改为 dnd 的一些设置
@@ -11,6 +11,8 @@ function createContext(card: ICard): IDiceRollContext {
   // config.defaultRoll.expression = 'd20'
   config.rollDeciderId = 'io.paotuan.embed.dnd0'
   return {
+    botId: MockBotId,
+    guildId: MockGuildId,
     channelId: MockChannelId,
     userId: MockUserId,
     username: 'Maca',
