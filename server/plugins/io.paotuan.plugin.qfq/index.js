@@ -105,7 +105,6 @@ module.exports = ({ sendMessageToChannel, getPreference, render, dispatchUserCom
             // 发送播报
             const env = {
               ...context,
-              nick: context.username, // 兼容处理，后面看是否可以合并
               用户名: context.username,
               人物卡名: event.card.name,
               at用户: `<@!${context.userId}>`

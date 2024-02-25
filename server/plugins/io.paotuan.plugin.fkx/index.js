@@ -64,7 +64,6 @@ module.exports = ({ sendMessageToChannel, getPreference, render, getCard, saveCa
               setTimeout(async () => {
                 const env = {
                   ...context,
-                  nick: context.username, // 兼容处理，后面看是否可以合并
                   用户名: context.username,
                   人物卡名: event.card.name,
                   at用户: `<@!${context.userId}>`

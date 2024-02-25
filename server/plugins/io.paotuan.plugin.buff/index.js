@@ -21,7 +21,6 @@ function isCommandShow(type, command) {
  * @param {string} command
  */
 function isCommandClearAll(type, command) {
-  // const pattern = /^(0|clear|clr|x)$/
   return command.match(/^(0|clear|clr|x)$/)
 }
 
@@ -117,7 +116,6 @@ function getCount(type, card, input, useGlobal = true) {
 }
 
 module.exports = (apis) => {
-
   return {
     id: 'io.paotuan.plugin.buff',
     name: 'buff/debuff',
@@ -190,7 +188,6 @@ module.exports = (apis) => {
           id: 'replace',
           name: '触发 buff/debuff',
           handler: roll => {
-            // console.log(roll)
             const card = roll.selfCard
             // 无人物卡，不处理
             if (!card) return false
