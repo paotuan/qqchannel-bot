@@ -8,8 +8,14 @@ import { EventEmitter } from 'events'
 import { NoteManager } from './note'
 import { DiceManager } from './dice'
 import { CustomReplyManager } from './customReply'
+import { parseUserCommand } from './utils'
+import type { ParseUserCommandResult, IUserCommandContext } from '../../../interface/config'
+import type { ICardEntryChangeEvent } from '../../../interface/card/types'
+import type { BasePtDiceRoll } from '../dice'
 
 type QueueListener = (data: unknown) => Promise<boolean>
+type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
+type MessageReactionListener = (context: IUserCommandContext) => Promise<boolean>
 
 /**
  * A bot connection to QQ
@@ -94,11 +100,14 @@ export class QApi {
       if (!this.wss.listeningChannels.includes(channelId)) return
       // 最近一条消息缓存到 channel 对象中
       const channel = this.guilds.findChannel(channelId, msg.guild_id)
-      channel && (channel.lastMessage = data.msg)
-      // 串行触发消息处理器
-      for (const listener of this.guildMessageQueueListeners) {
-        const consumed = await listener(data)
-        if (consumed) return
+      channel && (channel.lastMessage = msg)
+
+      // 只处理 MESSAGE_CREATE 事件，进行指令处理
+      if (data.eventType === 'MESSAGE_CREATE') {
+        // 统一对消息进行 parse，判断是否是需要处理的指令
+        const parseResult = parseUserCommand(this, msg)
+        if (!parseResult) return
+        await this.dispatchCommand(parseResult)
       }
     })
 
@@ -111,10 +120,42 @@ export class QApi {
       // 最近一条消息缓存到 user 对象中
       const user = this.guilds.findUser(data.msg.author.id, data.msg.src_guild_id) // 因为前面已经 addOrUpdateUserByMessage，所以一定存在一个永久的 user 对象
       user && (user.lastMessage = data.msg)
-      // 串行触发消息处理器
-      for (const listener of this.directMessageQueueListeners) {
-        const consumed = await listener(data)
-        if (consumed) return
+
+      // 只处理 DIRECT_MESSAGE_CREATE 事件
+      if (data.eventType === 'DIRECT_MESSAGE_CREATE') {
+        // 串行触发消息处理器
+        for (const listener of this.directMessageQueueListeners) {
+          const consumed = await listener(data)
+          if (consumed) return
+        }
+      }
+    })
+
+    this.on(AvailableIntentsEventsEnum.GUILD_MESSAGE_REACTIONS,  async (data: any) => {
+      const msg = data.msg
+      // 过滤掉未监听的频道消息
+      if (!this.wss.listeningChannels.includes(msg.channel_id)) return
+      console.log(`[QApi][表情表态事件][${data.eventType}]`)
+
+      // 只处理 MESSAGE_REACTION_ADD 事件
+      if (data.eventType === 'MESSAGE_REACTION_ADD') {
+        const userId = msg.user_id as string
+        const guildId = msg.guild_id as string
+        const user = this.guilds.findUser(userId, guildId)
+        const username = user?.username ?? userId
+        const context: IUserCommandContext = {
+          botId: this.appid,
+          userId,
+          username,
+          userRole: 'user', // todo 表情表态暂时不处理权限的问题，不方便拿到而且几乎不会用到
+          msgId: data.eventId as string, // 用于回复被动消息，表情标题用的是 event id
+          guildId,
+          channelId: msg.channel_id as string,
+          replyMsgId: msg.target.id as string, // 表情表态回复的消息
+          realUser: { userId, username }
+        }
+
+        await this.dispatchMessageReaction(context)
       }
     })
   }
@@ -135,7 +176,11 @@ export class QApi {
 
   disconnect() {
     this.qqWs.removeAllListeners()
-    this.qqWs.disconnect()
+    try {
+      this.qqWs.disconnect()
+    } catch (e) {
+      console.error('断开连接出错。若出现功能异常，请重启程序，否则可以无视。', e)
+    }
     this.eventEmitter.removeAllListeners()
   }
 
@@ -144,14 +189,85 @@ export class QApi {
     this.eventEmitter.on(intent, listener)
   }
 
-  private readonly guildMessageQueueListeners: QueueListener[] = []
+  private readonly guildMessageQueueListeners: CommandListener[] = []
   private readonly directMessageQueueListeners: QueueListener[] = []
+  private readonly messageReactionListeners: MessageReactionListener[] = []
 
-  onGuildMessage(listener: QueueListener) {
+  onGuildCommand(listener: CommandListener) {
     this.guildMessageQueueListeners.push(listener)
   }
 
   onDirectMessage(listener: QueueListener) {
     this.directMessageQueueListeners.push(listener)
+  }
+
+  onMessageReaction(listener: MessageReactionListener) {
+    this.messageReactionListeners.push(listener)
+  }
+
+  // 分派命令
+  async dispatchCommand(parseResult: ParseUserCommandResult) {
+    const config = this.wss.config.getChannelConfig(parseResult.context.channelId)
+
+    // 注册监听器
+    const unregisterListeners = this.registerCommonCommandProcessListeners(parseResult.context)
+
+    // hook: OnReceiveCommandCallback 处理
+    await config.hook_onReceiveCommand(parseResult)
+
+    // 整体别名指令处理
+    parseResult.command = config.parseAliasRoll_command(parseResult.command)
+
+    // 串行触发消息处理器
+    for (const listener of this.guildMessageQueueListeners) {
+      const consumed = await listener(parseResult)
+      if (consumed) break
+    }
+
+    // 取消监听器
+    unregisterListeners()
+  }
+
+  // 分派表情
+  async dispatchMessageReaction(context: IUserCommandContext) {
+    const config = this.wss.config.getChannelConfig(context.channelId)
+
+    // 注册监听器
+    const unregisterListeners = this.registerCommonCommandProcessListeners(context)
+
+    // hook: OnMessageReaction 处理
+    const handled = await config.hook_onMessageReaction({ context })
+    // 这里给个特殊逻辑，如果由插件处理过，就不走默认的逻辑了（自动检测技能检定），否则会显得奇怪
+    if (!handled) {
+      for (const listener of this.messageReactionListeners) {
+        const consumed = await listener(context)
+        if (consumed) break
+      }
+    }
+
+    // 取消监听器
+    unregisterListeners()
+  }
+
+  private registerCommonCommandProcessListeners(context: IUserCommandContext) {
+    const config = this.wss.config.getChannelConfig(context.channelId)
+    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
+      config.hook_onCardEntryChange({ event, context })
+    }
+    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
+    const beforeDiceRollListener = (roll: BasePtDiceRoll) => {
+      config.hook_beforeDiceRoll(roll)
+    }
+    const afterDiceRollListener = (roll: BasePtDiceRoll) => {
+      config.hook_afterDiceRoll(roll)
+    }
+    this.dice.addDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
+    this.dice.addDiceRollListener('AfterDiceRoll', afterDiceRollListener)
+
+    return () => {
+      this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
+      this.dice.removeDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
+      this.dice.removeDiceRollListener('AfterDiceRoll', afterDiceRollListener)
+    }
   }
 }

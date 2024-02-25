@@ -31,13 +31,6 @@ export function getInitialDefaultConfig(): IChannelConfig {
     botOwner: null,
     defaultRoll: { expression: 'd100', preferCard: true },
     specialDice: getSpecialDiceConfig(),
-    parseRule: {
-      convertCase: false,
-      detectCardEntry: false,
-      detectDefaultRoll: false,
-      customReplySubstitute: false,
-      naiveInlineParseRule: false
-    },
     customReplyIds: customReplies
       .map(item => ({ id: `${embedPluginId}.${item.id}`, enabled: true }))
       .concat(customReplyPlugins.map(id => ({ id, enabled: true }))),
@@ -45,6 +38,14 @@ export function getInitialDefaultConfig(): IChannelConfig {
     rollDeciderId: `${embedPluginId}.${rollDeciders[0].id}`,
     rollDeciderIds: rollDeciders.map(item => `${embedPluginId}.${item.id}`),
     customTextIds: [],
+    hookIds: {
+      onReceiveCommand: [],
+      beforeParseDiceRoll: [],
+      onCardEntryChange: [],
+      onMessageReaction: [],
+      beforeDiceRoll: [],
+      afterDiceRoll: []
+    },
     embedPlugin: {
       id: embedPluginId,
       customReply: customReplies,
@@ -189,7 +190,7 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
       })
     }
     // 新增配置
-    config.parseRule = { convertCase: false, detectCardEntry: false, detectDefaultRoll: false, customReplySubstitute: false, naiveInlineParseRule: false }
+    // config.parseRule = { convertCase: false, detectCardEntry: false, detectDefaultRoll: false, customReplySubstitute: false, naiveInlineParseRule: false }
     config.version = 23 // 1.6.1
   }
   if (config.version < 26) {
@@ -201,8 +202,8 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     config.version = 29 // 1.7.3
   }
   if (config.version < 30) {
-    config.parseRule.customReplySubstitute = false
-    config.parseRule.naiveInlineParseRule = false
+    // config.parseRule.customReplySubstitute = false
+    // config.parseRule.naiveInlineParseRule = false
     config.version = 30 // 1.7.4
   }
   if (config.version < 32) {
@@ -232,6 +233,24 @@ export function handleUpgrade(config: IChannelConfig, channelId: string) {
     // config.embedPlugin.aliasRoll!.push(...advs)
     // config.aliasRollIds.push({ id: `${embedPluginId}.advantage`, enabled: true }, { id: `${embedPluginId}.disadvantage`, enabled: true })
     config.version = 33 // 1.8.1
+  }
+  if (config.version < 35) {
+    config.hookIds = {
+      onReceiveCommand: [],
+      beforeParseDiceRoll: [],
+      onCardEntryChange: [],
+      onMessageReaction: [],
+      beforeDiceRoll: [],
+      afterDiceRoll: []
+    }
+    // 迁移旧的实验性配置
+    if ((config as any).parseRule) {
+      config.hookIds.onReceiveCommand.push({ id: 'io.paotuan.plugin.compatible.convertCase-Prefix', enabled: !!(config as any).parseRule.convertCase })
+      config.hookIds.beforeParseDiceRoll.push({ id: 'io.paotuan.plugin.compatible.convertCase', enabled: !!(config as any).parseRule.convertCase })
+      config.hookIds.beforeParseDiceRoll.push({ id: 'io.paotuan.plugin.compatible.detectCardEntry', enabled: !!(config as any).parseRule.detectCardEntry })
+      config.hookIds.beforeParseDiceRoll.push({ id: 'io.paotuan.plugin.compatible.detectDefaultRoll', enabled: !!(config as any).parseRule.detectDefaultRoll })
+    }
+    config.version = 35 // 1.8.3
   }
   return config as IChannelConfig
 }

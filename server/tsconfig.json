@@ -6,6 +6,7 @@
     "strict": true,
     "skipLibCheck": true,
     "useDefineForClassFields": true,
+    "esModuleInterop": true,
     "outDir": "../dist/server"
   }
 }

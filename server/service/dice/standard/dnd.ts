@@ -10,8 +10,7 @@ export class DndDiceRoll extends StandardDiceRoll {
     return super.selfCard as DndCard | undefined // 如果有 card，必须是 dnd card
   }
 
-  override roll(): this {
-    super.parse()
+  override doRoll() {
     // 掷骰
     for (let i = 0; i < this.times; i++) {
       // 1. 如果没有 expression，就正常 roll
@@ -56,7 +55,6 @@ export class DndDiceRoll extends StandardDiceRoll {
         this.rolls.push({ roll, tests: [{ skill, targetValue, cardEntry: entry, result }] }) // 这里传的 entry 目前不重要
       })
     }
-    return this
   }
 
   override get eligibleForOpposedRoll() {

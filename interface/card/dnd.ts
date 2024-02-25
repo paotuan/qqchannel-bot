@@ -127,9 +127,8 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   }
 
   override getAbility(input: string): IDndCardAbility | undefined {
-    const _input = input.toUpperCase()
     // 获取所有可能的别名
-    const possibleNames = SKILL_ALIAS[_input] ?? [_input]
+    const possibleNames = this.getAliases(input)
     for (const key of possibleNames) {
       for (const type of ['spells', 'equips'] as const) {
         const ability = this.data[type].find(item => item.name.toUpperCase() === key)
@@ -197,8 +196,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
   override getEntry(input: string): IDndCardEntry | undefined {
     const [skillName, postfix] = parseInput(input)
     if (!skillName) return undefined
-    const _input = skillName.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
+    const possibleSkills = this.getAliases(skillName) // 获取所有可能的属性/技能别名
     // 遍历尝试获取
     for (const key of possibleSkills) {
       // 先判断 items，因为可能有用户输入同名属性，优先级更高
@@ -230,6 +228,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
         // 判断是否是真的改变了，因为可能被 setter 拦下来，实际未改变
         if (oldValue !== newValue) {
           this.data.lastModified = Date.now()
+          this.emitCardEntryChange(entry.key, newValue, oldValue)
           return true
         } else {
           return false
@@ -240,8 +239,10 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     if (entry) {
       // set 的时候就不考虑后缀了。dnd 的特殊之处在于 set 技能名时实际修改的是技能的修正值，因此在 st 指令中要做些特殊处理
       if (value !== entry.value) {
-        (this.data[entry.type] as Record<string, number>)[entry.key] = value
+        const oldValue = entry.value
+        ;(this.data[entry.type] as Record<string, number>)[entry.key] = value
         this.data.lastModified = Date.now()
+        this.emitCardEntryChange(entry.key, value, oldValue)
         return true
       } else {
         return false
@@ -250,6 +251,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
       // 新增条目，认为是 items，且统一大写
       this.data.items[_input] = value
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(_input, value, undefined)
       return true
     }
   }
@@ -260,8 +262,10 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     if (postfix !== 'none') return false // 有特殊后缀的也不处理吧
     const entry = this.getEntry(name)
     if (entry && entry.type === 'items' && !['CP', 'SP', 'GP', 'EP', 'PP'].includes(entry.key)) {
+      const oldValue = entry.value
       delete this.data.items[entry.key]
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(entry.key, undefined, oldValue)
       return true
     } else {
       return false
@@ -289,8 +293,7 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
    */
   cancelExperienced(skill: string) {
     let updated = false
-    const _input = skill.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input]
+    const possibleSkills = this.getAliases(skill)
     possibleSkills.forEach(skill => { // 把所有的别名都干掉
       if (this.data.meta.experienced[skill]) {
         delete this.data.meta.experienced[skill]
@@ -332,6 +335,11 @@ export class DndCard extends BaseCard<IDndCardData, IDndCardEntry, IDndCardAbili
     const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')
     const items = Object.entries(this.data.items).map(([k ,v]) => `${k}:${v}`).join(' ')
     return '角色：' + this.name + '\n' + basic + '\n' + props + '\n' + skills + '\n' + items
+  }
+
+  override getAliases(name: string) {
+    const _input = name.toUpperCase()
+    return SKILL_ALIAS[_input] ?? [_input]
   }
 }
 

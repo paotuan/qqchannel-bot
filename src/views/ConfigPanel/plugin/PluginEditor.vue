@@ -8,7 +8,7 @@
         <span v-if="plugin.customText.length > 0" class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">自定义文案</span>
 <!--        <span v-if="plugin.rollDecider.length > 0" class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">检定规则</span>-->
         <span v-if="plugin.aliasRoll.length > 0" class="bg-indigo-100 text-indigo-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">别名指令</span>
-<!--        <span class="bg-purple-100 text-purple-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">钩子函数</span>-->
+        <span v-if="pluginHasHooks" class="bg-purple-100 text-purple-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">钩子函数</span>
 <!--        <span class="bg-pink-100 text-pink-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">Pink</span>-->
       </span>
       <span class="flex-grow text-right">
@@ -81,6 +81,12 @@ const reloadPlugin = (id: string) => {
   ws.send<IPluginReloadReq>({ cmd: 'plugin/reload', data: [id] })
 }
 
+const pluginHasHooks = computed(() => {
+  const hookMap = plugin.value?.hook
+  if (!hookMap) return false
+  const hookCount = Object.values(hookMap).map(hookType => hookType.length).reduce((a, b) => a + b, 0)
+  return hookCount > 0
+})
 </script>
 <style scoped>
 .collapse-title {

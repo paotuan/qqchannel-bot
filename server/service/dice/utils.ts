@@ -4,7 +4,7 @@ import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { CocOpposedDiceRoll } from './standard/cocOppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
-import type { CustomTextKeys, SuccessLevel, UserRole } from '../../../interface/config'
+import type { CustomTextKeys, DiceCommand, SuccessLevel, UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
 import type { ICardQuery } from '../../../interface/config'
 import { GeneralCard } from '../../../interface/card/general'
@@ -17,8 +17,11 @@ import { dispatchEn } from './special/en/utils'
 import { dispatchSt } from './special/st/utils'
 import { dispatchNn } from './special/nn/utils'
 import { LogSettingDiceRoll } from './special/log'
+import type { DiceRollEventListenerMap } from './index'
 
 export interface IDiceRollContext {
+  botId: string
+  guildId?: string
   channelId?: string
   userId: string
   username: string
@@ -40,6 +43,21 @@ const HISTORY_ROLL_REGEX = /\$(\d+)/g // match $1 $2...
 export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], depth = 0): string {
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
+
+  // region hook 处理
+  const diceCommand: DiceCommand = {
+    command: expression,
+    context: {
+      channelId: context.channelId,
+      userId: context.userId,
+      username: context.username,
+      userRole: context.userRole
+    }
+  }
+  context.config.hook_beforeParseDiceRoll(diceCommand)
+  expression = diceCommand.command
+  // endregion
+
   const selfCard = context.getCard(context.userId)
   const getEntry = (key: string) => selfCard?.getEntry(key)?.value ?? ''
   const getAbility = (key: string) => selfCard?.getAbility(key)?.value ?? ''
@@ -171,13 +189,8 @@ export function parseDescriptions2(rawExp: string, flag = ParseFlagsAll): { exp:
 /**
  * 工厂方法创建骰子实例
  */
-export function createDiceRoll(_expression: string, context: IDiceRollContext) {
+export function createDiceRoll(expression: string, context: IDiceRollContext, listeners: DiceRollEventListenerMap = {}) {
   const selfCard = context.getCard(context.userId)
-  // 预处理指令（仅在此处处理一次，后续可以改成 hook 插件。不放在 parseTemplate 里面，因为可能会被不同的指令处理器执行多次）
-  let expression = context.config.convertCase(_expression)
-  expression = context.config.detectCardEntry(expression, selfCard)
-  expression = context.config.detectDefaultRollCalculation(expression, selfCard)
-  // expression = context.config.naiveParseInlineRolls(expression, selfCard)
   // 根据指令前缀派发
   const specialDiceConfig = context.config.specialDice
   const inlineRolls: InlineDiceRoll[] = []
@@ -206,25 +219,33 @@ export function createDiceRoll(_expression: string, context: IDiceRollContext) {
     // log 也不需要 parseTemplate
     return new LogSettingDiceRoll(expression, context, inlineRolls).roll()
   } else {
-    const parsedExpression = parseTemplate(expression, context, inlineRolls)
-    // 对抗检定判断
-    if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
-      const opposedType = getOpposedType(context.opposedRoll, selfCard)
-      if (opposedType === 'coc') {
-        return new CocOpposedDiceRoll(parsedExpression, context, inlineRolls).roll()
-      } else if (opposedType === 'dnd') {
-        return new DndOpposedRoll(parsedExpression, context, inlineRolls).roll()
+    // 普通检定/掷骰
+    const roller = (() => {
+      const parsedExpression = parseTemplate(expression, context, inlineRolls)
+      // 对抗检定判断
+      if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
+        const opposedType = getOpposedType(context.opposedRoll, selfCard)
+        if (opposedType === 'coc') {
+          return new CocOpposedDiceRoll(parsedExpression, context, inlineRolls)
+        } else if (opposedType === 'dnd') {
+          return new DndOpposedRoll(parsedExpression, context, inlineRolls)
+        }
       }
-    }
-    // 走普通掷骰逻辑
-    if (selfCard instanceof GeneralCard) {
-      return new StandardDiceRoll(parsedExpression, context, inlineRolls).roll()
-    } else if (selfCard instanceof DndCard) {
-      return new DndDiceRoll(parsedExpression, context, inlineRolls).roll()
-    } else {
-      // 默认情况（包括未关联人物卡）都走 coc 的逻辑吧，和传统一致。后续看是否要引入配置
-      return new CocDiceRoll(parsedExpression, context, inlineRolls).roll()
-    }
+      // 走普通掷骰逻辑
+      if (selfCard instanceof GeneralCard) {
+        return new StandardDiceRoll(parsedExpression, context, inlineRolls)
+      } else if (selfCard instanceof DndCard) {
+        return new DndDiceRoll(parsedExpression, context, inlineRolls)
+      } else {
+        // 默认情况（包括未关联人物卡）都走 coc 的逻辑吧，和传统一致。后续看是否要引入配置
+        return new CocDiceRoll(parsedExpression, context, inlineRolls)
+      }
+    })()
+    // 目前仅普通检定掷骰接入事件机制
+    roller.addDiceRollEventListener(listeners)
+    roller.roll()
+    roller.removeDiceRollEventListener(listeners)
+    return roller
   }
 }
 

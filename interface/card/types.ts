@@ -1,3 +1,5 @@
+import mitt from 'mitt'
+
 export type CardType = 'general' | 'coc' | 'dnd'
 
 export interface ICardData {
@@ -41,6 +43,16 @@ export interface ICard<D extends ICardData = ICardData, E extends ICardEntry = I
   removeAbility(name: string): boolean
   getSummary(): string // 用于骰子指令展示人物卡信息
   getEntryDisplay(name: string): string // 同上
+  getAliases(name: string): string[] // 获取属性/技能名同义词列表（包含自己，统一为大写）
+  addCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void): void
+  removeCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void): void
+}
+
+export interface ICardEntryChangeEvent {
+  key: string
+  value: number | undefined
+  oldValue: number | undefined
+  card: BaseCard<any>
 }
 
 export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICardEntry, A extends ICardAbility = ICardAbility> implements ICard<D, E, A> {
@@ -84,4 +96,29 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
     // 啥也不是
     return `${name}:-`
   }
+
+  getAliases(name: string) {
+    return [name.toUpperCase()]
+  }
+
+  // region events
+  private readonly emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
+
+  protected emitCardEntryChange(key: string, value: number | undefined, oldValue: number | undefined) {
+    this.emitter.emit('EntryChange', {
+      key,
+      value,
+      oldValue,
+      card: this
+    })
+  }
+
+  addCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void) {
+    this.emitter.on('EntryChange', listener)
+  }
+
+  removeCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void) {
+    this.emitter.off('EntryChange', listener)
+  }
+  // endregion
 }

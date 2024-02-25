@@ -137,9 +137,8 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
   }
 
   override getAbility(input: string) {
-    const _input = input.toUpperCase()
     // 获取所有可能的别名
-    const possibleNames = SKILL_ALIAS[_input] ?? [_input]
+    const possibleNames = this.getAliases(input)
     // 是否从配置表里找得到这个 ability
     for (const key of possibleNames) {
       const ability = this.data.abilities.find(item => item.name.toUpperCase() === key)
@@ -191,8 +190,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
 
   // 不包含困难前缀的获取
   private getRawEntry(input: string): ICocCardEntryRaw | undefined {
-    const _input = input.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input] // 获取所有可能的属性/技能别名
+    const possibleSkills = this.getAliases(input) // 获取所有可能的属性/技能别名
     // 遍历 basic，props 和 skills 尝试获取. 先判断 skills，因为可能有用户输入同名属性，优先级更高
     for (const key of possibleSkills) {
       for (const type of ['skills', 'basic', 'props'] as const) {
@@ -239,6 +237,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
         // 判断是否是真的改变了，因为可能被 setter 拦下来，实际未改变
         if (oldValue !== newValue) {
           this.data.lastModified = Date.now()
+          this.emitCardEntryChange(rawEntry.key, newValue, oldValue)
           return true
         } else {
           return false
@@ -249,8 +248,10 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     const targetValue = calculateTargetValueWithDifficulty(value, difficulty, true)
     if (rawEntry && !rawEntry.readonly) {
       if (targetValue !== rawEntry.baseValue) {
-        (this.data[rawEntry.type] as Record<string, number>)[rawEntry.key] = targetValue
+        const oldValue = rawEntry.baseValue
+        ;(this.data[rawEntry.type] as Record<string, number>)[rawEntry.key] = targetValue
         this.data.lastModified = Date.now()
+        this.emitCardEntryChange(rawEntry.key, targetValue, oldValue)
         return true
       } else {
         return false
@@ -259,6 +260,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
       // 新增条目，认为是 skill，且统一大写
       this.data.skills[_input] = targetValue
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(_input, targetValue, undefined)
       return true
     }
   }
@@ -268,8 +270,10 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     if (!skillWithoutDifficulty) return false
     const entry = this.getRawEntry(skillWithoutDifficulty)
     if (entry && entry.type === 'skills' && !entry.readonly) {
+      const oldValue = entry.baseValue
       delete this.data.skills[entry.key]
       this.data.lastModified = Date.now()
+      this.emitCardEntryChange(entry.key, undefined, oldValue)
       return true
     } else {
       return false
@@ -297,8 +301,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
    */
   cancelSkillGrowth(skill: string) {
     let updated = false
-    const _input = skill.toUpperCase()
-    const possibleSkills = SKILL_ALIAS[_input] ?? [_input]
+    const possibleSkills = this.getAliases(skill)
     possibleSkills.forEach(skill => { // 把所有的别名都干掉
       if (this.data.meta.skillGrowth[skill]) {
         delete this.data.meta.skillGrowth[skill]
@@ -374,6 +377,11 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     const skills = Object.keys(this.data.skills).map(name => this.getEntryDisplay(name)).join(' ')
     const abilities = this.data.abilities.map(item => `${item.name}:${item.expression}`).join('\n')
     return '角色：' + this.name + '\n' + basic + '\n' + props + '\n' + skills + '\n' + abilities
+  }
+
+  override getAliases(name: string) {
+    const _input = name.toUpperCase()
+    return SKILL_ALIAS[_input] ?? [_input]
   }
 }
 

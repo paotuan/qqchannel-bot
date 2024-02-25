@@ -4,7 +4,12 @@ import type {
   ICustomReplyConfig,
   ICustomTextConfig,
   IRollDeciderConfig,
-  CustomTextKeys
+  CustomTextKeys, ParseUserCommandResult,
+  IHookFunction, OnReceiveCommandCallback,
+  BeforeParseDiceRollCallback, DiceCommand,
+  OnCardEntryChangeCallback, CardEntryChange,
+  OnMessageReactionCallback, MessageReaction,
+  BeforeDiceRollCallback, AfterDiceRollCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import type { PluginManager } from './plugin'
@@ -16,6 +21,7 @@ import { getEmbedCustomText } from './default'
 import { renderCustomText } from './helpers/customText'
 import type { ICard } from '../../../interface/card/types'
 import { parseAliasForCommand } from './helpers/aliasCommand'
+import { handleHooks, handleHooksAsync, handleLinearHooksAsync, handleVoidHooks } from './helpers/hook'
 
 // 频道配置文件封装
 export class ChannelConfig {
@@ -48,11 +54,19 @@ export class ChannelConfig {
   updateConfigByPluginManifest() {
     if (!this.plugin) return
     const manifest = this.plugin.pluginListManifest
-    // 记录一下当前每个功能的 id，用于第三部 purge
+    // 记录一下当前每个功能的 id，用于第三步 purge
     const existIds = {
       customReplyIds: new Set<string>(),
       aliasRollIds: new Set<string>(),
       customTextIds: new Set<string>(),
+      hookIds: {
+        onReceiveCommand: new Set<string>(),
+        beforeParseDiceRoll: new Set<string>(),
+        onCardEntryChange: new Set<string>(),
+        onMessageReaction: new Set<string>(),
+        beforeDiceRoll: new Set<string>(),
+        afterDiceRoll: new Set<string>()
+      }
     }
     manifest.forEach(plugin => {
       // 0. 确保 plugin 在配置中存在
@@ -88,10 +102,22 @@ export class ChannelConfig {
           this.config.customTextIds.push({ id, enabled: config.defaultEnabled })
         }
       })
+      ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction', 'beforeDiceRoll', 'afterDiceRoll'] as const).forEach(prop => {
+        plugin.hook[prop].forEach(config =>{
+          const id = `${plugin.id}.${config.id}`
+          existIds.hookIds[prop].add(id)
+          if (!this.config.hookIds[prop].find(_config => _config.id === id)) {
+            this.config.hookIds[prop].push({ id, enabled: config.defaultEnabled })
+          }
+        })
+      })
     })
     // 3. 如有 plugin 中已经不存在的功能，但 config 中还存在的，需要从 config 中去掉. (embed 须保留)
     ;(['customReplyIds', 'aliasRollIds', 'customTextIds'] as const).forEach(prop => {
       this.config[prop] = this.config[prop].filter(config => config.id.startsWith('io.paotuan.embed') || existIds[prop].has(config.id))
+    })
+    ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction', 'beforeDiceRoll', 'afterDiceRoll'] as const).forEach(prop => {
+      this.config.hookIds[prop] = this.config.hookIds[prop].filter(config => existIds.hookIds[prop].has(config.id))
     })
   }
 
@@ -204,107 +230,79 @@ export class ChannelConfig {
     return renderCustomText(this.customTextMap, key, args, context)
   }
 
-  /**
-   * 指令兼容大小写
-   * 目前的实现是简单粗暴转全小写（引用人物卡的部分本来就不区分大小写，因此只用考虑骰子指令和描述部分）
-   * 针对 dF 特殊处理
-   */
-  convertCase(expression: string) {
-    if (this.config.parseRule.convertCase) {
-      const dFIndexes = Array.from(expression.matchAll(/dF/g)).map(result => result.index)
-      const result = expression.toLowerCase()
-      if (dFIndexes.length === 0) return result
-      const arr = result.split('')
-      dFIndexes.forEach(index => {
-        if (typeof index === 'number') {
-          arr[index + 1] = 'F'
-        }
-      })
-      return arr.join('')
-    }
-    return expression
+  // 子频道 hook 处理器
+  private get hookOnReceiveCommandProcessors(): IHookFunction<OnReceiveCommandCallback>[] {
+    return this.config.hookIds.onReceiveCommand
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookOnReceiveCommandMap[item.id] as IHookFunction<OnReceiveCommandCallback>)
+      .filter(conf => !!conf)
+  }
+
+  private get hookBeforeParseDiceRollProcessors(): IHookFunction<BeforeParseDiceRollCallback>[] {
+    return this.config.hookIds.beforeParseDiceRoll
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookBeforeParseDiceRollMap[item.id] as IHookFunction<BeforeParseDiceRollCallback>)
+      .filter(conf => !!conf)
+  }
+
+  private get hookOnCardEntryChangeProcessors(): IHookFunction<OnCardEntryChangeCallback>[] {
+    return this.config.hookIds.onCardEntryChange
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookOnCardEntryChangeMap[item.id] as IHookFunction<OnCardEntryChangeCallback>)
+      .filter(conf => !!conf)
+  }
+
+  private get hookOnMessageReactionProcessors(): IHookFunction<OnMessageReactionCallback>[] {
+    return this.config.hookIds.onMessageReaction
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookOnMessageReactionMap[item.id] as IHookFunction<OnMessageReactionCallback>)
+      .filter(conf => !!conf)
+  }
+
+  private get hookBeforeDiceRollProcessors(): IHookFunction<BeforeDiceRollCallback>[] {
+    return this.config.hookIds.beforeDiceRoll
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookBeforeDiceRollMap[item.id] as IHookFunction<BeforeDiceRollCallback>)
+      .filter(conf => !!conf)
+  }
+
+  private get hookAfterDiceRollProcessors(): IHookFunction<AfterDiceRollCallback>[] {
+    return this.config.hookIds.afterDiceRoll
+      .filter(item => item.enabled)
+      .map(item => this.plugin?.hookAfterDiceRollMap[item.id] as IHookFunction<AfterDiceRollCallback>)
+      .filter(conf => !!conf)
   }
 
   /**
-   * 智能探测指令中可能出现的 entry/ability 并加上 $ 前缀
+   * Hook 处理
    */
-  detectCardEntry(expression: string, card?: ICard) {
-    // 特殊：【.st力量+1】 st 指令需要排除 // 【.en+侦察】en 也排除
-    if (expression.startsWith('st') || expression.startsWith('en')) {
-      return expression
-    }
-    if (this.config.parseRule.detectCardEntry && card) {
-      const replacer = (key: string) => {
-        if (card.getEntry(key) || card.getAbility(key)) {
-          return '$' + key
-        } else {
-          return key
-        }
-      }
-      return expression.replace(MAYBE_ENTRY_REGEX, replacer).replace(MAYBE_ENTRY_REGEX_AT_START, replacer)
-    }
-    return expression
+  async hook_onReceiveCommand(result: ParseUserCommandResult) {
+    console.log('[Hook] 收到指令')
+    await handleHooksAsync(this.hookOnReceiveCommandProcessors, result)
   }
 
-  /**
-   * 智能探测默认骰参与加减值运算，并替换默认骰为表达式
-   */
-  detectDefaultRollCalculation(expression: string, card?: ICard) {
-    if (this.config.parseRule.detectDefaultRoll) {
-      // 纯默认骰不处理，交给原来的逻辑处理
-      if (expression.match(DEFAULT_ROLL_REGEX)) return expression
-      const defaultRoll = this.defaultRoll(card)
-      return expression.replace(MAYBE_INCLUDE_DEFAULT_ROLL_REGEX, () => defaultRoll)
-    }
-    return expression
+  hook_beforeParseDiceRoll(diceCommand: DiceCommand) {
+    console.log('[Hook] 解析骰子指令前')
+    handleHooks(this.hookBeforeParseDiceRollProcessors, diceCommand)
   }
 
-  /**
-   * 使用 naive 的循环策略解析 inline 和 expression 引用
-   * e.g. [[1d3+1]] => (1d3+1); $db => (1d3)
-   * 作用是一次性把表达式打平，在掷骰输出时更为简洁明了
-   * 缺点是丧失了递归回溯（$1, $2）和 [[1d10]]d10 的拼接能力
-   */
-  naiveParseInlineRolls(expression: string, card?: ICard) {
-    // todo pending，还需要解决直接调用 ability【.徒手格斗】和括号（牺牲准确性换取美观）的功能。后续走插件处理
-    if (this.config.parseRule.naiveInlineParseRule) {
-      // 替换 entry
-      const getEntry = (key: string) => card?.getEntry(key)?.value ?? ''
-      const getAbility = (key: string) => card?.getAbility(key)?.value ?? ''
-      let depth = 0
-      while (ENTRY_REGEX.test(expression)) {
-        expression = expression.replace(ENTRY_REGEX, (_, key1: string, key2: string) => {
-          const key = key1 ?? key2 ?? ''
-          const abilityExpression = getAbility(key)
-          if (abilityExpression) {
-            return `(${abilityExpression})`
-          }
-          const skillValue = getEntry(key)
-          return String(skillValue ?? '')
-        })
+  hook_onCardEntryChange(e: CardEntryChange) {
+    console.log('[Hook] 人物卡数值变化')
+    handleVoidHooks(this.hookOnCardEntryChangeProcessors, e)
+  }
 
-        if (++depth > 99) {
-          console.error('stackoverflow in naiveParseInlineRolls')
-          break
-        }
-      }
-      // 替换 inline roll
-      while (INLINE_ROLL_REGEX.test(expression)) {
-        expression = expression.replace(INLINE_ROLL_REGEX, (_, notation: string) => `(${notation})`)
-      }
-    }
-    return expression
+  hook_onMessageReaction(e: MessageReaction) {
+    console.log('[Hook] 收到表情表态')
+    return handleLinearHooksAsync(this.hookOnMessageReactionProcessors, e)
+  }
+
+  hook_beforeDiceRoll(roll: unknown) {
+    console.log('[Hook] 掷骰/检定前')
+    handleHooks(this.hookBeforeDiceRollProcessors, roll)
+  }
+
+  hook_afterDiceRoll(roll: unknown) {
+    console.log('[Hook] 掷骰/检定后')
+    handleVoidHooks(this.hookAfterDiceRollProcessors, roll)
   }
 }
-
-// match 独立出现的疑似人物卡引用（前后不为数字或 $，前向匹配简化了）
-const MAYBE_ENTRY_REGEX = /(?<=[+\-*/({])([a-zA-Z\p{Unified_Ideograph}]+)(?![\d$])/gu
-const MAYBE_ENTRY_REGEX_AT_START = /^([a-zA-Z\p{Unified_Ideograph}]+)(?=[+\-*/])/gu
-
-// match 疑似默认骰
-const DEFAULT_ROLL_REGEX = /^(r|d|rd)$/
-const MAYBE_INCLUDE_DEFAULT_ROLL_REGEX = /(?<=^|[+\-*/({])(r|d|rd)(?=$|[+\-*/)}])/g
-
-// match inline roll 和 attribute
-const ENTRY_REGEX = /\$\{(.*?)\}|\$([a-zA-Z\p{Unified_Ideograph}]+)/gu // match ${ any content } or $AnyContent
-const INLINE_ROLL_REGEX = /\[\[([^[\]]+)]]/ // match [[ any content ]]

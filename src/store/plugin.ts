@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { IPluginConfigDisplay } from '../../interface/common'
+import type { HookModule } from '../views/ConfigPanel/hook/types'
 
 export interface IPluginItemConfigForDisplay {
   id: string // fullId
@@ -56,6 +57,36 @@ export const usePluginStore = defineStore('plugin', () => {
     return customTextMap.value[fullId]
   }
 
+  const hooksMap = computed(() => {
+    const map: Record<HookModule, Record<string, IPluginItemConfigForDisplay>> = {
+      onReceiveCommand: {},
+      beforeParseDiceRoll: {},
+      onCardEntryChange: {},
+      onMessageReaction: {},
+      beforeDiceRoll: {},
+      afterDiceRoll: {}
+    }
+    const hookTypes = Object.keys(map) as HookModule[]
+    plugins.value.forEach(plugin => {
+      hookTypes.forEach(type => {
+        plugin.hook[type].forEach(item => {
+          const id = `${plugin.id}.${item.id}`
+          map[type][id] = {
+            id,
+            name: item.name,
+            description: item.description || '',
+            fromPlugin: plugin.name
+          }
+        })
+      })
+    })
+    return map
+  })
+
+  const getHookProcessor = (module: HookModule, fullId: string) => {
+    return hooksMap.value[module][fullId]
+  }
+
   const onGetPlugins = (data: IPluginConfigDisplay[]) => {
     plugins.value = data
   }
@@ -70,6 +101,7 @@ export const usePluginStore = defineStore('plugin', () => {
     getPluginRollDeciderConfig,
     getPluginAliasRollProcessor,
     getCustomTextProcessor,
+    getHookProcessor,
     onGetPlugins
   }
 })

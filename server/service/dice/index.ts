@@ -3,6 +3,10 @@ import type { ICard } from '../../../interface/card/types'
 import type { IRollDecideContext } from '../config/helpers/decider'
 import type { CustomTextKeys, SuccessLevel } from '../../../interface/config'
 import { at, convertSuccessLevel2CustomTextKey } from './utils'
+import mitt from 'mitt'
+
+export type DiceRollEventListener = (roll: BasePtDiceRoll) => void
+export type DiceRollEventListenerMap = { before?: DiceRollEventListener, after?: DiceRollEventListener }
 
 export abstract class BasePtDiceRoll {
   protected readonly rawExpression: string
@@ -75,4 +79,30 @@ export abstract class BasePtDiceRoll {
       return userRole !== 'user'
     }
   }
+
+  // region events
+  private readonly emitter = mitt<{ BeforeDiceRoll: BasePtDiceRoll, AfterDiceRoll: BasePtDiceRoll }>()
+
+  protected emitDiceRollEvent(type: 'BeforeDiceRoll' | 'AfterDiceRoll') {
+    this.emitter.emit(type, this)
+  }
+
+  addDiceRollEventListener({ before, after }: DiceRollEventListenerMap) {
+    if (before) {
+      this.emitter.on('BeforeDiceRoll', before)
+    }
+    if (after) {
+      this.emitter.on('AfterDiceRoll', after)
+    }
+  }
+
+  removeDiceRollEventListener({ before, after }: DiceRollEventListenerMap) {
+    if (before) {
+      this.emitter.off('BeforeDiceRoll', before)
+    }
+    if (after) {
+      this.emitter.off('AfterDiceRoll', after)
+    }
+  }
+  // endregion
 }

@@ -188,6 +188,14 @@ export interface IPluginConfigDisplay {
   aliasRoll: IPluginItemConfig[]
   rollDecider: IPluginItemConfig[]
   customText: IPluginItemConfig[]
+  hook: {
+    onReceiveCommand: IPluginItemConfig[]
+    beforeParseDiceRoll: IPluginItemConfig[]
+    onCardEntryChange: IPluginItemConfig[]
+    onMessageReaction: IPluginItemConfig[]
+    beforeDiceRoll: IPluginItemConfig[]
+    afterDiceRoll: IPluginItemConfig[]
+  }
 }
 
 export type IPluginReloadReq = string[]

@@ -3,12 +3,21 @@ import type {
   IPlugin,
   ICustomReplyConfig,
   IPluginRegisterContext,
-  IAliasRollConfig, ICustomTextConfig
+  IAliasRollConfig,
+  ICustomTextConfig,
+  IPluginElementCommonInfo,
+  IHookFunction,
+  OnReceiveCommandCallback,
+  BeforeParseDiceRollCallback,
+  OnCardEntryChangeCallback,
+  OnMessageReactionCallback,
+  BeforeDiceRollCallback,
+  AfterDiceRollCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
@@ -62,33 +71,47 @@ export class PluginManager {
         }
       },
       queryCard: (query) => this.wss.cards.queryCard(query),
-      sendMessageToChannel: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {
-        const channel = this.wss.qApis.find(botId)?.guilds.findChannel(channelId, guildId)
+      sendMessageToChannel: ({ channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
+        const qApi = this.wss.qApis.find(botId)
+        const channel = qApi?.guilds.findChannel(channelId, guildId)
         if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
+        // 兼容旧接口
+        if (typeof options === 'string') {
+          options = { msgType: options }
+        }
+        const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = parseTemplate(msg, new DiceRollContext(this.wss, { channelId, userId, username, userRole }), [])
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { guildId, channelId, userId, username, userRole }), [])
           return channel.sendMessage({ content })
         } else {
           return channel.sendMessage({ image: msg })
         }
       },
-      sendMessageToUser: ({ channelId, guildId, botId, userId, nick: username, userRole }, msg, msgType = 'text') => {
-        const user = this.wss.qApis.find(botId)?.guilds.findUser(userId, guildId)
+      sendMessageToUser: ({ channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
+        const qApi = this.wss.qApis.find(botId)
+        const user = qApi?.guilds.findUser(userId, guildId)
         if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
+        // 兼容旧接口
+        if (typeof options === 'string') {
+          options = { msgType: options }
+        }
+        const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = parseTemplate(msg, new DiceRollContext(this.wss, { channelId, userId, username, userRole }), [])
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { guildId, channelId, userId, username, userRole }), [])
           return user.sendMessage({ content })
         } else {
           return user.sendMessage({ image: msg })
         }
       },
+      getConfig: ({ channelId }) => wss.config.getChannelConfig(channelId).config,
       getPreference: ({ channelId }) => {
         const channelConfig = wss.config.getChannelConfig(channelId)
         const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginId)
         return pluginConfig?.preference ?? {}
       },
+      dispatchUserCommand: (parsed) => this.wss.qApis.find(parsed.context.botId)?.dispatchCommand(parsed),
       _context: wss,
       _ // provide lodash for convenience
     } // todo: getItem/setItem
@@ -192,30 +215,19 @@ export class PluginManager {
         label: pref.label ?? pref.key,
         defaultValue: pref.defaultValue ?? ''
       })),
-      customReply: (plugin.customReply || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description ?? '',
-        defaultEnabled: item.defaultEnabled ?? true
-      })),
-      // rollDecider: (plugin.rollDecider || []).map(item => ({
-      //   id: item.id,
-      //   name: item.name,
-      //   description: item.description
-      // })),
+      customReply: (plugin.customReply || []).map(withDefaults),
+      // rollDecider: (plugin.rollDecider || []).map(withDefaults),
       rollDecider: [],
-      aliasRoll: (plugin.aliasRoll || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description ?? '',
-        defaultEnabled: item.defaultEnabled ?? true
-      })),
-      customText: (plugin.customText || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description ?? '',
-        defaultEnabled: item.defaultEnabled ?? true
-      }))
+      aliasRoll: (plugin.aliasRoll || []).map(withDefaults),
+      customText: (plugin.customText || []).map(withDefaults),
+      hook: {
+        onReceiveCommand: (plugin.hook?.onReceiveCommand || []).map(withDefaults),
+        beforeParseDiceRoll: (plugin.hook?.beforeParseDiceRoll || []).map(withDefaults),
+        onCardEntryChange: (plugin.hook?.onCardEntryChange || []).map(withDefaults),
+        onMessageReaction: (plugin.hook?.onMessageReaction || []).map(withDefaults),
+        beforeDiceRoll: (plugin.hook?.beforeDiceRoll || []).map(withDefaults),
+        afterDiceRoll: (plugin.hook?.afterDiceRoll || []).map(withDefaults),
+      }
     }))
   }
 
@@ -266,6 +278,84 @@ export class PluginManager {
     })
     return ret
   }
+
+  // 提供 hook: onReceiveCommand
+  // fullId => IHookFunction<OnReceiveCommandCallback>
+  get hookOnReceiveCommandMap(): Record<string, IHookFunction<OnReceiveCommandCallback>> {
+    const ret: Record<string, IHookFunction<OnReceiveCommandCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.onReceiveCommand) return
+      plugin.hook.onReceiveCommand.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: beforeParseDiceRoll
+  // fullId => IHookFunction<BeforeParseDiceRollCallback>
+  get hookBeforeParseDiceRollMap(): Record<string, IHookFunction<BeforeParseDiceRollCallback>> {
+    const ret: Record<string, IHookFunction<BeforeParseDiceRollCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.beforeParseDiceRoll) return
+      plugin.hook.beforeParseDiceRoll.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: onCardEntryChange
+  // fullId => IHookFunction<OnCardEntryChangeCallback>
+  get hookOnCardEntryChangeMap(): Record<string, IHookFunction<OnCardEntryChangeCallback>> {
+    const ret: Record<string, IHookFunction<OnCardEntryChangeCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.onCardEntryChange) return
+      plugin.hook.onCardEntryChange.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: onMessageReaction
+  // fullId => IHookFunction<OnMessageReactionCallback>
+  get hookOnMessageReactionMap(): Record<string, IHookFunction<OnMessageReactionCallback>> {
+    const ret: Record<string, IHookFunction<OnMessageReactionCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.onMessageReaction) return
+      plugin.hook.onMessageReaction.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: beforeDiceRoll
+  // fullId => IHookFunction<BeforeDiceRollCallback>
+  get hookBeforeDiceRollMap(): Record<string, IHookFunction<BeforeDiceRollCallback>> {
+    const ret: Record<string, IHookFunction<BeforeDiceRollCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.beforeDiceRoll) return
+      plugin.hook.beforeDiceRoll.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
+
+  // 提供 hook: afterDiceRoll
+  // fullId => IHookFunction<AfterDiceRollCallback>
+  get hookAfterDiceRollMap(): Record<string, IHookFunction<AfterDiceRollCallback>> {
+    const ret: Record<string, IHookFunction<AfterDiceRollCallback>> = {}
+    Object.values(this.pluginMap).forEach(plugin => {
+      if (!plugin.hook?.afterDiceRoll) return
+      plugin.hook.afterDiceRoll.forEach(item => {
+        ret[`${plugin.id}.${item.id}`] = item
+      })
+    })
+    return ret
+  }
 }
 
 // plugin 兼容性处理
@@ -276,10 +366,22 @@ function handlePluginCompatibility(plugin: IPlugin) {
   })
 }
 
+// IPluginElementCommonInfo 附加默认信息，供展示和索引使用
+function withDefaults(pluginItem: IPluginElementCommonInfo) {
+  return {
+    id: pluginItem.id,
+    name: pluginItem.name,
+    description: pluginItem.description ?? '',
+    defaultEnabled: pluginItem.defaultEnabled ?? true
+  }
+}
+
 const officialPluginsVersions = {
   'io.paotuan.plugin.namegen': 2,
   'io.paotuan.plugin.insane': 3,
   'io.paotuan.plugin.cardgen': 4,
   'io.paotuan.plugin.draw': 2,
   // 'io.paotuan.plugin.cocrules': 1,
+  // 'io.paotuan.plugin.globalflags': 1
+  'io.paotuan.plugin.compatible': 1
 }
