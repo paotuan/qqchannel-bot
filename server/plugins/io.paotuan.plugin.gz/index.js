@@ -29,7 +29,7 @@ function isCommandClearAll(command) {
 
 // 解析通用场景
 function parseCommon(command) {
-  const match = command.match(/^(?<name>[a-zA-Z\p{Unified_Ideograph}]+)(?<sign>[+\-=])?(?<value>\d+)?$/u)
+  const match = command.match(/^(?<name>[a-zA-Z\p{Unified_Ideograph}]+)\s*(?<sign>[+\-=])?\s*(?<value>\d+)?$/u)
   if (!match) return false
   const sign = match.groups.sign
   return {
@@ -94,7 +94,7 @@ function getGzValue(card, input) {
 
 module.exports = (apis) => {
   return {
-    id: 'io.paouan.plugins.gz',
+    id: 'io.paotuan.plugin.gz',
     name: '故障值',
     description: '记录枪械的故障值，并在检定时给予提示。\n.gz - 查看当前的故障值\n.gz手枪60 - 指定故障值。掷骰结果大于等于故障值，认为发生了故障\n.gz手枪-5 - 增减故障值\n.gz del 手枪 - 删除某项故障值\n.gz clear - 清除所有故障值记录',
     version: 1,

@@ -7,8 +7,8 @@ const getRegex = pattern => {
   }
   if (pattern.startsWith('/') && pattern.endsWith('/')) {
     // 1. /xxxx/ 格式的认为直接就是正则，需包含 command + count 捕获组
-    // e.g. /^(\((?<count>\d+)\))?(?<command>.+?)(\((?<count2>\d+)\))?$/
-    return regexCache[pattern] = new RegExp(pattern)
+    // e.g. /^([(（](?<count>\d+)[)）])?(?<command>.+?)([(（](?<count2>\d+)[)）])?$/
+    return regexCache[pattern] = new RegExp(pattern.substring(1, pattern.length - 1))
   } else {
     // 2. 普通格式的，拼装正则
     return regexCache[pattern] = new RegExp(`^(?<command>.+?)${pattern}(?<count>\\d+)$`)
@@ -52,9 +52,15 @@ module.exports = ({ dispatchUserCommand, getPreference, _ }) => {
                 // 所有 command* 代表新的 command
                 // 所有 count* 代表新的 count
                 if (key.startsWith('command')) {
-                  newCommand = (matchResult.groups[key] || '').trim()
+                  const str = matchResult.groups[key]
+                  if (typeof str !== 'undefined') {
+                    newCommand = str.trim()
+                  }
                 } else if (key.startsWith('count')) {
-                  count = parseInt(matchResult.groups[key] || '1')
+                  const str = matchResult.groups[key]
+                  if (typeof str !== 'undefined') {
+                    count = parseInt(str || '1')
+                  }
                 }
               })
               if (newCommand && count) {
