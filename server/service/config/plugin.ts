@@ -157,10 +157,10 @@ export class PluginManager {
       // require.cache 的 key 是带 index.js 的，因此组装路径时也要带上
       const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
       // 注意不能完全避免问题，仍然有副作用重复执行或内存泄露的风险
-      delete require.cache[fullPath]
+      // 使用 eval 是为了防止 ncc 对 require 的转译，以确保插件是从真实的外部路径进行加载的
+      eval('delete require.cache[fullPath]')
       const context = this.getPluginRegisterContext(pluginName) // 此处依赖 plugin.id 与文件夹名称需保持一致
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const plugin = require(fullPath)(context) as IPlugin // 未来可以通过 require(fullPath).id 等方式解除文件夹名称的限制
+      const plugin = eval('require(fullPath)(context)') as IPlugin // 未来可以通过 require(fullPath).id 等方式解除文件夹名称的限制
       plugin.id ||= pluginName
       handlePluginCompatibility(plugin)
       console.log('[Plugin] 加载插件', plugin.id)
