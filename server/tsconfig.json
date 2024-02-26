@@ -8,6 +8,11 @@
     "skipLibCheck": true,
     "useDefineForClassFields": true,
     "esModuleInterop": true,
-    "outDir": "../dist/server"
+    "outDir": "../dist/server",
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   }
 }
