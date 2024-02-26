@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import fs from 'fs'
 import { globSync } from 'fast-glob'
 import { makeAutoObservable } from 'mobx'
 import type { Wss } from '../../app/wss'

@@ -1,7 +1,7 @@
 import { Wss } from './app/wss'
 import { VERSION_NAME } from '../interface/version'
-import * as path from 'path'
-import * as dotenv from 'dotenv'
+import path from 'path'
+import dotenv from 'dotenv'
 import { detectPublicIP } from './utils'
 
 // 显式指定 env 文件路径，使 ncc 的静态分析器能自动打包 env 文件到 dist/server 路径下

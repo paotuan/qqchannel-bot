@@ -1,6 +1,6 @@
 import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
-import { render } from 'mustache'
+import Mustache from 'mustache'
 import type {
   ICustomReplyConfig,
   ICustomReplyConfigItem,
@@ -57,7 +57,7 @@ export class CustomReplyManager {
       const guildId = context.guildId
       const channelId = context.channelId
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
-        return render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
+        return Mustache.render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
       })
       const getCard = (_userId: string) => this.wss.cards.getCard(context.channelId, _userId)
       const env: ICustomReplyEnv = {

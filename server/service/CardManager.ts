@@ -1,5 +1,5 @@
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '../../interface/common'
-import * as fs from 'fs'
+import fs from 'fs'
 import { globSync } from 'fast-glob'
 import { autorun, makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'

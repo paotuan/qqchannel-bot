@@ -3,7 +3,7 @@ import { AvailableIntentsEventsEnum, IChannel, IMember, IMessage } from 'qq-guil
 import { makeAutoObservable, runInAction } from 'mobx'
 import { Channel } from './channel'
 import { User } from './user'
-import * as fs from 'fs'
+import fs from 'fs'
 import { VERSION_CODE } from '../../../interface/version'
 
 const USER_DIR = './user'

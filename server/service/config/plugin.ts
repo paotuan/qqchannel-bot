@@ -15,15 +15,15 @@ import type {
   AfterDiceRollCallback
 } from '../../../interface/config'
 import { makeAutoObservable } from 'mobx'
-import * as fs from 'fs'
-import * as path from 'path'
+import fs from 'fs'
+import path from 'path'
 import _ from 'lodash'
 import { VERSION_CODE, VERSION_NAME } from '../../../interface/version'
 import { copyFolderSync } from '../../utils'
 import type { IPluginConfigDisplay } from '../../../interface/common'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '../../../interface/card/types'
-import { render } from 'mustache'
+import Mustache from 'mustache'
 import { parseTemplate } from '../dice/utils'
 import { DiceRollContext } from '../DiceRollContext'
 
@@ -48,7 +48,7 @@ export class PluginManager {
       versionName: VERSION_NAME,
       versionCode: VERSION_CODE,
       roll: exp => new DiceRoll(exp),
-      render: (arg1, arg2, arg3) => render(arg1, arg2, arg3, { escape: value => value }),
+      render: (arg1, arg2, arg3) => Mustache.render(arg1, arg2, arg3, { escape: value => value }),
       getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
       getLinkedCardUserList: ({ channelId }) => Object.keys(this.wss.cards.getLinkMap(channelId)),

@@ -1,5 +1,5 @@
 import type { CustomTextKeys, ICustomTextHandler, ICustomTextItem } from '../../../../interface/config'
-import { render } from 'mustache'
+import Mustache from 'mustache'
 
 type CustomTextMap = Partial<Record<CustomTextKeys, ICustomTextItem[] | ICustomTextHandler>>
 export function renderCustomText(customTextMap: CustomTextMap, key: CustomTextKeys, args: Record<string, any>, context: any) {
@@ -19,7 +19,7 @@ export function renderCustomText(customTextMap: CustomTextMap, key: CustomTextKe
     }
   } else {
     const replyItem = randomReplyItem(processor)
-    let result = render(replyItem.text, args, undefined, { escape: value => value })
+    let result = Mustache.render(replyItem.text, args, undefined, { escape: value => value })
     // 是否有提前结束
     const endIndex = result.indexOf('$end$')
     if (endIndex >= 0) {
