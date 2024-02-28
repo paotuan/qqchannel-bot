@@ -24,6 +24,10 @@ export type ParseUserCommandResult = {
   [key: string | number | symbol]: unknown
 }
 
+// 标识指令来源，目前仅包含 message_template, 用于区分自定义回复/文案的格式化与骰子指令，目前仅供插件使用
+// 后续如有其他需要区分出具体指令的类型，可再加枚举区分
+export type CommandSource = 'message_template'
+
 // todo 是否可以和上面合并
 export type DiceCommand = {
   command: string,
@@ -33,6 +37,7 @@ export type DiceCommand = {
     username: string
     userRole: UserRole
   }
+  source?: CommandSource
   // 给插件使用，可附加自定义信息
   [key: string | number | symbol]: unknown
 }

@@ -4,7 +4,7 @@ import { RiDiceRoll, RiListDiceRoll } from './special/ri'
 import { CocOpposedDiceRoll } from './standard/cocOppose'
 import { getInlineDiceRollKlass, InlineDiceRoll } from './standard/inline'
 import { ChannelConfig } from '../config/config'
-import type { CustomTextKeys, DiceCommand, SuccessLevel, UserRole } from '../../../interface/config'
+import type { CommandSource, CustomTextKeys, DiceCommand, SuccessLevel, UserRole } from '../../../interface/config'
 import type { ICard } from '../../../interface/card/types'
 import type { ICardQuery } from '../../../interface/config'
 import { GeneralCard } from '../../../interface/card/general'
@@ -40,22 +40,27 @@ export interface IDiceRollContext {
 const ENTRY_REGEX = /\$\{(.*?)\}|\$([a-zA-Z\p{Unified_Ideograph}]+)/gu // match ${ any content } or $AnyContent
 const INLINE_ROLL_REGEX = /\[\[([^[\]]+)]]/ // match [[ any content ]]
 const HISTORY_ROLL_REGEX = /\$(\d+)/g // match $1 $2...
-export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], depth = 0): string {
+export function parseTemplate(expression: string, context: IDiceRollContext, history: InlineDiceRoll[], source?: CommandSource, depth = 0): string {
   debug(depth, '解析原始表达式:', expression)
   if (depth > 99) throw new Error('stackoverflow in parseTemplate!!')
 
   // region hook 处理
-  const diceCommand: DiceCommand = {
-    command: expression,
-    context: {
-      channelId: context.channelId,
-      userId: context.userId,
-      username: context.username,
-      userRole: context.userRole
+  // 如果是自定义回复直接触发的，或通过插件 sendMessage* 接口发送的消息，则不触发此 hook
+  // 因为这些情况下发送的其实是文字而不是掷骰指令，可能造成插件错误处理这些情况
+  if (source !== 'message_template') {
+    const diceCommand: DiceCommand = {
+      command: expression,
+      context: {
+        channelId: context.channelId,
+        userId: context.userId,
+        username: context.username,
+        userRole: context.userRole
+      },
+      source
     }
+    context.config.hook_beforeParseDiceRoll(diceCommand)
+    expression = diceCommand.command
   }
-  context.config.hook_beforeParseDiceRoll(diceCommand)
-  expression = diceCommand.command
   // endregion
 
   const selfCard = context.getCard(context.userId)
@@ -69,7 +74,7 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
     const abilityExpression = getAbility(key)
     if (abilityExpression) {
       debug(depth, '递归解析 ability:', key, '=', abilityExpression)
-      const parsedAbility = parseTemplate(abilityExpression, context, history, depth + 1)
+      const parsedAbility = parseTemplate(abilityExpression, context, history, undefined, depth + 1)
       // 将 key 拼接到表达式后面，这样 key 就会自然地被解析为 description 输出，优化 output 展示
       const dice = new InlineDiceRoll(`${parsedAbility.trim()} ${key}`, context).roll()
       debug(depth, '求值 ability:', dice.total)

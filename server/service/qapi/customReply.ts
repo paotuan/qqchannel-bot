@@ -77,7 +77,7 @@ export class CustomReplyManager {
       }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
-      return parseTemplate(template, new DiceRollContext(this.api, { guildId, channelId, userId, username, userRole }), [])
+      return parseTemplate(template, new DiceRollContext(this.api, { guildId, channelId, userId, username, userRole }), [], 'message_template')
     } catch (e: any) {
       console.error('[Config] 自定义回复处理出错', e?.message)
       return undefined
