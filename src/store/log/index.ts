@@ -179,10 +179,11 @@ function formatTime(str: string) {
 function gtagLogs(logs: ILog[]) {
   const botStore = useBotStore()
   logs.forEach(log => {
-    gtagEvent('log/message')
-    if (log.userId === botStore.botId) {
-      gtagEvent('log/botMessage')
-    }
+    // gtagEvent('log/message')
+    // if (log.userId === botStore.botId) {
+    //   gtagEvent('log/botMessage')
+    // }
+    // todo
   })
 }
 

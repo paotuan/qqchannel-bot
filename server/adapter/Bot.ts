@@ -1,9 +1,10 @@
-import type { IBotConfig } from './types'
+import type { IBotConfig } from '../../interface/platform/login'
 import { Context, Bot as SatoriApi, ForkScope, GetEvents } from '@satorijs/satori'
-import { adapterConfig, adapterPlugin } from './utils'
+import { adapterConfig, adapterPlugin, getBotId } from './utils'
 import { isEqual } from 'lodash'
 import { IBotInfo } from '../../interface/common'
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
+import type { Wss } from '../app/wss'
 
 /**
  * A bot connection to a platform
@@ -13,20 +14,19 @@ export class Bot {
   private readonly context = new Context()
   private _api?: SatoriApi
   private readonly _fork: ForkScope<Context>
+  readonly wss: Wss
+  botInfo: IBotInfo | null = null
 
-  constructor(config: IBotConfig) {
-    makeAutoObservable<this, 'config' | 'context' | '_api' | '_fork'>(this, {
-      config: false,
-      context: false,
-      _api: false,
-      _fork: false
-    })
-
+  constructor(config: IBotConfig, wss: Wss) {
+    makeAutoObservable(this)
+    this.wss = wss
     this.config = config
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
     this.context.on('login-added', session => {
+      if (this._api) return // 不知为何会触发两次，先做个保护
       this._api = session.bot
-      console.log('登录成功！', this.key)
+      console.log('登录成功！', this.id)
+      this.fetchBotInfo()
     })
 
     // 初始化串行监听器
@@ -43,31 +43,38 @@ export class Bot {
     return this.config.appid
   }
 
-  get key() {
-    return `${this.platform}:${this.appid}`
+  // bot 唯一标识
+  get id() {
+    return getBotId(this.platform, this.appid)
   }
 
   get api() {
     return this._api!
   }
 
-  get botInfo(): IBotInfo | null {
-    if (this.api) {
-      const user = this.api.user
-      return {
-        id: user.id,
-        username: (user.nick || user.name || '').replace(/-测试中$/, ''),
-        avatar: user.avatar || ''
+  private async fetchBotInfo() {
+    // 目前没有通用的，只能每个平台去尝试调用内部 api
+    if (this.platform === 'qq') {
+      try {
+        await (this._api as any).initialize()
+        const user = this._api!.user
+        runInAction(() => {
+          this.botInfo = {
+            id: user.id,
+            username: (user.username ?? '').replace(/-测试中$/, ''),
+            avatar: user.avatar ?? '',
+          }
+        })
+      } catch (e) {
+        console.error('获取机器人信息失败', e)
       }
-    } else {
-      return null
     }
   }
 
   async start() {
-    console.log('开始连接服务器', this.key)
+    console.log('开始连接服务器', this.id)
     await this.context.start()
-    console.log('连接服务器完成', this.key)
+    console.log('连接服务器完成', this.id)
   }
 
   async disconnect() {
@@ -75,7 +82,7 @@ export class Bot {
     await this.context.stop()
   }
 
-  equals(anotherConfig: IBotConfig) {
+  sameConfigWith(anotherConfig: IBotConfig) {
     return isEqual(this.config, anotherConfig)
   }
 

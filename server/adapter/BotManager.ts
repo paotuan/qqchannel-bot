@@ -1,7 +1,8 @@
 import { Wss } from '../app/wss'
 import { Bot } from './Bot'
 import { makeAutoObservable } from 'mobx'
-import { IBotConfig, Platform } from './types'
+import { IBotConfig } from '../../interface/platform/login'
+import { getBotId } from './utils'
 
 export class BotManager {
   private readonly wss: Wss
@@ -14,11 +15,11 @@ export class BotManager {
   }
 
   async login(config: IBotConfig) {
-    const bot = this.find(config.platform, config.appid)
+    const bot = this.find(getBotId(config.platform, config.appid))
     // 存在相同的连接，可直接复用
-    if (bot && bot.equals(config)) {
+    if (bot && bot.sameConfigWith(config)) {
       console.log('已存在相同的机器人连接，可直接复用')
-      return
+      return bot
     }
     // 存在不同的连接，移除旧的
     if (bot) {
@@ -26,12 +27,16 @@ export class BotManager {
       await bot.disconnect()
     }
     // 开启新连接
-    const newBot = new Bot(config)
+    const newBot = new Bot(config, this.wss)
     await newBot.start()
+    return newBot
   }
 
-  find(platform: Platform, appid: string): Bot | undefined {
-    const key = `${platform}:${appid}`
-    return this.bots[key]
+  find(id?: string): Bot | undefined {
+    if (!id) {
+      // 可做断言，理论不可能
+      return undefined
+    }
+    return this.bots[id]
   }
 }

@@ -1,6 +1,9 @@
-import { IBotConfig, Platform } from './types'
-import qqAdapter, { QQBot } from '@satorijs/adapter-qq'
-import { Intents } from '@satorijs/adapter-qq/lib/types'
+import { IBotConfig, IBotConfig_QQ, Platform } from '../../interface/platform/login'
+import qqAdapter, { QQBot, QQ } from '@satorijs/adapter-qq'
+
+export function getBotId(platform: Platform, appid: string) {
+  return `${platform}:${appid}`
+}
 
 export function adapterPlugin(platform: Platform) {
   switch (platform) {
@@ -20,18 +23,19 @@ export function adapterConfig(config: IBotConfig) {
   }
 }
 
-function adapterQQ(config: IBotConfig): QQBot.Config {
+function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
+  const type = config.type ?? 'private'
   return {
     id: config.appid,
     secret: config.secret,
     token: config.token,
-    type: config.type ?? 'private',
+    type,
     sandbox: config.sandbox ?? false,
-    intents: Intents.GUILDS
-      | Intents.GUILD_MEMBERS
-      | (config.type === 'private' ? Intents.GUILD_MESSAGES : Intents.PUBLIC_GUILD_MESSAGES)
-      | Intents.GUILD_MESSAGE_REACTIONS
-      | Intents.DIRECT_MESSAGES,
+    intents: QQ.Intents.GUILDS
+      | QQ.Intents.GUILD_MEMBERS
+      | (type === 'private' ? QQ.Intents.GUILD_MESSAGES : QQ.Intents.PUBLIC_GUILD_MESSAGES)
+      | QQ.Intents.GUILD_MESSAGE_REACTIONS
+      | QQ.Intents.DIRECT_MESSAGES,
     retryWhen: []
   }
 }

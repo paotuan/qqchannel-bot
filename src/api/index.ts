@@ -20,14 +20,10 @@ import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
 import type { ICardData } from '../../interface/card/types'
 
-ws.on('bot/login', message => {
+ws.on('bot/loginV2', message => {
   console.log('login success')
   const bot = useBotStore()
-  bot.loginState = message.success ? 'LOGIN' : 'NOT_LOGIN'
-  // 极端情况下会有异步的问题，不过这里很快，就不管了
-  localStorage.setItem('appid', bot.appid)
-  localStorage.setItem('token', bot.token)
-  localStorage.setItem('sandbox', String(bot.sandbox))
+  bot.onLoginFinish(!!message.success)
 })
 
 ws.on('bot/info', message => {

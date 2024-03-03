@@ -7,7 +7,9 @@ import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
  * 一个 client 对应一个打开的网页
  */
 export class WsClient {
-  // 该 client 登录机器人的 appid
+  // 该 client 登录机器人的 id
+  botId?: string
+  // 该 client 登录机器人的 appid todo 待废弃
   appid = ''
   // 该 client 监听的频道 id
   listenToGuildId = ''

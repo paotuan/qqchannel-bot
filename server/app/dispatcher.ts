@@ -25,13 +25,17 @@ import type {
   IRiListResp,
   IRiSetReq,
   IRiDeleteReq,
-  IDiceRollReq, IUserDeleteReq, IPluginReloadReq,
+  IDiceRollReq, IUserDeleteReq, IPluginReloadReq, ILoginReqV2,
 } from '../../interface/common'
+import { getBotId } from '../adapter/utils'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
   switch (request.cmd) {
   case 'bot/login':
     handleLogin(client, server, request.data as ILoginReq)
+    break
+  case 'bot/loginV2':
+    handleLoginV2(client, server, request.data as ILoginReqV2)
     break
   case 'channel/listen':
     handleListenToChannel(client, server, request.data as IListenToChannelReq)
@@ -124,6 +128,32 @@ function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
   client.autorun(ws => {
     ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
   })
+}
+
+async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
+  console.log('机器人登录：', getBotId(data.platform, data.appid))
+  try {
+    // 1. 发起连接
+    const bot = await server.bots.login(data)
+    // 2. 记录 bot 到这个浏览器连接上
+    client.botId = bot.id
+    // 3. 返回登录成功
+    client.send({ cmd: 'bot/loginV2', success: true, data: null })
+    // 4. watch bot info
+    client.autorun(ws => {
+      if (bot.botInfo) {
+        ws.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: bot.botInfo })
+      }
+    })
+    // todo watch guild & channel info
+    // 5. 返回插件信息
+    client.autorun(ws => {
+      ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
+    })
+  } catch (e) {
+    // 返回失败
+    client.send({ cmd: 'bot/loginV2', success: false, data: null })
+  }
 }
 
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {

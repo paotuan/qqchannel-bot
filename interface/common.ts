@@ -1,8 +1,10 @@
 import type { IChannelConfig } from './config'
 import type { ICardData } from './card/types'
+import type { IBotConfig } from './platform/login'
 
 export type Command =
   | 'bot/login' // req/res
+  | 'bot/loginV2' // req/res
   | 'bot/info'  // res
   | 'channel/list' // res
   | 'channel/listen' // req
@@ -50,6 +52,8 @@ export interface ILoginReq {
   token: string
   sandbox: boolean
 }
+
+export type ILoginReqV2 = IBotConfig
 
 export type IBotInfoResp = IBotInfo
 // endregion bot

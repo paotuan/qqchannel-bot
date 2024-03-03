@@ -7,6 +7,7 @@ import { makeAutoObservable } from 'mobx'
 import { CardManager } from '../service/CardManager'
 import { ConfigManager } from '../service/config'
 import { PluginManager } from '../service/config/plugin'
+import { BotManager } from '../adapter/BotManager'
 
 /**
  * The server is a singleton websocket server
@@ -14,11 +15,12 @@ import { PluginManager } from '../service/config/plugin'
 export class Wss {
   private readonly server: WebSocketServer
   private readonly clients: WsClient[] = []
-  readonly qApis = new QApiManager(this)
+  readonly bots = new BotManager(this)
+  readonly qApis = new QApiManager(this) // todo 待废弃
   readonly cards = new CardManager(this)
   readonly plugin = new PluginManager(this)
   readonly config = new ConfigManager(this, this.plugin)
-  private readonly _listeningChannels: string[] = []
+  private readonly _listeningChannels: string[] = [] // todo 待废弃
 
   constructor(port: number) {
     makeAutoObservable<this, 'server'>(this, { server: false, qApis: false })
