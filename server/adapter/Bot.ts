@@ -5,6 +5,7 @@ import { isEqual } from 'lodash'
 import { IBotInfo } from '../../interface/common'
 import { makeAutoObservable, runInAction } from 'mobx'
 import type { Wss } from '../app/wss'
+import { GuildManager } from '../model/GuildManager'
 
 /**
  * A bot connection to a platform
@@ -16,6 +17,7 @@ export class Bot {
   private readonly _fork: ForkScope<Context>
   readonly wss: Wss
   botInfo: IBotInfo | null = null
+  guilds!: GuildManager
 
   constructor(config: IBotConfig, wss: Wss) {
     makeAutoObservable(this)
@@ -28,6 +30,8 @@ export class Bot {
       console.log('登录成功！', this.id)
       this.fetchBotInfo()
     })
+
+
 
     // 初始化串行监听器
     this.on('message', session => {
@@ -49,7 +53,11 @@ export class Bot {
   }
 
   get api() {
-    return this._api!
+    if ((this._api as any)?.guildBot) {
+      return (this._api as any).guildBot as SatoriApi // todo wtf?
+    } else {
+      return this._api!
+    }
   }
 
   private async fetchBotInfo() {
@@ -75,6 +83,10 @@ export class Bot {
     console.log('开始连接服务器', this.id)
     await this.context.start()
     console.log('连接服务器完成', this.id)
+    // 初始化各项功能
+    // 初始化 bot 所在频道信息
+    this.guilds = new GuildManager(this)
+    console.log(this.context.bots[0].getGuildList)
   }
 
   async disconnect() {

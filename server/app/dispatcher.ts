@@ -145,7 +145,18 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
         ws.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: bot.botInfo })
       }
     })
-    // todo watch guild & channel info
+    // watch guild & channel info
+    client.autorun(ws => {
+      const channels: IChannel[] = bot.guilds.all.map(guild => guild.allChannels.map(channel => ({
+        id: channel.id,
+        name: channel.name,
+        type: channel.type,
+        guildId: channel.guildId,
+        guildName: guild.name,
+        guildIcon: guild.icon
+      }))).flat()
+      ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
+    })
     // 5. 返回插件信息
     client.autorun(ws => {
       ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
