@@ -6,6 +6,7 @@ import { IBotInfo } from '../../interface/common'
 import { makeAutoObservable, runInAction } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
+import type { QQBot } from '@paotuan/adapter-qq'
 
 /**
  * A bot connection to a platform
@@ -53,8 +54,8 @@ export class Bot {
   }
 
   get api() {
-    if ((this._api as any)?.guildBot) {
-      return (this._api as any).guildBot as SatoriApi // todo wtf?
+    if ((this._api as QQBot)?.guildBot) {
+      return (this._api as QQBot).guildBot as SatoriApi // todo wtf?
     } else {
       return this._api!
     }

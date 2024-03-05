@@ -316,30 +316,30 @@
   resolved "https://registry.npmmirror.com/@colors/colors/-/colors-1.6.0.tgz#ec6cd237440700bc23ca23087f513c75508958b0"
   integrity sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==
 
-"@cordisjs/core@3.12.0":
-  version "3.12.0"
-  resolved "https://registry.npmmirror.com/@cordisjs/core/-/core-3.12.0.tgz#937011556f71ab219978e7b48a5cac17d15e66f5"
-  integrity sha512-w7H/IJ2C95aI5WxhlberxwKu/b969/Flv75BmFHjpoWC7zRiCQt5+16C6PLlm6tn+ZTx4nzL2Ldy3oBff6tFkQ==
+"@cordisjs/core@3.13.3":
+  version "3.13.3"
+  resolved "https://registry.npmmirror.com/@cordisjs/core/-/core-3.13.3.tgz#7a56f56f49c4ebe1befcfef226ae812ac94b696d"
+  integrity sha512-76NmCEZbZmqshhzQLrxp+/C6jNNLA0Reov17/HJmMGrQfGsx9UAqRJoIDtQz0uyXesQuLrp9v/l/P0kW+fU7Ig==
   dependencies:
     cosmokit "^1.5.2"
 
-"@cordisjs/loader@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.npmmirror.com/@cordisjs/loader/-/loader-0.7.0.tgz#4f2d083a23fba1b89009829f7dacee5432299b5b"
-  integrity sha512-ufKs/nZ1v43spjb7d4VLnbu8qEehC7fhoTPedOB2fOkTcRHLeKv9ptaWfFN8hs+S2QqltGwGo6rXn62swbnIcQ==
+"@cordisjs/loader@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.npmmirror.com/@cordisjs/loader/-/loader-0.8.3.tgz#8b223e421f9243bfee64b72436ac90050e29b60f"
+  integrity sha512-oIXMszJ+eYzAln5PWrL31Nc92uWE0hk4ciVP3W0Xdy2eZXOOrA0BUjym912gUPGdY29a+Nfs//I6u9lsWGC7WA==
   dependencies:
     cosmokit "^1.5.2"
     dotenv "^16.3.1"
     js-yaml "^4.1.0"
 
-"@cordisjs/logger@^0.3.1":
+"@cordisjs/logger@^0.3.2":
   version "0.3.2"
   resolved "https://registry.npmmirror.com/@cordisjs/logger/-/logger-0.3.2.tgz#a7318730aec280d449c9186133b8995898f78a99"
   integrity sha512-8t/n5ImZ2fw5QBt+jLlS2r523yALBxHlUd2XZuwbbn6v3JfiirYxO31Yfdi+7btf98ctYwYGBOArwXxK19o4aw==
   dependencies:
     reggol "^1.6.3"
 
-"@cordisjs/timer@^0.3.1":
+"@cordisjs/timer@^0.3.2":
   version "0.3.2"
   resolved "https://registry.npmmirror.com/@cordisjs/timer/-/timer-0.3.2.tgz#3719854ec4b649c3c76dde81689a7b41784d7e82"
   integrity sha512-frdIvc+1AqKVHMWnNacqqZ2Cm52FfoYKPpBQ+kZgr/cFs7HXDKqetL35CLy/EZAF22l/6VTvpQOYUwS6tvVJZA==
@@ -693,6 +693,14 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@paotuan/adapter-qq@4.5.1-1":
+  version "4.5.1-1"
+  resolved "https://registry.yarnpkg.com/@paotuan/adapter-qq/-/adapter-qq-4.5.1-1.tgz#f8b3afd1a7797a19b663d2fcfecf5d524a769664"
+  integrity sha512-wRjVVYMXWvS1bSUFvgZ0fZqUoWnpUiTQ0sJIJmewmGo5MOEhqvHaRZSxCWp6/+Pl1CB9qTq6JNd/4b5TEefXCg==
+  dependencies:
+    "@satorijs/satori" "^3.6.3"
+    qface "^1.4.1"
+
 "@paotuan/api2d@0.1.41":
   version "0.1.41"
   resolved "https://registry.npmmirror.com/@paotuan/api2d/-/api2d-0.1.41.tgz#9caa0080af13449bded495803fcac953cf1c7d54"
@@ -705,23 +713,16 @@
     https-proxy-agent "^7.0.1"
     node-fetch "2"
 
-"@satorijs/adapter-qq@^4.5.0":
-  version "4.5.0"
-  resolved "https://registry.npmmirror.com/@satorijs/adapter-qq/-/adapter-qq-4.5.0.tgz#53e899324646e9d44f726569953aa948418e1ab8"
-  integrity sha512-/bBi7WAAJPNx3f8SiBm6H8yURfS8l6xa/gmA1WVlJ4mcNtoxX+wp04RJZsMNOkfu1sFgDxHLzRX8K+yhoL4JAQ==
-  dependencies:
-    qface "^1.4.1"
-
-"@satorijs/core@3.6.1":
-  version "3.6.1"
-  resolved "https://registry.npmmirror.com/@satorijs/core/-/core-3.6.1.tgz#3443ec2f7c65328bda8c2a8bd45f67d835027bd3"
-  integrity sha512-X02sZ8YthH8oBVeS8fU9CdFTmELs8QJjQhoElWZGT350bVmI4OHZ54ENCkF4ggXreuNQ53ymm7w22WERchIlSg==
+"@satorijs/core@3.6.3":
+  version "3.6.3"
+  resolved "https://registry.npmmirror.com/@satorijs/core/-/core-3.6.3.tgz#cdaa5dfdded4dc1497f5c75c4611574e0aaace6e"
+  integrity sha512-/EAVzx0406o+GwUGv+JJ/etTRuHj5GqKgd5gfiIGJRere8dN+Ox05taUhLKAJ1GhlT6T9gqyNcGH+6gh1WSdFQ==
   dependencies:
     "@satorijs/element" "^3.1.5"
     "@satorijs/protocol" "^1.3.0-alpha.0"
-    cordis "^3.12.0"
+    cordis "^3.13.1"
     cosmokit "^1.5.2"
-    undios "^0.2.3"
+    undios "^0.3.0"
     undios-file "^0.1.2"
     ws "^8.14.2"
 
@@ -740,12 +741,12 @@
     "@satorijs/element" "^3.1.4"
     cosmokit "^1.5.2"
 
-"@satorijs/satori@^3.6.1":
-  version "3.6.1"
-  resolved "https://registry.npmmirror.com/@satorijs/satori/-/satori-3.6.1.tgz#aecaa1d8b53df24b7ca60f914c781bd230fcd4ad"
-  integrity sha512-L1UNgecUIGhVAATrwMbJfAECWjnZxWSqbF+f7j4ZrbhSqWKvel53vQfMZt2Rg5Iy0tw2G7GrUzhFWfnKAkhpNg==
+"@satorijs/satori@3.6.3", "@satorijs/satori@^3.6.3":
+  version "3.6.3"
+  resolved "https://registry.npmmirror.com/@satorijs/satori/-/satori-3.6.3.tgz#4e717c5ea2888b15d2619635d248ab4ee959e5c1"
+  integrity sha512-lrF/1WVZop4wHl3lNa1LaBdh8PmaXPOEkf0KmmdDAQSClsbS4M8oBpH4/9OkvxVWzqOD9gnZiqf1GtjVuePWwA==
   dependencies:
-    "@satorijs/core" "3.6.1"
+    "@satorijs/core" "3.6.3"
     cosmokit "^1.5.2"
 
 "@sinclair/typebox@^0.25.16":
@@ -1887,15 +1888,15 @@ cookie@0.5.0:
   resolved "https://registry.npmmirror.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
   integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
 
-cordis@^3.12.0:
-  version "3.12.0"
-  resolved "https://registry.npmmirror.com/cordis/-/cordis-3.12.0.tgz#d950ec680cbc6f2ca7f2643603a9f938586f716d"
-  integrity sha512-XaX4YdjNd6uxFA90l2gUr3/8RMgMiz1zjokgT6MYl7jzBSB0NUkvHhKcre40qI4++8iBVKyT6pBFs155XvjfIw==
+cordis@^3.13.1:
+  version "3.13.3"
+  resolved "https://registry.npmmirror.com/cordis/-/cordis-3.13.3.tgz#47f2714ac11aa17a6b3a746241a14fb8532d6677"
+  integrity sha512-cuFqKMV50QPQpQ68fo/Ah5mt3H2dZRGE+KWmMhyyP6G6DjDbKznnnUnQrzK38EuQ/v9nuFgTT+TS8uMO31Pcdg==
   dependencies:
-    "@cordisjs/core" "3.12.0"
-    "@cordisjs/loader" "^0.7.0"
-    "@cordisjs/logger" "^0.3.1"
-    "@cordisjs/timer" "^0.3.1"
+    "@cordisjs/core" "3.13.3"
+    "@cordisjs/loader" "^0.8.3"
+    "@cordisjs/logger" "^0.3.2"
+    "@cordisjs/timer" "^0.3.2"
     cac "^6.7.14"
     cosmokit "^1.5.2"
     kleur "^4.1.5"
@@ -5240,10 +5241,10 @@ undios-file@^0.1.2:
     file-type "^16.5.4"
     mime-db "^1.52.0"
 
-undios@^0.2.3:
-  version "0.2.5"
-  resolved "https://registry.npmmirror.com/undios/-/undios-0.2.5.tgz#5fce93109df2d79e2a7a32c5a0eb03593290fe1d"
-  integrity sha512-Wuy5tvuWwtVWdLC/yHkyitg+s1GRcCIqupL0Pm1y7XHHamCBRy2EPO/E2VOdq/nnK16hX0mR7w4EwdhfuuVVuw==
+undios@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.npmmirror.com/undios/-/undios-0.3.0.tgz#6ead778fc196716a9786c64e94173b1b533393e2"
+  integrity sha512-OOLG+qA3rA6jdAePkxAS1UUdj55OPsqzVtoliPPlOTN5jftFNEUV+pgCL8zEy30ayt1RO17XzFQ5biaHYjmknw==
   dependencies:
     cosmokit "^1.5.2"
     ws "^8.16.0"

@@ -2,8 +2,10 @@ import { Bot } from '../adapter/Bot'
 import { makeAutoObservable } from 'mobx'
 import { Universal } from '@satorijs/satori'
 
+const ChannelTypeLive_QQ = 10005
+
 export class Channel {
-  static VALID_TYPES = [Universal.Channel.Type.TEXT, Universal.Channel.Type.VOICE] // 只支持文字、音视频子频道
+  static VALID_TYPES = [Universal.Channel.Type.TEXT, Universal.Channel.Type.VOICE, ChannelTypeLive_QQ] // 只支持文字、音视频子频道
   readonly id: string
   readonly guildId: string
   name: string

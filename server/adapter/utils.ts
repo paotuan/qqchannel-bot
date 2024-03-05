@@ -1,5 +1,5 @@
 import { IBotConfig, IBotConfig_QQ, Platform } from '../../interface/platform/login'
-import qqAdapter, { QQBot, QQ } from '@satorijs/adapter-qq'
+import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
 
 export function getBotId(platform: Platform, appid: string) {
   return `${platform}:${appid}`

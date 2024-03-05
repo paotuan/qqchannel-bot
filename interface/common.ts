@@ -62,7 +62,7 @@ export type IBotInfoResp = IBotInfo
 export interface IChannel {
   id: string
   name: string
-  type: number // 0 | 2 | 10005 todo
+  type: number // 0 | 2 | 10005
   guildId: string
   guildName: string
   guildIcon: string
