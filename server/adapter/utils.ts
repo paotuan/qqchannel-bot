@@ -5,6 +5,10 @@ export function getBotId(platform: Platform, appid: string) {
   return `${platform}:${appid}`
 }
 
+export function getChannelUnionId(platform: Platform, guildId: string, channelId: string) {
+  return `${platform}_${guildId}_${channelId}` // 保证可用作文件名
+}
+
 export function adapterPlugin(platform: Platform) {
   switch (platform) {
   case 'qq':

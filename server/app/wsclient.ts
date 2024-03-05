@@ -8,24 +8,46 @@ import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
  */
 export class WsClient {
   // 该 client 登录机器人的 id
-  botId?: string
+  private _botId?: string
   // 该 client 登录机器人的 appid todo 待废弃
   appid = ''
   // 该 client 监听的频道 id
-  listenToGuildId = ''
+  private _listenToGuildId = ''
   // 该 client 监听的子频道 id
-  listenToChannelId = ''
+  private _listenToChannelId = ''
 
+  private readonly server: Wss
   private readonly ws: WebSocket
   private readonly disposers: IReactionDisposer[] = []
+
+  get botId() {
+    return this._botId
+  }
+
+  get bot() {
+    return this.server.bots.find(this.botId)
+  }
+
+  get platform() {
+    return this.bot?.platform
+  }
+
+  get listenToGuildId() {
+    return this._listenToGuildId
+  }
+
+  get listenToChannelId() {
+    return this._listenToChannelId
+  }
 
   constructor(ws: WebSocket, server: Wss) {
     makeAutoObservable<this, 'ws'>(this, { ws: false })
     this.ws = ws
+    this.server = server
     ws.on('message', (rawData: Buffer) => {
       try {
         const body = JSON.parse(rawData.toString()) as IMessage<unknown>
-        server.handleClientRequest(this, body)
+        this.server.handleClientRequest(this, body)
       } catch (e) {
         console.error('消息处理失败', e)
         console.error('原始消息', rawData)
@@ -35,26 +57,33 @@ export class WsClient {
     ws.on('close', () => {
       console.log('客户端关闭')
       this.disposeAllEffects()
-      server.removeClient(this)
+      this.server.removeClient(this)
     })
 
     ws.on('error', e => {
       console.error('客户端因发生错误而关闭', e)
       this.disposeAllEffects()
-      server.removeClient(this)
+      this.server.removeClient(this)
     })
 
     // watch 人物卡相关数据
     this.autorun(ws => {
-      const cardList = server.cards.cardList
-      server.sendToClient<ICardListResp>(ws, { cmd: 'card/list', success: true, data: cardList })
+      const cardList = this.server.cards.cardList
+      this.server.sendToClient<ICardListResp>(ws, { cmd: 'card/list', success: true, data: cardList })
     })
   }
 
-  // 监听某个子频道
+  // 客户端绑定某个 bot 实例
+  bindToBot(botId: string) {
+    this._botId = botId
+  }
+
+  // 客户端选择某个子频道
   listenTo(channelId: string, guildId: string) {
-    this.listenToChannelId = channelId
-    this.listenToGuildId = guildId
+    this._listenToChannelId = channelId
+    this._listenToGuildId = guildId
+    // 也向对应的 bot 注册。即使 wsclient 关闭，bot 中也继续监听消息
+    this.bot!.listenTo(channelId, guildId)
   }
 
   // 发送给网页

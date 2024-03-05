@@ -136,7 +136,7 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
     // 1. 发起连接
     const bot = await server.bots.login(data)
     // 2. 记录 bot 到这个浏览器连接上
-    client.botId = bot.id
+    client.bindToBot(bot.id)
     // 3. 返回登录成功
     client.send({ cmd: 'bot/loginV2', success: true, data: null })
     // 4. watch bot info
@@ -170,53 +170,53 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
-  server.addListeningChannel(data.channelId)
+  // todo
   // watch user list
-  client.autorun(ws => {
-    const qApi = server.qApis.find(ws.appid)
-    if (qApi) {
-      const guild = qApi.guilds.find(ws.listenToGuildId)
-      if (guild) {
-        const users: IUser[] = guild.allUsers.map(user => ({
-          id: user.id,
-          nick: user.nick,
-          username: user.username,
-          avatar: user.avatar,
-          bot: user.bot,
-          deleted: user.deleted
-        }))
-        ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
-      }
-    }
-  })
+  // client.autorun(ws => {
+  //   const qApi = server.qApis.find(ws.appid)
+  //   if (qApi) {
+  //     const guild = qApi.guilds.find(ws.listenToGuildId)
+  //     if (guild) {
+  //       const users: IUser[] = guild.allUsers.map(user => ({
+  //         id: user.id,
+  //         nick: user.nick,
+  //         username: user.username,
+  //         avatar: user.avatar,
+  //         bot: user.bot,
+  //         deleted: user.deleted
+  //       }))
+  //       ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
+  //     }
+  //   }
+  // })
   // watch card link info
-  client.autorun(ws => {
-    const channel = ws.listenToChannelId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
-    if (channel) {
-      const linkMap = server.cards.getLinkMap(channel)
-      const data: ICardLinkResp = Object.entries(linkMap).map(([userId, cardName]) => ({ userId, cardName }))
-      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data })
-    } else {
-      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
-    }
-  })
+  // client.autorun(ws => {
+  //   const channel = ws.listenToChannelId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
+  //   if (channel) {
+  //     const linkMap = server.cards.getLinkMap(channel)
+  //     const data: ICardLinkResp = Object.entries(linkMap).map(([userId, cardName]) => ({ userId, cardName }))
+  //     ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data })
+  //   } else {
+  //     ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
+  //   }
+  // })
   // watch channel config
-  client.autorun(ws => {
-    const channelId = ws.listenToChannelId
-    if (channelId) {
-      const config = server.config.getChannelConfig(channelId).config
-      ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
-    }
-  })
+  // client.autorun(ws => {
+  //   const channelId = ws.listenToChannelId
+  //   if (channelId) {
+  //     const config = server.config.getChannelConfig(channelId).config
+  //     ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
+  //   }
+  // })
   // watch ri list
-  client.autorun(ws => {
-    const channelId = ws.listenToChannelId
-    if (channelId) {
-      const qApi = server.qApis.find(ws.appid)
-      const list = qApi.dice.getRiListOfChannel(channelId)
-      ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
-    }
-  })
+  // client.autorun(ws => {
+  //   const channelId = ws.listenToChannelId
+  //   if (channelId) {
+  //     const qApi = server.qApis.find(ws.appid)
+  //     const list = qApi.dice.getRiListOfChannel(channelId)
+  //     ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
+  //   }
+  // })
 }
 
 function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {

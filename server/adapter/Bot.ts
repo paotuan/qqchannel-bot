@@ -20,8 +20,11 @@ export class Bot {
   botInfo: IBotInfo | null = null
   guilds!: GuildManager
 
+  // 维护当前工作子频道 // guildId => channelIds for quick search
+  private readonly listeningChannels = new Map<string, Set<string>>()
+
   constructor(config: IBotConfig, wss: Wss) {
-    makeAutoObservable(this)
+    makeAutoObservable<this, 'listeningChannels'>(this, { listeningChannels: false })
     this.wss = wss
     this.config = config
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
@@ -36,7 +39,9 @@ export class Bot {
 
     // 初始化串行监听器
     this.on('message', session => {
-      this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
+      if (this.isListening(session.channelId, session.guildId)) {
+        this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
+      }
     })
   }
 
@@ -59,6 +64,21 @@ export class Bot {
     } else {
       return this._api!
     }
+  }
+
+  // 选择某个子频道
+  listenTo(channelId: string, guildId: string) {
+    let set = this.listeningChannels.get(guildId)
+    if (!set) {
+      set = new Set<string>()
+      this.listeningChannels.set(guildId, set)
+    }
+    set.add(channelId)
+  }
+
+  // 是否正在监听某个子频道
+  private isListening(channelId: string, guildId: string) {
+    return !!this.listeningChannels.get(guildId)?.has(channelId)
   }
 
   private async fetchBotInfo() {

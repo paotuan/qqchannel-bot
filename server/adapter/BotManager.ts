@@ -1,16 +1,14 @@
 import { Wss } from '../app/wss'
 import { Bot } from './Bot'
-import { makeAutoObservable } from 'mobx'
 import { IBotConfig } from '../../interface/platform/login'
 import { getBotId } from './utils'
 
 export class BotManager {
   private readonly wss: Wss
-  private readonly bots: Record<string, Bot>  = {}
+  private readonly bots = new Map<string, Bot>()
 
   // singleton
   constructor(wss: Wss) {
-    makeAutoObservable<this, 'wss'>(this, { wss: false })
     this.wss = wss
   }
 
@@ -28,6 +26,7 @@ export class BotManager {
     }
     // 开启新连接
     const newBot = new Bot(config, this.wss)
+    this.bots.set(newBot.id, newBot)
     await newBot.start()
     return newBot
   }
@@ -37,6 +36,6 @@ export class BotManager {
       // 可做断言，理论不可能
       return undefined
     }
-    return this.bots[id]
+    return this.bots.get(id)
   }
 }
