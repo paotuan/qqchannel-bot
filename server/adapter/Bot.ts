@@ -33,8 +33,13 @@ export class Bot {
 
     // 初始化串行监听器
     this.on('message', session => {
+      // 根据消息中的用户信息更新成员信息
+      this.guilds.addGuildChannelByMessage(session.event.guild, session.event.channel)
+
+      // todo
       if (this.isListening(session.channelId, session.guildId)) {
         this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
+        // todo log 直接记在这里就好，之前过度设计了
       }
     })
   }
@@ -99,7 +104,7 @@ export class Bot {
     await this.context.start()
     console.log('连接服务器完成', this.id)
     // 初始化各项功能
-    // 初始化 bot 所在频道信息
+    // 初始化 bot 所在频道信息 todo 尝试放在构造函数
     this.guilds = new GuildManager(this)
   }
 

@@ -23,6 +23,29 @@ export class Guild {
     return Object.values(this.channelsMap)
   }
 
+  findChannel(id: string): Channel | undefined {
+    return this.channelsMap[id]
+  }
+
+  findUser(id: string) {
+    // todo
+  }
+
+  addChannel(channel: { id: string, name: string, type: number }) {
+    this.channelsMap[channel.id] = new Channel(this.bot, channel.id, this.id, channel.name, channel.type)
+  }
+  //
+  // updateChannel(channel: IChannel) {
+  //   const chan = this.channelsMap[channel.id]
+  //   if (chan) {
+  //     chan.name = channel.name
+  //   }
+  // }
+  //
+  // deleteChannel(id: string) {
+  //   delete this.channelsMap[id]
+  // }
+
   private async fetchChannels() {
     this.channelsMap = {}
     try {

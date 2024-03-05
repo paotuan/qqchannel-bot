@@ -31,9 +31,9 @@ import { getBotId } from '../adapter/utils'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
   switch (request.cmd) {
-  case 'bot/login':
-    handleLogin(client, server, request.data as ILoginReq)
-    break
+  // case 'bot/login':
+  //   handleLogin(client, server, request.data as ILoginReq)
+  //   break
   case 'bot/loginV2':
     handleLoginV2(client, server, request.data as ILoginReqV2)
     break
@@ -94,41 +94,41 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   }
 }
 
-function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
-  console.log('机器人登录：', data.appid)
-  // 1. 记录 appid
-  client.appid = data.appid
-  // 2. 连接 qq 服务器
-  server.qApis.login(data.appid, data.token, data.sandbox)
-  // 3. 返回登录成功
-  client.send({ cmd: 'bot/login', success: true, data: null })
-  // 4. watch bot info
-  client.autorun(ws => {
-    const qApi = server.qApis.find(ws.appid)
-    if (qApi?.botInfo) {
-      ws.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: qApi.botInfo })
-    }
-  })
-  // watch guild & channel info
-  client.autorun(ws => {
-    const qApi = server.qApis.find(ws.appid)
-    if (qApi) {
-      const channels: IChannel[] = qApi.guilds.all.map(guild => guild.allChannels.map(channel => ({
-        id: channel.id,
-        name: channel.name,
-        type: channel.type,
-        guildId: channel.guildId,
-        guildName: guild.name,
-        guildIcon: guild.icon
-      }))).flat()
-      ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
-    }
-  })
-  // 5. 返回插件信息
-  client.autorun(ws => {
-    ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
-  })
-}
+// function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
+//   console.log('机器人登录：', data.appid)
+//   // 1. 记录 appid
+//   client.appid = data.appid
+//   // 2. 连接 qq 服务器
+//   server.qApis.login(data.appid, data.token, data.sandbox)
+//   // 3. 返回登录成功
+//   client.send({ cmd: 'bot/login', success: true, data: null })
+//   // 4. watch bot info
+//   client.autorun(ws => {
+//     const qApi = server.qApis.find(ws.appid)
+//     if (qApi?.botInfo) {
+//       ws.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: qApi.botInfo })
+//     }
+//   })
+//   // watch guild & channel info
+//   client.autorun(ws => {
+//     const qApi = server.qApis.find(ws.appid)
+//     if (qApi) {
+//       const channels: IChannel[] = qApi.guilds.all.map(guild => guild.allChannels.map(channel => ({
+//         id: channel.id,
+//         name: channel.name,
+//         type: channel.type,
+//         guildId: channel.guildId,
+//         guildName: guild.name,
+//         guildIcon: guild.icon
+//       }))).flat()
+//       ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
+//     }
+//   })
+//   // 5. 返回插件信息
+//   client.autorun(ws => {
+//     ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
+//   })
+// }
 
 async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
   console.log('机器人登录：', getBotId(data.platform, data.appid))
