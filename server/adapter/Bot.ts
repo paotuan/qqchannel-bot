@@ -14,7 +14,7 @@ import type { QQBot } from '@paotuan/adapter-qq'
 export class Bot {
   private readonly config: IBotConfig
   private readonly context = new Context()
-  private _api?: SatoriApi
+  private readonly _api: SatoriApi
   private readonly _fork: ForkScope<Context>
   readonly wss: Wss
   botInfo: IBotInfo | null = null
@@ -28,14 +28,8 @@ export class Bot {
     this.wss = wss
     this.config = config
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
-    this.context.on('login-added', session => {
-      if (this._api) return // 不知为何会触发两次，先做个保护
-      this._api = session.bot
-      console.log('登录成功！', this.id)
-      this.fetchBotInfo()
-    })
-
-
+    this._api = this.context.bots[0]
+    this.fetchBotInfo()
 
     // 初始化串行监听器
     this.on('message', session => {
@@ -59,10 +53,10 @@ export class Bot {
   }
 
   get api() {
-    if ((this._api as QQBot)?.guildBot) {
+    if ((this._api as QQBot).guildBot) {
       return (this._api as QQBot).guildBot as SatoriApi // todo wtf?
     } else {
-      return this._api!
+      return this._api
     }
   }
 
@@ -107,7 +101,6 @@ export class Bot {
     // 初始化各项功能
     // 初始化 bot 所在频道信息
     this.guilds = new GuildManager(this)
-    console.log(this.context.bots[0].getGuildList)
   }
 
   async disconnect() {
