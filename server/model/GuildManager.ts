@@ -49,8 +49,6 @@ export class GuildManager {
   // 处理获取 guild/channel 接口有时失败的问题，理论上我们只需要 guildId、channelId，可以和 user 一样直接从 message 里面取
   addGuildChannelByMessage(_guild?: Universal.Guild, _channel?: Universal.Channel) {
     if (!_guild || !_channel) return
-    // 不处理私信消息
-    if (_channel.type === Universal.Channel.Type.DIRECT) return
     const guildId = _guild.id
     const channelId = _channel.id
     let guild = this.guildsMap[guildId]
@@ -66,6 +64,11 @@ export class GuildManager {
       const type = Channel.VALID_TYPES.includes(_channel.type) ? _channel.type : Universal.Channel.Type.TEXT
       guild.addChannel({ id: channelId, name: channelId, type })
     }
+  }
+
+  addOrUpdateUserByMessage(_guild?: Universal.Guild, _author?: Universal.GuildMember & Universal.User) {
+    if (!_guild || !_author) return
+    this.addOrUpdateUser(_author, _guild.id)
   }
 
   // 请求所有 guild
@@ -97,9 +100,50 @@ export class GuildManager {
   // private deleteGuild(id: string) {
   //   delete this.guildsMap[id]
   // }
+  //
+  // addChannel(channel: IChannel) {
+  //   if (!Channel.VALID_TYPES.includes(channel.type)) return // 不支持的子频道类型
+  //   const guild = this.guildsMap[channel.guild_id]
+  //   if (guild) {
+  //     guild.addChannel(channel)
+  //   }
+  // }
+  //
+  // updateChannel(channel: IChannel) {
+  //   if (!Channel.VALID_TYPES.includes(channel.type)) return // 不支持的子频道类型
+  //   const guild = this.guildsMap[channel.guild_id]
+  //   if (guild) {
+  //     guild.updateChannel(channel)
+  //   }
+  // }
+  //
+  // deleteChannel(channel: IChannel) {
+  //   if (!Channel.VALID_TYPES.includes(channel.type)) return // 不支持的子频道类型
+  //   const guild = this.guildsMap[channel.guild_id]
+  //   if (guild) {
+  //     guild.deleteChannel(channel.id)
+  //   }
+  // }
+
+  private addOrUpdateUser(author: Universal.GuildMember & Universal.User, guildId: string) {
+    const guild = this.guildsMap[guildId]
+    if (guild) {
+      guild.addOrUpdateUser(author)
+    }
+  }
+
+  private deleteUser(userId: string, guildId: string) {
+    const guild = this.guildsMap[guildId]
+    if (guild) {
+      guild.deleteUser(userId)
+    }
+  }
 
   private initEventListeners() {
     // todo guild 和 channel 变动事件，satori 不全，而且使用场景少，暂不处理。目前也可以通过发消息进行更新
-    // todo guild member 事件也同理。后续实验下各平台的真实数据再进行处理
+    // 监听成员变动事件
+    this.bot.on('guild-member-added', session => this.addOrUpdateUser(session.author, session.guildId))
+    this.bot.on('guild-member-updated', session => this.addOrUpdateUser(session.author, session.guildId))
+    this.bot.on('guild-member-removed', session => this.deleteUser(session.userId, session.guildId))
   }
 }

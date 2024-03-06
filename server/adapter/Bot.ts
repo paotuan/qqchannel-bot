@@ -33,13 +33,19 @@ export class Bot {
 
     // 初始化串行监听器
     this.on('message', session => {
-      // 根据消息中的用户信息更新成员信息
-      this.guilds.addGuildChannelByMessage(session.event.guild, session.event.channel)
+      // 区分私信场景
+      if (!session.isDirect) {
+        // 根据消息中的用户信息更新成员信息
+        this.guilds.addGuildChannelByMessage(session.event.guild, session.event.channel)
+        this.guilds.addOrUpdateUserByMessage(session.event.guild, session.author)
 
-      // todo
-      if (this.isListening(session.channelId, session.guildId)) {
-        this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
-        // todo log 直接记在这里就好，之前过度设计了
+        // todo
+        if (this.isListening(session.channelId, session.guildId)) {
+          this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
+          // todo log 直接记在这里就好，之前过度设计了
+        }
+      } else {
+        // todo
       }
     })
   }
@@ -59,7 +65,7 @@ export class Bot {
 
   get api() {
     if ((this._api as QQBot).guildBot) {
-      return (this._api as QQBot).guildBot as SatoriApi // todo wtf?
+      return (this._api as QQBot).guildBot as SatoriApi // todo 兼容群机器人缺乏 api 的场景
     } else {
       return this._api
     }
@@ -89,7 +95,7 @@ export class Bot {
         runInAction(() => {
           this.botInfo = {
             id: user.id,
-            username: (user.username ?? '').replace(/-测试中$/, ''),
+            username: (user.username ?? '').replace(/-测试中$/, ''), // todo 修改适配器
             avatar: user.avatar ?? '',
           }
         })

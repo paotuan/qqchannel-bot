@@ -170,25 +170,25 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
 function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
-  // todo
   // watch user list
-  // client.autorun(ws => {
-  //   const qApi = server.qApis.find(ws.appid)
-  //   if (qApi) {
-  //     const guild = qApi.guilds.find(ws.listenToGuildId)
-  //     if (guild) {
-  //       const users: IUser[] = guild.allUsers.map(user => ({
-  //         id: user.id,
-  //         nick: user.nick,
-  //         username: user.username,
-  //         avatar: user.avatar,
-  //         bot: user.bot,
-  //         deleted: user.deleted
-  //       }))
-  //       ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
-  //     }
-  //   }
-  // })
+  client.autorun(ws => {
+    const bot = ws.bot
+    if (bot) {
+      const guild = bot.guilds.find(ws.listenToGuildId)
+      if (guild) {
+        const users: IUser[] = guild.allUsers.map(user => ({
+          id: user.id,
+          nick: user.name,
+          username: user.name,
+          avatar: user.avatar,
+          bot: false, // todo
+          deleted: user.deleted
+        }))
+        ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
+      }
+    }
+  })
+  // todo
   // watch card link info
   // client.autorun(ws => {
   //   const channel = ws.listenToChannelId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
