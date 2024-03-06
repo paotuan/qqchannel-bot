@@ -1,11 +1,11 @@
 import { Wss } from '../app/wss'
 import { Bot } from './Bot'
 import { IBotConfig } from '../../interface/platform/login'
-import { getBotId } from './utils'
+import { BotId, getBotId } from './utils'
 
 export class BotManager {
   private readonly wss: Wss
-  private readonly bots = new Map<string, Bot>()
+  private readonly bots = new Map<BotId, Bot>()
 
   // singleton
   constructor(wss: Wss) {
@@ -31,7 +31,7 @@ export class BotManager {
     return newBot
   }
 
-  find(id?: string): Bot | undefined {
+  find(id?: BotId): Bot | undefined {
     if (!id) {
       // 可做断言，理论不可能
       return undefined

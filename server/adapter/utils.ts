@@ -1,11 +1,13 @@
 import { IBotConfig, IBotConfig_QQ, Platform } from '../../interface/platform/login'
 import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
 
-export function getBotId(platform: Platform, appid: string) {
+export type BotId = `${Platform}:${string}`
+export function getBotId(platform: Platform, appid: string): BotId {
   return `${platform}:${appid}`
 }
 
-export function getChannelUnionId(platform: Platform, guildId: string, channelId: string) {
+export type ChannelUnionId = `${Platform}_${string}_${string}`
+export function getChannelUnionId(platform: Platform, guildId: string, channelId: string): ChannelUnionId {
   return `${platform}_${guildId}_${channelId}` // 保证可用作文件名
 }
 

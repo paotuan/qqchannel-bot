@@ -2,13 +2,14 @@ import type { WebSocket } from 'ws'
 import type { Wss } from './wss'
 import type { IMessage, ICardListResp } from '../../interface/common'
 import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
+import type { BotId } from '../adapter/utils'
 
 /**
  * 一个 client 对应一个打开的网页
  */
 export class WsClient {
   // 该 client 登录机器人的 id
-  private _botId?: string
+  private _botId?: BotId
   // 该 client 登录机器人的 appid todo 待废弃
   appid = ''
   // 该 client 监听的频道 id
@@ -74,7 +75,7 @@ export class WsClient {
   }
 
   // 客户端绑定某个 bot 实例
-  bindToBot(botId: string) {
+  bindToBot(botId: BotId) {
     this._botId = botId
   }
 
