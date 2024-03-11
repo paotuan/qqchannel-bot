@@ -8,6 +8,7 @@ import type { ICard, ICardData, ICardEntryChangeEvent } from '../../interface/ca
 import { createCard } from '../../interface/card'
 import type { ICardQuery } from '../../interface/config'
 import mitt from 'mitt'
+import { ChannelUnionId } from '../adapter/utils'
 
 const dir = './cards'
 const LINK_FILE_NAME = '/__link.json'
@@ -21,7 +22,7 @@ export class CardManager {
   private readonly wss: Wss
   private readonly cardMap: Record<string, ICardData> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
   private readonly cardCache: Record<string, ICard> = {} // 由于 mobx 不会把类实例变为响应式，我们只把 plain data 作为响应性，类只用于缓存，手动管理
-  private readonly channelLinkMap: Record<string, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
+  private readonly channelLinkMap: Record<ChannelUnionId, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
   private readonly emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
 
   get cardList() { return Object.values(this.cardMap) }
@@ -136,16 +137,18 @@ export class CardManager {
 
   handleLinkCard(client: WsClient, req: ICardLinkReq) {
     const { cardName, userId } = req
-    const channelId = client.listenToChannelId
-    console.log('[Card] 关联人物卡', req)
-    this.linkCard(channelId, cardName, userId ?? undefined)
+    const channelUnionId = client.listenToChannelUnionId
+    if (channelUnionId) {
+      console.log('[Card] 关联人物卡', req)
+      this.linkCard(channelUnionId, cardName, userId ?? undefined)
+    }
   }
 
-  getLinkMap(channelId: string) {
-    if (!this.channelLinkMap[channelId]) {
-      this.channelLinkMap[channelId] = {}
+  getLinkMap(channelUnionId: ChannelUnionId) {
+    if (!this.channelLinkMap[channelUnionId]) {
+      this.channelLinkMap[channelUnionId] = {}
     }
-    return this.channelLinkMap[channelId]
+    return this.channelLinkMap[channelUnionId]
   }
 
   private _getCardObj(cardData: ICardData) {
@@ -160,8 +163,8 @@ export class CardManager {
   }
 
   // 根据子频道和用户 id，获取该用户关联的人物卡
-  getCard(channelId: string, userId: string): ICard | undefined {
-    const linkMap = this.getLinkMap(channelId)
+  getCard(channelUnionId: ChannelUnionId, userId: string): ICard | undefined {
+    const linkMap = this.getLinkMap(channelUnionId)
     const cardName = linkMap[userId]
     const cardData = this.cardMap[cardName]
     if (!cardData) return undefined
@@ -170,9 +173,9 @@ export class CardManager {
 
   // 根据子频道、用户 id、人物卡名，关联人物卡. 不传 userId 代表取消这张卡的关联
   // 注：目前不会校验 cardName 是否真的存在这张卡
-  linkCard(channelId: string, cardName: string, userId?: string) {
+  linkCard(channelUnionId: ChannelUnionId, cardName: string, userId?: string) {
     // 如果 cardName 之前关联的别的人，要删掉
-    const linkMap = this.getLinkMap(channelId)
+    const linkMap = this.getLinkMap(channelUnionId)
     const user2delete = Object.keys(linkMap).find(userId => linkMap[userId] === cardName)
     if (user2delete) {
       delete linkMap[user2delete]

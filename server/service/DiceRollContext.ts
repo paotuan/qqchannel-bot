@@ -57,12 +57,12 @@ export class DiceRollContext implements IDiceRollContext {
   }
 
   private _getCard(userId: string) {
-    return this.channelId ? this.wss.cards.getCard(this.channelId, userId) : undefined
+    return this.channelUnionId ? this.wss.cards.getCard(this.channelUnionId, userId) : undefined
   }
 
   private _linkCard(cardName: string, userId?: string) {
-    if (this.channelId) {
-      this.wss.cards.linkCard(this.channelId, cardName, userId)
+    if (this.channelUnionId) {
+      this.wss.cards.linkCard(this.channelUnionId, cardName, userId)
     }
   }
 

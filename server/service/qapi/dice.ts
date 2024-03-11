@@ -195,7 +195,7 @@ export class DiceManager {
       // 1. 投骰
       const systemUserId = config.botOwner || 'system'
       const systemCard = createCard(cardData)
-      const getCard = (userId: string) => userId === systemUserId ? systemCard : this.wss.cards.getCard(channelId, userId)
+      const getCard = (userId: string) => userId === systemUserId ? systemCard : this.wss.cards.getCard(channelUnionId!, userId)
       // 网页代骰暂不支持人物卡操作。毕竟网页代骰是等于绑定了自己人物卡的
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       const linkCard = () => {}

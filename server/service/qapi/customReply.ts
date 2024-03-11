@@ -63,7 +63,8 @@ export class CustomReplyManager {
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
         return Mustache.render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
       })
-      const getCard = (_userId: string) => this.wss.cards.getCard(context.channelId, _userId)
+      const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+      const getCard = (_userId: string) => this.wss.cards.getCard(channelUnionId, _userId)
       const env: ICustomReplyEnv = {
         botId: context.botId,
         platform: context.platform,

@@ -50,25 +50,32 @@ export class PluginManager {
       versionCode: VERSION_CODE,
       roll: exp => new DiceRoll(exp),
       render: (arg1, arg2, arg3) => Mustache.render(arg1, arg2, arg3, { escape: value => value }),
-      getCard: ({ channelId, userId }) => this.wss.cards.getCard(channelId, userId),
+      getCard: ({ platform, guildId, channelId, userId }) => {
+        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+        return this.wss.cards.getCard(channelUnionId, userId)
+      },
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
-      getLinkedCardUserList: ({ channelId }) => Object.keys(this.wss.cards.getLinkMap(channelId)),
-      linkCard: ({ channelId, userId }, cardName) => {
+      getLinkedCardUserList: ({ platform, guildId, channelId }) => {
+        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+        return Object.keys(this.wss.cards.getLinkMap(channelUnionId))
+      },
+      linkCard: ({ platform, guildId, channelId, userId }, cardName) => {
+        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
         if (userId && !cardName) {
           // 1. 如果传了 userId，没传 cardName，代表解除该 user 的卡关联
-          const cardName = this.wss.cards.getCard(channelId, userId)?.name
+          const cardName = this.wss.cards.getCard(channelUnionId, userId)?.name
           if (cardName) {
-            this.wss.cards.linkCard(channelId, cardName, userId)
+            this.wss.cards.linkCard(channelUnionId, cardName, userId)
           }
         } else if (cardName && !userId) {
           // 2. 如果传了 cardName，没传 userId，代表解除该卡的 user 关联
-          this.wss.cards.linkCard(channelId, cardName, userId)
+          this.wss.cards.linkCard(channelUnionId, cardName, userId)
         } else if (!cardName) {
           // 3. userId 和 cardName 都不传，报错？
           throw new Error('必须传入 userId 或 cardName')
         } else {
           // 4. 正常关联人物卡
-          this.wss.cards.linkCard(channelId, cardName, userId)
+          this.wss.cards.linkCard(channelUnionId, cardName, userId)
         }
       },
       queryCard: (query) => this.wss.cards.queryCard(query),
