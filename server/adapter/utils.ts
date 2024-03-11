@@ -11,6 +11,14 @@ export function getChannelUnionId(platform: Platform, guildId: string, channelId
   return `${platform}_${guildId}_${channelId}` // 保证可用作文件名
 }
 
+export function asChannelUnionId(maybeUnionId: string) {
+  if (maybeUnionId.match(/^[a-z]+_.+_+/)) {
+    return maybeUnionId as ChannelUnionId
+  } else {
+    return undefined
+  }
+}
+
 export function adapterPlugin(platform: Platform) {
   switch (platform) {
   case 'qq':

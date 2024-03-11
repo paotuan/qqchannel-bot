@@ -18,9 +18,11 @@ import { dispatchSt } from './special/st/utils'
 import { dispatchNn } from './special/nn/utils'
 import { LogSettingDiceRoll } from './special/log'
 import type { DiceRollEventListenerMap } from './index'
+import { Platform } from '../../../interface/platform/login'
 
 export interface IDiceRollContext {
   botId: string
+  platform?: Platform
   guildId?: string
   channelId?: string
   userId: string

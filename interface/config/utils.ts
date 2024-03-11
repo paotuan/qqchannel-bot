@@ -1,4 +1,5 @@
 import type { ICardEntryChangeEvent } from '../card/types'
+import type { Platform } from '../platform/login'
 
 export type UserRole = 'admin' | 'manager' | 'user'
 
@@ -8,6 +9,7 @@ export interface IUserCommandContext {
   username: string
   userRole: UserRole
   msgId: string
+  platform: Platform
   guildId: string
   channelId: string
   replyMsgId?: string

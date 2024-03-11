@@ -8,13 +8,16 @@ import type { WsClient } from '../../app/wsclient'
 import { getInitialDefaultConfig, handleUpgrade } from './default'
 import { ChannelConfig } from './config'
 import type { PluginManager } from './plugin'
+import { asChannelUnionId, ChannelUnionId } from '../../adapter/utils'
 
 const CONFIG_DIR = './config'
 
 export class ConfigManager {
   private readonly wss: Wss
   private readonly plugin: PluginManager
-  private readonly configMap: Record<string, ChannelConfig> = {}
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore initConfig 逻辑确保 default config 一定存在
+  private readonly configMap: Record<ChannelUnionId | 'default', ChannelConfig> = {}
 
   constructor(wss: Wss, plugin: PluginManager) {
     makeAutoObservable<this, 'wss' | 'plugin'>(this, { wss: false, plugin: false })
@@ -27,15 +30,16 @@ export class ConfigManager {
     return this.configMap['default']
   }
 
-  getChannelConfig(channelId: string | 'default') {
-    return this.configMap[channelId] || this.defaultConfig
+  getChannelConfig(channelUnionId: ChannelUnionId | 'default') {
+    return this.configMap[channelUnionId] || this.defaultConfig
   }
 
   saveChannelConfig(client: WsClient, { config, setDefault }: IChannelConfigReq) {
     console.log('[Config] 保存配置，设为默认配置：', setDefault)
-    const channelId = client.listenToChannelId
-    this.configMap[channelId] = new ChannelConfig(config, this.plugin)
-    this.saveToFile(channelId, config)
+    const channelUnionId = client.listenToChannelUnionId
+    if (!channelUnionId) return
+    this.configMap[channelUnionId] = new ChannelConfig(config, this.plugin)
+    this.saveToFile(channelUnionId, config)
     if (setDefault) {
       this.configMap['default'] = new ChannelConfig(config, this.plugin)
       this.saveToFile('default', config)
@@ -44,15 +48,16 @@ export class ConfigManager {
 
   resetChannelConfig(client: WsClient) {
     console.log('[Config] 重置为默认配置')
-    const channelId = client.listenToChannelId
+    const channelUnionId = client.listenToChannelUnionId
+    if (!channelUnionId) return
     // 重置配置时，显式为这个子频道创建一个新的配置对象。确保依赖发生变化，autorun 推送配置到前端
     // 否则只在前端编辑，未保存时，点击重置配置，后端无法感知到频道的默认配置发生了变化
-    this.configMap[channelId] = new ChannelConfig(this.defaultConfig.config, this.plugin)
+    this.configMap[channelUnionId] = new ChannelConfig(this.defaultConfig.config, this.plugin)
     try {
       if (!fs.existsSync(CONFIG_DIR)) {
         return
       }
-      const filePath = `${CONFIG_DIR}/${channelId}.json`
+      const filePath = `${CONFIG_DIR}/${channelUnionId}.json`
       if (!fs.existsSync(filePath)) {
         return // 可能本来就是用的默认配置，无需处理
       }
@@ -72,7 +77,10 @@ export class ConfigManager {
             const str = fs.readFileSync(filename, 'utf8')
             const config = JSON.parse(str) as IChannelConfig
             const name = filename.match(/config\/(.+)\.json$/)![1]
-            this.configMap[name] = new ChannelConfig(handleUpgrade(config, name), this.plugin)
+            const defaultOrUnionId = name === 'default' ? 'default' : asChannelUnionId(name)
+            if (defaultOrUnionId) {
+              this.configMap[defaultOrUnionId] = new ChannelConfig(handleUpgrade(config, name), this.plugin)
+            }
           } catch (e) {
             console.log(`[Config] ${filename} 解析失败`, e)
           }
@@ -87,7 +95,7 @@ export class ConfigManager {
     }
   }
 
-  private saveToFile(channelIdOrDefault: string, config: IChannelConfig) {
+  private saveToFile(channelIdOrDefault: ChannelUnionId | 'default', config: IChannelConfig) {
     if (!fs.existsSync(CONFIG_DIR)) {
       fs.mkdirSync(CONFIG_DIR)
     }

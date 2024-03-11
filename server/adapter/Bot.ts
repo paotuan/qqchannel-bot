@@ -1,12 +1,20 @@
 import type { IBotConfig } from '../../interface/platform/login'
 import { Context, Bot as SatoriApi, ForkScope, GetEvents } from '@satorijs/satori'
-import { adapterConfig, adapterPlugin, getBotId } from './utils'
+import { adapterConfig, adapterPlugin, getBotId, getChannelUnionId } from './utils'
 import { isEqual } from 'lodash'
 import { IBotInfo } from '../../interface/common'
 import { makeAutoObservable, runInAction } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
 import type { QQBot } from '@paotuan/adapter-qq'
+import { parseUserCommand } from '../service/qapi/utils'
+import { IUserCommandContext, ParseUserCommandResult } from '../../interface/config'
+import { ICardEntryChangeEvent } from '../../interface/card/types'
+import { BasePtDiceRoll } from '../service/dice'
+
+type QueueListener = (data: unknown) => Promise<boolean>
+type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
+type MessageReactionListener = (context: IUserCommandContext) => Promise<boolean>
 
 /**
  * A bot connection to a platform
@@ -32,7 +40,7 @@ export class Bot {
     this.fetchBotInfo()
 
     // 初始化串行监听器
-    this.on('message', session => {
+    this.on('message', async session => {
       // 区分私信场景
       if (!session.isDirect) {
         // 根据消息中的用户信息更新成员信息
@@ -41,6 +49,12 @@ export class Bot {
 
         // todo
         if (this.isListening(session.channelId, session.guildId)) {
+          // 统一对消息进行 parse，判断是否是需要处理的指令
+          const parseResult = parseUserCommand(this, session)
+          if (!parseResult) return
+          await this.dispatchCommand(parseResult)
+
+
           this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
           // todo log 直接记在这里就好，之前过度设计了
         }
@@ -125,5 +139,93 @@ export class Bot {
 
   on<K extends keyof GetEvents<Context>>(name: K, listener: GetEvents<Context>[K]) {
     this.context.on(name, listener)
+  }
+
+  private readonly guildMessageQueueListeners: CommandListener[] = []
+  private readonly directMessageQueueListeners: QueueListener[] = []
+  private readonly messageReactionListeners: MessageReactionListener[] = []
+
+  onGuildCommand(listener: CommandListener) {
+    this.guildMessageQueueListeners.push(listener)
+  }
+
+  onDirectMessage(listener: QueueListener) {
+    this.directMessageQueueListeners.push(listener)
+  }
+
+  onMessageReaction(listener: MessageReactionListener) {
+    this.messageReactionListeners.push(listener)
+  }
+
+  // 分派命令
+  async dispatchCommand(parseResult: ParseUserCommandResult) {
+    const { platform, guildId, channelId } = parseResult.context
+    const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+    const config = this.wss.config.getChannelConfig(channelUnionId)
+
+    // 注册监听器
+    const unregisterListeners = this.registerCommonCommandProcessListeners(parseResult.context)
+
+    // hook: OnReceiveCommandCallback 处理
+    await config.hook_onReceiveCommand(parseResult)
+
+    // 整体别名指令处理
+    parseResult.command = config.parseAliasRoll_command(parseResult.command)
+
+    // 串行触发消息处理器
+    for (const listener of this.guildMessageQueueListeners) {
+      const consumed = await listener(parseResult)
+      if (consumed) break
+    }
+
+    // 取消监听器
+    unregisterListeners()
+  }
+
+  // 分派表情
+  async dispatchMessageReaction(context: IUserCommandContext) {
+    const { platform, guildId, channelId } = context
+    const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+    const config = this.wss.config.getChannelConfig(channelUnionId)
+
+    // 注册监听器
+    const unregisterListeners = this.registerCommonCommandProcessListeners(context)
+
+    // hook: OnMessageReaction 处理
+    const handled = await config.hook_onMessageReaction({ context })
+    // 这里给个特殊逻辑，如果由插件处理过，就不走默认的逻辑了（自动检测技能检定），否则会显得奇怪
+    if (!handled) {
+      for (const listener of this.messageReactionListeners) {
+        const consumed = await listener(context)
+        if (consumed) break
+      }
+    }
+
+    // 取消监听器
+    unregisterListeners()
+  }
+
+  private registerCommonCommandProcessListeners(context: IUserCommandContext) {
+    const { platform, guildId, channelId } = context
+    const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+    const config = this.wss.config.getChannelConfig(channelUnionId)
+    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
+      config.hook_onCardEntryChange({ event, context })
+    }
+    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
+    const beforeDiceRollListener = (roll: BasePtDiceRoll) => {
+      config.hook_beforeDiceRoll(roll)
+    }
+    const afterDiceRollListener = (roll: BasePtDiceRoll) => {
+      config.hook_afterDiceRoll(roll)
+    }
+    this.dice.addDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
+    this.dice.addDiceRollListener('AfterDiceRoll', afterDiceRollListener)
+
+    return () => {
+      this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
+      this.dice.removeDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
+      this.dice.removeDiceRollListener('AfterDiceRoll', afterDiceRollListener)
+    }
   }
 }

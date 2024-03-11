@@ -11,6 +11,7 @@ import { at, parseTemplate } from '../dice/utils'
 import { ICustomReplyEnv } from '../../../interface/config'
 import { VERSION_NAME } from '../../../interface/version'
 import { DiceRollContext } from '../DiceRollContext'
+import { getChannelUnionId } from '../../adapter/utils'
 
 export class CustomReplyManager {
   private readonly api: QApi
@@ -27,7 +28,9 @@ export class CustomReplyManager {
 
   private async handleGuildMessage({ command, context }: ParseUserCommandResult) {
     // 获取配置列表
-    const config = this.api.wss.config.getChannelConfig(context.channelId)
+    const { platform, guildId, channelId } = context
+    const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+    const config = this.api.wss.config.getChannelConfig(channelUnionId)
     const channel = this.api.guilds.findChannel(context.channelId, context.guildId)
     if (!channel) return false
     const processors = config.customReplyProcessors
@@ -54,6 +57,7 @@ export class CustomReplyManager {
       const username = context.username
       const userId = context.userId
       const userRole = context.userRole
+      const platform = context.platform
       const guildId = context.guildId
       const channelId = context.channelId
       const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
@@ -62,6 +66,7 @@ export class CustomReplyManager {
       const getCard = (_userId: string) => this.wss.cards.getCard(context.channelId, _userId)
       const env: ICustomReplyEnv = {
         botId: context.botId,
+        platform: context.platform,
         channelId: context.channelId,
         guildId: context.guildId,
         userId,
@@ -77,7 +82,7 @@ export class CustomReplyManager {
       }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
-      return parseTemplate(template, new DiceRollContext(this.api, { guildId, channelId, userId, username, userRole }), [], 'message_template')
+      return parseTemplate(template, new DiceRollContext(this.api, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
     } catch (e: any) {
       console.error('[Config] 自定义回复处理出错', e?.message)
       return undefined

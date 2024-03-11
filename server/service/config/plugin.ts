@@ -26,6 +26,7 @@ import type { ICard } from '../../../interface/card/types'
 import Mustache from 'mustache'
 import { parseTemplate } from '../dice/utils'
 import { DiceRollContext } from '../DiceRollContext'
+import { getChannelUnionId } from '../../adapter/utils'
 
 const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
 const PLUGIN_DIR = './plugins'
@@ -71,7 +72,7 @@ export class PluginManager {
         }
       },
       queryCard: (query) => this.wss.cards.queryCard(query),
-      sendMessageToChannel: ({ channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
+      sendMessageToChannel: ({ platform, channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
         const qApi = this.wss.qApis.find(botId)
         const channel = qApi?.guilds.findChannel(channelId, guildId)
         if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
@@ -82,13 +83,13 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { guildId, channelId, userId, username, userRole }), [], 'message_template')
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
           return channel.sendMessage({ content })
         } else {
           return channel.sendMessage({ image: msg })
         }
       },
-      sendMessageToUser: ({ channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
+      sendMessageToUser: ({ platform, channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
         const qApi = this.wss.qApis.find(botId)
         const user = qApi?.guilds.findUser(userId, guildId)
         if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
@@ -99,15 +100,19 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { guildId, channelId, userId, username, userRole }), [], 'message_template')
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
           return user.sendMessage({ content })
         } else {
           return user.sendMessage({ image: msg })
         }
       },
-      getConfig: ({ channelId }) => wss.config.getChannelConfig(channelId).config,
-      getPreference: ({ channelId }) => {
-        const channelConfig = wss.config.getChannelConfig(channelId)
+      getConfig: ({ platform, guildId, channelId }) => {
+        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+        return wss.config.getChannelConfig(channelUnionId).config
+      },
+      getPreference: ({ platform, guildId, channelId }) => {
+        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+        const channelConfig = wss.config.getChannelConfig(channelUnionId)
         const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginId)
         return pluginConfig?.preference ?? {}
       },

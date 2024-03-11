@@ -342,7 +342,7 @@ function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
 async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRollReq) {
   const qApi = server.qApis.find(client.appid)
   if (qApi) {
-    const errmsg = await qApi.dice.manualDiceRollFromWeb(client.listenToChannelId, client.listenToGuildId, data)
+    const errmsg = await qApi.dice.manualDiceRollFromWeb(client, data)
     client.send<string>({ cmd: 'dice/roll', success: !errmsg, data: errmsg })
   }
 }

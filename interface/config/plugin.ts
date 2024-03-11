@@ -7,6 +7,7 @@ import type { ICustomTextConfig } from './customText'
 import type { IHookFunctionConfig } from './hook'
 import type { ParseUserCommandResult } from './utils'
 import type { IChannelConfig } from './index'
+import type { Platform } from '../platform/login'
 
 export interface ICardQuery {
   name?: string
@@ -31,8 +32,8 @@ export interface IPluginRegisterContext {
   queryCard: (query: ICardQuery) => ICard[]
   sendMessageToChannel: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<IMessage | null>
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<IMessage | null>
-  getConfig: (context: { channelId: string }) => IChannelConfig
-  getPreference: (context: { channelId: string }) => Record<string, string>
+  getConfig: (context: { platform: Platform, guildId: string, channelId: string }) => IChannelConfig
+  getPreference: (context: { platform: Platform, guildId: string, channelId: string }) => Record<string, string>
   dispatchUserCommand: (context: ParseUserCommandResult) => Promise<void>
   _: any // lodash
   _context: any // 逃生通道，通常不要使用

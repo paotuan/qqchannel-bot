@@ -3,6 +3,7 @@ import type { Wss } from './wss'
 import type { IMessage, ICardListResp } from '../../interface/common'
 import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
 import type { BotId } from '../adapter/utils'
+import { getChannelUnionId } from '../adapter/utils'
 
 /**
  * 一个 client 对应一个打开的网页
@@ -39,6 +40,14 @@ export class WsClient {
 
   get listenToChannelId() {
     return this._listenToChannelId
+  }
+
+  get listenToChannelUnionId() {
+    if (this.platform && this.listenToGuildId && this.listenToChannelId) {
+      return getChannelUnionId(this.platform, this.listenToGuildId, this.listenToChannelId)
+    } else {
+      return undefined
+    }
   }
 
   constructor(ws: WebSocket, server: Wss) {

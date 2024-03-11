@@ -12,6 +12,7 @@ import { createCard } from '../../../interface/card'
 import { DiceRollContext } from '../DiceRollContext'
 import mitt from 'mitt'
 import type { BasePtDiceRoll } from '../dice'
+import { WsClient } from '../../app/wsclient'
 
 interface IMessageCache {
   text?: string
@@ -187,9 +188,10 @@ export class DiceManager {
   /**
    * 从网页端手动发起代骰，如错误则返回错误信息
    */
-  async manualDiceRollFromWeb(channelId: string, guildId: string, { expression, cardData }: IDiceRollReq) {
+  async manualDiceRollFromWeb(wsClient: WsClient, { expression, cardData }: IDiceRollReq) {
     try {
-      const config = this.wss.config.getChannelConfig(channelId)
+      const { listenToChannelUnionId: channelUnionId, listenToGuildId: guildId, listenToChannelId: channelId, platform } = wsClient
+      const config = this.wss.config.getChannelConfig(channelUnionId!)
       // 1. 投骰
       const systemUserId = config.botOwner || 'system'
       const systemCard = createCard(cardData)
@@ -200,7 +202,7 @@ export class DiceManager {
       const queryCard = () => []
       const roll = createDiceRoll(
         expression,
-        { botId: this.api.appid, guildId, channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard },
+        { botId: this.api.appid, platform, guildId, channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard },
         { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
       )
       // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）

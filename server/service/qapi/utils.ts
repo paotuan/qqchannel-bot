@@ -1,17 +1,17 @@
-import type { QApi } from './index'
-import type { IMessage as IQQMessage } from 'qq-guild-bot'
 import { at, AtUserPatternEnd, convertRoleIds } from '../dice/utils'
 import { unescapeHTML } from '../../utils'
 import type { IUserCommandContext, ParseUserCommandResult } from '../../../interface/config'
+import { Bot } from '../../adapter/Bot'
+import { Session } from '@satorijs/satori'
 
 // 统一处理用户的原始输入文字
-export function parseUserCommand(api: QApi, msg: IQQMessage): ParseUserCommandResult | false {
+export function parseUserCommand(bot: Bot, session: Session): ParseUserCommandResult | false {
   // 无视非文本消息
-  const content = msg.content?.trim()
+  const content = session.content?.trim()
   if (!content) return false
 
   // 提取出指令体，无视非指令消息
-  const botUserId = api.botInfo?.id
+  const botUserId = bot.botInfo?.id
   let fullExp = content // .d100 困难侦察
   let isInstruction = false
   // @机器人的消息
@@ -32,33 +32,35 @@ export function parseUserCommand(api: QApi, msg: IQQMessage): ParseUserCommandRe
   const userIdMatch = fullExp.match(AtUserPatternEnd)
   if (userIdMatch) {
     const subUserId = userIdMatch[1]
-    const user = api.guilds.findUser(subUserId, msg.guild_id)
-    const subUsername = user?.persona ?? subUserId
+    const user = bot.guilds.findUser(subUserId, session.guildId)
+    const subUsername = user?.name ?? subUserId
     fullExp = fullExp.substring(0, userIdMatch.index).trim()
     substitute = { userId: subUserId, username: subUsername }
   }
   // }
 
   // 转义 转义得放在 at 消息和 emoji 之类的后面
-  fullExp = unescapeHTML(fullExp)
+  // todo 是否需要
+  // fullExp = unescapeHTML(fullExp)
 
   // 组装结构体
   const realUser = {
-    userId: msg.author.id,
-    username: msg.member.nick || msg.author.username || msg.author.id
+    userId: session.userId,
+    username: session.author.name ?? session.userId
   }
 
   return {
     command: fullExp,
     context: {
-      botId: api.appid,
+      botId: bot.id,
       userId: substitute?.userId ?? realUser.userId,
       username: substitute?.username ?? realUser.username,
-      userRole: convertRoleIds(msg.member.roles),
-      msgId: msg.id,
-      guildId: msg.guild_id,
-      channelId: msg.channel_id,
-      replyMsgId: (msg as any).message_reference?.message_id,
+      userRole: 'admin', // todo convertRoleIds(msg.member.roles),
+      msgId: session.messageId,
+      platform: bot.platform,
+      guildId: session.guildId,
+      channelId: session.channelId,
+      replyMsgId: session.event.message?.quote?.id, //(msg as any).message_reference?.message_id,
       realUser
     }
   }
