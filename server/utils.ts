@@ -13,6 +13,19 @@ export function unescapeHTML(str: string) {
   })
 }
 
+// 允许支持 \b 退格
+// https://stackoverflow.com/questions/11891653/javascript-concat-string-with-backspace
+export function removeBackspaces(str: string) {
+  let index = str.indexOf('\b') // str must be trimed
+  while (index >= 0) {
+    const left = str.substring(0, index - 1)
+    const right = str.substring(index + 1)
+    str = (left + right).trim()
+    index = str.indexOf('\b')
+  }
+  return str
+}
+
 // https://stackoverflow.com/questions/13786160/copy-folder-recursively-in-node-js
 export function copyFolderSync(from: string, to: string) {
   if (!fs.existsSync(to)) fs.mkdirSync(to)

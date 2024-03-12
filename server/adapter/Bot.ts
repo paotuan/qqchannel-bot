@@ -54,15 +54,22 @@ export class Bot {
           // 记录 log
           this.logs.onReceivedMessage(session)
 
+          // 最近一条消息缓存到 channel 对象中
+          const channel = this.guilds.findChannel(session.channelId, session.guildId)
+          channel && (channel.lastSession = session)
+
           // 统一对消息进行 parse，判断是否是需要处理的指令
           const parseResult = parseUserCommand(this, session)
           if (!parseResult) return
           await this.dispatchCommand(parseResult)
-
-
-          this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
         }
       } else {
+        // 根据消息中的用户信息更新成员信息
+        // this.guilds.addOrUpdateUserByMessage(session.event.guild, session.author) todo 确定 guild 是私信本身还是来源频道。理论上私信不更新也没啥
+
+        // 最近一条消息缓存到 user 对象中
+        // todo 确定 guildId 是私信本身还是来源频道
+
         // todo
       }
     })
