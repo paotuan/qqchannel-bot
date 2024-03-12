@@ -1,10 +1,11 @@
 import type { ICardEntryChangeEvent } from '../card/types'
 import type { Platform } from '../platform/login'
+import { BotId } from '../../server/adapter/utils'
 
 export type UserRole = 'admin' | 'manager' | 'user'
 
 export interface IUserCommandContext {
-  botId: string
+  botId: BotId
   userId: string
   username: string
   userRole: UserRole

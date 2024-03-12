@@ -1,5 +1,5 @@
 import type { IBotConfig } from '../../interface/platform/login'
-import { Context, Bot as SatoriApi, ForkScope, GetEvents } from '@satorijs/satori'
+import { Context, Bot as SatoriApi, ForkScope, GetEvents, Session } from '@satorijs/satori'
 import { adapterConfig, adapterPlugin, getBotId, getChannelUnionId } from './utils'
 import { isEqual } from 'lodash'
 import { IBotInfo } from '../../interface/common'
@@ -12,9 +12,8 @@ import { IUserCommandContext, ParseUserCommandResult } from '../../interface/con
 import { ICardEntryChangeEvent } from '../../interface/card/types'
 import { BasePtDiceRoll } from '../service/dice'
 import { LogManager } from '../service/qapi/log'
+import { CustomReplyManager } from '../service/qapi/customReply'
 
-type QueueListener = (data: unknown) => Promise<boolean>
-type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
 type MessageReactionListener = (context: IUserCommandContext) => Promise<boolean>
 
 /**
@@ -29,6 +28,7 @@ export class Bot {
   botInfo: IBotInfo | null = null
   guilds!: GuildManager
   logs!: LogManager
+  customReply!: CustomReplyManager
 
   // 维护当前工作子频道 // guildId => channelIds for quick search
   private readonly listeningChannels = new Map<string, Set<string>>()
@@ -61,7 +61,7 @@ export class Bot {
           // 统一对消息进行 parse，判断是否是需要处理的指令
           const parseResult = parseUserCommand(this, session)
           if (!parseResult) return
-          await this.dispatchCommand(parseResult)
+          await this.dispatchCommand(parseResult, session)
         }
       } else {
         // 根据消息中的用户信息更新成员信息
@@ -139,6 +139,8 @@ export class Bot {
     this.guilds = new GuildManager(this)
     // 初始化 log 记录
     this.logs = new LogManager(this)
+    // 初始化自定义回复
+    this.customReply = new CustomReplyManager(this)
   }
 
   async disconnect() {
@@ -154,24 +156,14 @@ export class Bot {
     this.context.on(name, listener)
   }
 
-  private readonly guildMessageQueueListeners: CommandListener[] = []
-  private readonly directMessageQueueListeners: QueueListener[] = []
   private readonly messageReactionListeners: MessageReactionListener[] = []
-
-  onGuildCommand(listener: CommandListener) {
-    this.guildMessageQueueListeners.push(listener)
-  }
-
-  onDirectMessage(listener: QueueListener) {
-    this.directMessageQueueListeners.push(listener)
-  }
 
   onMessageReaction(listener: MessageReactionListener) {
     this.messageReactionListeners.push(listener)
   }
 
   // 分派命令
-  async dispatchCommand(parseResult: ParseUserCommandResult) {
+  async dispatchCommand(parseResult: ParseUserCommandResult, session: Session) {
     const { platform, guildId, channelId } = parseResult.context
     const channelUnionId = getChannelUnionId(platform, guildId, channelId)
     const config = this.wss.config.getChannelConfig(channelUnionId)
@@ -185,10 +177,12 @@ export class Bot {
     // 整体别名指令处理
     parseResult.command = config.parseAliasRoll_command(parseResult.command)
 
-    // 串行触发消息处理器
-    for (const listener of this.guildMessageQueueListeners) {
-      const consumed = await listener(parseResult)
-      if (consumed) break
+    // 自定义回复处理
+    const consumed = await this.customReply.handleGuildMessage(session, parseResult)
+
+    // 骰子指令处理
+    if (!consumed) {
+      // todo
     }
 
     // 取消监听器

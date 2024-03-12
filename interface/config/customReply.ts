@@ -1,8 +1,9 @@
 import { UserRole, IPluginElementCommonInfo } from './utils'
 import { Platform } from '../platform/login'
+import { BotId } from '../../server/adapter/utils'
 
 export interface ICustomReplyEnv {
-  botId: string
+  botId: BotId
   platform: Platform
   guildId: string
   channelId: string

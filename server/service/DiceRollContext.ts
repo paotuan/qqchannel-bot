@@ -3,16 +3,16 @@ import type { Wss } from '../app/wss'
 import type { ChannelConfig } from './config/config'
 import type { StandardDiceRoll } from './dice/standard'
 import type { ICardQuery, UserRole } from '../../interface/config'
-import { QApi } from './qapi'
 import { Platform } from '../../interface/platform/login'
 import { getChannelUnionId } from '../adapter/utils'
+import { Bot } from '../adapter/Bot'
 
 type InitDiceRollContextArgs = Partial<IDiceRollContext> & { userId: string }
 
 // 简化一些通用方法和配置的获取
 export class DiceRollContext implements IDiceRollContext {
 
-  private readonly qApi: QApi
+  private readonly bot: Bot
   private readonly wss: Wss
   platform?: Platform
   guildId?: string
@@ -27,9 +27,9 @@ export class DiceRollContext implements IDiceRollContext {
   opposedRoll?: StandardDiceRoll
   setBackgroundLogEnabled: IDiceRollContext['setBackgroundLogEnabled']
 
-  constructor(qapi: QApi, args: InitDiceRollContextArgs) {
-    this.qApi = qapi
-    this.wss = qapi.wss
+  constructor(bot: Bot, args: InitDiceRollContextArgs) {
+    this.bot = bot
+    this.wss = bot.wss
     this.platform = args.platform
     this.guildId = args.guildId
     this.channelId = args.channelId
@@ -45,7 +45,7 @@ export class DiceRollContext implements IDiceRollContext {
   }
 
   get botId() {
-    return this.qApi.appid // todo 暂时不从外部读了，反正后面要重构
+    return this.bot.id
   }
 
   private get channelUnionId() {
@@ -71,8 +71,8 @@ export class DiceRollContext implements IDiceRollContext {
   }
 
   private _setBackgroundLogEnabled(enabled: boolean) {
-    if (this.qApi && this.channelUnionId) {
-      this.qApi.logs.setBackgroundLogEnabled(this.channelUnionId, enabled)
+    if (this.bot && this.channelUnionId) {
+      this.bot.logs.setBackgroundLogEnabled(this.channelUnionId, enabled)
     }
   }
 }

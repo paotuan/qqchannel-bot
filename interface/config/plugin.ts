@@ -1,6 +1,5 @@
 import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { CardType, ICard } from '../card/types'
-import type { IMessage } from 'qq-guild-bot'
 import type { ICustomReplyConfig, ICustomReplyEnv } from './customReply'
 import type { IAliasRollConfig, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextConfig } from './customText'
@@ -30,8 +29,8 @@ export interface IPluginRegisterContext {
   getLinkedCardUserList: (env: ICustomReplyEnv) => string[] // 获取当前频道关联了人物卡的 user id 列表
   linkCard: (env: ICustomReplyEnv, cardName?: string) => void
   queryCard: (query: ICardQuery) => ICard[]
-  sendMessageToChannel: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<IMessage | null>
-  sendMessageToUser: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<IMessage | null>
+  sendMessageToChannel: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<unknown>
+  sendMessageToUser: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<unknown>
   getConfig: (context: { platform: Platform, guildId: string, channelId: string }) => IChannelConfig
   getPreference: (context: { platform: Platform, guildId: string, channelId: string }) => Record<string, string>
   dispatchUserCommand: (context: ParseUserCommandResult) => Promise<void>

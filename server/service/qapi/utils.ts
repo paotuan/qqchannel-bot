@@ -4,6 +4,7 @@ import type { IUserCommandContext, ParseUserCommandResult } from '../../../inter
 import { Bot } from '../../adapter/Bot'
 import { Session } from '@satorijs/satori'
 
+// todo 改造成类，封装 session
 // 统一处理用户的原始输入文字
 export function parseUserCommand(bot: Bot, session: Session): ParseUserCommandResult | false {
   // 无视非文本消息

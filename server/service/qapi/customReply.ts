@@ -1,4 +1,3 @@
-import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
 import Mustache from 'mustache'
 import type {
@@ -12,26 +11,24 @@ import { ICustomReplyEnv } from '../../../interface/config'
 import { VERSION_NAME } from '../../../interface/version'
 import { DiceRollContext } from '../DiceRollContext'
 import { getChannelUnionId } from '../../adapter/utils'
+import { Bot } from '../../adapter/Bot'
+import { Session } from '@satorijs/satori'
 
 export class CustomReplyManager {
-  private readonly api: QApi
-  private get wss() { return this.api.wss }
+  private readonly bot: Bot
+  private get wss() { return this.bot.wss }
 
-  constructor(api: QApi) {
-    makeAutoObservable<this, 'api' | 'wss'>(this, { api: false, wss: false })
-    this.api = api
-    // init listener
-    this.api.onGuildCommand(async (data) => {
-      return await this.handleGuildMessage(data)
-    })
+  constructor(bot: Bot) {
+    makeAutoObservable(this)
+    this.bot = bot
   }
 
-  private async handleGuildMessage({ command, context }: ParseUserCommandResult) {
+  async handleGuildMessage(session: Session, { command, context }: ParseUserCommandResult) {
     // 获取配置列表
     const { platform, guildId, channelId } = context
     const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-    const config = this.api.wss.config.getChannelConfig(channelUnionId)
-    const channel = this.api.guilds.findChannel(context.channelId, context.guildId)
+    const config = this.wss.config.getChannelConfig(channelUnionId)
+    const channel = this.bot.guilds.findChannel(context.channelId, context.guildId)
     if (!channel) return false
     const processors = config.customReplyProcessors
     // 从上到下匹配
@@ -41,7 +38,7 @@ export class CustomReplyManager {
       const reply = await this.parseMessage(processor, matchGroups, context)
       // 发消息
       if (reply) {
-        channel.sendMessage({ content: reply, msg_id: context.msgId })
+        channel.sendMessage(reply, session)
       }
       return true
     }
@@ -83,7 +80,7 @@ export class CustomReplyManager {
       }
       const template = await replyFunc(env, matchGroups)
       // 替换 inline rolls
-      return parseTemplate(template, new DiceRollContext(this.api, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
+      return parseTemplate(template, new DiceRollContext(this.bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
     } catch (e: any) {
       console.error('[Config] 自定义回复处理出错', e?.message)
       return undefined

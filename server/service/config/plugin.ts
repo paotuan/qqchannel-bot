@@ -80,9 +80,9 @@ export class PluginManager {
       },
       queryCard: (query) => this.wss.cards.queryCard(query),
       sendMessageToChannel: ({ platform, channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
-        const qApi = this.wss.qApis.find(botId)
-        const channel = qApi?.guilds.findChannel(channelId, guildId)
-        if (!channel) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
+        const bot = this.wss.bots.find(botId)
+        const channel = bot?.guilds.findChannel(channelId, guildId)
+        if (!channel || !bot) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
         // 兼容旧接口
         if (typeof options === 'string') {
           options = { msgType: options }
@@ -90,16 +90,18 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
-          return channel.sendMessage({ content })
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
+          return channel.sendMessage(content)
         } else {
-          return channel.sendMessage({ image: msg })
+          // return channel.sendMessage({ image: msg })
+          // todo
+          throw new Error('not implemented yet')
         }
       },
       sendMessageToUser: ({ platform, channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
-        const qApi = this.wss.qApis.find(botId)
-        const user = qApi?.guilds.findUser(userId, guildId)
-        if (!user) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
+        const bot = this.wss.bots.find(botId)
+        const user = bot?.guilds.findUser(userId, guildId)
+        if (!user || !bot) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
         // 兼容旧接口
         if (typeof options === 'string') {
           options = { msgType: options }
@@ -107,10 +109,12 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(qApi, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
-          return user.sendMessage({ content })
+          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
+          return user.sendMessage(content)
         } else {
-          return user.sendMessage({ image: msg })
+          // return user.sendMessage({ image: msg })
+          // todo
+          throw new Error('not implemented yet')
         }
       },
       getConfig: ({ platform, guildId, channelId }) => {

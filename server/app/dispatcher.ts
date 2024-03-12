@@ -31,30 +31,27 @@ import { getBotId } from '../adapter/utils'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
   switch (request.cmd) {
-  // case 'bot/login':
-  //   handleLogin(client, server, request.data as ILoginReq)
-  //   break
   case 'bot/loginV2':
     handleLoginV2(client, server, request.data as ILoginReqV2)
     break
   case 'channel/listen':
     handleListenToChannel(client, server, request.data as IListenToChannelReq)
     break
-  case 'note/send':
-    handleSendNote(client, server, request.data as INoteSendReq)
-    break
-  case 'note/sendImageRaw':
-    handleSendImage(client, server, request.data as INoteSendImageRawReq)
-    break
-  case 'note/sync':
-    handleSyncNotes(client, server)
-    break
-  case 'note/fetch':
-    handleFetchNotes(client, server, request.data as INoteFetchReq)
-    break
-  case 'note/delete':
-    handleDeleteNote(client, server, request.data as INoteDeleteReq)
-    break
+  // case 'note/send':
+  //   handleSendNote(client, server, request.data as INoteSendReq)
+  //   break
+  // case 'note/sendImageRaw':
+  //   handleSendImage(client, server, request.data as INoteSendImageRawReq)
+  //   break
+  // case 'note/sync':
+  //   handleSyncNotes(client, server)
+  //   break
+  // case 'note/fetch':
+  //   handleFetchNotes(client, server, request.data as INoteFetchReq)
+  //   break
+  // case 'note/delete':
+  //   handleDeleteNote(client, server, request.data as INoteDeleteReq)
+  //   break
   case 'card/import':
     handleCardImport(client, server, request.data as ICardImportReq)
     break
@@ -93,42 +90,6 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   }
 }
-
-// function handleLogin(client: WsClient, server: Wss, data: ILoginReq) {
-//   console.log('机器人登录：', data.appid)
-//   // 1. 记录 appid
-//   client.appid = data.appid
-//   // 2. 连接 qq 服务器
-//   server.qApis.login(data.appid, data.token, data.sandbox)
-//   // 3. 返回登录成功
-//   client.send({ cmd: 'bot/login', success: true, data: null })
-//   // 4. watch bot info
-//   client.autorun(ws => {
-//     const qApi = server.qApis.find(ws.appid)
-//     if (qApi?.botInfo) {
-//       ws.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: qApi.botInfo })
-//     }
-//   })
-//   // watch guild & channel info
-//   client.autorun(ws => {
-//     const qApi = server.qApis.find(ws.appid)
-//     if (qApi) {
-//       const channels: IChannel[] = qApi.guilds.all.map(guild => guild.allChannels.map(channel => ({
-//         id: channel.id,
-//         name: channel.name,
-//         type: channel.type,
-//         guildId: channel.guildId,
-//         guildName: guild.name,
-//         guildIcon: guild.icon
-//       }))).flat()
-//       ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
-//     }
-//   })
-//   // 5. 返回插件信息
-//   client.autorun(ws => {
-//     ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
-//   })
-// }
 
 async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
   console.log('机器人登录：', getBotId(data.platform, data.appid))
@@ -188,26 +149,26 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       }
     }
   })
-  // todo
   // watch card link info
-  // client.autorun(ws => {
-  //   const channel = ws.listenToChannelId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
-  //   if (channel) {
-  //     const linkMap = server.cards.getLinkMap(channel)
-  //     const data: ICardLinkResp = Object.entries(linkMap).map(([userId, cardName]) => ({ userId, cardName }))
-  //     ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data })
-  //   } else {
-  //     ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
-  //   }
-  // })
+  client.autorun(ws => {
+    const channel = ws.listenToChannelUnionId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
+    if (channel) {
+      const linkMap = server.cards.getLinkMap(channel)
+      const data: ICardLinkResp = Object.entries(linkMap).map(([userId, cardName]) => ({ userId, cardName }))
+      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data })
+    } else {
+      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
+    }
+  })
   // watch channel config
-  // client.autorun(ws => {
-  //   const channelId = ws.listenToChannelId
-  //   if (channelId) {
-  //     const config = server.config.getChannelConfig(channelId).config
-  //     ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
-  //   }
-  // })
+  client.autorun(ws => {
+    const channelId = ws.listenToChannelUnionId
+    if (channelId) {
+      const config = server.config.getChannelConfig(channelId).config
+      ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
+    }
+  })
+  // todo
   // watch ri list
   // client.autorun(ws => {
   //   const channelId = ws.listenToChannelId
@@ -219,45 +180,45 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
   // })
 }
 
-function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
-  if (!client.listenToChannelId) return
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    qApi.notes.sendNote(client, data)
-  }
-}
-
-function handleSendImage(client: WsClient, server: Wss, data: INoteSendImageRawReq) {
-  if (!client.listenToChannelId) return
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    qApi.notes.sendRawImage(client, data)
-  }
-}
-
-function handleSyncNotes(client: WsClient, server: Wss) {
-  if (!client.listenToChannelId) return
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    qApi.notes.syncNotes(client)
-  }
-}
-
-function handleFetchNotes(client: WsClient, server: Wss, data: INoteFetchReq) {
-  if (!client.listenToChannelId) return
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    qApi.notes.fetchNotes(client, data)
-  }
-}
-
-function handleDeleteNote(client: WsClient, server: Wss, data: INoteDeleteReq) {
-  if (!client.listenToChannelId) return
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    qApi.notes.deleteNote(client, data)
-  }
-}
+// function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
+//   if (!client.listenToChannelId) return
+//   const qApi = server.qApis.find(client.appid)
+//   if (qApi) {
+//     qApi.notes.sendNote(client, data)
+//   }
+// }
+//
+// function handleSendImage(client: WsClient, server: Wss, data: INoteSendImageRawReq) {
+//   if (!client.listenToChannelId) return
+//   const qApi = server.qApis.find(client.appid)
+//   if (qApi) {
+//     qApi.notes.sendRawImage(client, data)
+//   }
+// }
+//
+// function handleSyncNotes(client: WsClient, server: Wss) {
+//   if (!client.listenToChannelId) return
+//   const qApi = server.qApis.find(client.appid)
+//   if (qApi) {
+//     qApi.notes.syncNotes(client)
+//   }
+// }
+//
+// function handleFetchNotes(client: WsClient, server: Wss, data: INoteFetchReq) {
+//   if (!client.listenToChannelId) return
+//   const qApi = server.qApis.find(client.appid)
+//   if (qApi) {
+//     qApi.notes.fetchNotes(client, data)
+//   }
+// }
+//
+// function handleDeleteNote(client: WsClient, server: Wss, data: INoteDeleteReq) {
+//   if (!client.listenToChannelId) return
+//   const qApi = server.qApis.find(client.appid)
+//   if (qApi) {
+//     qApi.notes.deleteNote(client, data)
+//   }
+// }
 
 function handleCardImport(client: WsClient, server: Wss, data: ICardImportReq) {
   server.cards.importCard(client, data)
