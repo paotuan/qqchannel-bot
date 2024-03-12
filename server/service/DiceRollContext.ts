@@ -71,8 +71,8 @@ export class DiceRollContext implements IDiceRollContext {
   }
 
   private _setBackgroundLogEnabled(enabled: boolean) {
-    if (this.qApi && this.channelId) {
-      this.qApi.logs.setBackgroundLogEnabled(this.channelId, enabled)
+    if (this.qApi && this.channelUnionId) {
+      this.qApi.logs.setBackgroundLogEnabled(this.channelUnionId, enabled)
     }
   }
 }

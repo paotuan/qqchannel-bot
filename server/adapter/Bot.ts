@@ -11,6 +11,7 @@ import { parseUserCommand } from '../service/qapi/utils'
 import { IUserCommandContext, ParseUserCommandResult } from '../../interface/config'
 import { ICardEntryChangeEvent } from '../../interface/card/types'
 import { BasePtDiceRoll } from '../service/dice'
+import { LogManager } from '../service/qapi/log'
 
 type QueueListener = (data: unknown) => Promise<boolean>
 type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
@@ -27,6 +28,7 @@ export class Bot {
   readonly wss: Wss
   botInfo: IBotInfo | null = null
   guilds!: GuildManager
+  logs!: LogManager
 
   // 维护当前工作子频道 // guildId => channelIds for quick search
   private readonly listeningChannels = new Map<string, Set<string>>()
@@ -49,6 +51,9 @@ export class Bot {
 
         // todo
         if (this.isListening(session.channelId, session.guildId)) {
+          // 记录 log
+          this.logs.onReceivedMessage(session)
+
           // 统一对消息进行 parse，判断是否是需要处理的指令
           const parseResult = parseUserCommand(this, session)
           if (!parseResult) return
@@ -56,7 +61,6 @@ export class Bot {
 
 
           this.api.sendMessage(session.channelId, 'pong', session.guildId, { session })
-          // todo log 直接记在这里就好，之前过度设计了
         }
       } else {
         // todo
@@ -126,6 +130,8 @@ export class Bot {
     // 初始化各项功能
     // 初始化 bot 所在频道信息 todo 尝试放在构造函数
     this.guilds = new GuildManager(this)
+    // 初始化 log 记录
+    this.logs = new LogManager(this)
   }
 
   async disconnect() {

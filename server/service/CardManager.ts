@@ -81,7 +81,7 @@ export class CardManager {
     this.cardMap[cardName] = card
     delete this.cardCache[cardName] // 由于 card 引用变化，清除 cache，避免还引用到旧的 card data
     this._saveCardData(this.cardMap[cardName])
-    this.wss.sendToChannel<null>(client.listenToChannelId, { cmd: 'card/import', success: true, data: null })
+    this.wss.sendToChannel<null>(client.listenToChannelUnionId!, { cmd: 'card/import', success: true, data: null })
   }
 
   saveCard(card: ICard) {

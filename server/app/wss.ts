@@ -8,6 +8,7 @@ import { CardManager } from '../service/CardManager'
 import { ConfigManager } from '../service/config'
 import { PluginManager } from '../service/config/plugin'
 import { BotManager } from '../adapter/BotManager'
+import { ChannelUnionId } from '../adapter/utils'
 
 /**
  * The server is a singleton websocket server
@@ -20,10 +21,9 @@ export class Wss {
   readonly cards = new CardManager(this)
   readonly plugin = new PluginManager(this)
   readonly config = new ConfigManager(this, this.plugin)
-  private readonly _listeningChannels: string[] = [] // todo 待废弃
 
   constructor(port: number) {
-    makeAutoObservable<this, 'server'>(this, { server: false, qApis: false })
+    makeAutoObservable<this, 'server'>(this, { server: false })
     this.server = new WebSocketServer({ port })
     console.log('WebSocket 服务已启动，端口号 ' + port)
 
@@ -52,33 +52,21 @@ export class Wss {
     }
   }
 
-  addListeningChannel(channelId: string) {
-    if (!this._listeningChannels.includes(channelId)) {
-      this._listeningChannels.push(channelId)
-    }
-  }
-
-  // 当前正在监听的子频道 id 列表
-  get listeningChannels() {
-    // return this.clients.map(client => client.listenToChannelId).filter(id => !!id)
-    return this._listeningChannels // 即使关闭了网页也让骰子继续工作
-  }
-
   // 发消息给某个 client
   sendToClient<T>(client: WsClient, message: IMessage<T>) {
     client.send(message)
   }
 
   // 发消息给正在监听某个频道的所有 client
-  sendToChannel<T>(channelId: string, message: IMessage<T>) {
-    this.clients.filter(client => client.listenToChannelId === channelId).forEach(client => {
+  sendToChannel<T>(channelUnionId: ChannelUnionId, message: IMessage<T>) {
+    this.clients.filter(client => client.listenToChannelUnionId === channelUnionId).forEach(client => {
       client.send(message)
     })
   }
 
-  sendToGuild<T>(guildId: string, message: IMessage<T>) {
-    this.clients.filter(client => client.listenToGuildId === guildId).forEach(client => {
-      client.send(message)
-    })
-  }
+  // sendToGuild<T>(guildId: string, message: IMessage<T>) {
+  //   this.clients.filter(client => client.listenToGuildId === guildId).forEach(client => {
+  //     client.send(message)
+  //   })
+  // }
 }
