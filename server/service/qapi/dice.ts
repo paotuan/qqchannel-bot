@@ -7,7 +7,7 @@ import { StandardDiceRoll } from '../dice/standard'
 import { unescapeHTML } from '../../utils'
 import type { IRiItem, IDiceRollReq } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
-import type { UserRole, ParseUserCommandResult, IUserCommandContext } from '../../../interface/config'
+import type { UserRole, IUserCommand, IUserCommandContext } from '../../../interface/config'
 import { createCard } from '../../../interface/card'
 import { DiceRollContext } from '../DiceRollContext'
 import mitt from 'mitt'
@@ -50,7 +50,7 @@ export class DiceManager {
   /**
    * 处理子频道骰子指令
    */
-  private async handleGuildMessage({ command, context }: ParseUserCommandResult) {
+  private async handleGuildMessage({ command, context }: IUserCommand) {
     // 投骰
     const roll = this.tryRollDice(command, context)
     if (roll) {

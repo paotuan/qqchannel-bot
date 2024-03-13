@@ -9,12 +9,12 @@ import { NoteManager } from './note'
 import { DiceManager } from './dice'
 import { CustomReplyManager } from './customReply'
 import { parseUserCommand } from './utils'
-import type { ParseUserCommandResult, IUserCommandContext } from '../../../interface/config'
+import type { IUserCommand, IUserCommandContext } from '../../../interface/config'
 import type { ICardEntryChangeEvent } from '../../../interface/card/types'
 import type { BasePtDiceRoll } from '../dice'
 
 type QueueListener = (data: unknown) => Promise<boolean>
-type CommandListener = (data: ParseUserCommandResult) => Promise<boolean>
+type CommandListener = (data: IUserCommand) => Promise<boolean>
 type MessageReactionListener = (context: IUserCommandContext) => Promise<boolean>
 
 /**
@@ -206,7 +206,7 @@ export class QApi {
   }
 
   // 分派命令
-  async dispatchCommand(parseResult: ParseUserCommandResult) {
+  async dispatchCommand(parseResult: IUserCommand) {
     const config = this.wss.config.getChannelConfig(parseResult.context.channelId)
 
     // 注册监听器

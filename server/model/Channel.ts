@@ -25,7 +25,11 @@ export class Channel {
   }
 
   // 发消息到该子频道
-  async sendMessage(content: string, session?: Session, recordLog = true) {
+  async sendMessage(content: string, session?: unknown, recordLog = true) {
+    // 防止参数错误
+    if (!(session instanceof Session)) {
+      session = undefined
+    }
     // 如没有指定发某条被动消息，则尝试尽量发被动
     if (!session) {
       session = this.getLastSessionForReply()
@@ -37,7 +41,7 @@ export class Channel {
     }
     try {
       // console.time('message')
-      const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session })
+      const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session: session as Session | undefined })
       const messageId = res.at(-1)!
       // console.timeEnd('message')
       console.log('[Message] 发送成功 ' + content)

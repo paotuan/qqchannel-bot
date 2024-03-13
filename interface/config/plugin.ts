@@ -4,7 +4,7 @@ import type { ICustomReplyConfig, ICustomReplyEnv } from './customReply'
 import type { IAliasRollConfig, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextConfig } from './customText'
 import type { IHookFunctionConfig } from './hook'
-import type { ParseUserCommandResult } from './utils'
+import type { IUserCommand } from './utils'
 import type { IChannelConfig } from './index'
 import type { Platform } from '../platform/login'
 
@@ -33,7 +33,7 @@ export interface IPluginRegisterContext {
   sendMessageToUser: (env: ICustomReplyEnv, msg: string, options?: SendMessageOptions) => Promise<unknown>
   getConfig: (context: { platform: Platform, guildId: string, channelId: string }) => IChannelConfig
   getPreference: (context: { platform: Platform, guildId: string, channelId: string }) => Record<string, string>
-  dispatchUserCommand: (context: ParseUserCommandResult) => Promise<void>
+  dispatchUserCommand: (context: IUserCommand) => Promise<void>
   _: any // lodash
   _context: any // 逃生通道，通常不要使用
 }

@@ -1,5 +1,5 @@
 import type { IBotConfig } from '../../interface/platform/login'
-import { Context, Bot as SatoriApi, ForkScope, GetEvents, Session } from '@satorijs/satori'
+import { Context, Bot as SatoriApi, ForkScope, GetEvents } from '@satorijs/satori'
 import { adapterConfig, adapterPlugin, getBotId, getChannelUnionId } from './utils'
 import { isEqual } from 'lodash'
 import { IBotInfo } from '../../interface/common'
@@ -7,12 +7,12 @@ import { makeAutoObservable, runInAction } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
 import type { QQBot } from '@paotuan/adapter-qq'
-import { parseUserCommand } from '../service/qapi/utils'
-import { IUserCommandContext, ParseUserCommandResult } from '../../interface/config'
+import { IUserCommandContext, IUserCommand } from '../../interface/config'
 import { ICardEntryChangeEvent } from '../../interface/card/types'
 import { BasePtDiceRoll } from '../service/dice'
 import { LogManager } from '../service/qapi/log'
 import { CustomReplyManager } from '../service/qapi/customReply'
+import { UserCommand } from '../model/UserCommand'
 
 type MessageReactionListener = (context: IUserCommandContext) => Promise<boolean>
 
@@ -59,9 +59,9 @@ export class Bot {
           channel && (channel.lastSession = session)
 
           // 统一对消息进行 parse，判断是否是需要处理的指令
-          const parseResult = parseUserCommand(this, session)
-          if (!parseResult) return
-          await this.dispatchCommand(parseResult, session)
+          const userCommand = UserCommand.parse(this, session)
+          if (!userCommand) return
+          await this.dispatchCommand(userCommand)
         }
       } else {
         // 根据消息中的用户信息更新成员信息
@@ -163,22 +163,22 @@ export class Bot {
   }
 
   // 分派命令
-  async dispatchCommand(parseResult: ParseUserCommandResult, session: Session) {
-    const { platform, guildId, channelId } = parseResult.context
+  async dispatchCommand(userCommand: IUserCommand) {
+    const { platform, guildId, channelId } = userCommand.context
     const channelUnionId = getChannelUnionId(platform, guildId, channelId)
     const config = this.wss.config.getChannelConfig(channelUnionId)
 
     // 注册监听器
-    const unregisterListeners = this.registerCommonCommandProcessListeners(parseResult.context)
+    const unregisterListeners = this.registerCommonCommandProcessListeners(userCommand.context)
 
     // hook: OnReceiveCommandCallback 处理
-    await config.hook_onReceiveCommand(parseResult)
+    await config.hook_onReceiveCommand(userCommand)
 
     // 整体别名指令处理
-    parseResult.command = config.parseAliasRoll_command(parseResult.command)
+    userCommand.command = config.parseAliasRoll_command(userCommand.command)
 
     // 自定义回复处理
-    const consumed = await this.customReply.handleGuildMessage(session, parseResult)
+    const consumed = await this.customReply.handleGuildMessage(userCommand)
 
     // 骰子指令处理
     if (!consumed) {

@@ -20,11 +20,12 @@ export interface IUserCommandContext {
   }
 }
 
-export type ParseUserCommandResult = {
-  command: string,
+export interface IUserCommand {
+  command: string
   context: IUserCommandContext
+  session?: unknown // we dont care about what it actually is, just pass down
   // 给插件使用，可附加自定义信息
-  [key: string | number | symbol]: unknown
+  // [key: string | number | symbol]: unknown
 }
 
 // 标识指令来源，目前仅包含 message_template, 用于区分自定义回复/文案的格式化与骰子指令，目前仅供插件使用

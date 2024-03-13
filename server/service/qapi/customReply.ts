@@ -3,7 +3,7 @@ import Mustache from 'mustache'
 import type {
   ICustomReplyConfig,
   ICustomReplyConfigItem,
-  ParseUserCommandResult,
+  IUserCommand,
   IUserCommandContext
 } from '../../../interface/config'
 import { at, parseTemplate } from '../dice/utils'
@@ -12,7 +12,6 @@ import { VERSION_NAME } from '../../../interface/version'
 import { DiceRollContext } from '../DiceRollContext'
 import { getChannelUnionId } from '../../adapter/utils'
 import { Bot } from '../../adapter/Bot'
-import { Session } from '@satorijs/satori'
 
 export class CustomReplyManager {
   private readonly bot: Bot
@@ -23,12 +22,12 @@ export class CustomReplyManager {
     this.bot = bot
   }
 
-  async handleGuildMessage(session: Session, { command, context }: ParseUserCommandResult) {
+  async handleGuildMessage({ command, context, session }: IUserCommand) {
     // 获取配置列表
     const { platform, guildId, channelId } = context
     const channelUnionId = getChannelUnionId(platform, guildId, channelId)
     const config = this.wss.config.getChannelConfig(channelUnionId)
-    const channel = this.bot.guilds.findChannel(context.channelId, context.guildId)
+    const channel = this.bot.guilds.findChannel(channelId, guildId)
     if (!channel) return false
     const processors = config.customReplyProcessors
     // 从上到下匹配

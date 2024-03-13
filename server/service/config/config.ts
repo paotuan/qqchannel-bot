@@ -4,7 +4,7 @@ import type {
   ICustomReplyConfig,
   ICustomTextConfig,
   IRollDeciderConfig,
-  CustomTextKeys, ParseUserCommandResult,
+  CustomTextKeys, IUserCommand,
   IHookFunction, OnReceiveCommandCallback,
   BeforeParseDiceRollCallback, DiceCommand,
   OnCardEntryChangeCallback, CardEntryChange,
@@ -276,7 +276,7 @@ export class ChannelConfig {
   /**
    * Hook 处理
    */
-  async hook_onReceiveCommand(result: ParseUserCommandResult) {
+  async hook_onReceiveCommand(result: IUserCommand) {
     console.log('[Hook] 收到指令')
     await handleHooksAsync(this.hookOnReceiveCommandProcessors, result)
   }
