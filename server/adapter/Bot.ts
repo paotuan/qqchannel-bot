@@ -13,8 +13,7 @@ import { BasePtDiceRoll } from '../service/dice'
 import { LogManager } from '../service/qapi/log'
 import { CustomReplyManager } from '../service/qapi/customReply'
 import { UserCommand } from '../model/UserCommand'
-
-type MessageReactionListener = (context: IUserCommandContext) => Promise<boolean>
+import { DiceManager } from '../service/qapi/dice'
 
 /**
  * A bot connection to a platform
@@ -29,6 +28,7 @@ export class Bot {
   guilds!: GuildManager
   logs!: LogManager
   customReply!: CustomReplyManager
+  dice!: DiceManager
 
   // 维护当前工作子频道 // guildId => channelIds for quick search
   private readonly listeningChannels = new Map<string, Set<string>>()
@@ -49,7 +49,6 @@ export class Bot {
         this.guilds.addGuildChannelByMessage(session.event.guild, session.event.channel)
         this.guilds.addOrUpdateUserByMessage(session.event.guild, session.author)
 
-        // todo
         if (this.isListening(session.channelId, session.guildId)) {
           // 记录 log
           this.logs.onReceivedMessage(session)
@@ -59,7 +58,7 @@ export class Bot {
           channel && (channel.lastSession = session)
 
           // 统一对消息进行 parse，判断是否是需要处理的指令
-          const userCommand = UserCommand.parse(this, session)
+          const userCommand = UserCommand.fromMessage(this, session)
           if (!userCommand) return
           await this.dispatchCommand(userCommand)
         }
@@ -70,7 +69,18 @@ export class Bot {
         // 最近一条消息缓存到 user 对象中
         // todo 确定 guildId 是私信本身还是来源频道
 
-        // todo
+        // 私信我们认为没有 config，因此只处理最简单的掷骰场景
+        // todo 后面可以考虑使用 default config
+        const userCommand = UserCommand.fromMessage(this, session)
+        if (!userCommand) return
+        await this.dice.handleDirectMessage(userCommand)
+      }
+    })
+
+    this.on('reaction-added', async session => {
+      if (this.isListening(session.channelId, session.guildId)) {
+        const userCommand = UserCommand.fromReaction(this, session)
+        await this.dispatchMessageReaction(userCommand)
       }
     })
   }
@@ -141,6 +151,8 @@ export class Bot {
     this.logs = new LogManager(this)
     // 初始化自定义回复
     this.customReply = new CustomReplyManager(this)
+    // 初始化骰子
+    this.dice = new DiceManager(this)
   }
 
   async disconnect() {
@@ -154,12 +166,6 @@ export class Bot {
 
   on<K extends keyof GetEvents<Context>>(name: K, listener: GetEvents<Context>[K]) {
     this.context.on(name, listener)
-  }
-
-  private readonly messageReactionListeners: MessageReactionListener[] = []
-
-  onMessageReaction(listener: MessageReactionListener) {
-    this.messageReactionListeners.push(listener)
   }
 
   // 分派命令
@@ -182,7 +188,7 @@ export class Bot {
 
     // 骰子指令处理
     if (!consumed) {
-      // todo
+      await this.dice.handleGuildMessage(userCommand)
     }
 
     // 取消监听器
@@ -190,7 +196,8 @@ export class Bot {
   }
 
   // 分派表情
-  async dispatchMessageReaction(context: IUserCommandContext) {
+  async dispatchMessageReaction(userCommand: IUserCommand) {
+    const { context } = userCommand
     const { platform, guildId, channelId } = context
     const channelUnionId = getChannelUnionId(platform, guildId, channelId)
     const config = this.wss.config.getChannelConfig(channelUnionId)
@@ -202,10 +209,7 @@ export class Bot {
     const handled = await config.hook_onMessageReaction({ context })
     // 这里给个特殊逻辑，如果由插件处理过，就不走默认的逻辑了（自动检测技能检定），否则会显得奇怪
     if (!handled) {
-      for (const listener of this.messageReactionListeners) {
-        const consumed = await listener(context)
-        if (consumed) break
-      }
+      await this.dice.handleGuildReactions(userCommand)
     }
 
     // 取消监听器

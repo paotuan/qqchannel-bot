@@ -31,7 +31,11 @@ export class User implements _IUser {
     this.bot = bot
   }
 
-  async sendMessage(content: string, session?: Session) {
+  async sendMessage(content: string, session?: unknown) {
+    // 防止参数错误
+    if (!(session instanceof Session)) {
+      session = undefined
+    }
     // 如没有指定发某条被动消息，则尝试尽量发被动
     if (!session) {
       session = this.getLastSessionForReply()
@@ -42,7 +46,7 @@ export class User implements _IUser {
       content = removeBackspaces(content.trim())
     }
     try {
-      const res = await this.bot.api.sendPrivateMessage(this.id, content, this.guildId, { session })
+      const res = await this.bot.api.sendPrivateMessage(this.id, content, this.guildId, { session: session as Session | undefined })
       const messageId = res.at(-1)!
       console.log('[Message] 私信发送成功 ' + content)
       return { id: messageId, content }

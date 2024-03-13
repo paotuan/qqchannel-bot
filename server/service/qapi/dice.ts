@@ -1,18 +1,16 @@
-import type { QApi } from './index'
 import { makeAutoObservable } from 'mobx'
-import type { IMessage } from 'qq-guild-bot'
 import LRUCache from 'lru-cache'
 import { createDiceRoll } from '../dice/utils'
 import { StandardDiceRoll } from '../dice/standard'
-import { unescapeHTML } from '../../utils'
 import type { IRiItem, IDiceRollReq } from '../../../interface/common'
 import { RiDiceRoll, RiListDiceRoll } from '../dice/special/ri'
-import type { UserRole, IUserCommand, IUserCommandContext } from '../../../interface/config'
+import type { UserRole, IUserCommand } from '../../../interface/config'
 import { createCard } from '../../../interface/card'
 import { DiceRollContext } from '../DiceRollContext'
 import mitt from 'mitt'
 import type { BasePtDiceRoll } from '../dice'
 import { WsClient } from '../../app/wsclient'
+import { Bot } from '../../adapter/Bot'
 
 interface IMessageCache {
   text?: string
@@ -20,8 +18,8 @@ interface IMessageCache {
 }
 
 export class DiceManager {
-  private readonly api: QApi
-  private get wss() { return this.api.wss }
+  private readonly bot: Bot
+  private get wss() { return this.bot.wss }
   private readonly msgCache: LRUCache<string, IMessageCache>
   private readonly opposedRollCache: LRUCache<string, StandardDiceRoll> // 对抗检定缓存 msgid => roll
   private readonly riListCache: Record<string, IRiItem[]> // 先攻列表缓存 channelId => ri list
@@ -30,41 +28,40 @@ export class DiceManager {
   private readonly beforeDiceRollListener = (roll: BasePtDiceRoll) => this.emitter.emit('BeforeDiceRoll', roll)
   private readonly afterDiceRollListener = (roll: BasePtDiceRoll) => this.emitter.emit('AfterDiceRoll', roll)
 
-  constructor(api: QApi) {
-    makeAutoObservable<this, 'api' | 'wss'>(this, { api: false, wss: false })
-    this.api = api
+  constructor(bot: Bot) {
+    makeAutoObservable(this)
+    this.bot = bot
     this.msgCache = new LRUCache({
       max: 50,
       fetchMethod: async key => {
         const [channelId, msgId] = key.split('-')
-        const { data } = await this.api.qqClient.messageApi.message(channelId, msgId)
-        const text = data.message.content?.trim()
+        const message = await this.bot.api.getMessage(channelId, msgId)
+        const text = message.content?.trim()
         return { text, instruction: text ? undefined : null } as IMessageCache // 非文本消息就直接记录为 null 了
       }
     })
     this.opposedRollCache = new LRUCache({ max: 50 })
     this.riListCache = {}
-    this.initListeners()
   }
 
   /**
    * 处理子频道骰子指令
    */
-  private async handleGuildMessage({ command, context }: IUserCommand) {
+  async handleGuildMessage({ command, context, session }: IUserCommand) {
     // 投骰
     const roll = this.tryRollDice(command, context)
     if (roll) {
       // 拼装结果，并发消息
-      const channel = this.api.guilds.findChannel(context.channelId, context.guildId)
+      const channel = this.bot.guilds.findChannel(context.channelId, context.guildId)
       if (!channel) return true // channel 信息不存在
       if (roll instanceof StandardDiceRoll && roll.hidden) { // 处理暗骰
         const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
-        channel.sendMessage({ content: channelMsg, msg_id: context.msgId })
-        const user = this.api.guilds.findUser(context.realUser.userId, context.guildId) // 暗骰始终发送给消息发送人，不考虑代骰
+        channel.sendMessage(channelMsg, session)
+        const user = this.bot.guilds.findUser(context.realUser.userId, context.guildId) // 暗骰始终发送给消息发送人，不考虑代骰
         if (!user) return true // 用户信息不存在
-        user.sendMessage({ content: roll.output, msg_id: context.msgId }) // 似乎填 channel 的消息 id 也可以认为是被动
+        user.sendMessage(roll.output, session) // 似乎填 channel 的消息 id 也可以认为是被动
       } else {
-        const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: context.msgId })
+        const replyMsg = await channel.sendMessage(roll.output, session)
         // 如果是可供对抗的投骰，记录下缓存
         if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
           this.opposedRollCache.set(replyMsg.id, roll)
@@ -77,44 +74,27 @@ export class DiceManager {
   /**
    * 处理私信
    */
-  private handleDirectMessage(msg: IMessage) {
-    const userId = msg.author.id
-    const srcGuildId = (msg as any).src_guild_id
+  async handleDirectMessage({ command, context, session }: IUserCommand) {
+    const user = this.bot.guilds.findUser(context.userId, context.guildId)
+    if (!user) return
     try {
-      // 无视非文本消息
-      const content = msg.content?.trim()
-      if (!content) throw 'unknown message'
-
-      // 提取出指令体，无视非指令消息
-      let fullExp = '' // .d100 困难侦察
-      if (content.startsWith('.') || content.startsWith('。')) {
-        // 指令消息
-        fullExp = content.substring(1).trim()
-      }
-      if (!fullExp) throw 'unknown message'
-      // 转义 转义得放在 at 消息和 emoji 之类的后面
-      fullExp = unescapeHTML(fullExp)
-
-      // 投骰
-      const user = this.api.guilds.findUser(userId, srcGuildId)
-      if (!user) throw 'user not found'
-      const roll = this.tryRollDice(fullExp, { userId: msg.author.id, username: user.persona })
+      const roll = this.tryRollDice(command, { userId: context.userId, username: context.username })
       if (roll) {
         // 私信就不用考虑是不是暗骰了
-        user.sendMessage({ content: roll.output, msg_id: msg.id }, msg.guild_id)
+        await user.sendMessage(roll.output, session)
       } else throw 'unrecognized dice expression'
     } catch (e) {
       // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
-      const selfNick = this.api.botInfo?.username || ''
-      const reply = `${selfNick}在的说`
-      this.api.guilds.findUser(userId, srcGuildId)?.sendMessage({ content: reply, msg_id: msg.id }, msg.guild_id)
+      const selfNick = this.bot.botInfo?.username || ''
+      await user.sendMessage(`${selfNick}在的说`, session)
     }
   }
 
   /**
    * 处理表情表态快速投骰
    */
-  private async handleGuildReactions({ msgId: eventId, channelId, guildId, replyMsgId: msgId, userId, username, userRole }: IUserCommandContext) {
+  async handleGuildReactions({ context, session }: IUserCommand) {
+    const { channelId, guildId, replyMsgId: msgId, userId, username, userRole } = context
     // 获取原始消息
     const cacheMsg = await this.msgCache.fetch(`${channelId}-${msgId}`)
     if (!cacheMsg || cacheMsg.instruction === null) return
@@ -125,9 +105,9 @@ export class DiceManager {
     const roll = this.tryRollDice(cacheMsg.instruction, { userId, guildId, channelId, username, userRole })
     if (roll) {
       // 表情表态也没有暗骰
-      const channel = this.api.guilds.findChannel(channelId, guildId)
+      const channel = this.bot.guilds.findChannel(channelId, guildId)
       if (!channel) return // channel 信息不存在
-      const replyMsg = await channel.sendMessage({ content: roll.output, msg_id: eventId }) // 这里文档写用 event_id, 但其实要传 msg_id
+      const replyMsg = await channel.sendMessage(roll.output, session) // 这里文档写用 event_id, 但其实要传 msg_id
       // 如果是可供对抗的投骰，记录下缓存
       if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
         this.opposedRollCache.set(replyMsg.id, roll)
@@ -153,7 +133,7 @@ export class DiceManager {
       // 投骰
       const roller = createDiceRoll(
         fullExp,
-        new DiceRollContext(this.api, { guildId, channelId, userId, username, userRole, opposedRoll }),
+        new DiceRollContext(this.bot, { guildId, channelId, userId, username, userRole, opposedRoll }),
         { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
       )
       // 保存人物卡更新
@@ -202,7 +182,7 @@ export class DiceManager {
       const queryCard = () => []
       const roll = createDiceRoll(
         expression,
-        { botId: this.api.appid, platform, guildId, channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard },
+        { botId: this.bot.appid, platform, guildId, channelId, userId: systemUserId, username: cardData.name, userRole: 'admin', config, getCard, linkCard, queryCard },
         { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
       )
       // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
@@ -211,16 +191,16 @@ export class DiceManager {
       //   roller.applyToRiList(this.riListCache)
       // }
       // 2. 发消息
-      const channel = this.api.guilds.findChannel(channelId, guildId)
+      const channel = this.bot.guilds.findChannel(channelId, guildId)
       if (!channel) throw new Error('频道不存在')
       if (roll instanceof StandardDiceRoll && roll.hidden && config.botOwner) { // 如果设置了 botOwner, 则可以处理暗骰
         const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
-        channel.sendMessage({ content: channelMsg })
-        const user = this.api.guilds.findUser(config.botOwner, guildId)
+        channel.sendMessage(channelMsg)
+        const user = this.bot.guilds.findUser(config.botOwner, guildId)
         if (!user) throw new Error('用户信息不存在')
-        user.sendMessage({ content: roll.output })
+        user.sendMessage(roll.output)
       } else {
-        const replyMsg = await channel.sendMessage({ content: roll.output })
+        const replyMsg = await channel.sendMessage(roll.output)
         // 如果是可供对抗的投骰，记录下缓存
         if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
           this.opposedRollCache.set(replyMsg.id, roll)
@@ -231,20 +211,6 @@ export class DiceManager {
       console.log('[Dice] 网页端发起投骰失败', e?.message)
       return '掷骰失败：' + (e?.message ?? '')
     }
-  }
-
-  private initListeners() {
-    this.api.onGuildCommand(async (data) => {
-      return await this.handleGuildMessage(data)
-    })
-    this.api.onMessageReaction(async (context) => {
-      this.handleGuildReactions(context)
-      return false
-    })
-    this.api.onDirectMessage(async (data: any) => {
-      this.handleDirectMessage(data.msg as IMessage)
-      return false
-    })
   }
 
   addDiceRollListener(type: 'BeforeDiceRoll' | 'AfterDiceRoll', listener: (roll: BasePtDiceRoll) => void) {
