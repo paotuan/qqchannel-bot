@@ -2,7 +2,6 @@ import { WebSocketServer } from 'ws'
 import type { IMessage } from '../../interface/common'
 import { WsClient } from './wsclient'
 import { dispatch } from './dispatcher'
-import { QApiManager } from '../service/QApiManager'
 import { makeAutoObservable } from 'mobx'
 import { CardManager } from '../service/CardManager'
 import { ConfigManager } from '../service/config'
@@ -17,7 +16,6 @@ export class Wss {
   private readonly server: WebSocketServer
   private readonly clients: WsClient[] = []
   readonly bots = new BotManager(this)
-  readonly qApis = new QApiManager(this) // todo 待废弃
   readonly cards = new CardManager(this)
   readonly plugin = new PluginManager(this)
   readonly config = new ConfigManager(this, this.plugin)

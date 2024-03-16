@@ -127,7 +127,9 @@ export class PluginManager {
         const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginId)
         return pluginConfig?.preference ?? {}
       },
-      dispatchUserCommand: (parsed) => this.wss.qApis.find(parsed.context.botId)?.dispatchCommand(parsed),
+      dispatchUserCommand: async (parsed) => {
+        return this.wss.bots.find(parsed.context.botId)?.dispatchCommand(parsed)
+      },
       _context: wss,
       _ // provide lodash for convenience
     } // todo: getItem/setItem

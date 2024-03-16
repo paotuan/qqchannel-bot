@@ -11,6 +11,7 @@ import mitt from 'mitt'
 import type { BasePtDiceRoll } from '../dice'
 import { WsClient } from '../../app/wsclient'
 import { Bot } from '../../adapter/Bot'
+import { ChannelUnionId } from '../../adapter/utils'
 
 interface IMessageCache {
   text?: string
@@ -22,7 +23,7 @@ export class DiceManager {
   private get wss() { return this.bot.wss }
   private readonly msgCache: LRUCache<string, IMessageCache>
   private readonly opposedRollCache: LRUCache<string, StandardDiceRoll> // 对抗检定缓存 msgid => roll
-  private readonly riListCache: Record<string, IRiItem[]> // 先攻列表缓存 channelId => ri list
+  private readonly riListCache: Record<ChannelUnionId, IRiItem[]> // 先攻列表缓存 channelId => ri list
   // 掷骰事件相关
   private readonly emitter = mitt<{ BeforeDiceRoll: BasePtDiceRoll, AfterDiceRoll: BasePtDiceRoll }>()
   private readonly beforeDiceRollListener = (roll: BasePtDiceRoll) => this.emitter.emit('BeforeDiceRoll', roll)
@@ -158,11 +159,11 @@ export class DiceManager {
   /**
    * 获取某个子频道先攻列表
    */
-  getRiListOfChannel(channelId: string) {
-    if (!this.riListCache[channelId]) {
-      this.riListCache[channelId] = []
+  getRiListOfChannel(channelUnionId: ChannelUnionId) {
+    if (!this.riListCache[channelUnionId]) {
+      this.riListCache[channelUnionId] = []
     }
-    return this.riListCache[channelId]
+    return this.riListCache[channelUnionId]
   }
 
   /**

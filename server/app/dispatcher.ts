@@ -70,9 +70,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'scene/sendBattleLog':
     handleSceneSendBattleLog(client, server, request.data as ISceneSendBattleLogReq)
     break
-  case 'scene/sendMapImage':
-    handleSceneSendMapImage(client, server, request.data as ISceneSendMapImageReq)
-    break
+  // case 'scene/sendMapImage':
+  //   handleSceneSendMapImage(client, server, request.data as ISceneSendMapImageReq)
+  //   break
   case 'ri/set':
     handleRiSet(client, server, request.data as IRiSetReq)
     break
@@ -168,16 +168,15 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
     }
   })
-  // todo
   // watch ri list
-  // client.autorun(ws => {
-  //   const channelId = ws.listenToChannelId
-  //   if (channelId) {
-  //     const qApi = server.qApis.find(ws.appid)
-  //     const list = qApi.dice.getRiListOfChannel(channelId)
-  //     ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
-  //   }
-  // })
+  client.autorun(ws => {
+    const bot = ws.bot
+    const channelId = ws.listenToChannelUnionId
+    if (bot && channelId) {
+      const list = bot.dice.getRiListOfChannel(channelId)
+      ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
+    }
+  })
 }
 
 // function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {
@@ -244,11 +243,11 @@ function handleResetChannelConfig(client: WsClient, server: Wss) {
 }
 
 async function handleSceneSendBattleLog(client: WsClient, server: Wss, data: ISceneSendBattleLogReq) {
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    const channel = qApi.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
+  const bot = client.bot
+  if (bot) {
+    const channel = bot.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
     if (channel) {
-      const resp = await channel.sendMessage({ content: data.content })
+      const resp = await channel.sendMessage(data.content)
       if (resp) {
         client.send<string>({ cmd: 'scene/sendBattleLog', success: true, data: '' })
         return
@@ -258,27 +257,28 @@ async function handleSceneSendBattleLog(client: WsClient, server: Wss, data: ISc
   client.send<string>({ cmd: 'scene/sendBattleLog', success: false, data: '发送失败' })
 }
 
-async function handleSceneSendMapImage(client: WsClient, server: Wss, data: ISceneSendMapImageReq) {
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    const channel = qApi.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
-    if (channel) {
-      const resp = await channel.sendRawImageMessage(data.data)
-      if (resp) {
-        client.send<string>({ cmd: 'scene/sendMapImage', success: true, data: '' })
-        return
-      }
-    }
-  }
-  client.send<string>({ cmd: 'scene/sendMapImage', success: false, data: '发送失败' })
-}
+// async function handleSceneSendMapImage(client: WsClient, server: Wss, data: ISceneSendMapImageReq) {
+//   const bot = client.bot
+//   if (bot) {
+//     const channel = bot.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
+//     if (channel) {
+//       const resp = await channel.sendRawImageMessage(data.data)
+//       if (resp) {
+//         client.send<string>({ cmd: 'scene/sendMapImage', success: true, data: '' })
+//         return
+//       }
+//     }
+//   }
+//   client.send<string>({ cmd: 'scene/sendMapImage', success: false, data: '发送失败' })
+// }
 
 function handleRiSet(client: WsClient, server: Wss, data: IRiSetReq) {
   data.seq = data.seq === null ? NaN : data.seq
   data.seq2 = data.seq2 === null ? NaN : data.seq2
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    const riList = qApi.dice.getRiListOfChannel(client.listenToChannelId)
+  const bot = client.bot
+  const channelUnionId = client.listenToChannelUnionId
+  if (bot && channelUnionId) {
+    const riList = bot.dice.getRiListOfChannel(channelUnionId)
     const exist = riList.find(item => item.id === data.id && item.type === data.type)
     if (exist) {
       exist.seq = data.seq
@@ -290,9 +290,10 @@ function handleRiSet(client: WsClient, server: Wss, data: IRiSetReq) {
 }
 
 function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    const riList = qApi.dice.getRiListOfChannel(client.listenToChannelId)
+  const bot = client.bot
+  const channelUnionId = client.listenToChannelUnionId
+  if (bot && channelUnionId) {
+    const riList = bot.dice.getRiListOfChannel(channelUnionId)
     const index = riList.findIndex(item => item.id === data.id && item.type === data.type)
     if (index >= 0) {
       riList.splice(index, 1)
@@ -301,17 +302,17 @@ function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
 }
 
 async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRollReq) {
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    const errmsg = await qApi.dice.manualDiceRollFromWeb(client, data)
+  const bot = client.bot
+  if (bot) {
+    const errmsg = await bot.dice.manualDiceRollFromWeb(client, data)
     client.send<string>({ cmd: 'dice/roll', success: !errmsg, data: errmsg })
   }
 }
 
 function handleUserDelete(client: WsClient, server: Wss, data: IUserDeleteReq) {
-  const qApi = server.qApis.find(client.appid)
-  if (qApi) {
-    const guild = qApi.guilds.find(client.listenToGuildId)
+  const bot = client.bot
+  if (bot) {
+    const guild = bot.guilds.find(client.listenToGuildId)
     if (guild) {
       guild.deleteUsersBatch(data.ids)
     }
