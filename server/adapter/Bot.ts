@@ -20,7 +20,7 @@ import { DiceManager } from '../service/qapi/dice'
 export class Bot {
   private readonly config: IBotConfig
   private readonly context = new Context()
-  private readonly _api: SatoriApi
+  readonly api: SatoriApi
   private readonly _fork: ForkScope<Context>
   readonly wss: Wss
   botInfo: IBotInfo | null = null
@@ -37,7 +37,7 @@ export class Bot {
     this.wss = wss
     this.config = config
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
-    this._api = this.context.bots.find(bot => bot.platform === config.platform)!
+    this.api = this.context.bots.find(bot => bot.platform === config.platform)!
     this.fetchBotInfo()
 
     // 初始化串行监听器
@@ -95,10 +95,6 @@ export class Bot {
     return getBotId(this.platform, this.appid)
   }
 
-  get api() {
-    return this._api
-  }
-
   // 选择某个子频道
   listenTo(channelId: string, guildId: string) {
     let set = this.listeningChannels.get(guildId)
@@ -118,7 +114,7 @@ export class Bot {
     // 目前没有通用的，只能每个平台去尝试调用内部 api
     if (this.platform === 'qqguild') {
       try {
-        const user = await this._api.internal.getMe()
+        const user = await this.api.internal.getMe()
         runInAction(() => {
           this.botInfo = {
             id: user.id,

@@ -1,10 +1,8 @@
 import { Bot } from '../adapter/Bot'
-import { Session } from '@satorijs/satori'
-import { at, AtUserPatternEnd } from '../service/dice/utils'
+import { Session, Element } from '@satorijs/satori'
 import { IUserCommandContext, IUserCommand } from '../../interface/config'
 import { BotId } from '../adapter/utils'
 import { Platform } from '../../interface/platform/login'
-import { unescapeHTML } from '../utils'
 
 export class UserCommand implements IUserCommand {
 
@@ -52,40 +50,51 @@ export class UserCommand implements IUserCommand {
   static fromMessage(bot: Bot, session: Session) {
     try {
       // 无视非文本消息
-      const content = session.content?.trim()
-      if (!content) throw new Error()
+      const elements = Element.transform(session.elements, ({ type, attrs }) => {
+        if (type === 'at') {
+          return true
+        } else if (type === 'text') {
+          return !!attrs.content.trim()
+        } else {
+          return false
+        }
+      }, session)
+      if (elements.length === 0) throw new Error()
 
       // 提取出指令体，无视非指令消息
       const botUserId = bot.botInfo?.id
-      let fullExp = content // .d100 困难侦察
       let isInstruction = false
       // @机器人的消息
-      if (botUserId && fullExp.startsWith(at(botUserId))) {
+      if (botUserId && elements[0].type === 'at' && elements[0].attrs.id === botUserId) {
         isInstruction = true
-        fullExp = fullExp.replace(at(botUserId), '').trim()
+        elements.splice(0, 1)
       }
+
       // 指令消息. 自定义回复建议使用 qq 频道原生指令前缀 “/”
-      if (fullExp.startsWith('/') || fullExp.startsWith('.') || fullExp.startsWith('。')) {
-        isInstruction = true
-        fullExp = fullExp.substring(1).trim()
+      const firstElem = elements[0]
+      if (firstElem && firstElem.type === 'text') {
+        let firstSpan = firstElem.attrs.content.trimStart()
+        if (firstSpan.startsWith('/') || firstSpan.startsWith('.') || firstSpan.startsWith('。')) {
+          isInstruction = true
+          firstSpan = firstSpan.substring(1)
+          firstElem.attrs.content = firstSpan
+        }
       }
+
       if (!isInstruction) throw new Error()
 
       // 是否是全局代骰
       let substitute: IUserCommandContext['realUser'] | undefined = undefined
-      // if (config.config.parseRule.customReplySubstitute) {
-      const userIdMatch = fullExp.match(AtUserPatternEnd)
-      if (userIdMatch) {
-        const subUserId = userIdMatch[1]
-        const user = bot.guilds.findUser(subUserId, session.guildId)
-        const subUsername = user?.name ?? subUserId
-        fullExp = fullExp.substring(0, userIdMatch.index).trim()
-        substitute = { userId: subUserId, username: subUsername }
+      const lastElem = elements.at(-1)
+      if (lastElem && lastElem.type === 'at') {
+        const userId = lastElem.attrs.id
+        const user = bot.guilds.findUser(userId, session.guildId)
+        const username = user?.name ?? userId
+        substitute = { userId, username }
+        elements.splice(-1, 1)
       }
-      // }
 
-      // 转义 转义得放在 at 消息和 emoji 之类的后面
-      fullExp = unescapeHTML(fullExp)
+      const fullExp = elements.map(elem => elem.toString()).join('').trim()
 
       return new UserCommand(bot, session, fullExp, substitute)
     } catch (e) {
