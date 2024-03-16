@@ -142,7 +142,7 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
           nick: user.name,
           username: user.name,
           avatar: user.avatar,
-          bot: false, // todo
+          bot: user.isBot,
           deleted: user.deleted
         }))
         ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })

@@ -62,42 +62,9 @@ export class Channel {
 
   // 记录 log
   private async sendLogAsync(msgId: string, content: string) {
-    // 如有 content，说明是文本消息，直接推
     if (content) {
-      this.bot.logs.pushToClients(this.guildId, this.id, {
-        msgId,
-        msgType: 'text',
-        userId: this.bot.botInfo?.id || '',
-        username: this.bot.botInfo?.username || '',
-        content,
-        timestamp: String(Date.now())
-      })
-      return
+      this.bot.logs.onPushMessage(this.guildId, this.id, msgId, content)
     }
-    // 没 content 的情况，是图片，获取不到转存后的图片地址，需要单独请求下
-    // try {
-    //   const resp = await this.api.qqClient.messageApi.message(this.id, msgResp.id)
-    //   const detailMsg = resp.data.message
-    //   let fetchedContent: string = detailMsg.content
-    //   let msgType: MessageType = 'text'
-    //   if (detailMsg.attachments?.[0]?.url) {
-    //     fetchedContent = detailMsg.attachments[0].url
-    //     msgType = 'image'
-    //   }
-    //   if (!fetchedContent) {
-    //     fetchedContent = '消息为空或暂不支持'
-    //   }
-    //   this.api.logs.pushToClients(this.guildId, this.id, {
-    //     msgId: msgResp.id,
-    //     msgType: msgType,
-    //     userId: this.api.botInfo?.id || '',
-    //     username: this.api.botInfo?.username || '',
-    //     content: fetchedContent,
-    //     timestamp: msgResp.timestamp
-    //   })
-    // } catch (e) {
-    //   console.error('[Message] 获取消息详情失败', e)
-    // }
   }
 
   // 获取可用于回复的被动消息 id

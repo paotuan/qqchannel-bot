@@ -2,6 +2,7 @@ import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { at, AtUserPattern, parseDescriptions, ParseFlags, parseTemplate } from '../utils'
 import type { IRiItem } from '../../../../interface/common'
+import { ChannelUnionId, getChannelUnionId } from '../../../adapter/utils'
 
 // ri [1d20+1] [username],[1d20] [username]
 // init
@@ -10,8 +11,17 @@ export class RiDiceRoll extends BasePtDiceRoll {
 
   private readonly rolls: { type: 'actor' | 'npc', id: string, username?: string, roll: DiceRoll }[] = [] // username 用于展示
 
+  private get channelUnionId() {
+    const { platform, guildId, channelId } = this.context
+    if (platform && guildId && channelId) {
+      return getChannelUnionId(platform, guildId, channelId)
+    } else {
+      return undefined
+    }
+  }
+
   private get notSupported() {
-    return !this.context.channelId
+    return !this.channelUnionId
   }
 
   override roll() {
@@ -60,11 +70,11 @@ export class RiDiceRoll extends BasePtDiceRoll {
   }
 
   // ri 是走缓存，不走人物卡，不走 applyToCard 逻辑，自己处理了
-  applyToRiList(riListCache: Record<string, IRiItem[]>) {
+  applyToRiList(riListCache: Record<ChannelUnionId, IRiItem[]>) {
     if (this.notSupported) {
       console.warn('私信场景不支持先攻列表')
     } else {
-      const list = riListCache[this.context.channelId!]
+      const list = riListCache[this.channelUnionId!]
       this.rolls.forEach(item => {
         const exist = list.find(other => other.type === item.type && other.id === item.id)
         if (exist) {

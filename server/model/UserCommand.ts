@@ -4,6 +4,7 @@ import { at, AtUserPatternEnd } from '../service/dice/utils'
 import { IUserCommandContext, IUserCommand } from '../../interface/config'
 import { BotId } from '../adapter/utils'
 import { Platform } from '../../interface/platform/login'
+import { unescapeHTML } from '../utils'
 
 export class UserCommand implements IUserCommand {
 
@@ -84,8 +85,7 @@ export class UserCommand implements IUserCommand {
       // }
 
       // 转义 转义得放在 at 消息和 emoji 之类的后面
-      // todo 是否需要
-      // fullExp = unescapeHTML(fullExp)
+      fullExp = unescapeHTML(fullExp)
 
       return new UserCommand(bot, session, fullExp, substitute)
     } catch (e) {

@@ -11,8 +11,8 @@
           <template v-else>
             <div class="flex-grow">
               <div class="w-1/2 h-40">
-                <a :href="`https://${log.content}`" target="_blank" rel="noopener noreferrer">
-                  <img :src="`https://${log.content}`" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
+                <a :href="log.content" target="_blank" rel="noopener noreferrer">
+                  <img :src="log.content" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
                 </a>
               </div>
             </div>
