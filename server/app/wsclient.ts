@@ -11,8 +11,6 @@ import { getChannelUnionId } from '../adapter/utils'
 export class WsClient {
   // 该 client 登录机器人的 id
   private _botId?: BotId
-  // 该 client 登录机器人的 appid todo 待废弃
-  appid = ''
   // 该 client 监听的频道 id
   private _listenToGuildId = ''
   // 该 client 监听的子频道 id

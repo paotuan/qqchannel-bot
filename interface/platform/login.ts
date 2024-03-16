@@ -1,7 +1,7 @@
-export type Platform = 'qq' | 'kook'
+export type Platform = 'qqguild' | 'kook' // 尽量和 satori 保持一致，便于操作
 
 export interface IBotConfig_QQ {
-  platform: 'qq'
+  platform: 'qqguild'
   appid: string
   secret: string
   token: string

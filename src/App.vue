@@ -32,7 +32,7 @@ const toastClass = (type: ToastType) => {
 }
 
 const clearCache = () => {
-  const allKeys = []
+  const allKeys = ['login-platform', 'login-model']
   const length = localStorage.length
   for (let i = 0; i < length; i++) {
     const key = localStorage.key(i)

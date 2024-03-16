@@ -21,7 +21,7 @@ export function asChannelUnionId(maybeUnionId: string) {
 
 export function adapterPlugin(platform: Platform) {
   switch (platform) {
-  case 'qq':
+  case 'qqguild':
     return qqAdapter
   default:
     throw new Error(`Not implement platform: ${platform}`)
@@ -30,7 +30,7 @@ export function adapterPlugin(platform: Platform) {
 
 export function adapterConfig(config: IBotConfig) {
   switch (config.platform) {
-  case 'qq':
+  case 'qqguild':
     return adapterQQ(config)
   default:
     throw new Error(`Not implement platform: ${config.platform}`)

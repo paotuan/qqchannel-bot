@@ -38,7 +38,7 @@ export class Bot {
     this.wss = wss
     this.config = config
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
-    this._api = this.context.bots[0]
+    this._api = this.context.bots.find(bot => bot.platform === config.platform)!
     this.fetchBotInfo()
 
     // 初始化串行监听器
@@ -63,8 +63,6 @@ export class Bot {
           await this.dispatchCommand(userCommand)
         }
       } else {
-        // 根据消息中的用户信息更新成员信息
-        // this.guilds.addOrUpdateUserByMessage(session.event.guild, session.author) todo 确定 guild 是私信本身还是来源频道。理论上私信不更新也没啥
 
         // 最近一条消息缓存到 user 对象中
         // todo 确定 guildId 是私信本身还是来源频道
@@ -99,11 +97,7 @@ export class Bot {
   }
 
   get api() {
-    if ((this._api as QQBot).guildBot) {
-      return (this._api as QQBot).guildBot as SatoriApi // todo 兼容群机器人缺乏 api 的场景
-    } else {
-      return this._api
-    }
+    return this._api
   }
 
   // 选择某个子频道
@@ -123,14 +117,13 @@ export class Bot {
 
   private async fetchBotInfo() {
     // 目前没有通用的，只能每个平台去尝试调用内部 api
-    if (this.platform === 'qq') {
+    if (this.platform === 'qqguild') {
       try {
-        await (this._api as any).initialize()
-        const user = this._api!.user
+        const user = await this._api.internal.getMe()
         runInAction(() => {
           this.botInfo = {
             id: user.id,
-            username: (user.username ?? '').replace(/-测试中$/, ''), // todo 修改适配器
+            username: (user.username ?? '').replace(/-测试中$/, ''),
             avatar: user.avatar ?? '',
           }
         })

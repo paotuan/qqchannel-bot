@@ -10,9 +10,9 @@ type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 export const useBotStore = defineStore('bot', () => {
   const [_platform, _model] = loadLocalLoginInfo()
 
-  const platform = ref<Platform>(_platform ?? 'qq')
-  const formQQ = ref<IBotConfig_QQ>(_model.qq ?? {
-    platform: 'qq',
+  const platform = ref<Platform>(_platform ?? 'qqguild')
+  const formQQ = ref<IBotConfig_QQ>(_model.qqguild ?? {
+    platform: 'qqguild', // 群和频道是一起的，但现在暂时只支持通过频道登录
     appid: '',
     secret: '',
     token: '',
@@ -22,7 +22,7 @@ export const useBotStore = defineStore('bot', () => {
 
   const formModel = computed(() => {
     switch (platform.value) {
-    case 'qq':
+    case 'qqguild':
       return formQQ.value
     default:
       return null
@@ -31,7 +31,7 @@ export const useBotStore = defineStore('bot', () => {
 
   const formModelIsValid = computed(() => {
     switch (platform.value) {
-    case 'qq':
+    case 'qqguild':
     {
       const form = formQQ.value
       return !!(form.appid && form.secret && form.token)
@@ -69,7 +69,7 @@ function saveLoginInfo2LocalStorage(platform: Platform, model: IBotConfig) {
 }
 
 type Platform2ConfigMap = {
-  qq?: IBotConfig_QQ
+  qqguild?: IBotConfig_QQ
   kook?: never
 }
 
