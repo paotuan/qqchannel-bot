@@ -3,6 +3,7 @@ import { Session, Element } from '@satorijs/satori'
 import { IUserCommandContext, IUserCommand } from '../../interface/config'
 import { BotId } from '../adapter/utils'
 import { Platform } from '../../interface/platform/login'
+import { convertRoleIds } from '../service/dice/utils'
 
 export class UserCommand implements IUserCommand {
 
@@ -29,6 +30,25 @@ export class UserCommand implements IUserCommand {
     }
   }
 
+  get guildId() {
+    const session = this.session
+    if (session.isDirect) {
+      // qq 频道提取私信机器人所在的 src guild
+      return session.guildId.split('_')[0]
+    } else {
+      return session.guildId
+    }
+  }
+
+  get channelId() {
+    const session = this.session
+    if (session.isDirect) {
+      return session.channelId.split('_')[1]
+    } else {
+      return session.channelId
+    }
+  }
+
   get context(): IUserCommandContext {
     const session = this.session
     const substitute = this.substitute
@@ -37,12 +57,12 @@ export class UserCommand implements IUserCommand {
       botId: this.botId,
       userId: substitute?.userId ?? realUser.userId,
       username: substitute?.username ?? realUser.username,
-      userRole: 'admin', // todo convertRoleIds(msg.member.roles),
+      userRole: convertRoleIds(session.author.roles),
       msgId: session.messageId,
       platform: this.platform,
-      guildId: session.guildId,
-      channelId: session.channelId,
-      replyMsgId: session.event.message?.quote?.id, //(msg as any).message_reference?.message_id,
+      guildId: this.guildId,
+      channelId: this.channelId,
+      replyMsgId: session.event.message?.quote?.id,
       realUser
     }
   }
@@ -88,7 +108,7 @@ export class UserCommand implements IUserCommand {
       const lastElem = elements.at(-1)
       if (lastElem && lastElem.type === 'at') {
         const userId = lastElem.attrs.id
-        const user = bot.guilds.findUser(userId, session.guildId)
+        const user = bot.guilds.findUser(userId, session.guildId) // 一般不会在私信用到，可以直接使用 session.guildId
         const username = user?.name ?? userId
         substitute = { userId, username }
         elements.splice(-1, 1)

@@ -24,10 +24,10 @@ export class Bot {
   private readonly _fork: ForkScope<Context>
   readonly wss: Wss
   botInfo: IBotInfo | null = null
-  guilds!: GuildManager
-  logs!: LogManager
-  customReply!: CustomReplyManager
-  dice!: DiceManager
+  readonly guilds: GuildManager
+  readonly logs: LogManager
+  readonly customReply: CustomReplyManager
+  readonly dice: DiceManager
 
   // 维护当前工作子频道 // guildId => channelIds for quick search
   private readonly listeningChannels = new Map<string, Set<string>>()
@@ -39,6 +39,16 @@ export class Bot {
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
     this.api = this.context.bots.find(bot => bot.platform === config.platform)!
     this.fetchBotInfo()
+
+    // 初始化各项功能
+    // 初始化 bot 所在频道信息
+    this.guilds = new GuildManager(this)
+    // 初始化 log 记录
+    this.logs = new LogManager(this)
+    // 初始化自定义回复
+    this.customReply = new CustomReplyManager(this)
+    // 初始化骰子
+    this.dice = new DiceManager(this)
 
     // 初始化串行监听器
     this.on('message', async session => {
@@ -62,9 +72,10 @@ export class Bot {
           await this.dispatchCommand(userCommand)
         }
       } else {
-
         // 最近一条消息缓存到 user 对象中
-        // todo 确定 guildId 是私信本身还是来源频道
+        const srcGuildId = session.guildId.split('_')[0]
+        const user = this.guilds.findUser(session.userId, srcGuildId)
+        user && (user.lastSession = session)
 
         // 私信我们认为没有 config，因此只处理最简单的掷骰场景
         // todo 后面可以考虑使用 default config
@@ -132,15 +143,6 @@ export class Bot {
     console.log('开始连接服务器', this.id)
     await this.context.start()
     console.log('连接服务器完成', this.id)
-    // 初始化各项功能
-    // 初始化 bot 所在频道信息 todo 尝试放在构造函数
-    this.guilds = new GuildManager(this)
-    // 初始化 log 记录
-    this.logs = new LogManager(this)
-    // 初始化自定义回复
-    this.customReply = new CustomReplyManager(this)
-    // 初始化骰子
-    this.dice = new DiceManager(this)
   }
 
   async disconnect() {

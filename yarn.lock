@@ -693,10 +693,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@paotuan/adapter-qq@4.5.1-1":
-  version "4.5.1-1"
-  resolved "https://registry.yarnpkg.com/@paotuan/adapter-qq/-/adapter-qq-4.5.1-1.tgz#f8b3afd1a7797a19b663d2fcfecf5d524a769664"
-  integrity sha512-wRjVVYMXWvS1bSUFvgZ0fZqUoWnpUiTQ0sJIJmewmGo5MOEhqvHaRZSxCWp6/+Pl1CB9qTq6JNd/4b5TEefXCg==
+"@paotuan/adapter-qq@4.5.1-2":
+  version "4.5.1-2"
+  resolved "https://registry.yarnpkg.com/@paotuan/adapter-qq/-/adapter-qq-4.5.1-2.tgz#0bd3ff16e523629d363db868bd69a423ae634241"
+  integrity sha512-oxm+BRJZUFNyqtN3ppaFIJqmpKmMvqTYOkybDZy8S49oPm8odYTnGLaKHcEnbnzHuk6skpT7WYdgRUSq4ngV9g==
   dependencies:
     "@satorijs/satori" "^3.6.3"
     qface "^1.4.1"

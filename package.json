@@ -18,7 +18,7 @@
     "@dice-roller/rpg-dice-roller": "^5.3.2",
     "@heroicons/vue": "^2.0.11",
     "@paotuan/api2d": "0.1.41",
-    "@paotuan/adapter-qq": "4.5.1-1",
+    "@paotuan/adapter-qq": "4.5.1-2",
     "@satorijs/satori": "3.6.3",
     "@vuepic/vue-datepicker": "^5.4.0",
     "@vueuse/core": "^9.13.0",
