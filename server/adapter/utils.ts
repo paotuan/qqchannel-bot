@@ -1,6 +1,6 @@
 import { IBotConfig, IBotConfig_Kook, IBotConfig_QQ, Platform } from '../../interface/platform/login'
 import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
-import kookAdapter, { KookBot } from '@satorijs/adapter-kook'
+import kookAdapter, { KookBot } from '@paotuan/adapter-kook'
 
 export type BotId = `${Platform}:${string}`
 export function getBotId(platform: Platform, appid: string): BotId {
