@@ -3,6 +3,7 @@ import { makeAutoObservable, runInAction } from 'mobx'
 import { Guild } from './Guild'
 import { Universal } from '@satorijs/satori'
 import { Channel } from './Channel'
+import { User } from './User'
 
 export class GuildManager {
   private readonly bot: Bot
@@ -26,8 +27,13 @@ export class GuildManager {
   findUser(userId: string, guildId: string) {
     const guild = this.find(guildId)
     if (!guild) {
-      console.error('[GuildManager]频道信息不存在，guildId=', guildId, 'userId=', userId)
-      return undefined
+      if (this.bot.platform === 'kook') {
+        // kook 用户无频道概念，因此 guildId 为空（私信场景）时，可以返回一个 temp user，不影响发消息
+        return User.createTemp(this.bot, userId, guildId)
+      } else {
+        console.error('[GuildManager]频道信息不存在，guildId=', guildId, 'userId=', userId)
+        return undefined
+      }
     }
     return guild.findUser(userId)
   }

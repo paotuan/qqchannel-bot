@@ -66,9 +66,11 @@ export class Bot {
           // 记录 log
           this.logs.onReceivedMessage(session)
 
-          // 最近一条消息缓存到 channel 对象中
-          const channel = this.guilds.findChannel(session.channelId, session.guildId)
-          channel && (channel.lastSession = session)
+          if (this.platform === 'qqguild') {
+            // 最近一条消息缓存到 channel 对象中
+            const channel = this.guilds.findChannel(session.channelId, session.guildId)
+            channel && (channel.lastSession = session)
+          }
 
           // 统一对消息进行 parse，判断是否是需要处理的指令
           const userCommand = UserCommand.fromMessage(this, session)
@@ -76,10 +78,12 @@ export class Bot {
           await this.dispatchCommand(userCommand)
         }
       } else {
-        // 最近一条消息缓存到 user 对象中
-        const srcGuildId = session.guildId.split('_')[0]
-        const user = this.guilds.findUser(session.userId, srcGuildId)
-        user && (user.lastSession = session)
+        if (this.platform === 'qqguild') {
+          // 最近一条消息缓存到 user 对象中
+          const srcGuildId = session.guildId.split('_')[0]
+          const user = this.guilds.findUser(session.userId, srcGuildId)
+          user && (user.lastSession = session)
+        }
 
         // 私信我们认为没有 config，因此只处理最简单的掷骰场景
         // todo 后面可以考虑使用 default config

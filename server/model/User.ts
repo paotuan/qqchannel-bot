@@ -39,10 +39,17 @@ export class User implements _IUser {
     if (!(session instanceof Session)) {
       session = undefined
     }
-    // 如没有指定发某条被动消息，则尝试尽量发被动
-    if (!session) {
-      session = this.getLastSessionForReply()
+    if (this.bot.platform === 'qqguild') {
+      // 如没有指定发某条被动消息，则尝试尽量发被动
+      if (!session) {
+        session = this.getLastSessionForReply()
+      }
+    } else {
+      // kook 的实现，从 channel 发私信会导致 channelId 优先于私信 chat_code, 导致消息被发送到 channel 中
+      // 考虑到 kook 并没有维护 session 的必要，直接置空即可
+      session = undefined
     }
+
     // 如果发送文字消息，则对文字消息做 trim。因为 qq 除 android 端都会自动 trim，为了保证结果在各个平台展示的一致性，此处先统一做 trim
     // 同时人肉对 \b 做下处理，支持退格，以应对自定义回复拼接时用户需要自定义的极端情况
     if (content) {

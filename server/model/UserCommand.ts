@@ -34,11 +34,15 @@ export class UserCommand implements IUserCommand {
   get guildId() {
     const session = this.session
     if (session.isDirect) {
-      // qq 频道提取私信机器人所在的 src guild
-      return session.guildId.split('_')[0]
-    } else {
-      return session.guildId
+      if (this.platform === 'qqguild') {
+        // qq 频道提取私信机器人所在的 src guild
+        return session.guildId.split('_')[0]
+      } else if (this.platform === 'kook') {
+        // kook 无私信频道概念，兜底留个空字符串
+        return session.guildId || ''
+      }
     }
+    return session.guildId
   }
 
   get channelId() {

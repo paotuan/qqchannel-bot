@@ -11,7 +11,7 @@
                  @click="checkedGuildId = guildId">
               <div class="avatar">
                 <div class="w-12 rounded-lg">
-                  <img :src="channelsGroupByGuild[guildId][0].guildIcon" />
+                  <img :src="channelsGroupByGuild[guildId][0].guildIcon" referrerpolicy="no-referrer" />
                 </div>
               </div>
               <div>{{ channelsGroupByGuild[guildId][0].guildName }}</div>
