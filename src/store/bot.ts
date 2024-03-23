@@ -8,6 +8,11 @@ import md5 from 'md5'
 
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
+type Platform2ConfigMap = {
+  qqguild?: IBotConfig_QQ
+  kook?: IBotConfig_Kook
+}
+
 export const useBotStore = defineStore('bot', () => {
   const [_platform, _model] = loadLocalLoginInfo()
 
@@ -68,7 +73,7 @@ export const useBotStore = defineStore('bot', () => {
     loginState.value = 'LOADING'
     ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
     gtagEvent('bot/login', { platform: model.platform }, false)
-    saveLoginInfo2LocalStorage(platform.value, model)
+    saveLoginInfo2LocalStorage(_model, model)
   }
 
   const onLoginFinish = (success: boolean) => {
@@ -80,24 +85,17 @@ export const useBotStore = defineStore('bot', () => {
   return { platform, formModel, loginState, connect, onLoginFinish, info }
 })
 
-function saveLoginInfo2LocalStorage(platform: Platform, model: IBotConfig) {
-  localStorage.setItem('login-platform', platform)
-  localStorage.setItem('login-model', JSON.stringify(model))
-}
-
-type Platform2ConfigMap = {
-  qqguild?: IBotConfig_QQ
-  kook?: IBotConfig_Kook
+function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, model: IBotConfig) {
+  localStorage.setItem('login-platform', model.platform)
+  const newData = { ...allData, [model.platform]: model }
+  localStorage.setItem('login-model', JSON.stringify(newData))
 }
 
 function loadLocalLoginInfo(): [Platform | null, Platform2ConfigMap] {
   const platform  = localStorage.getItem('login-platform') as Platform | null
   const model: Platform2ConfigMap = (() => {
-    if (!platform) return {}
-    const str = localStorage.getItem('login-model')
-    if (!str) return {}
     try {
-      return { [platform]: JSON.parse(str) as Platform2ConfigMap[typeof platform] }
+      return JSON.parse(localStorage.getItem('login-model') || '{}')
     } catch (e) {
       return {}
     }
