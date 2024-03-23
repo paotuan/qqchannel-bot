@@ -126,33 +126,17 @@ export class Bot {
   }
 
   private async fetchBotInfo() {
-    // 目前没有通用的，只能每个平台去尝试调用内部 api
-    if (this.platform === 'qqguild') {
-      try {
-        const user = await this.api.internal.getMe()
-        runInAction(() => {
-          this.botInfo = {
-            id: user.id,
-            username: (user.username ?? '').replace(/-测试中$/, ''),
-            avatar: user.avatar ?? '',
-          }
-        })
-      } catch (e) {
-        console.error('获取机器人信息失败', e)
-      }
-    } else if (this.platform === 'kook') {
-      try {
-        const user = (await this.api.getLogin()).user!
-        runInAction(() => {
-          this.botInfo = {
-            id: user.id,
-            username: user.name ?? '',
-            avatar: user.avatar ?? '',
-          }
-        })
-      } catch (e) {
-        console.error('获取机器人信息失败', e)
-      }
+    try {
+      const user = (await this.api.getLogin()).user!
+      runInAction(() => {
+        this.botInfo = {
+          id: user.id,
+          username: (user.name ?? '').replace(/-测试中$/, ''),
+          avatar: user.avatar ?? '',
+        }
+      })
+    } catch (e) {
+      console.error('获取机器人信息失败', e)
     }
   }
 
