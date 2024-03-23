@@ -1,8 +1,6 @@
 import { Bot } from '../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
 import { IUserCommandContext, IUserCommand } from '../../interface/config'
-import { BotId } from '../adapter/utils'
-import { Platform } from '../../interface/platform/login'
 import { convertRoleIds } from '../service/dice/utils'
 
 export class UserCommand implements IUserCommand {
@@ -10,24 +8,36 @@ export class UserCommand implements IUserCommand {
   readonly session: Session
   command: string
   readonly substitute: IUserCommandContext['realUser'] | undefined
-  readonly botId: BotId
-  readonly platform: Platform
+  readonly bot: Bot
   [key: string | number | symbol]: unknown
 
   private constructor(bot: Bot, session: Session, command: string, substitute: IUserCommandContext['realUser'] | undefined) {
     this.session = session
     this.command = command
     this.substitute = substitute
-    this.botId = bot.id
-    this.platform = bot.platform
+    this.bot = bot
+  }
+
+  get botId() {
+    return this.bot.id
+  }
+
+  get platform() {
+    return this.bot.platform
   }
 
   get realUser() {
     const session = this.session
     const author = session.author
+    // 适配部分情况下接口不返回昵称的情况（例如 kook 表情表态）
+    let username = author.nick ?? author.nickname ?? author.name ?? author.username
+    if (typeof username === 'undefined') {
+      const user = this.bot.guilds.findUser(session.userId, session.guildId)
+      if (user) username = user.name
+    }
     return {
       userId: session.userId,
-      username: author.nick ?? author.nickname ?? author.name ?? author.username ?? session.userId
+      username: username || session.userId
     }
   }
 

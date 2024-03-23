@@ -36,7 +36,7 @@ export class DiceManager {
     this.msgCache = new LRUCache({
       max: 50,
       fetchMethod: async key => {
-        const [channelId, msgId] = key.split('-')
+        const [channelId, msgId] = key.split('$$$')
         const message = await this.bot.api.getMessage(channelId, msgId)
         const text = message.content?.trim()
         return { text, instruction: text ? undefined : null } as IMessageCache // 非文本消息就直接记录为 null 了
@@ -96,9 +96,9 @@ export class DiceManager {
    * 处理表情表态快速投骰
    */
   async handleGuildReactions({ context, session }: IUserCommand) {
-    const { platform, channelId, guildId, replyMsgId: msgId, userId, username, userRole } = context
+    const { platform, channelId, guildId, msgId, userId, username, userRole } = context
     // 获取原始消息
-    const cacheMsg = await this.msgCache.fetch(`${channelId}-${msgId}`)
+    const cacheMsg = await this.msgCache.fetch(`${channelId}$$$${msgId}`)
     if (!cacheMsg || cacheMsg.instruction === null) return
     if (typeof cacheMsg.instruction === 'undefined') {
       cacheMsg.instruction = detectInstruction(cacheMsg.text || '')
