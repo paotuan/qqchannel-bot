@@ -24,9 +24,10 @@ export class UserCommand implements IUserCommand {
 
   get realUser() {
     const session = this.session
+    const author = session.author
     return {
       userId: session.userId,
-      username: session.author.name ?? session.userId
+      username: author.nick ?? author.nickname ?? author.name ?? author.username ?? session.userId
     }
   }
 

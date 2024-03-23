@@ -54,7 +54,7 @@ export class GuildManager {
     let guild = this.guildsMap[guildId]
     if (!guild) {
       console.log('Create guild by message, id =', guildId)
-      this.addGuild({ id: guildId, name: guildId, icon: '' })
+      this.addGuild({ id: guildId, name: _guild.name ?? guildId, icon: _guild?.avatar ?? '' })
       guild = this.guildsMap[guildId]
     }
     const channel = guild.findChannel(channelId)
@@ -62,7 +62,7 @@ export class GuildManager {
       console.log('Create channel by message, id =', channelId)
       // 现在 satori 类型适配不全。如果能收到消息说明总归是 valid 的类型，兜底按文字子频道处理也没什么问题
       const type = Channel.VALID_TYPES.includes(_channel.type) ? _channel.type : Universal.Channel.Type.TEXT
-      guild.addChannel({ id: channelId, name: channelId, type })
+      guild.addChannel({ id: channelId, name: _channel.name ?? channelId, type })
     }
   }
 

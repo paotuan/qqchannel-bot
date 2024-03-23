@@ -3,7 +3,7 @@
     <div class="avatar" :class="{ 'placeholder': !props.chara.avatar }" @click.stop="uploadAvatar">
       <template v-if="props.chara.avatar">
         <div class="w-12 rounded-full">
-          <img :src="props.chara.avatar" :alt="props.chara.userId" />
+          <img :src="props.chara.avatar" :alt="props.chara.userId" referrerpolicy="no-referrer" />
         </div>
       </template>
       <template v-else>

@@ -59,12 +59,13 @@ export class Guild {
   // }
 
   addOrUpdateUser(author: Universal.GuildMember & Universal.User) {
+    const authorName = author.nick ?? author.nickname ?? author.name ?? author.username
     const user = this.usersMap[author.id]
     if (user) {
       // 判断是否有更新需要持久化
       let updated = false
-      if (author.name && author.name !== user.name) {
-        user.name = author.name
+      if (authorName && authorName !== user.name) {
+        user.name = authorName
         updated = true
       }
       if (author.avatar && author.avatar !== user.avatar) {
@@ -82,7 +83,7 @@ export class Guild {
       const newUser = new User(this.bot, {
         id: author.id,
         guildId: this.id,
-        name: author.name ?? author.id,
+        name: authorName ?? author.id,
         avatar: author.avatar ?? '',
         isBot: author.isBot ?? false
       })

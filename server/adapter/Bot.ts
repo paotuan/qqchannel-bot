@@ -36,6 +36,8 @@ export class Bot {
     makeAutoObservable<this, 'listeningChannels'>(this, { listeningChannels: false })
     this.wss = wss
     this.config = config
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore wtf
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
     this.api = this.context.bots.find(bot => bot.platform === config.platform)!
     this.fetchBotInfo()
@@ -52,6 +54,8 @@ export class Bot {
 
     // 初始化串行监听器
     this.on('message', async session => {
+      // 部分平台 如 kook 机器人可以收到自己的信息，此时对它们进行一个过滤
+      if (session.userId === this.botInfo?.id) return
       // 区分私信场景
       if (!session.isDirect) {
         // 根据消息中的用户信息更新成员信息
@@ -130,6 +134,19 @@ export class Bot {
           this.botInfo = {
             id: user.id,
             username: (user.username ?? '').replace(/-测试中$/, ''),
+            avatar: user.avatar ?? '',
+          }
+        })
+      } catch (e) {
+        console.error('获取机器人信息失败', e)
+      }
+    } else if (this.platform === 'kook') {
+      try {
+        const user = (await this.api.getLogin()).user!
+        runInAction(() => {
+          this.botInfo = {
+            id: user.id,
+            username: user.name ?? '',
             avatar: user.avatar ?? '',
           }
         })

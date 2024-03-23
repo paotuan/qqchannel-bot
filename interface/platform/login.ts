@@ -12,6 +12,7 @@ export interface IBotConfig_QQ {
 export interface IBotConfig_Kook {
   platform: 'kook'
   appid: string
+  token: string
 }
 
 export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook

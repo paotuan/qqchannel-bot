@@ -37,8 +37,9 @@
 <script setup lang="ts">
 import { useBotStore } from '../../store/bot'
 import { computed } from 'vue'
+import { IBotConfig_QQ } from '../../../interface/platform/login'
 
 const bot = useBotStore()
-const model = computed(() => bot.formQQ)
+const model = computed(() => bot.formModel as IBotConfig_QQ)
 </script>
 

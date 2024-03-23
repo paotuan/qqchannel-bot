@@ -3,7 +3,7 @@
     <div class="avatar" :class="{ 'placeholder': !userInfo.avatar }">
       <template v-if="userInfo.avatar">
         <div class="w-12 rounded-full">
-          <img :src="userInfo.avatar" :alt="userInfo.nick" />
+          <img :src="userInfo.avatar" :alt="userInfo.nick" referrerpolicy="no-referrer" />
         </div>
       </template>
       <template v-else>

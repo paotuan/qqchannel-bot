@@ -1,5 +1,6 @@
-import { IBotConfig, IBotConfig_QQ, Platform } from '../../interface/platform/login'
+import { IBotConfig, IBotConfig_Kook, IBotConfig_QQ, Platform } from '../../interface/platform/login'
 import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
+import kookAdapter, { KookBot } from '@satorijs/adapter-kook'
 
 export type BotId = `${Platform}:${string}`
 export function getBotId(platform: Platform, appid: string): BotId {
@@ -23,8 +24,10 @@ export function adapterPlugin(platform: Platform) {
   switch (platform) {
   case 'qqguild':
     return qqAdapter
-  default:
-    throw new Error(`Not implement platform: ${platform}`)
+  case 'kook':
+    return kookAdapter
+  // default:
+  //   throw new Error(`Not implement platform: ${platform}`)
   }
 }
 
@@ -32,8 +35,10 @@ export function adapterConfig(config: IBotConfig) {
   switch (config.platform) {
   case 'qqguild':
     return adapterQQ(config)
-  default:
-    throw new Error(`Not implement platform: ${config.platform}`)
+  case 'kook':
+    return adapterKook(config)
+  // default:
+  //   throw new Error(`Not implement platform: ${config.platform}`)
   }
 }
 
@@ -51,5 +56,12 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
       | QQ.Intents.GUILD_MESSAGE_REACTIONS
       | QQ.Intents.DIRECT_MESSAGES,
     retryWhen: []
+  }
+}
+
+function adapterKook(config: IBotConfig_Kook): KookBot.Config {
+  return {
+    protocol: 'ws',
+    token: config.token
   }
 }
