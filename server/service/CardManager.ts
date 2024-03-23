@@ -146,7 +146,15 @@ export class CardManager {
 
   getLinkMap(channelUnionId: ChannelUnionId) {
     if (!this.channelLinkMap[channelUnionId]) {
-      this.channelLinkMap[channelUnionId] = {}
+      // 尝试加载旧版数据
+      if (channelUnionId.startsWith('qqguild_')) {
+        const channelId = channelUnionId.split('_').at(-1)!
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.channelLinkMap[channelUnionId] = this.channelLinkMap[channelId] || {}
+      } else {
+        this.channelLinkMap[channelUnionId] = {}
+      }
     }
     return this.channelLinkMap[channelUnionId]
   }

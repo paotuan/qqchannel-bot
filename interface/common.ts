@@ -47,12 +47,6 @@ export interface IBotInfo {
   avatar: string
 }
 
-export interface ILoginReq {
-  appid: string
-  token: string
-  sandbox: boolean
-}
-
 export type ILoginReqV2 = IBotConfig
 
 export type IBotInfoResp = IBotInfo

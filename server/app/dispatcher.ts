@@ -11,7 +11,6 @@ import type {
   IChannelConfigResp,
   IChannelListResp,
   IListenToChannelReq,
-  ILoginReq,
   IMessage,
   INoteDeleteReq,
   INoteFetchReq,
@@ -233,12 +232,12 @@ function handleCardLink(client: WsClient, server: Wss, data: ICardLinkReq) {
 }
 
 function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfigReq) {
-  if (!client.listenToChannelId) return
-  server.config.saveChannelConfig(client, data)
+  if (!client.listenToChannelUnionId) return
+  server.config.saveChannelConfig(client.listenToChannelUnionId, data)
 }
 
 function handleResetChannelConfig(client: WsClient, server: Wss) {
-  if (!client.listenToChannelId) return
+  if (!client.listenToChannelUnionId) return
   server.config.resetChannelConfig(client)
 }
 

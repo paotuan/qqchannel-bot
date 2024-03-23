@@ -156,13 +156,40 @@ export class Guild {
   private loadUsers() {
     console.log('[Guild] 开始读取用户，guildId=', this.id)
     const filename = this.userPersistenceFilename
-    if (!fs.existsSync(filename)) return
+    if (!fs.existsSync(filename)) {
+      this.tryLoadV1Data()
+      return
+    }
     try {
       const str = fs.readFileSync(filename, 'utf8')
       const { version, list } = JSON.parse(str) as { version: number, list: User['toJSON'][] }
       const users = list.map(data => User.fromJSON(this.bot, data))
       this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
       // 一次性传给前端吧
+    } catch (e) {
+      console.error(`[Guild] ${filename} 用户列表解析失败`, e)
+    }
+  }
+
+  private tryLoadV1Data() {
+    if (this.bot.platform !== 'qqguild') return
+    const filename = `${USER_DIR}/${this.id}.json`
+    if (!fs.existsSync(filename)) return
+    try {
+      console.log('[Guild] 开始读取旧版用户列表，guildId=', this.id)
+      const str = fs.readFileSync(filename, 'utf8')
+      const { list } = JSON.parse(str)
+      const users: User[] = list.map((item: any) => User.fromJSON(this.bot, {
+        id: item.id,
+        guildId: item.guildId,
+        isBot: item.bot,
+        name: item.nick || item.username,
+        avatar: item.avatar,
+        deleted: item.deleted
+      }))
+      this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
+      // 保存一次避免下次再次处理
+      this.saveUsers()
     } catch (e) {
       console.error(`[Guild] ${filename} 用户列表解析失败`, e)
     }

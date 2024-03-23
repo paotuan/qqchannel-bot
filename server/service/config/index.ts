@@ -18,6 +18,8 @@ export class ConfigManager {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore initConfig 逻辑确保 default config 一定存在
   private readonly configMap: Record<ChannelUnionId | 'default', ChannelConfig> = {}
+  // 保存旧版本数据用于兼容 channelId(qqguild) => config
+  private readonly configMapV1: Record<string, ChannelConfig> = {}
 
   constructor(wss: Wss, plugin: PluginManager) {
     makeAutoObservable<this, 'wss' | 'plugin'>(this, { wss: false, plugin: false })
@@ -31,13 +33,23 @@ export class ConfigManager {
   }
 
   getChannelConfig(channelUnionId: ChannelUnionId | 'default') {
-    return this.configMap[channelUnionId] || this.defaultConfig
+    if (this.configMap[channelUnionId]) {
+      return this.configMap[channelUnionId]
+    } else if (channelUnionId.startsWith('qqguild_')) {
+      // 如有旧版本配置，迁移到新版
+      const channelId = channelUnionId.split('_').at(-1)!
+      if (this.configMapV1[channelId]) {
+        console.log('[Config] 迁移旧版本配置：', channelUnionId)
+        const config = this.configMapV1[channelId].config
+        this.saveChannelConfig(channelUnionId as ChannelUnionId, { config, setDefault: false })
+      }
+      return this.configMap[channelUnionId]
+    }
+    return this.defaultConfig
   }
 
-  saveChannelConfig(client: WsClient, { config, setDefault }: IChannelConfigReq) {
+  saveChannelConfig(channelUnionId: ChannelUnionId, { config, setDefault }: IChannelConfigReq) {
     console.log('[Config] 保存配置，设为默认配置：', setDefault)
-    const channelUnionId = client.listenToChannelUnionId
-    if (!channelUnionId) return
     this.configMap[channelUnionId] = new ChannelConfig(config, this.plugin)
     this.saveToFile(channelUnionId, config)
     if (setDefault) {
@@ -80,6 +92,8 @@ export class ConfigManager {
             const defaultOrUnionId = name === 'default' ? 'default' : asChannelUnionId(name)
             if (defaultOrUnionId) {
               this.configMap[defaultOrUnionId] = new ChannelConfig(handleUpgrade(config, name), this.plugin)
+            } else {
+              this.configMapV1[name] = new ChannelConfig(handleUpgrade(config, name), this.plugin)
             }
           } catch (e) {
             console.log(`[Config] ${filename} 解析失败`, e)
