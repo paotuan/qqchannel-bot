@@ -8,10 +8,12 @@
   },
   "bin": "bundle.js",
   "pkg": {
-    "assets": ["client/**/*", "server/plugins/**/*"],
+    "assets": [
+      "client/**/*",
+      "server/plugins/**/*"
+    ],
     "targets": [
-      "node16-macos-x64",
-      "node12-win-x64"
+      "node18-win-x64"
     ],
     "outputPath": "bin"
   },

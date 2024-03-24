@@ -28,7 +28,7 @@ import { parseTemplate } from '../dice/utils'
 import { DiceRollContext } from '../DiceRollContext'
 import { getChannelUnionId } from '../../adapter/utils'
 
-const INTERNAL_PLUGIN_DIR = path.resolve('./server/plugins')
+const INTERNAL_PLUGIN_DIR = process.env.NODE_ENV === 'development' ? path.resolve('./server/plugins') : path.resolve(__dirname, './plugins')
 const PLUGIN_DIR = './plugins'
 
 export class PluginManager {
