@@ -42,8 +42,8 @@ export class ConfigManager {
         console.log('[Config] 迁移旧版本配置：', channelUnionId)
         const config = this.configMapV1[channelId].config
         this.saveChannelConfig(channelUnionId as ChannelUnionId, { config, setDefault: false })
+        return this.configMap[channelUnionId]
       }
-      return this.configMap[channelUnionId]
     }
     return this.defaultConfig
   }
