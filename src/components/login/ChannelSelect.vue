@@ -29,9 +29,9 @@
               <template v-if="showLoadingFailTips">
                 <div>如长时间获取不到频道信息：</div>
                 <ol class="list-decimal pl-4 mb-4">
-                  <li>请检查机器人 APPID 和 机器人令牌 是否填写正确。</li>
+                  <li>请检查机器人登录信息是否填写正确。</li>
                   <li>请检查机器人是否真的已经被添加到了频道中。</li>
-                  <li>可能是腾讯接口挂了。可以在频道里发一条消息，频道 ID 就会展示在此处。</li>
+                  <li>可能是第三方接口挂了。可以在频道里发一条消息，频道 ID 就会展示在此处。</li>
                 </ol>
               </template>
             </div>

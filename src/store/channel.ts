@@ -21,7 +21,7 @@ export const useChannelStore = defineStore('channel', {
       initChannelRelatedStorage(channel.id)
       ws.send<IListenToChannelReq>({ cmd: 'channel/listen', data: { channelId: channel.id, guildId: channel.guildId } })
       // 更新 title 和 favicon
-      document.title = `${channel.name} - QQ 频道机器人`
+      document.title = channel.name
       const linkElem = document.querySelector('link[rel=icon]')
       linkElem && ((linkElem as HTMLLinkElement).href = channel.guildIcon)
       gtagEvent('channel/listen')
