@@ -30,8 +30,7 @@ export function parseAliasForCommand(processors: IAliasRollConfig[], command: st
             result = result.replace(config.command, config.replacer)
           } else {
             // 理论上使用 startWith 匹配时，不应该使用 function 的 replacer
-            // 出现这种情况就传个空吧
-            result = config.replacer([])
+            console.warn('[Alias] unsupported trigger = startWith & replacer = function')
           }
         }
       } else {

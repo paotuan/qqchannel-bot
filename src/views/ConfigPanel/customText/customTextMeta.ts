@@ -41,7 +41,7 @@ const _ = Object.freeze<Record<string, ICustomTextMetaItem['args'][number]>>({
   无前缀: { name: '无前缀', section: true, scope: 'coc' },
 })
 
-const customTextMeta = Object.freeze<ICustomTextMetaGroup>([
+const customTextMeta = Object.freeze<ICustomTextMetaGroup[]>([
   {
     name: '通用文案',
     items: [
