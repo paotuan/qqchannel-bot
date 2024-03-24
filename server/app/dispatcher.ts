@@ -69,9 +69,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'scene/sendBattleLog':
     handleSceneSendBattleLog(client, server, request.data as ISceneSendBattleLogReq)
     break
-  // case 'scene/sendMapImage':
-  //   handleSceneSendMapImage(client, server, request.data as ISceneSendMapImageReq)
-  //   break
+  case 'scene/sendMapImage':
+    handleSceneSendMapImage(client, server, request.data as ISceneSendMapImageReq)
+    break
   case 'ri/set':
     handleRiSet(client, server, request.data as IRiSetReq)
     break
@@ -256,20 +256,20 @@ async function handleSceneSendBattleLog(client: WsClient, server: Wss, data: ISc
   client.send<string>({ cmd: 'scene/sendBattleLog', success: false, data: '发送失败' })
 }
 
-// async function handleSceneSendMapImage(client: WsClient, server: Wss, data: ISceneSendMapImageReq) {
-//   const bot = client.bot
-//   if (bot) {
-//     const channel = bot.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
-//     if (channel) {
-//       const resp = await channel.sendRawImageMessage(data.data)
-//       if (resp) {
-//         client.send<string>({ cmd: 'scene/sendMapImage', success: true, data: '' })
-//         return
-//       }
-//     }
-//   }
-//   client.send<string>({ cmd: 'scene/sendMapImage', success: false, data: '发送失败' })
-// }
+async function handleSceneSendMapImage(client: WsClient, server: Wss, data: ISceneSendMapImageReq) {
+  const bot = client.bot
+  if (bot) {
+    const channel = bot.guilds.findChannel(client.listenToChannelId, client.listenToGuildId)
+    if (channel) {
+      const resp = await channel.sendRawImageMessage(data.data)
+      if (resp) {
+        client.send<string>({ cmd: 'scene/sendMapImage', success: true, data: '' })
+        return
+      }
+    }
+  }
+  client.send<string>({ cmd: 'scene/sendMapImage', success: false, data: '发送失败' })
+}
 
 function handleRiSet(client: WsClient, server: Wss, data: IRiSetReq) {
   data.seq = data.seq === null ? NaN : data.seq

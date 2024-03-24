@@ -93,7 +93,7 @@ export class PluginManager {
           const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
           return channel.sendMessage(content)
         } else {
-          return channel.sendMessage(`<img src="${msg}">`)
+          return channel.sendMessage(`<img src="${msg}"/>`)
         }
       },
       sendMessageToUser: ({ platform, channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
@@ -110,7 +110,7 @@ export class PluginManager {
           const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
           return user.sendMessage(content)
         } else {
-          return user.sendMessage(`<img src="${msg}">`)
+          return user.sendMessage(`<img src="${msg}"/>`)
         }
       },
       getConfig: ({ platform, guildId, channelId }) => {

@@ -18,7 +18,7 @@ import { DiceManager } from '../service/qapi/dice'
  * A bot connection to a platform
  */
 export class Bot {
-  private readonly config: IBotConfig
+  readonly config: IBotConfig
   private readonly context = new Context()
   readonly api: SatoriApi
   private readonly _fork: ForkScope<Context>
