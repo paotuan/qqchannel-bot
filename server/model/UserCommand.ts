@@ -7,8 +7,8 @@ export class UserCommand implements IUserCommand {
 
   readonly session: Session
   command: string
-  readonly substitute: IUserCommandContext['realUser'] | undefined
-  readonly bot: Bot
+  private readonly substitute: IUserCommandContext['realUser'] | undefined
+  private readonly bot: Bot
   [key: string | number | symbol]: unknown
 
   private constructor(bot: Bot, session: Session, command: string, substitute: IUserCommandContext['realUser'] | undefined) {
@@ -81,6 +81,15 @@ export class UserCommand implements IUserCommand {
       realUser
     }
   }
+  //
+  // clone() {
+  //   const newCommand = new UserCommand(this.bot, this.session, this.command, this.substitute)
+  //   for (const key of Reflect.ownKeys(this)) {
+  //     if (['session', 'command', 'substitute', 'bot'].includes(key as string)) continue
+  //     newCommand[key] = this[key]
+  //   }
+  //   return newCommand
+  // }
 
   static fromMessage(bot: Bot, session: Session) {
     try {
