@@ -36,10 +36,10 @@ import { computed } from 'vue'
 import { useUserStore } from '../../../../store/user'
 import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../../../store/card'
-import { useUIStore } from '../../../../store/ui'
 import CharacterHpBar from './CharacterHpBar.vue'
 import ws from '../../../../api/ws'
 import type { IRiDeleteReq, IUser } from '../../../../../interface/common'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{ chara: ISceneActor }>()
 
@@ -63,11 +63,11 @@ const hp = computed(() => userCard.value?.HP ?? NaN)
 const maxHp = computed(() => userCard.value?.MAXHP ?? NaN)
 
 // 跳转到人物卡页面
-const uiStore = useUIStore()
+const router = useRouter()
 const selectCard = () => {
   if (!userCard.value) return
   cardStore.selectCard(userCard.value!.name)
-  uiStore.activeTab = 'card'
+  router.push('/card')
 }
 
 const sceneStore = useSceneStore()

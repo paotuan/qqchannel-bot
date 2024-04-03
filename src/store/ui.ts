@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia'
 
-export type Tabs = 'log' | 'note' | 'card' | 'config' | 'scene'
 export type ToastType = 'success' | 'warning' | 'info' | 'error'
 let toastId = 0
 
 export const useUIStore = defineStore('ui', {
   state: () => ({
-    activeTab: 'log' as Tabs,
     connectionStatus: true, // 连接状态
     toasts: [] as { id: number, type: ToastType, msg: string }[],
     theme: localStorage.getItem('theme') || 'lemonade',

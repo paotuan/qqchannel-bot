@@ -1,25 +1,24 @@
 <template>
   <div class="tabs font-bold">
-    <a v-for="tab in tabs" :key="tab.value" class="tab indicator"
-       :class="{ 'tab-active': tab.value === ui.activeTab }" @click="ui.activeTab = tab.value">
+    <router-link v-for="tab in tabs" :key="tab.value" :to="tab.value" class="tab indicator"
+       :class="{ 'tab-active': tab.value === route.path }">
       {{ tab.name }}
 <!--      <span v-if="tab.value === 'scene'" class="indicator-item badge badge-primary">beta</span>-->
-    </a>
+    </router-link>
   </div>
 </template>
 <script setup lang="ts">
-import type { Tabs } from '../../store/ui'
-import { useUIStore } from '../../store/ui'
+import { useRoute } from 'vue-router'
 
-const tabs: { name: string, value: Tabs }[] = [
-  { name: 'Log 录制', value: 'log' },
-  // { name: '重要笔记', value: 'note' },
-  { name: '人物卡', value: 'card' },
-  { name: '场景', value: 'scene' },
-  { name: '配置', value: 'config' }
+const tabs: { name: string, value: string }[] = [
+  { name: 'Log 录制', value: '/log' },
+  // { name: '重要笔记', value: '/note' },
+  { name: '人物卡', value: '/card' },
+  { name: '场景', value: '/scene' },
+  { name: '配置', value: '/config' }
 ]
 
-const ui = useUIStore()
+const route = useRoute()
 </script>
 <style scoped>
 .indicator-item {
