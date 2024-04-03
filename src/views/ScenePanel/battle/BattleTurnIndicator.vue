@@ -2,10 +2,10 @@
   <div class="flex gap-2 justify-between">
     <div class="flex-none flex gap-2">
       <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevTurn">
-        <ChevronDoubleLeftIcon class="w-4 h-4" />
+        <ChevronDoubleLeftIcon class="size-4" />
       </button>
       <button class="btn btn-sm btn-square btn-outline border-base-300" @click="prevChara">
-        <ChevronLeftIcon class="w-4 h-4" />
+        <ChevronLeftIcon class="size-4" />
       </button>
     </div>
     <div class="flex-none">
@@ -21,10 +21,10 @@
     </div>
     <div class="flex-none flex gap-2">
       <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextChara">
-        <ChevronRightIcon class="w-4 h-4" />
+        <ChevronRightIcon class="size-4" />
       </button>
       <button class="btn btn-sm btn-square btn-outline border-base-300" @click="nextTurn">
-        <ChevronDoubleRightIcon class="w-4 h-4" />
+        <ChevronDoubleRightIcon class="size-4" />
       </button>
     </div>
   </div>

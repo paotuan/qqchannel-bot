@@ -23,7 +23,7 @@
             <input v-model="config.defaultRoll.preferCard" type="checkbox" class="checkbox checkbox-sm" @click.stop />
             <span class="label-text">优先使用人物卡对应的默认骰</span>
             <span class="tooltip tooltip-top" data-tip="当玩家关联 COC 人物卡时，默认使用 d%&#xa;当玩家关联 DND 人物卡时，默认使用 d20">
-              <QuestionMarkCircleIcon class="w-4 h-4" />
+              <QuestionMarkCircleIcon class="size-4" />
             </span>
           </label>
         </div>

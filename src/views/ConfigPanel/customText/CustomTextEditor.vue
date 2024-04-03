@@ -1,10 +1,10 @@
 <template>
   <div class="collapse overflow-visible" :class="{ 'collapse-open': isOpen, 'collapse-close': !isOpen }">
     <div class="collapse-title text-md font-medium flex items-center gap-2 cursor-pointer" @click="isOpen = !isOpen">
-      <component :is="isOpen ? ChevronDownIcon : ChevronRightIcon" class="w-4 h-4" />
+      <component :is="isOpen ? ChevronDownIcon : ChevronRightIcon" class="size-4" />
       <span>{{ meta.name }}</span>
       <div class="dropdown dropdown-hover dropdown-right">
-        <label tabindex="0"><InformationCircleIcon class="w-4 h-4" /></label>
+        <label tabindex="0"><InformationCircleIcon class="size-4" /></label>
         <div tabindex="0" class="dropdown-content p-2 shadow-lg bg-base-100 rounded-lg example-content" @click.stop>
           <div v-html="meta.description" class="font-medium text-sm whitespace-pre example-text"></div>
         </div>
@@ -19,7 +19,7 @@
           </label>
           <textarea v-model="item.text" class="textarea textarea-bordered w-full" placeholder="请输入文案模板" @blur="onBlur($event, i)" />
           <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: data.length <= 1 }" @click="deleteItem(i)">
-            <XMarkIcon class="w-4 h-4" />
+            <XMarkIcon class="size-4" />
           </button>
         </div>
         <button class="btn btn-xs btn-ghost" @click="newItem">+ 新增一行</button>

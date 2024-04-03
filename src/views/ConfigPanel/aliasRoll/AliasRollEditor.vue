@@ -1,20 +1,20 @@
 <template>
   <div v-if="processor" class="collapse" :class="{ 'collapse-open': isOpen, 'collapse-close': !isOpen }">
     <div class="collapse-title text-md font-medium flex items-center gap-2 cursor-pointer" @click="isOpen = !isOpen">
-      <Bars3Icon class="w-4 h-4 cursor-move flex-none sortable-handle" @click.stop/>
+      <Bars3Icon class="size-4 cursor-move flex-none sortable-handle" @click.stop/>
       <input v-model="item.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
       <span class="inline-flex items-center gap-1 group">
         {{ processor.name }}
         <div v-if="fromPlugin" class="tooltip tooltip-right" :data-tip="`来自插件：${fromPlugin}`">
-          <Squares2X2Icon class="w-4 h-4 flex-none" />
+          <Squares2X2Icon class="size-4 flex-none" />
         </div>
         <button v-else class="btn btn-circle btn-ghost btn-xs invisible group-hover:visible" @click.stop="editSelf">
-          <PencilSquareIcon class="w-4 h-4 flex-none" />
+          <PencilSquareIcon class="size-4 flex-none" />
         </button>
       </span>
       <span v-if="!fromPlugin" class="flex-grow text-right">
         <button class="btn btn-circle btn-outline btn-xs" @click.stop="deleteSelf">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </span>
     </div>

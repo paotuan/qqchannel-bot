@@ -18,13 +18,13 @@
       <div class="font-bold max-w-[7rem] truncate">{{ userInfo.nick }}</div>
       <span class="flex gap-1">
         <button class="btn btn-xs btn-outline btn-circle" :disabled="!userCard" @click.stop="selectCard">
-          <DocumentTextIcon class="h-4 w-4" />
+          <DocumentTextIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.currentMap" @click.stop="addCharacterToken">
-          <MapPinIcon class="h-4 w-4" />
+          <MapPinIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">
-          <TrashIcon class="h-4 w-4" />
+          <TrashIcon class="size-4" />
         </button>
       </span>
     </div>

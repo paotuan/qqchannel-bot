@@ -19,16 +19,16 @@
       <div class="font-bold max-w-[7rem] truncate">{{ props.chara.userId }}</div>
       <span class="flex gap-1">
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="showNpcCard">
-          <DocumentTextIcon class="h-4 w-4" />
+          <DocumentTextIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.currentMap" @click.stop="addCharacterToken">
-          <MapPinIcon class="h-4 w-4" />
+          <MapPinIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="sceneStore.duplicateNpc(props.chara)">
-          <Square2StackIcon class="h-4 w-4" />
+          <Square2StackIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">
-          <TrashIcon class="h-4 w-4" />
+          <TrashIcon class="size-4" />
         </button>
       </span>
     </div>

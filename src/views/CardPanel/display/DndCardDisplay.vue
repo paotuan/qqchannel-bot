@@ -208,7 +208,7 @@
                 <td><text-input v-model="ability.ext" class="input input-ghost input-xs w-full"/></td>
                 <td>
                   <button class="btn btn-xs btn-circle btn-ghost" @click="openSpellData(ability.name)">
-                    <InformationCircleIcon class="w-4 h-4" />
+                    <InformationCircleIcon class="size-4" />
                   </button>
                 </td>
                 <td style="padding: 0">
@@ -245,7 +245,7 @@
             <th>描述</th>
             <th class="w-8 p-0">
               <button class="btn btn-xs btn-circle btn-ghost" @click="foldPanel.jobAbilities = !foldPanel.jobAbilities">
-                <component :is="foldPanel.jobAbilities ? ChevronDownIcon : ChevronUpIcon" class="w-4 h-4" />
+                <component :is="foldPanel.jobAbilities ? ChevronDownIcon : ChevronUpIcon" class="size-4" />
               </button>
             </th>
           </tr>
@@ -257,7 +257,7 @@
             <td><textarea v-model="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
             <td style="padding: 0">
               <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('jobAbilities', i)">
-                <XMarkIcon class="w-4 h-4" />
+                <XMarkIcon class="size-4" />
               </button>
             </td>
           </tr>
@@ -275,7 +275,7 @@
             <th>描述</th>
             <th class="w-8 p-0">
               <button class="btn btn-xs btn-circle btn-ghost" @click="foldPanel.specialists = !foldPanel.specialists">
-                <component :is="foldPanel.specialists ? ChevronDownIcon : ChevronUpIcon" class="w-4 h-4" />
+                <component :is="foldPanel.specialists ? ChevronDownIcon : ChevronUpIcon" class="size-4" />
               </button>
             </th>
           </tr>
@@ -287,7 +287,7 @@
             <td><textarea v-model="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
             <td style="padding: 0">
               <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('specialists', i)">
-                <XMarkIcon class="w-4 h-4" />
+                <XMarkIcon class="size-4" />
               </button>
             </td>
           </tr>

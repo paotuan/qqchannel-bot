@@ -2,16 +2,16 @@
   <d-modal :visible="props.visible" title="自定义列" modal-class="custom-column-dialog" @update:visible="$emit('update:visible', $event)">
     <div ref="sortableRef" class="flex flex-col gap-2">
       <div v-for="(col, i) in vm" :key="col.id" class="flex items-center gap-2">
-        <Bars3Icon class="w-4 h-4 cursor-move flex-none sortable-handle"/>
+        <Bars3Icon class="size-4 cursor-move flex-none sortable-handle"/>
         <input v-model="col.name" type="text" placeholder="输入属性/技能名称" class="input input-bordered input-sm w-60" />
         <button class="btn btn-circle btn-ghost btn-sm" @click="removeColumn(i)">
-          <MinusCircleIcon class="w-4 h-4" />
+          <MinusCircleIcon class="size-4" />
         </button>
       </div>
     </div>
     <div class="ml-6 mt-2">
       <button class="btn btn-circle btn-ghost btn-sm" @click="addColumn">
-        <PlusCircleIcon class="w-4 h-4" />
+        <PlusCircleIcon class="size-4" />
       </button>
     </div>
     <template #action>

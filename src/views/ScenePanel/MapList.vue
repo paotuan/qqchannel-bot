@@ -12,7 +12,7 @@
     </button>
     <template v-if="mapList.length < 10">
       <button class="btn btn-primary gap-2 w-40" @click="createNewMap">
-        <PlusCircleIcon class="w-6 h-6"/>
+        <PlusCircleIcon class="size-6"/>
         添加新场景
       </button>
     </template>

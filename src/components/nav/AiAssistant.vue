@@ -1,7 +1,7 @@
 <template>
   <div v-if="channel.selected">
     <button class="btn btn-circle btn-primary btn-ghost btn-sm m-1" @click="panelVisible = !panelVisible" @contextmenu.prevent="resetPosition">
-      <LightBulbIcon class="w-6 h-6 text-yellow-500" />
+      <LightBulbIcon class="size-6 text-yellow-500" />
     </button>
     <keep-alive>
       <AiAssistantPanel ref="panelRef" v-if="panelVisible" v-model:visible="panelVisible" />

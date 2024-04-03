@@ -1,7 +1,7 @@
 <template>
   <div class="collapse" :class="{ 'collapse-open': helpDocOpen, 'collapse-close': !helpDocOpen }">
     <div class="collapse-title cursor-pointer flex items-center gap-2" :class="{ 'font-bold': main }" @click="helpDocOpen = !helpDocOpen">
-      <component :is="helpDocOpen ? ChevronDownIcon : ChevronRightIcon" class="w-4 h-4" />
+      <component :is="helpDocOpen ? ChevronDownIcon : ChevronRightIcon" class="size-4" />
       <span>{{ title }}</span>
     </div>
     <div class="collapse-content">

@@ -1,7 +1,7 @@
 <template>
   <div class="dropdown dropdown-end">
     <label tabindex="0" class="btn btn-xs btn-circle btn-ghost">
-      <EllipsisVerticalIcon class="w-4 h-4" />
+      <EllipsisVerticalIcon class="size-4" />
     </label>
     <ul tabindex="0" class="dropdown-content menu menu-compact shadow bg-base-100 rounded-md w-24">
       <li><a class="text-xs" @click="onManualDiceRoll()">掷骰</a></li>

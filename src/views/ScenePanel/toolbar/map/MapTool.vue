@@ -3,19 +3,19 @@
     <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />
     <template v-if="!backgroundData">
       <button class="btn btn-primary gap-2" @click="uploadBackground">
-        <PhotoIcon class="w-6 h-6" />上传背景图片
+        <PhotoIcon class="size-6" />上传背景图片
       </button>
     </template>
     <template v-else>
       <button class="btn btn-square btn-primary" @click="uploadBackground">
-        <PhotoIcon class="w-6 h-6" />
+        <PhotoIcon class="size-6" />
       </button>
       <div>
         <span class="label-text font-bold">缩放</span>
         <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs range-secondary" @input="onScaleChange" />
       </div>
       <button class="btn btn-square btn-error" @click="clearBackground">
-        <TrashIcon class="w-6 h-6" />
+        <TrashIcon class="size-6" />
       </button>
     </template>
     <MapGenerate @generate="onGenerateMap" />

@@ -5,15 +5,15 @@
       <span class="inline-flex items-center gap-1 group">
         {{ config.name }}
         <div v-if="fromPlugin" class="tooltip tooltip-right" :data-tip="`来自插件：${fromPlugin}`">
-          <Squares2X2Icon class="w-4 h-4 flex-none" />
+          <Squares2X2Icon class="size-4 flex-none" />
         </div>
         <button v-else class="btn btn-circle btn-ghost btn-xs invisible group-hover:visible" @click.stop="editSelf">
-          <PencilSquareIcon class="w-4 h-4 flex-none" />
+          <PencilSquareIcon class="size-4 flex-none" />
         </button>
       </span>
       <span v-if="!fromPlugin" class="flex-grow text-right">
         <button class="btn btn-circle btn-outline btn-xs" @click.stop="deleteSelf">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </span>
     </div>
@@ -23,18 +23,18 @@
         <template v-if="!fromPlugin">
           <div class="mt-2">
             <div class="flex gap-2 p-1">
-              <div class="w-4 h-4 flex-none"></div>
+              <div class="size-4 flex-none"></div>
               <div class="w-32 pl-2 font-bold">成功等级</div>
               <div class="pl-2 font-bold">判断规则</div>
               <div></div>
             </div>
             <div ref="rulesPanelRef">
               <div v-for="(rule, i) in config.rules" :key="getRuleRowId(rule)" class="flex gap-2 items-center p-1">
-                <Bars3Icon class="w-4 h-4 cursor-move flex-none sortable-handle"/>
+                <Bars3Icon class="size-4 cursor-move flex-none sortable-handle"/>
                 <d-native-select v-model="rule.level" :options="ruleLevelOptions" select-class="select-bordered select-sm" class="w-32" placeholder="成功等级" />
                 <input v-model="rule.expression" type="text" placeholder="请输入检定表达式" class="input input-bordered input-sm w-full" />
                 <button class="btn btn-circle btn-ghost btn-xs flex-none" :class="{ invisible: config.rules.length <= 1 }" @click="deleteRule(i)">
-                  <XMarkIcon class="w-4 h-4" />
+                  <XMarkIcon class="size-4" />
                 </button>
               </div>
             </div>

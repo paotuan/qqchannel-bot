@@ -21,7 +21,7 @@
           <div class="p-4 bg-base-100 shadow-2xl rounded-2xl overflow-hidden">
             <div class="py-2 flex justify-between items-center bg-base-100">
               <div class="card-title">请选择机器人工作的子频道</div>
-              <a class="link text-sm inline-flex" @click="openMultiWindow">我要多开<ArrowTopRightOnSquareIcon class="w-4 h-4" /></a>
+              <a class="link text-sm inline-flex" @click="openMultiWindow">我要多开<ArrowTopRightOnSquareIcon class="size-4" /></a>
             </div>
             <!-- 子频道空数据展示 -->
             <div v-if="channelStore.list.length === 0" class="w-96">
@@ -41,7 +41,7 @@
                      class="label cursor-pointer p-2 rounded-xl border"
                      :class="checkedChannelId === channel.id ? 'border-primary' : 'border-base-300'">
                 <span class="inline-flex items-center gap-2">
-                  <component :is="iconByChannel(channel)" class="w-4 h-4" :class="colorByChannel(channel)" />
+                  <component :is="iconByChannel(channel)" class="size-4" :class="colorByChannel(channel)" />
                   <span class="label-text">{{ channel.name }}</span>
                 </span>
                 <input type="radio" name="login_channel-select-radio" class="radio radio-primary"

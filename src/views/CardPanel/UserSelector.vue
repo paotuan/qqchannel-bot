@@ -10,7 +10,7 @@
       </div>
     </template>
     <template #list-top>
-      <li><a @click="select(null)"><NoSymbolIcon class="w-4 h-4" />取消关联</a></li>
+      <li><a @click="select(null)"><NoSymbolIcon class="size-4" />取消关联</a></li>
     </template>
   </UserSelectDropdown>
 </template>

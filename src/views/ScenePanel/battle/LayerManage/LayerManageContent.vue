@@ -2,10 +2,10 @@
   <div class="h-full flex flex-col">
     <div class="flex justify-between">
       <button class="btn btn-primary btn-sm gap-2 w-28" @click="createNewLayer">
-        <PlusCircleIcon class="w-4 h-4"/>新增图层
+        <PlusCircleIcon class="size-4"/>新增图层
       </button>
       <span class="tooltip tooltip-left" data-tip="若图层顺序与实际有误，可尝试强制刷新顺序">
-          <button class="btn btn-sm btn-circle btn-ghost" @click="$emit('refresh')"><ArrowPathRoundedSquareIcon class="w-4 h-4" /></button>
+          <button class="btn btn-sm btn-circle btn-ghost" @click="$emit('refresh')"><ArrowPathRoundedSquareIcon class="size-4" /></button>
         </span>
     </div>
     <div ref="sortableRef" class="mt-4 flex-grow overflow-auto">

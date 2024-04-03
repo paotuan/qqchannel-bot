@@ -1,6 +1,6 @@
 <template>
   <button class="btn modal-button btn-primary gap-2" @click="open = true">
-    <PlusCircleIcon class="w-6 h-6"/>
+    <PlusCircleIcon class="size-6"/>
     导入人物卡
   </button>
   <d-modal v-model:visible="open" title="导入人物卡">
@@ -59,7 +59,7 @@
       <div class="flex items-center gap-4">
         <div v-show="nameExist"
              class="text-sm bg-warning text-warning-content px-2 py-0.5 rounded flex items-center gap-0.5">
-          <ExclamationCircleIcon class="w-4 h-4"/>
+          <ExclamationCircleIcon class="size-4"/>
           存在同名人物卡，导入后将覆盖旧的人物卡
         </div>
         <button class="btn btn-primary" :disabled="!canSubmit" @click="submit">导入!</button>

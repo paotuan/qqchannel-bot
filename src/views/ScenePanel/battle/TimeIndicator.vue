@@ -13,7 +13,7 @@
     />
     <div class="dropdown dropdown-end">
       <label tabindex="0" class="btn btn-sm btn-square btn-outline border-base-300">
-        <ChevronDoubleRightIcon class="w-4 h-4" />
+        <ChevronDoubleRightIcon class="size-4" />
       </label>
       <ul tabindex="0" class="dropdown-content menu menu-compact p-2 shadow bg-base-100 rounded-box w-24">
         <li><a @click="addTime(6)">+ 6s</a></li>

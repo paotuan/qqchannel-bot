@@ -8,7 +8,7 @@
       <div class="flex flex-col gap-2">
         <h3 class="font-bold">人物卡列表：</h3>
         <div class="label-text flex gap-0.5" style="width: 308px">
-          <InformationCircleIcon class="w-4 h-4 flex-shrink-0" />
+          <InformationCircleIcon class="size-4 flex-shrink-0" />
           <span>如果找不到你想关联的玩家，请保持网页开启，并让 Ta 在频道里发一条消息，Ta 就会显示在选框中</span>
         </div>
         <div v-for="card in userCardList" :key="card.name" class="flex gap-2">
@@ -18,7 +18,7 @@
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
             <span class="truncate translate-y-1/4">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
-            <CheckCircleIcon v-show="selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
+            <CheckCircleIcon v-show="selectedCard === card" class="size-6 ml-auto flex-none" />
           </button>
           <user-selector :user-id="cardStore.linkedUserOf(card.name) || null" @select="cardStore.requestLinkUser(card.name, $event?.id)" />
         </div>
@@ -30,7 +30,7 @@
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
             <span class="truncate translate-y-1/4">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
-            <CheckCircleIcon v-show="selectedCard === card" class="w-6 h-6 ml-auto flex-none" />
+            <CheckCircleIcon v-show="selectedCard === card" class="size-6 ml-auto flex-none" />
           </button>
         </div>
       </div>

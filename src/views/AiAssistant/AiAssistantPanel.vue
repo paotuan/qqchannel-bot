@@ -4,13 +4,13 @@
       <h3 ref="panelTitleEl" class="cursor-move font-bold text-lg leading-10 pl-4 pt-2 flex-none">来点灵感</h3>
       <span class="absolute right-2 top-2">
         <span class="tooltip tooltip-left" data-tip="重置所有对话">
-          <button class="btn btn-sm btn-circle btn-ghost" @click="chatStore.clearHistory()"><ArrowPathRoundedSquareIcon class="w-4 h-4" /></button>
+          <button class="btn btn-sm btn-circle btn-ghost" @click="chatStore.clearHistory()"><ArrowPathRoundedSquareIcon class="size-4" /></button>
         </span>
         <span class="tooltip tooltip-left" data-tip="高级设置">
-          <button class="btn btn-sm btn-circle btn-ghost" @click="settingDialogVisible = true"><Cog6ToothIcon class="w-4 h-4" /></button>
+          <button class="btn btn-sm btn-circle btn-ghost" @click="settingDialogVisible = true"><Cog6ToothIcon class="size-4" /></button>
         </span>
         <span class="tooltip tooltip-left" data-tip="关闭窗口">
-          <button class="btn btn-sm btn-circle btn-ghost" @click="emit('update:visible', false)"><XMarkIcon class="w-4 h-4" /></button>
+          <button class="btn btn-sm btn-circle btn-ghost" @click="emit('update:visible', false)"><XMarkIcon class="size-4" /></button>
         </span>
       </span>
       <div ref="conversationListEl" class="m-4 mt-0 p-2 flex-grow overflow-x-hidden overflow-y-auto border-common">
@@ -24,7 +24,7 @@
             {{ chat.content }}
             <span v-if="chat.role !== 'user'" class="tooltip tooltip-left absolute bottom-0 -right-10 invisible group-hover:visible" data-tip="移除本轮对话">
               <button class="btn btn-circle btn-error btn-sm " @click="chatStore.clearSingle(chat.id)">
-                <XMarkIcon class="w-4 h-4" />
+                <XMarkIcon class="size-4" />
               </button>
             </span>
           </div>
@@ -78,7 +78,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ArrowPathRoundedSquareIcon, Cog6ToothIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { ArrowPathRoundedSquareIcon, Cog6ToothIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import DModal from '../../dui/modal/DModal.vue'
 import { useChatStore } from '../../store/chat'
 import { ref, watch } from 'vue'

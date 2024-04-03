@@ -6,7 +6,7 @@
         <span>先攻值</span>
         <div class="tooltip tooltip-left font-medium h-5 -top-0.5" :data-tip="riDesc.join(`&#xa;`)">
           <button class="btn btn-circle btn-xs btn-ghost">
-            <QuestionMarkCircleIcon class="w-4 h-4" />
+            <QuestionMarkCircleIcon class="size-4" />
           </button>
         </div>
       </div>
@@ -16,7 +16,7 @@
       <div class="w-6">
         <div class="tooltip tooltip-left font-medium h-5" data-tip="自定义列">
           <button class="btn btn-circle btn-xs btn-ghost" @click="customColumnDialogShow = true">
-            <Cog6ToothIcon class="w-4 h-4" />
+            <Cog6ToothIcon class="size-4" />
           </button>
         </div>
       </div>

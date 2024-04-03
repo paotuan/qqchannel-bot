@@ -18,28 +18,28 @@
               :class="toolbarItem !== 'map' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
               @click="selectToolbar('map')"
             >
-              <MapIcon class="h-6 w-6" />
+              <MapIcon class="size-6" />
             </button>
             <button
                 class="btn btn-circle border border-base-300"
                 :class="toolbarItem !== 'grid' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
                 @click="selectToolbar('grid')"
             >
-              <HashtagIcon class="h-6 w-6" />
+              <HashtagIcon class="size-6" />
             </button>
             <button
               class="btn btn-circle border border-base-300"
               :class="toolbarItem !== 'token' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
               @click="selectToolbar('token')"
             >
-              <MapPinIcon class="h-6 w-6" />
+              <MapPinIcon class="size-6" />
             </button>
             <button
               class="btn btn-circle border border-base-300"
               :class="toolbarItem !== 'text' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
               @click="selectToolbar('text')"
             >
-              <PencilIcon class="h-6 w-6" />
+              <PencilIcon class="size-6" />
             </button>
           </div>
         </div>

@@ -13,7 +13,7 @@
       </span>
       <span class="flex-grow text-right">
         <button class="btn btn-circle btn-ghost btn-sm" @click.stop="reloadPlugin(plugin!.id)">
-          <ArrowPathIcon class="h-4 w-4" />
+          <ArrowPathIcon class="size-4" />
         </button>
       </span>
     </div>

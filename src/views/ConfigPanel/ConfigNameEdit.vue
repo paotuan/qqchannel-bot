@@ -1,7 +1,7 @@
 <template>
   <d-modal :visible="!!props.mode" :title="title" lock @update:visible="close">
     <div class="flex items-center gap-1 text-sm text-base-content/60 mb-2">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 size-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       <span>名称和功能描述只用于展示，不影响实际功能</span>
     </div>
     <div class="form-control w-full">

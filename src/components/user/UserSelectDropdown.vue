@@ -21,7 +21,7 @@
         </ul>
         <div class="absolute bottom-0 left-0 right-0 bg-base-100">
           <button class="btn btn-ghost gap-2 w-full" @click="ui.userManageDialogShow = true">
-            <UserGroupIcon class="w-4 h-4" />成员管理
+            <UserGroupIcon class="size-4" />成员管理
           </button>
         </div>
       </template>

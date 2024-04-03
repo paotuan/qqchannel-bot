@@ -15,7 +15,7 @@
     </template>
   </div>
   <div class="p-2 border-t border-base-content/10 flex items-center gap-2">
-    <button class="btn btn-sm btn-ghost gap-1" @click="newEmbedConfig"><PlusIcon class="w-4 h-4" />新增检定规则</button>
+    <button class="btn btn-sm btn-ghost gap-1" @click="newEmbedConfig"><PlusIcon class="size-4" />新增检定规则</button>
   </div>
   <config-name-edit
       v-model:mode="editForm.mode"

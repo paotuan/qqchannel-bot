@@ -3,21 +3,21 @@
     <div class="flex items-center justify-between gap-4">
       <span class="inline-flex items-center flex-grow">
         <button v-if="isLayer" class="btn btn-xs btn-circle btn-ghost" @click="layerCollapsed = !layerCollapsed">
-          <ChevronRightIcon v-if="layerCollapsed" class="w-4 h-4" />
-          <ChevronDownIcon v-else class="w-4 h-4" />
+          <ChevronRightIcon v-if="layerCollapsed" class="size-4" />
+          <ChevronDownIcon v-else class="size-4" />
         </button>
         <input v-model.lazy="item['data-remark']" class="input input-sm input-ghost p-1 h-6 flex-grow" />
       </span>
       <span class="inline-flex flex-none">
         <button class="btn btn-xs btn-circle btn-ghost" @click="item.visible = !item.visible">
-          <EyeIcon v-if="item.visible" class="w-4 h-4" />
-          <EyeSlashIcon v-else class="w-4 h-4" />
+          <EyeIcon v-if="item.visible" class="size-4" />
+          <EyeSlashIcon v-else class="size-4" />
         </button>
         <button class="btn btn-xs btn-circle btn-ghost" @click="selectSelfOnStage">
-          <ViewfinderCircleIcon class="w-4 h-4" />
+          <ViewfinderCircleIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-circle btn-ghost hover:bg-error" @click="deleteSelf">
-          <XMarkIcon class="w-4 h-4" />
+          <XMarkIcon class="size-4" />
         </button>
       </span>
     </div>
