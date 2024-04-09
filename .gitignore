@@ -22,13 +22,17 @@ dist-ssr
 *.sln
 *.sw?
 
+.npmrc
+tsconfig.tsbuildinfo
+
 .env
 /cards/
 /config/
 /config-backup/
 /plugins/
 /user/
-/dist/client
-/dist/server
-/dist/bin
-/dist/log.txt
+/packages/dist/client
+/packages/dist/server
+/packages/dist/bin
+/packages/dist/log.txt
+/packages/types/lib

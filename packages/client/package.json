@@ -1,0 +1,41 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "rimraf ../dist/client/* && vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@heroicons/vue": "^2.0.11",
+    "@paotuan/api2d": "0.1.41",
+    "@paotuan/types": "1.0.0",
+    "@vuepic/vue-datepicker": "^5.4.0",
+    "@vueuse/core": "^9.13.0",
+    "daisyui": "^2.51.3",
+    "hotkeys-js": "^3.12.0",
+    "konva": "^8.3.14",
+    "md5": "^2.3.0",
+    "nanoid": "^4.0.0",
+    "pinia": "^2.0.22",
+    "sortablejs": "^1.15.0",
+    "vue": "^3.2.37",
+    "vue-konva": "^3.0.2",
+    "vue-router": "^4.3.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/gtag.js": "^0.0.12",
+    "@types/md5": "^2.3.5",
+    "@types/sortablejs": "^1.13.0",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "autoprefixer": "^10.4.19",
+    "cssnano": "^6.1.2",
+    "eslint-plugin-vue": "^9.24.0",
+    "postcss": "8.4.38",
+    "tailwindcss": "^3.4.3",
+    "vite": "5.2.7",
+    "vue-eslint-parser": "^9.4.2",
+    "vue-tsc": "^2.0.7"
+  }
+}
