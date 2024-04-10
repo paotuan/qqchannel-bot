@@ -1,6 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "license": "MIT",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch src",
     "clean": "rimraf ../dist/server/* && rimraf ../../plugins/*",

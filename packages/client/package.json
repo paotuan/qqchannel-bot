@@ -1,6 +1,7 @@
 {
   "name": "client",
   "version": "1.0.0",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "rimraf ../dist/client/* && vue-tsc --noEmit && vite build",

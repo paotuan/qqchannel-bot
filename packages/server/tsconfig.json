@@ -1,13 +1,6 @@
 {
+  "extends": "../../tsconfig.base",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "useDefineForClassFields": true,
-    "esModuleInterop": true,
     "outDir": "../dist/server",
     "paths": {
       "@paotuan/types": ["../types/lib/index.d.ts"]

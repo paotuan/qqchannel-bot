@@ -2,6 +2,7 @@
   "name": "@paotuan/qqchannel-bot",
   "private": true,
   "version": "2.0.0-alpha.1",
+  "license": "MIT",
   "workspaces": ["packages/*"],
   "scripts": {
     "dev:client": "yarn workspace client run dev",
