@@ -45,3 +45,14 @@ export function detectPublicIP() {
     console.error('获取公网 IP 失败')
   })
 }
+
+// 获取某个文件夹名称基于 root 的路径
+// dev 环境对应项目根目录
+// prod 环境对应 exe 同级目录
+export function resolveRootDir(dirName: string) {
+  if (process.env.NODE_ENV === 'development') {
+    return `../../${dirName}` // from child's package.json to root's
+  } else {
+    return `./${dirName}`
+  }
+}

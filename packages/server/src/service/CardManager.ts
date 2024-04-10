@@ -6,8 +6,9 @@ import type { Wss } from '../app/wss'
 import { ICard, ICardData, ICardEntryChangeEvent, ICardQuery, ICardDeleteReq, ICardImportReq, ICardLinkReq, createCard } from '@paotuan/types'
 import mitt from 'mitt'
 import { ChannelUnionId } from '../adapter/utils'
+import { resolveRootDir } from '../utils'
 
-const dir = '../../cards'
+const CARD_DIR = resolveRootDir('cards')
 const LINK_FILE_NAME = '/__link.json'
 
 type LinkMap = Record<string, string> // userId => cardName
@@ -34,10 +35,10 @@ export class CardManager {
   private initCardFiles() {
     try {
       console.log('[Card] 开始读取人物卡')
-      if (!fs.existsSync(dir)) {
+      if (!fs.existsSync(CARD_DIR)) {
         return
       }
-      const filesPath = globSync(`${dir}/*.json`, { stats: true })
+      const filesPath = globSync(`${CARD_DIR}/*.json`, { stats: true })
       const files = filesPath.map(path=> ({ created: path.stats?.birthtimeMs, modified: path.stats?.mtimeMs, path: path.path }))
       files.forEach(file => {
         const str = fs.readFileSync(file.path, 'utf8')
@@ -86,11 +87,11 @@ export class CardManager {
   }
 
   private _saveCardData(cardData: ICardData) {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir)
+    if (!fs.existsSync(CARD_DIR)) {
+      fs.mkdirSync(CARD_DIR)
     }
     const cardName = cardData.name
-    fs.writeFile(`${dir}/${cardName}.json`, JSON.stringify(cardData), (e) => {
+    fs.writeFile(`${CARD_DIR}/${cardName}.json`, JSON.stringify(cardData), (e) => {
       if (e) {
         console.error('[Card] 人物卡写文件失败', e)
       }
@@ -98,10 +99,10 @@ export class CardManager {
   }
 
   private _saveLinkData() {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir)
+    if (!fs.existsSync(CARD_DIR)) {
+      fs.mkdirSync(CARD_DIR)
     }
-    fs.writeFile(`${dir}${LINK_FILE_NAME}`, JSON.stringify(this.channelLinkMap), (e) => {
+    fs.writeFile(`${CARD_DIR}${LINK_FILE_NAME}`, JSON.stringify(this.channelLinkMap), (e) => {
       if (e) {
         console.error('[Card] 人物卡写关联失败', e)
       }
@@ -112,11 +113,11 @@ export class CardManager {
     const { cardName } = req
     console.log('[Card] 删除人物卡', cardName)
     try {
-      if (!fs.existsSync(dir)) {
+      if (!fs.existsSync(CARD_DIR)) {
         return
       }
       // 删除卡片
-      fs.unlinkSync(`${dir}/${cardName}.json`)
+      fs.unlinkSync(`${CARD_DIR}/${cardName}.json`)
       delete this.cardMap[cardName]
       delete this.cardCache[cardName]
       // 删除所有这张卡片的关联关系

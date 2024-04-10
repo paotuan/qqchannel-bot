@@ -9,8 +9,9 @@ import { getInitialDefaultConfig, handleUpgrade } from './default'
 import { ChannelConfig } from './config'
 import type { PluginManager } from './plugin'
 import { asChannelUnionId, ChannelUnionId } from '../../adapter/utils'
+import { resolveRootDir } from '../../utils'
 
-const CONFIG_DIR = './config'
+const CONFIG_DIR = resolveRootDir('config')
 
 export class ConfigManager {
   private readonly wss: Wss

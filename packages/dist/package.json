@@ -13,7 +13,7 @@
       "server/plugins/**/*"
     ],
     "targets": [
-      "node18-win-x64"
+      "node18-macos-x64"
     ],
     "outputPath": "bin"
   },

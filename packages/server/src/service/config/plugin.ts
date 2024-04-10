@@ -29,7 +29,7 @@ import { DiceRollContext } from '../DiceRollContext'
 import { getChannelUnionId } from '../../adapter/utils'
 
 const INTERNAL_PLUGIN_DIR = process.env.NODE_ENV === 'development' ? path.resolve('./src/plugins') : path.resolve(__dirname, './plugins')
-const PLUGIN_DIR = process.env.NODE_ENV === 'development' ? '../../plugins' : './plugins'
+const PLUGIN_DIR = './plugins' // prod 环境外部插件文件夹
 
 export class PluginManager {
   private readonly wss: Wss
@@ -40,7 +40,10 @@ export class PluginManager {
     this.wss = wss
     const pluginNames = this.extractOfficialPluginsIfNeed()
     this.loadPlugins(pluginNames)
-    this.checkOfficialPluginsUpdate()
+    // dev 环境从单一来源加载插件，不存在插件更新的问题
+    if (process.env.NODE_ENV !== 'development') {
+      this.checkOfficialPluginsUpdate()
+    }
   }
 
   private getPluginRegisterContext(pluginId: string): IPluginRegisterContext {
@@ -135,6 +138,16 @@ export class PluginManager {
   // 如果 plugins 下没有该 plugin 的文件夹，则复制过去
   private extractOfficialPluginsIfNeed() {
     console.log('[Plugin] 开始加载插件')
+    // develop 环境，直接从 internal dir 读取
+    if (process.env.NODE_ENV === 'development') {
+      const internalPluginNames = fs
+        .readdirSync(INTERNAL_PLUGIN_DIR, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .map(d => d.name)
+      return internalPluginNames
+    }
+
+    // prod 环境
     if (!fs.existsSync(PLUGIN_DIR)) {
       fs.mkdirSync(PLUGIN_DIR)
     }
@@ -144,15 +157,14 @@ export class PluginManager {
       .filter(d => d.isDirectory())
       .map(d => d.name))
     // 内置插件列表
-    // 此处 ncc 打包时会智能地打到 dist/server/plugins 下，pkg 打包时通过 assets 配置保留文件，因此路径比较 tricky 地保持了一致
     const internalPluginNames = fs
       .readdirSync(INTERNAL_PLUGIN_DIR, { withFileTypes: true })
       .filter(d => d.isDirectory())
       .map(d => d.name)
     // 如有新的内置插件不在已有插件列表，则复制过去
-    // 不每次复制是为了可以保留用户对已有插件的魔改。但 development 时每次都复制以提升开发体验
+    // 不每次复制是为了可以保留用户对已有插件的魔改
     internalPluginNames.forEach(pluginName => {
-      if (!pluginNames.has(pluginName) || process.env.NODE_ENV === 'development') {
+      if (!pluginNames.has(pluginName)) {
         copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, pluginName), path.join(PLUGIN_DIR, pluginName))
         pluginNames.add(pluginName) // 记录到插件列表里去
       }
@@ -169,7 +181,9 @@ export class PluginManager {
   private loadPlugin(pluginName: string) {
     try {
       // require.cache 的 key 是带 index.js 的，因此组装路径时也要带上
-      const fullPath = path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
+      const fullPath = process.env.NODE_ENV === 'development'
+        ? path.join(INTERNAL_PLUGIN_DIR, pluginName, 'index.js')
+        : path.join(process.cwd(), PLUGIN_DIR, pluginName, 'index.js')
       // 注意不能完全避免问题，仍然有副作用重复执行或内存泄露的风险
       // 使用 eval 是为了防止 ncc 对 require 的转译，以确保插件是从真实的外部路径进行加载的
       eval('delete require.cache[fullPath]')
@@ -203,12 +217,6 @@ export class PluginManager {
   // 手动重载插件
   public manualReloadPlugins(pluginNames: string[]) {
     if (pluginNames.length > 0) {
-      // 如果是 develop mode，需要先复制一遍
-      if (process.env.NODE_ENV === 'development') {
-        pluginNames.forEach(name => {
-          copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
-        })
-      }
       // 重载指定的插件
       this.loadPlugins(pluginNames)
     } else {

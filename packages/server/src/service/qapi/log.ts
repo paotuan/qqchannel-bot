@@ -4,6 +4,7 @@ import { createLogger, transports, format, type Logger } from 'winston'
 import { Bot } from '../../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
 import { ChannelUnionId, getChannelUnionId } from '../../adapter/utils'
+import { resolveRootDir } from '../../utils'
 
 export class LogManager {
   private readonly bot: Bot
@@ -108,7 +109,7 @@ export class LogManager {
       const channelName = channel?.name ?? channelId
       this.backgroundLoggers[channelUnionId] = createLogger({
         format: backgroundLogFormatter,
-        transports: new transports.File({ filename: `logs/${channelName}.txt`, maxsize: 1024 * 1024 })
+        transports: new transports.File({ filename: `${resolveRootDir('logs')}/${channelName}.txt`, maxsize: 1024 * 1024 })
       })
     }
     return this.backgroundLoggers[channelUnionId]

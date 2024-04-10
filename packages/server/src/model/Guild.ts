@@ -5,8 +5,9 @@ import { Universal } from '@satorijs/satori'
 import { User } from './User'
 import { VERSION_CODE } from '@paotuan/types'
 import fs from 'fs'
+import { resolveRootDir } from '../utils'
 
-const USER_DIR = './user'
+const USER_DIR = resolveRootDir('user')
 
 export class Guild {
   readonly id: string
