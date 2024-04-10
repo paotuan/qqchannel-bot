@@ -138,7 +138,7 @@ const backgroundLogFormatter = format.printf(info => {
   if (user === lastUser) {
     return content
   } else {
-    const date = new Date(message.timestamp)
+    const date = new Date(Number(message.timestamp))
     const pad2 = (v: number) => String(v).padStart(2, '0')
     const timestamp = `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`
     return `${user} ${timestamp}\n${content}`
