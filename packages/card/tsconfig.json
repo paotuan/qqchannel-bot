@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "incremental": true,
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+}

@@ -16,7 +16,7 @@ import { EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../store/card'
 import { computed, ComputedRef, inject } from 'vue'
 import { SELECTED_CARD } from './utils'
-import type { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 import { useConfigStore } from '../../store/config'
 
 const props = withDefaults(defineProps<{ expression: string, deletable?: boolean }>(), { deletable: true })

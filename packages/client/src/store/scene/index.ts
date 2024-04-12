@@ -5,12 +5,9 @@ import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
 import { getDefaultStageData, useStage } from './map'
 import type { IStageData } from './map-types'
-import type { IRiItem } from '@paotuan/types'
+import { VERSION_CODE, type IRiItem, type IRiSetReq } from '@paotuan/types'
 import ws from '../../api/ws'
-import type { IRiSetReq } from '@paotuan/types'
-import type { ICard } from '@paotuan/types'
-import { createCard } from '@paotuan/types'
-import { VERSION_CODE } from '@paotuan/types'
+import { createCard, type ICard } from '@paotuan/card'
 
 // 场景地图
 export interface ISceneMap {

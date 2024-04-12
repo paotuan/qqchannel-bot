@@ -48,7 +48,7 @@ import CardDisplay from './display/CardDisplay.vue'
 import { storeToRefs } from 'pinia'
 import { computed, nextTick, watch } from 'vue'
 import { orderBy } from 'lodash'
-import type { ICardData } from '@paotuan/types'
+import type { ICardData } from '@paotuan/card'
 import CardFilters from './filter/CardFilters.vue'
 import { useCardFilter } from './filter/useCardFilter'
 

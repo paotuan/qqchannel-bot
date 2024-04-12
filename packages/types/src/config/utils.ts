@@ -1,4 +1,4 @@
-import type { ICardEntryChangeEvent } from '../card/types'
+import type { ICardEntryChangeEvent } from '@paotuan/card'
 import type { Platform } from '../platform/login'
 
 export type BotId = `${Platform}:${string}`

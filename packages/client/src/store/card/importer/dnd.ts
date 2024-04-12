@@ -1,4 +1,4 @@
-import { DndCard, IDndCardData } from '@paotuan/types'
+import { DndCard, type IDndCardData } from '@paotuan/card'
 import { VERSION_CODE } from '@paotuan/types'
 import XLSX from 'xlsx'
 

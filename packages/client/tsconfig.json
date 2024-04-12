@@ -3,10 +3,7 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "lib": ["ESNext", "DOM"],
-    "paths": {
-      "@paotuan/types": ["../types/lib/index.d.ts"]
-    }
+    "lib": ["ESNext", "DOM"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "vite.config.mts"]
 }

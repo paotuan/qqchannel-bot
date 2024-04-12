@@ -1,7 +1,7 @@
 import { StandardDiceRoll } from './index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import { CocCard, getCocTempEntry, type ICocCardEntry } from '@paotuan/types'
+import { CocCard, getCocTempEntry, type ICocCardEntry } from '@paotuan/card'
 import { at } from '../utils'
 
 export class CocDiceRoll extends StandardDiceRoll {

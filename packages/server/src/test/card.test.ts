@@ -7,13 +7,10 @@ import {
   MockUserId,
   resetRandomEngine
 } from './utils'
-import { GeneralCard } from '@paotuan/types'
-import { CocCard } from '@paotuan/types'
-import { ICard } from '@paotuan/types'
+import { GeneralCard, CocCard, DndCard, type ICard } from '@paotuan/card'
 import { createDiceRoll, IDiceRollContext } from '../service/dice/utils'
 import { ChannelConfig } from '../service/config/config'
 import { getInitialDefaultConfig } from '../service/config/default'
-import { DndCard } from '@paotuan/types'
 
 function createContext(card: ICard): IDiceRollContext {
   return {

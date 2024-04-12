@@ -1,5 +1,5 @@
 import { StandardDiceRoll } from './index'
-import { DndCard, getPropOfSkill } from '@paotuan/types'
+import { DndCard, getPropOfSkill } from '@paotuan/card'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import { at } from '../utils'

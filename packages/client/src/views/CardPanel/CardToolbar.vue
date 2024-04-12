@@ -12,7 +12,7 @@ import CardAddAttribute from './CardAddAttribute.vue'
 import { ComputedRef, inject } from 'vue'
 import { IS_TEMP_CARD, SELECTED_CARD } from './utils'
 import { useCardStore } from '../../store/card'
-import { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 import { addAttributesBatch } from '../../store/card/importer/utils'
 
 const cardStore = useCardStore()

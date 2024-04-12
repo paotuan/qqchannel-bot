@@ -1,6 +1,6 @@
 {
-  "name": "@paotuan/types",
-  "version": "1.0.0",
+  "name": "@paotuan/card",
+  "version": "2.0.0",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -9,6 +9,5 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@paotuan/card": "2.0.0"
   }
 }

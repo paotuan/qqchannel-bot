@@ -18,7 +18,7 @@ import { IS_TEMP_CARD, SELECTED_CARD } from '../utils'
 import CocCardDisplay from './CocCardDisplay.vue'
 import DndCardDisplay from './DndCardDisplay.vue'
 import GeneralCardDisplay from './GeneralCardDisplay.vue'
-import type { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 import ManualDiceRollDialog from '../ManualDiceRollDialog.vue'
 
 const props = withDefaults(defineProps<{ card?: ICard, isTempCard?: boolean }>(), { isTempCard: false })

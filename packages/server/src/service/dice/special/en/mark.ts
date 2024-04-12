@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../../index'
-import { CocCard } from '@paotuan/types'
+import { CocCard } from '@paotuan/card'
 
 type MarkMode = 'add' | 'remove' | 'clear'
 

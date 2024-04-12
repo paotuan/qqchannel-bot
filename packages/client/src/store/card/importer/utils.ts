@@ -1,5 +1,4 @@
-import type { ICard } from '@paotuan/types'
-import type { IGeneralCardData } from '@paotuan/types'
+import type { ICard, IGeneralCardData } from '@paotuan/card'
 import { VERSION_CODE } from '@paotuan/types'
 
 export function addAttributesBatch<T extends ICard>(card: T, rawText: string): T {

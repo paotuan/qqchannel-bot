@@ -1,9 +1,6 @@
 {
   "extends": "../../tsconfig.base",
   "compilerOptions": {
-    "outDir": "../dist/server",
-    "paths": {
-      "@paotuan/types": ["../types/lib/index.d.ts"]
-    }
+    "outDir": "../dist/server"
   }
 }

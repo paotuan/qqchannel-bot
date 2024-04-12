@@ -9,7 +9,7 @@ import {
 } from '../utils'
 import { BasePtDiceRoll } from '../index'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import type { ICardEntry } from '@paotuan/types'
+import type { ICardEntry } from '@paotuan/card'
 
 interface IRollResult {
   roll: DiceRoll

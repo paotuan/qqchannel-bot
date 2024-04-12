@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../index'
-import { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 
 export class LogSettingDiceRoll extends BasePtDiceRoll {
 

@@ -1,7 +1,7 @@
 import { BasePtDiceRoll } from '../../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import { at, parseTemplate } from '../../utils'
-import { DndCard } from '@paotuan/types'
+import { DndCard } from '@paotuan/card'
 
 // .st xx +1d6，yy -2，zz 20，ww=20  // 根据逗号或分号分隔。不支持自动探测，因为骰子表达式情况比较复杂，难以判断。而且也要考虑技能名特殊字符的情况
 export class StDiceRoll extends BasePtDiceRoll {

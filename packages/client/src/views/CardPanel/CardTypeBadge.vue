@@ -3,7 +3,7 @@
 </template>
 <script setup lang="ts">
 // https://flowbite.com/docs/components/badge/
-import type { CardType } from '@paotuan/types'
+import type { CardType } from '@paotuan/card'
 import { computed } from 'vue'
 
 const props = defineProps<{ type: CardType }>()

@@ -2,7 +2,7 @@ import { BasePtDiceRoll } from '../index'
 import { parseDescriptions2, removeTrailingOneSpace } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import type { ICardEntry } from '@paotuan/types'
+import type { ICardEntry } from '@paotuan/card'
 
 const SC_CARD_ENTRY_NAME = 'SAN' // sc 在人物卡中的字段名
 

@@ -2,7 +2,7 @@
 import { useCardStore } from '../../store/card'
 import { computed, ComputedRef, inject, nextTick, ref } from 'vue'
 import { SELECTED_CARD } from './utils'
-import type { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 
 const props = defineProps<{ modelValue: number, allowNegative?: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: number): void }>()

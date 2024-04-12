@@ -26,7 +26,7 @@ import ws from '../../../../api/ws'
 import type { IRiSetReq } from '@paotuan/types'
 import { useCardStore } from '../../../../store/card'
 import { computed, toRefs } from 'vue'
-import { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 
 const props = defineProps<{ chara: ISceneActor | ISceneNpc }>()
 const { chara } = toRefs(props)

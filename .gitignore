@@ -35,4 +35,4 @@ tsconfig.tsbuildinfo
 /packages/dist/server
 /packages/dist/bin
 /packages/dist/log.txt
-/packages/types/lib
+/packages/**/lib

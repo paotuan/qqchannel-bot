@@ -66,7 +66,7 @@
 import { useCardStore } from '../../../store/card'
 import { computed, ComputedRef, inject } from 'vue'
 import { SELECTED_CARD } from '../utils'
-import { GeneralCard } from '@paotuan/types'
+import type { GeneralCard } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
 import NumberInput from '../NumberInput.vue'
 import TextInput from '../TextInput.vue'

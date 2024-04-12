@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../../index'
-import type { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 
 export class NnLinkDiceRoll extends BasePtDiceRoll {
 

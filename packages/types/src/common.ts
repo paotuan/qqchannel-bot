@@ -1,5 +1,5 @@
 import type { IChannelConfig } from './config'
-import type { ICardData } from './card/types'
+import type { ICardData } from '@paotuan/card'
 import type { IBotConfig } from './platform/login'
 
 export type Command =

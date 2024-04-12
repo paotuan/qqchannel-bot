@@ -1,8 +1,6 @@
-import { IDndCardData } from '@paotuan/types'
+import type { IDndCardData, ICocCardData, IGeneralCardData } from '@paotuan/card'
 import { VERSION_CODE } from '@paotuan/types'
-import { ICocCardData } from '@paotuan/types'
 import { NumberGenerator } from '@dice-roller/rpg-dice-roller'
-import { IGeneralCardData } from '@paotuan/types'
 
 export const MockBotId = '__mock_bot_id__'
 export const MockGuildId = '__mock_guild_id__'

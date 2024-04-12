@@ -12,7 +12,8 @@ import type {
   OnCardEntryChangeCallback,
   OnMessageReactionCallback,
   BeforeDiceRollCallback,
-  AfterDiceRollCallback
+  AfterDiceRollCallback,
+  IPluginConfigDisplay
 } from '@paotuan/types'
 import { makeAutoObservable } from 'mobx'
 import fs from 'fs'
@@ -20,9 +21,8 @@ import path from 'path'
 import _ from 'lodash'
 import { VERSION_CODE, VERSION_NAME } from '@paotuan/types'
 import { copyFolderSync } from '../../utils'
-import type { IPluginConfigDisplay } from '@paotuan/types'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import type { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 import Mustache from 'mustache'
 import { parseTemplate } from '../dice/utils'
 import { DiceRollContext } from '../DiceRollContext'

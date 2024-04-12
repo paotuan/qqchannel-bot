@@ -18,7 +18,7 @@ import { gtagEvent, Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
-import type { ICardData } from '@paotuan/types'
+import type { ICardData } from '@paotuan/card'
 
 ws.on('bot/loginV2', message => {
   console.log('login success')

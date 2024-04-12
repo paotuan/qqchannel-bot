@@ -9,9 +9,7 @@ import type {
 import ws from '../../api/ws'
 import { computed, reactive, ref } from 'vue'
 import { gtagEvent } from '../../utils'
-import { CocCard } from '@paotuan/types'
-import type { ICardData, ICard } from '@paotuan/types'
-import { createCard } from '@paotuan/types'
+import { createCard, CocCard, type ICardData, type ICard } from '@paotuan/card'
 
 export const useCardStore = defineStore('card', () => {
   const cardMap = reactive<Record<string, ICard>>({})

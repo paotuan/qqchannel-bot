@@ -71,14 +71,12 @@
 import { PlusCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref, watch } from 'vue'
 import DModal from '../../dui/modal/DModal.vue'
-import type { CardType, ICard } from '@paotuan/types'
+import { createCard, CocCard, type CardType, type ICard } from '@paotuan/card'
 import { useCardStore } from '../../store/card'
 import * as XLSX from 'xlsx'
 import { getCocCardProto, parseCocXlsx } from '../../store/card/importer/coc'
 import { Toast } from '../../utils'
-import { createCard } from '@paotuan/types'
 import { addAttributesBatch, getGeneralCardProto } from '../../store/card/importer/utils'
-import { CocCard } from '@paotuan/types'
 import { getDndCardProto, parseDndXlsx } from '../../store/card/importer/dnd'
 
 const open = ref(false)

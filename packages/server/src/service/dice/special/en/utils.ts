@@ -1,7 +1,6 @@
 import type { IDiceRollContext } from '../../utils'
 import { EnDiceRoll } from './en'
-import type { ICard } from '@paotuan/types'
-import { CocCard } from '@paotuan/types'
+import { CocCard, type ICard } from '@paotuan/card'
 import { EnListDiceRoll } from './list'
 import { EnMarkDiceRoll } from './mark'
 

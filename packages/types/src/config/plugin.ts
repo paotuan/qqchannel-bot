@@ -1,5 +1,5 @@
 import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import type { CardType, ICard } from '../card/types'
+import type { CardType, ICard } from '@paotuan/card'
 import type { ICustomReplyConfig, ICustomReplyEnv } from './customReply'
 import type { IAliasRollConfig, IRollDeciderConfig } from './aliasRoll'
 import type { ICustomTextConfig } from './customText'

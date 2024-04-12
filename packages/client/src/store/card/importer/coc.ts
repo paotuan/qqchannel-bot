@@ -1,4 +1,4 @@
-import { CocCard, ICocCardData } from '@paotuan/types'
+import { CocCard, type ICocCardData } from '@paotuan/card'
 import { VERSION_CODE } from '@paotuan/types'
 import XLSX from 'xlsx'
 

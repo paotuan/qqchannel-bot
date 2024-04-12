@@ -1,6 +1,6 @@
 import { BasePtDiceRoll } from '../../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { CocCard, getCocTempEntry, type ICocCardEntry } from '@paotuan/types'
+import { CocCard, getCocTempEntry, type ICocCardEntry } from '@paotuan/card'
 import { getAllSkillsCanEn } from './utils'
 
 interface IGrowthDecideResult {

@@ -1,6 +1,6 @@
 import { BasePtDiceRoll } from '../index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { DndCard } from '@paotuan/types'
+import { DndCard } from '@paotuan/card'
 
 // 死亡豁免
 // 任何人都可以 roll，但是只有关联了 DND 人物卡才进行 applyToCard

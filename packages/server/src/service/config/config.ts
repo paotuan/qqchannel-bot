@@ -19,7 +19,7 @@ import type { InlineDiceRoll } from '../dice/standard/inline'
 import { parseAliasForExpression } from './helpers/alias'
 import { getEmbedCustomText } from './default'
 import { renderCustomText } from './helpers/customText'
-import type { ICard } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 import { parseAliasForCommand } from './helpers/aliasCommand'
 import { handleHooks, handleHooksAsync, handleLinearHooksAsync, handleVoidHooks } from './helpers/hook'
 
