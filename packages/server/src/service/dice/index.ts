@@ -1,7 +1,7 @@
 import type { IDiceRollContext } from './utils'
 import type { ICard } from '@paotuan/card'
 import type { IRollDecideContext } from '../config/helpers/decider'
-import type { CustomTextKeys, SuccessLevel } from '@paotuan/types'
+import type { CustomTextKeys, SuccessLevel } from '@paotuan/config'
 import { at, convertSuccessLevel2CustomTextKey } from './utils'
 import mitt from 'mitt'
 

@@ -42,7 +42,7 @@ import { computed, nextTick, reactive, ref, toRefs } from 'vue'
 import { InformationCircleIcon, XMarkIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
 import type { ICustomTextMetaItem } from './customTextMeta'
 import { useConfigStore } from '../../../store/config'
-import type { ICustomTextItem } from '@paotuan/types'
+import type { ICustomTextItem } from '@paotuan/config'
 import DNumberInput from '../../../dui/input/DNumberInput.vue'
 import ArgButton from './ArgButton.vue'
 

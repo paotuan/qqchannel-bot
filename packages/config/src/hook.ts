@@ -1,8 +1,5 @@
 import type { ICardEntryChangeEvent } from '@paotuan/card'
-import type { Platform } from '../platform/login'
-
-export type BotId = `${Platform}:${string}`
-export type UserRole = 'admin' | 'manager' | 'user'
+import type { BotId, Platform, UserRole, IPluginElementCommonInfo } from './utils'
 
 export interface IUserCommandContext {
   botId: BotId
@@ -53,10 +50,22 @@ export type CardEntryChange = {
 
 export type MessageReaction = { context: IUserCommandContext }
 
-// 各个插件的 item 的通用字段
-export interface IPluginElementCommonInfo {
-  id: string // 短 id
-  name: string
-  description?: string
-  defaultEnabled?: boolean
+export interface IHookFunction<T> extends IPluginElementCommonInfo {
+  handler: T
+}
+
+export type OnReceiveCommandCallback = (result: IUserCommand) => boolean | Promise<boolean>
+export type BeforeParseDiceRollCallback = (diceCommand: DiceCommand) => boolean
+export type OnCardEntryChangeCallback = (change: CardEntryChange) => void
+export type OnMessageReactionCallback = (reaction: MessageReaction) => boolean | Promise<boolean>
+export type BeforeDiceRollCallback = (roll: unknown) => boolean // todo roll 类型先不确定
+export type AfterDiceRollCallback = (roll: unknown) => void
+
+export interface IHookFunctionConfig {
+  onReceiveCommand?: IHookFunction<OnReceiveCommandCallback>[]
+  beforeParseDiceRoll?: IHookFunction<BeforeParseDiceRollCallback>[]
+  onCardEntryChange?: IHookFunction<OnCardEntryChangeCallback>[]
+  onMessageReaction?: IHookFunction<OnMessageReactionCallback>[]
+  beforeDiceRoll?: IHookFunction<BeforeDiceRollCallback>[]
+  afterDiceRoll?: IHookFunction<AfterDiceRollCallback>[]
 }

@@ -1,12 +1,5 @@
-import type { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { CardType, ICard } from '@paotuan/card'
-import type { ICustomReplyConfig, ICustomReplyEnv } from './customReply'
-import type { IAliasRollConfig, IRollDeciderConfig } from './aliasRoll'
-import type { ICustomTextConfig } from './customText'
-import type { IHookFunctionConfig } from './hook'
-import type { IUserCommand } from './utils'
-import type { IChannelConfig } from './index'
-import type { Platform } from '../platform/login'
+import type { ICustomReplyEnv, IUserCommand, Platform, IChannelConfig } from '@paotuan/config'
 
 export interface ICardQuery {
   name?: string
@@ -22,7 +15,7 @@ type SendMessageOptions = {
 export interface IPluginRegisterContext {
   versionName: string
   versionCode: number
-  roll: (exp: string) => DiceRoll
+  roll: (exp: string) => unknown
   render: (template: string, view: any, partials?: any) => string
   getCard: (env: ICustomReplyEnv) => ICard | undefined
   saveCard: (card: ICard) => void
@@ -36,21 +29,4 @@ export interface IPluginRegisterContext {
   dispatchUserCommand: (context: IUserCommand) => Promise<void>
   _: any // lodash
   _context: any // 逃生通道，通常不要使用
-}
-
-export interface IPlugin {
-  id: string
-  name?: string
-  description?: string
-  version?: number
-  preference?: {
-    key: string
-    label?: string
-    defaultValue?: string
-  }[]
-  customReply?: ICustomReplyConfig[]
-  aliasRoll?: IAliasRollConfig[]
-  rollDecider?: IRollDeciderConfig[]
-  customText?: ICustomTextConfig[]
-  hook?: IHookFunctionConfig
 }

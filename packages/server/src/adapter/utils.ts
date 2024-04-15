@@ -1,4 +1,5 @@
-import { IBotConfig, IBotConfig_Kook, IBotConfig_QQ, Platform } from '@paotuan/types'
+import type { IBotConfig, IBotConfig_Kook, IBotConfig_QQ } from '@paotuan/types'
+import type { Platform } from '@paotuan/config'
 import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
 import kookAdapter, { KookBot } from '@paotuan/adapter-kook'
 

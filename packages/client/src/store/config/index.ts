@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { IChannelConfig } from '@paotuan/types'
+import type { IChannelConfig } from '@paotuan/config'
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 import ws from '../../api/ws'
 import type { IChannelConfigReq } from '@paotuan/types'

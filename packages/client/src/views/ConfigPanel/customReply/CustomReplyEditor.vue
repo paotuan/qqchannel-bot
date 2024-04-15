@@ -47,7 +47,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { ICustomReplyConfig } from '@paotuan/types'
+import type { ICustomReplyConfig } from '@paotuan/config'
 import { computed, ref, toRefs } from 'vue'
 import { Bars3Icon, XMarkIcon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'

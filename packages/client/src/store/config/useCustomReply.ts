@@ -1,4 +1,4 @@
-import type { IChannelConfig, ICustomReplyConfig } from '@paotuan/types'
+import type { IChannelConfig, ICustomReplyConfig } from '@paotuan/config'
 import { computed, ComputedRef } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 

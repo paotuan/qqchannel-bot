@@ -1,9 +1,9 @@
-import type { IBotInfo, ILoginReqV2 } from '@paotuan/types'
+import type { IBotInfo, ILoginReqV2, IBotConfig, IBotConfig_Kook, IBotConfig_QQ } from '@paotuan/types'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { gtagEvent } from '../utils'
 import { computed, ref } from 'vue'
-import { IBotConfig, IBotConfig_Kook, IBotConfig_QQ, Platform } from '@paotuan/types'
+import type { Platform } from '@paotuan/config'
 import md5 from 'md5'
 
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'

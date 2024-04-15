@@ -21,7 +21,7 @@ import HelpButton from '../HelpButton.vue'
 import PluginList from './PluginList.vue'
 import { ArrowPathIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import ws from '../../../api/ws'
-import { IPluginReloadReq } from '@paotuan/types'
+import type { IPluginReloadReq } from '@paotuan/types'
 
 const reloadAllPlugins = () => {
   ws.send<IPluginReloadReq>({ cmd: 'plugin/reload', data: [] })

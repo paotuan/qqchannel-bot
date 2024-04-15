@@ -2,7 +2,6 @@ import type { Wss } from '../../app/wss'
 import type {
   IPlugin,
   ICustomReplyConfig,
-  IPluginRegisterContext,
   IAliasRollConfig,
   ICustomTextConfig,
   IPluginElementCommonInfo,
@@ -12,14 +11,13 @@ import type {
   OnCardEntryChangeCallback,
   OnMessageReactionCallback,
   BeforeDiceRollCallback,
-  AfterDiceRollCallback,
-  IPluginConfigDisplay
-} from '@paotuan/types'
+  AfterDiceRollCallback
+} from '@paotuan/config'
+import { VERSION_CODE, VERSION_NAME, type IPluginRegisterContext, type IPluginConfigDisplay } from '@paotuan/types'
 import { makeAutoObservable } from 'mobx'
 import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
-import { VERSION_CODE, VERSION_NAME } from '@paotuan/types'
 import { copyFolderSync } from '../../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '@paotuan/card'

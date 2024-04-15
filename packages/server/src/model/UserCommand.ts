@@ -1,6 +1,6 @@
 import { Bot } from '../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
-import { IUserCommandContext, IUserCommand } from '@paotuan/types'
+import type { IUserCommandContext, IUserCommand } from '@paotuan/config'
 import { convertRoleIds } from '../service/dice/utils'
 
 export class UserCommand implements IUserCommand {

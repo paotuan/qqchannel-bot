@@ -42,7 +42,7 @@ import { usePluginStore } from '../../../store/plugin'
 import { ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
 import ws from '../../../api/ws'
-import { IPluginReloadReq } from '@paotuan/types'
+import type { IPluginReloadReq } from '@paotuan/types'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }
 

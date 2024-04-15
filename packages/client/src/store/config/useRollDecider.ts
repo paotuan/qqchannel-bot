@@ -1,5 +1,5 @@
 import { computed, ComputedRef } from 'vue'
-import type { IChannelConfig, IRollDeciderConfig } from '@paotuan/types'
+import type { IChannelConfig, IRollDeciderConfig } from '@paotuan/config'
 import { nanoid } from 'nanoid/non-secure'
 
 export function useRollDecider(config: ComputedRef<IChannelConfig | null>) {

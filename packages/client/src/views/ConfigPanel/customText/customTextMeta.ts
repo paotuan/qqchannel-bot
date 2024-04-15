@@ -1,4 +1,4 @@
-import type { CustomTextKeys } from '@paotuan/types'
+import type { CustomTextKeys } from '@paotuan/config'
 
 export interface ICustomTextMetaItem {
   key: CustomTextKeys

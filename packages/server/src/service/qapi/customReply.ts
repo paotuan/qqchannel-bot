@@ -4,10 +4,10 @@ import type {
   ICustomReplyConfig,
   ICustomReplyConfigItem,
   IUserCommand,
-  IUserCommandContext
-} from '@paotuan/types'
+  IUserCommandContext,
+  ICustomReplyEnv
+} from '@paotuan/config'
 import { at, parseTemplate } from '../dice/utils'
-import { ICustomReplyEnv } from '@paotuan/types'
 import { VERSION_NAME } from '@paotuan/types'
 import { DiceRollContext } from '../DiceRollContext'
 import { getChannelUnionId } from '../../adapter/utils'

@@ -1,4 +1,4 @@
-import { IPluginElementCommonInfo } from './utils'
+import type { IPluginElementCommonInfo } from './utils'
 
 export interface ICustomTextItem {
   weight: number

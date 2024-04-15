@@ -1,6 +1,6 @@
 import { StandardDiceRoll } from './index'
 import { CocDiceRoll } from './coc'
-import type { SuccessLevel } from '@paotuan/types'
+import type { SuccessLevel } from '@paotuan/config'
 
 // 对抗检定
 // this.context.opposedRoll 代表要和本次对抗的 roll

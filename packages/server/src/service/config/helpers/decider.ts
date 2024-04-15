@@ -1,5 +1,5 @@
 import { SyncLruCache } from '../sync-lru-cache'
-import type { IRollDeciderConfig, SuccessLevel } from '@paotuan/types'
+import type { IRollDeciderConfig, SuccessLevel } from '@paotuan/config'
 
 export interface IRollDecideContext {
   baseValue: number

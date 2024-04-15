@@ -7,7 +7,7 @@ import type {
   ISpecialDiceConfig,
   CustomTextKeys,
   ICustomTextItem, SuccessLevel
-} from '@paotuan/types'
+} from '@paotuan/config'
 import { VERSION_CODE } from '@paotuan/types'
 
 const embedPluginId = 'io.paotuan.embed'

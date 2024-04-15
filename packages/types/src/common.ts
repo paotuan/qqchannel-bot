@@ -1,6 +1,6 @@
-import type { IChannelConfig } from './config'
+import type { IChannelConfig } from '@paotuan/config'
 import type { ICardData } from '@paotuan/card'
-import type { IBotConfig } from './platform/login'
+import type { IBotConfig } from './platform'
 
 export type Command =
   | 'bot/login' // req/res

@@ -1,47 +1,4 @@
-import type { IPlugin, IPluginRegisterContext, ICardQuery } from './plugin'
-import type { UserRole, IPluginElementCommonInfo, IUserCommandContext, IUserCommand, DiceCommand, CardEntryChange, MessageReaction, CommandSource } from './utils'
-import type { ICustomReplyEnv, ICustomReplyConfigItem, ICustomReplyConfig } from './customReply'
-import type { IAliasRollConfig, SuccessLevel, IRollDeciderConfig } from './aliasRoll'
-import type { ICustomTextItem, ICustomTextHandler, CustomTextKeys, ICustomTextConfig } from './customText'
-import type { IHookFunctionConfig, IHookFunction, OnReceiveCommandCallback, BeforeParseDiceRollCallback, OnCardEntryChangeCallback, OnMessageReactionCallback, BeforeDiceRollCallback, AfterDiceRollCallback } from './hook'
-
-export type {
-  // utils
-  UserRole,
-  IPluginElementCommonInfo,
-  IUserCommandContext,
-  IUserCommand,
-  DiceCommand,
-  CardEntryChange,
-  MessageReaction,
-  CommandSource,
-  // plugin
-  IPlugin,
-  IPluginRegisterContext,
-  ICardQuery,
-  // custom reply
-  ICustomReplyEnv,
-  ICustomReplyConfigItem,
-  ICustomReplyConfig,
-  // alias roll
-  IAliasRollConfig,
-  SuccessLevel,
-  IRollDeciderConfig,
-  // custom text
-  ICustomTextItem,
-  ICustomTextHandler,
-  CustomTextKeys,
-  ICustomTextConfig,
-  // hook
-  IHookFunctionConfig,
-  IHookFunction,
-  OnReceiveCommandCallback,
-  BeforeParseDiceRollCallback,
-  OnCardEntryChangeCallback,
-  OnMessageReactionCallback,
-  BeforeDiceRollCallback,
-  AfterDiceRollCallback
-}
+import type { IPlugin } from './plugin'
 
 // 每个子频道对应一份配置
 export interface IChannelConfig {
@@ -85,3 +42,11 @@ export interface IPluginConfig {
   enabled: boolean
   preference: Record<string, string>
 }
+
+export * from './aliasRoll'
+export * from './customReply'
+export * from './customText'
+export * from './hook'
+export * from './plugin'
+export * from './rollDecider'
+export * from './utils'

@@ -1,4 +1,4 @@
-import type { IHookFunction } from '@paotuan/types'
+import type { IHookFunction } from '@paotuan/config'
 
 export function handleHooks<T>(processors: IHookFunction<(arg: T) => boolean>[], arg: T) {
   let depth = 0

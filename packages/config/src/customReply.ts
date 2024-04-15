@@ -1,5 +1,4 @@
-import { UserRole, IPluginElementCommonInfo, BotId } from './utils'
-import { Platform } from '../platform/login'
+import type { UserRole, IPluginElementCommonInfo, BotId, Platform } from './utils'
 
 export interface ICustomReplyEnv {
   botId: BotId
@@ -8,10 +7,16 @@ export interface ICustomReplyEnv {
   channelId: string
   userId: string
   username: string
-  nick: string // deprecated
+  /**
+   * @deprecated Use {@link 用户名} instead.
+   */
+  nick: string
   用户名: string
   人物卡名: string
-  at: string // deprecated
+  /**
+   * @deprecated Use {@link at用户} instead.
+   */
+  at: string
   at用户: string
   userRole: UserRole
   version: string

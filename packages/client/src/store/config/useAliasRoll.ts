@@ -1,4 +1,4 @@
-import type { IAliasRollConfig, IChannelConfig } from '@paotuan/types'
+import type { IAliasRollConfig, IChannelConfig } from '@paotuan/config'
 import { computed, ComputedRef } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 

@@ -1,4 +1,4 @@
-import type { CustomTextKeys, ICustomTextHandler, ICustomTextItem } from '@paotuan/types'
+import type { CustomTextKeys, ICustomTextHandler, ICustomTextItem } from '@paotuan/config'
 import Mustache from 'mustache'
 
 type CustomTextMap = Partial<Record<CustomTextKeys, ICustomTextItem[] | ICustomTextHandler>>

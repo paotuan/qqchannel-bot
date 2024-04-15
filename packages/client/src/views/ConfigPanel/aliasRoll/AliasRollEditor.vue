@@ -55,7 +55,7 @@ import { computed, ComputedRef, ref, toRefs } from 'vue'
 import { Bars3Icon, PencilSquareIcon, Squares2X2Icon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
 import { IPluginItemConfigForDisplay, usePluginStore } from '../../../store/plugin'
-import { IAliasRollConfig } from '@paotuan/types'
+import type { IAliasRollConfig } from '@paotuan/config'
 import DNativeSelect from '../../../dui/select/DNativeSelect.vue'
 
 interface Props { item: { id: string, enabled: boolean }, defaultOpen: boolean }

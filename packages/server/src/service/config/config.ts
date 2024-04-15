@@ -10,7 +10,7 @@ import type {
   OnCardEntryChangeCallback, CardEntryChange,
   OnMessageReactionCallback, MessageReaction,
   BeforeDiceRollCallback, AfterDiceRollCallback
-} from '@paotuan/types'
+} from '@paotuan/config'
 import { makeAutoObservable } from 'mobx'
 import type { PluginManager } from './plugin'
 import { decideRoll, IRollDecideContext } from './helpers/decider'

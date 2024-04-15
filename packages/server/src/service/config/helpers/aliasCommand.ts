@@ -1,5 +1,5 @@
 import { SyncLruCache } from '../sync-lru-cache'
-import { IAliasRollConfig } from '@paotuan/types'
+import type { IAliasRollConfig } from '@paotuan/config'
 import Mustache from 'mustache'
 
 // 原生 regex 缓存

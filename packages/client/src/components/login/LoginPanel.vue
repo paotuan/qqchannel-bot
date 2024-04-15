@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { useBotStore } from '../../store/bot'
 import FormQQ from './FormQQ.vue'
-import { Platform } from '@paotuan/types'
+import type { Platform } from '@paotuan/config'
 import qqLogo from '../../assets/qq.png'
 import kookLogo from '../../assets/kook.ico'
 import FormKook from './FormKook.vue'

@@ -1,5 +1,5 @@
-import { ComputedRef } from 'vue'
-import { IChannelConfig } from '@paotuan/types'
+import type { ComputedRef } from 'vue'
+import type { IChannelConfig } from '@paotuan/config'
 
 export function useCustomText(config: ComputedRef<IChannelConfig | null>) {
 
