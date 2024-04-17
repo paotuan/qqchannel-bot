@@ -108,6 +108,7 @@ export class ConfigManager {
     if (!this.configMap['default']) {
       this.configMap['default'] = new ChannelConfig(getInitialDefaultConfig(), this.plugin)
     }
+    // todo register configs
   }
 
   private saveToFile(channelIdOrDefault: ChannelUnionId | 'default', config: IChannelConfig) {

@@ -13,6 +13,7 @@
     "@paotuan/adapter-qq": "4.5.1-4",
     "@paotuan/card": "2.0.0",
     "@paotuan/config": "2.0.0",
+    "@paotuan/dicecore": "2.0.0",
     "@paotuan/types": "1.0.0",
     "@satorijs/satori": "3.6.3",
     "fast-glob": "^3.3.1",

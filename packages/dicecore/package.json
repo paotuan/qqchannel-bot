@@ -1,0 +1,18 @@
+{
+  "name": "@paotuan/dicecore",
+  "version": "2.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@dice-roller/rpg-dice-roller": "^5.3.2",
+    "@paotuan/card": "2.0.0",
+    "@paotuan/config": "2.0.0",
+    "lru-cache": "^7.14.0",
+    "mustache": "^4.2.0"
+  }
+}

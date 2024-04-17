@@ -3,7 +3,15 @@
   "private": true,
   "version": "2.0.0-alpha.1",
   "license": "MIT",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/card",
+    "packages/config",
+    "packages/dicecore",
+    "packages/types",
+    "packages/server",
+    "packages/client",
+    "packages/dist"
+  ],
   "scripts": {
     "dev:client": "yarn workspace client run dev",
     "build:client": "yarn workspace client run build",
@@ -11,7 +19,7 @@
     "clean:server": "yarn workspace server run clean",
     "build:server": "yarn workspace server run build",
     "build:types": "yarn workspace @paotuan/types run build",
-    "build": "npm run build:types && npm run build:client && npm run build:server",
+    "build": "yarn workspaces run build",
     "preview": "node packages/dist/bundle.js",
     "start": "pm2 start packages/dist/bundle.js --name qqchannel-bot",
     "stop": "pm2 stop qqchannel-bot",

@@ -191,6 +191,7 @@ export class PluginManager {
       handlePluginCompatibility(plugin)
       console.log('[Plugin] 加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
+      // todo register plugins
     } catch (e) {
       console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
     }
