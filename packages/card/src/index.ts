@@ -2,8 +2,9 @@ import type { ICardData, ICard, CardType, ICardEntryChangeEvent, ICardEntry, ICa
 import { CocCard, ICocCardData, getCocTempEntry, ICocCardEntry, ICocCardAbility } from './coc'
 import { GeneralCard, IGeneralCardData } from './general'
 import { DndCard, IDndCardData, getSkillsMap, getPropOfSkill, IDndCardAbility, IDndCardEntry } from './dnd'
+import { VERSION_CODE } from './utils/version'
 
-export function createCard(data: ICardData): ICard {
+function createCard(data: ICardData): ICard {
   switch (data.type) {
   case 'coc':
     return new CocCard(data as ICocCardData)
@@ -35,5 +36,7 @@ export {
   IDndCardAbility,
   IDndCardEntry,
   getSkillsMap,
-  getPropOfSkill
+  getPropOfSkill,
+  createCard,
+  VERSION_CODE
 }
