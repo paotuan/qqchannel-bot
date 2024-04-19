@@ -1,7 +1,7 @@
 import { IDiceRollContext, parseTemplate } from '../../dice/utils'
 import type { InlineDiceRoll } from '../../dice/standard/inline'
 import type { IAliasRollConfig } from '@paotuan/config'
-import { SyncLruCache } from '../sync-lru-cache'
+import { SyncLruCache } from '../../utils/sync-lru-cache'
 
 // alias 的 command 解析为正则表达式和默认值
 interface INaiveCommandParsed {

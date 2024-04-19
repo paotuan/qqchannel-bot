@@ -1,5 +1,5 @@
 import type { IPlugin } from '@paotuan/config'
-import { eventBus } from '../eventBus'
+import { eventBus } from '../utils/eventBus'
 
 type PluginId = string
 type PluginFullId = `${PluginId}.${string}`
@@ -62,9 +62,4 @@ export class PluginProvider {
   getPluginItem<T>(fullId: string) {
     return this.itemsMap.get(fullId as PluginFullId) as T
   }
-}
-
-// 提供给外部
-export function registerPlugins(plugins: IPlugin[]) {
-  PluginProvider.INSTANCE.register(plugins)
 }

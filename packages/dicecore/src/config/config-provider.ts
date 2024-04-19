@@ -1,6 +1,6 @@
 import type { IChannelConfig } from '@paotuan/config'
 import { ChannelConfig } from './config'
-import { eventBus } from '../eventBus'
+import { eventBus } from '../utils/eventBus'
 import { getInitialDefaultConfig } from './default'
 
 type IdOrDefault = string | 'default'
@@ -39,13 +39,4 @@ export class ConfigProvider {
   getConfig(id: string) {
     return this.configMap.get(id) || this.defaultConfig
   }
-}
-
-// 提供给外部
-export function registerConfig(id: IdOrDefault, config: IChannelConfig) {
-  ConfigProvider.INSTANCE.register(id, config)
-}
-
-export function unregisterConfig(id: IdOrDefault) {
-  ConfigProvider.INSTANCE.unregister(id)
 }

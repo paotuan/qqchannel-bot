@@ -1,4 +1,4 @@
-import { SyncLruCache } from '../sync-lru-cache'
+import { SyncLruCache } from '../../utils/sync-lru-cache'
 import type { IAliasRollConfig } from '@paotuan/config'
 import Mustache from 'mustache'
 

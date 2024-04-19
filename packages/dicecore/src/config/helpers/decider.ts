@@ -1,4 +1,4 @@
-import { SyncLruCache } from '../sync-lru-cache'
+import { SyncLruCache } from '../../utils/sync-lru-cache'
 import type { IRollDeciderConfig, SuccessLevel } from '@paotuan/config'
 
 export interface IRollDecideContext {

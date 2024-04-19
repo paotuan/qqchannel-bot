@@ -30,7 +30,6 @@ export class ChannelConfig {
 
   constructor(config: IChannelConfig) {
     this.config = updateConfigByPlugin(upgradeConfig(config))
-    // todo 把 embedPlugin 打平
   }
 
   get botOwner() {
@@ -143,45 +142,10 @@ export class ChannelConfig {
   }
 
   // 子频道 hook 处理器
-  private get hookOnReceiveCommandProcessors() {
-    return this.config.hookIds.onReceiveCommand
+  private getHookProcessors<T>(prop: keyof IChannelConfig['hookIds']): IHookFunction<T>[] {
+    return this.config.hookIds[prop]
       .filter(item => item.enabled)
-      .map(item => PluginProvider.INSTANCE.getPluginItem<IHookFunction<OnReceiveCommandCallback>>(item.id))
-      .filter(conf => !!conf)
-  }
-
-  private get hookBeforeParseDiceRollProcessors() {
-    return this.config.hookIds.beforeParseDiceRoll
-      .filter(item => item.enabled)
-      .map(item => PluginProvider.INSTANCE.getPluginItem<IHookFunction<BeforeParseDiceRollCallback>>(item.id))
-      .filter(conf => !!conf)
-  }
-
-  private get hookOnCardEntryChangeProcessors() {
-    return this.config.hookIds.onCardEntryChange
-      .filter(item => item.enabled)
-      .map(item => PluginProvider.INSTANCE.getPluginItem<IHookFunction<OnCardEntryChangeCallback>>(item.id))
-      .filter(conf => !!conf)
-  }
-
-  private get hookOnMessageReactionProcessors() {
-    return this.config.hookIds.onMessageReaction
-      .filter(item => item.enabled)
-      .map(item => PluginProvider.INSTANCE.getPluginItem<IHookFunction<OnMessageReactionCallback>>(item.id))
-      .filter(conf => !!conf)
-  }
-
-  private get hookBeforeDiceRollProcessors() {
-    return this.config.hookIds.beforeDiceRoll
-      .filter(item => item.enabled)
-      .map(item => PluginProvider.INSTANCE.getPluginItem<IHookFunction<BeforeDiceRollCallback>>(item.id))
-      .filter(conf => !!conf)
-  }
-
-  private get hookAfterDiceRollProcessors() {
-    return this.config.hookIds.afterDiceRoll
-      .filter(item => item.enabled)
-      .map(item => PluginProvider.INSTANCE.getPluginItem<IHookFunction<AfterDiceRollCallback>>(item.id))
+      .map(item => PluginProvider.INSTANCE.getPluginItem<IHookFunction<T>>(item.id))
       .filter(conf => !!conf)
   }
 
@@ -190,31 +154,31 @@ export class ChannelConfig {
    */
   async hook_onReceiveCommand(result: IUserCommand) {
     console.log('[Hook] 收到指令')
-    await handleHooksAsync(this.hookOnReceiveCommandProcessors, result)
+    await handleHooksAsync(this.getHookProcessors<OnReceiveCommandCallback>('onReceiveCommand'), result)
   }
 
   hook_beforeParseDiceRoll(diceCommand: DiceCommand) {
     console.log('[Hook] 解析骰子指令前')
-    handleHooks(this.hookBeforeParseDiceRollProcessors, diceCommand)
+    handleHooks(this.getHookProcessors<BeforeParseDiceRollCallback>('beforeParseDiceRoll'), diceCommand)
   }
 
   hook_onCardEntryChange(e: CardEntryChange) {
     console.log('[Hook] 人物卡数值变化')
-    handleVoidHooks(this.hookOnCardEntryChangeProcessors, e)
+    handleVoidHooks(this.getHookProcessors<OnCardEntryChangeCallback>('onCardEntryChange'), e)
   }
 
   hook_onMessageReaction(e: MessageReaction) {
     console.log('[Hook] 收到表情表态')
-    return handleLinearHooksAsync(this.hookOnMessageReactionProcessors, e)
+    return handleLinearHooksAsync(this.getHookProcessors<OnMessageReactionCallback>('onMessageReaction'), e)
   }
 
   hook_beforeDiceRoll(roll: unknown) {
     console.log('[Hook] 掷骰/检定前')
-    handleHooks(this.hookBeforeDiceRollProcessors, roll)
+    handleHooks(this.getHookProcessors<BeforeDiceRollCallback>('beforeDiceRoll'), roll)
   }
 
   hook_afterDiceRoll(roll: unknown) {
     console.log('[Hook] 掷骰/检定后')
-    handleVoidHooks(this.hookAfterDiceRollProcessors, roll)
+    handleVoidHooks(this.getHookProcessors<AfterDiceRollCallback>('afterDiceRoll'), roll)
   }
 }
