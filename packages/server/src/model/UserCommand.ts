@@ -2,6 +2,7 @@ import { Bot } from '../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
 import type { IUserCommandContext, IUserCommand } from '@paotuan/config'
 import { convertRoleIds } from '../service/dice/utils'
+import { getChannelUnionId } from '../adapter/utils'
 
 export class UserCommand implements IUserCommand {
 
@@ -77,6 +78,7 @@ export class UserCommand implements IUserCommand {
       platform: this.platform,
       guildId: this.guildId,
       channelId: this.channelId,
+      channelUnionId: getChannelUnionId(this.platform, this.guildId, this.channelId),
       replyMsgId: session.event.message?.quote?.id,
       realUser
     }

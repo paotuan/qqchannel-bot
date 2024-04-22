@@ -48,7 +48,7 @@ export class DiceRollContext implements IDiceRollContext {
     return this.bot.id
   }
 
-  private get channelUnionId() {
+  get channelUnionId() {
     if (this.platform && this.guildId && this.channelId) {
       return getChannelUnionId(this.platform, this.guildId, this.channelId)
     } else {

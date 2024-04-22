@@ -1,4 +1,4 @@
-import { IDiceRollContext, parseTemplate } from '../../dice/utils'
+import { IDiceRollContext, parseTemplate } from '../../dice/utils/parseTemplate'
 import type { InlineDiceRoll } from '../../dice/standard/inline'
 import type { IAliasRollConfig } from '@paotuan/config'
 import { SyncLruCache } from '../../utils/sync-lru-cache'

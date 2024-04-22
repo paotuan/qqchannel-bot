@@ -13,7 +13,7 @@ import type {
   BeforeDiceRollCallback, AfterDiceRollCallback
 } from '@paotuan/config'
 import { decideRoll, IRollDecideContext } from './helpers/decider'
-import type { IDiceRollContext } from '../dice/utils'
+import type { IDiceRollContext } from '../dice/utils/parseTemplate'
 import type { InlineDiceRoll } from '../dice/standard/inline'
 import { parseAliasForExpression } from './helpers/alias'
 import { getEmbedCustomText } from './default'
@@ -23,6 +23,7 @@ import { handleHooks, handleHooksAsync, handleLinearHooksAsync, handleVoidHooks 
 import { PluginProvider } from './plugin-provider'
 import { upgradeConfig } from './migration/upgrade'
 import { updateConfigByPlugin } from './migration/updateByPlugin'
+import { handleCustomReply } from './helpers/customReply'
 
 // 频道配置文件封装
 export class ChannelConfig {
@@ -59,14 +60,19 @@ export class ChannelConfig {
     return items.reduce((obj, item) => Object.assign(obj, { [`${embedPluginId}.${item.id}`]: item }), {})
   }
 
-  /**
-   * 子频道自定义回复处理器列表
-   */
-  get customReplyProcessors() {
+  // 子频道自定义回复处理器列表
+  private get customReplyProcessors() {
     return this.config.customReplyIds
       .filter(item => item.enabled)
       .map(item => this.embedCustomReplyMap[item.id] || PluginProvider.INSTANCE.getPluginItem<ICustomReplyConfig>(item.id))
       .filter(conf => !!conf)
+  }
+
+  /**
+   * 处理自定义回复
+   */
+  async handleCustomReply(command: IUserCommand) {
+    return await handleCustomReply(this.customReplyProcessors, command)
   }
 
   // embed 规则配置索引

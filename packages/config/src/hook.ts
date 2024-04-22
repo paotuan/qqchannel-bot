@@ -2,14 +2,27 @@ import type { ICardEntryChangeEvent } from '@paotuan/card'
 import type { BotId, Platform, UserRole, IPluginElementCommonInfo } from './utils'
 
 export interface IUserCommandContext {
+  /**
+   * @deprecated
+   */
   botId: BotId
   userId: string
   username: string
   userRole: UserRole
   msgId: string
+  /**
+   * @deprecated
+   */
   platform: Platform
+  /**
+   * @deprecated
+   */
   guildId: string
+  /**
+   * @deprecated
+   */
   channelId: string
+  channelUnionId: string
   replyMsgId?: string
   realUser: {
     userId: string
@@ -33,7 +46,11 @@ export type CommandSource = 'message_template'
 export type DiceCommand = {
   command: string,
   context: {
+    /**
+     * @deprecated
+     */
     channelId?: string // 可能是私信？
+    channelUnionId: string
     userId: string
     username: string
     userRole: UserRole
