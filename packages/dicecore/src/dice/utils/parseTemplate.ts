@@ -2,7 +2,7 @@ import type { CommandSource, DiceCommand, UserRole } from '@paotuan/config'
 import { CardProvider } from '../../card/card-provider'
 import { ConfigProvider } from '../../config/config-provider'
 import { StandardDiceRoll } from '../standard'
-import { getInlineDiceRollKlass, InlineDiceRoll } from '../standard/inline'
+import { InlineDiceRoll } from '../standard/inline'
 
 export interface IDiceRollContext {
   userId: string
@@ -46,7 +46,6 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
   const selfCard = CardProvider.INSTANCE.getCard(context.channelUnionId, context.userId)
   const getEntry = (key: string) => selfCard?.getEntry(key)?.value ?? ''
   const getAbility = (key: string) => selfCard?.getAbility(key)?.value ?? ''
-  const InlineDiceRoll = getInlineDiceRollKlass()
   // 1. 如检测到 ability or attribute，则求值并替换
   expression = expression.replace(ENTRY_REGEX, (_, key1?: string, key2?: string) => {
     const key = key1 ?? key2 ?? ''

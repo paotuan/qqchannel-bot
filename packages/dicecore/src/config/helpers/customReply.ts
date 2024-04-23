@@ -7,10 +7,11 @@ import type {
 } from '@paotuan/config'
 import Mustache from 'mustache'
 import { CardProvider } from '../../card/card-provider'
+import { parseTemplate } from '../../dice'
 
 // 处理自定义回复
 // 返回 [是否命中，处理结果]
-export async function handleCustomReply(processors: ICustomReplyConfig[], { command, context }: IUserCommand) {
+export async function handleCustomReply(processors: ICustomReplyConfig[], { command, context }: IUserCommand): Promise<[boolean, string | undefined]> {
   // 从上到下匹配
   for (const processor of processors) {
     const matchGroups = isMatch(processor, command)
@@ -31,9 +32,6 @@ async function parseMessage(processor: ICustomReplyConfig, matchGroups: Record<s
     const userId = context.userId
     const userRole = context.userRole
     const channelUnionId = context.channelUnionId
-    // const platform = context.platform
-    // const guildId = context.guildId
-    // const channelId = context.channelId
     const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
       return Mustache.render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
     })
@@ -56,9 +54,8 @@ async function parseMessage(processor: ICustomReplyConfig, matchGroups: Record<s
       realUser: context.realUser
     }
     const template = await replyFunc(env, matchGroups)
-    // 替换 inline rolls todo
-    // return parseTemplate(template, new DiceRollContext(this.bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
-    return 'echo'
+    // 替换 inline rolls
+    return parseTemplate(template, { userId, username, userRole, channelUnionId }, [], 'message_template')
   } catch (e: any) {
     console.error('[Config] 自定义回复处理出错', e?.message)
     return undefined

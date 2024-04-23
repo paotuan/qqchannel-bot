@@ -8,7 +8,6 @@ import { RiDiceRoll, RiListDiceRoll } from '../special/ri'
 import { dispatchSt } from '../special/st/utils'
 import { DsDiceRoll } from '../special/ds'
 import { dispatchNn } from '../special/nn/utils'
-import { LogSettingDiceRoll } from '../special/log'
 import { CocOpposedDiceRoll } from '../standard/cocOppose'
 import { DndOpposedRoll } from '../standard/dndOppose'
 import { StandardDiceRoll } from '../standard'
@@ -47,9 +46,9 @@ export function createDiceRoll(expression: string, context: IDiceRollContext, li
   } else if (expression.startsWith('nn') && specialDiceConfig.nnDice.enabled) {
     // 我寻思 nn 就不用 parseTemplate 了，纯指令不包含掷骰
     return dispatchNn(expression, context, inlineRolls).roll()
-  } else if (expression.startsWith('log')) {
-    // log 也不需要 parseTemplate
-    return new LogSettingDiceRoll(expression, context, inlineRolls).roll()
+  // } else if (expression.startsWith('log')) {
+  //   // log 也不需要 parseTemplate
+  //   return new LogSettingDiceRoll(expression, context, inlineRolls).roll()
   } else {
     // 普通检定/掷骰
     const roller = (() => {

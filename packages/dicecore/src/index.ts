@@ -18,3 +18,5 @@ export {
   ICardQuery,
   VERSION_CODE
 }
+
+export * from './dice'

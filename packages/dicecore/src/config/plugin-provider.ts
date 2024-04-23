@@ -19,10 +19,12 @@ export class PluginProvider {
   }
 
   register(plugins: IPlugin[]) {
-    for (const plugin of plugins) {
-      this._register(plugin.id, plugin)
+    if (plugins.length > 0) {
+      for (const plugin of plugins) {
+        this._register(plugin.id, plugin)
+      }
+      eventBus.emit('plugins-added', plugins)
     }
-    eventBus.emit('plugins-added', plugins)
   }
 
   private _register(pluginId: string, plugin: IPlugin) {
