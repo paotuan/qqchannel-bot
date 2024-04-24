@@ -18,7 +18,7 @@ export class Wss {
   readonly bots = new BotManager(this)
   readonly cards = new CardManager(this)
   readonly plugin = new PluginManager(this)
-  readonly config = new ConfigManager(this, this.plugin)
+  readonly config = new ConfigManager(this)
 
   constructor(port: number) {
     makeAutoObservable<this, 'server'>(this, { server: false })

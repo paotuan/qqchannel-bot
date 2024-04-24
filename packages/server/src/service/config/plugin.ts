@@ -1,18 +1,5 @@
 import type { Wss } from '../../app/wss'
-import type {
-  IPlugin,
-  ICustomReplyConfig,
-  IAliasRollConfig,
-  ICustomTextConfig,
-  IPluginElementCommonInfo,
-  IHookFunction,
-  OnReceiveCommandCallback,
-  BeforeParseDiceRollCallback,
-  OnCardEntryChangeCallback,
-  OnMessageReactionCallback,
-  BeforeDiceRollCallback,
-  AfterDiceRollCallback
-} from '@paotuan/config'
+import type { IPlugin, IPluginElementCommonInfo } from '@paotuan/config'
 import { VERSION_CODE, VERSION_NAME, type IPluginRegisterContext, type IPluginConfigDisplay } from '@paotuan/types'
 import { makeAutoObservable } from 'mobx'
 import fs from 'fs'
@@ -22,9 +9,8 @@ import { copyFolderSync } from '../../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '@paotuan/card'
 import Mustache from 'mustache'
-import { parseTemplate } from '../dice/utils'
-import { DiceRollContext } from '../DiceRollContext'
 import { getChannelUnionId } from '../../adapter/utils'
+import { parseTemplate, PluginProvider } from '@paotuan/dicecore'
 
 const INTERNAL_PLUGIN_DIR = process.env.NODE_ENV === 'development' ? path.resolve('./src/plugins') : path.resolve(__dirname, './plugins')
 const PLUGIN_DIR = './plugins' // prod 环境外部插件文件夹
@@ -91,7 +77,8 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
+          const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+          const content = skipParse ? msg : parseTemplate(msg, { userId, username, userRole, channelUnionId }, [], 'message_template')
           return channel.sendMessage(content)
         } else {
           return channel.sendMessage(`<img src="${msg}"/>`)
@@ -108,7 +95,8 @@ export class PluginManager {
         const { msgType = 'text', skipParse = false } = options
         // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
         if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, new DiceRollContext(bot, { platform, guildId, channelId, userId, username, userRole }), [], 'message_template')
+          const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+          const content = skipParse ? msg : parseTemplate(msg, { userId, username, userRole, channelUnionId }, [], 'message_template')
           return user.sendMessage(content)
         } else {
           return user.sendMessage(`<img src="${msg}"/>`)
@@ -171,12 +159,18 @@ export class PluginManager {
   }
 
   private loadPlugins(pluginNames: string[]) {
+    const newPlugins: IPlugin[] = []
     pluginNames.forEach(pluginName => {
-      this.loadPlugin(pluginName)
+      const plugin = this._loadPlugin(pluginName)
+      if (plugin) {
+        newPlugins.push(plugin)
+      }
     })
+    PluginProvider.register(newPlugins)
   }
 
-  private loadPlugin(pluginName: string) {
+  // 注意：只通过 loadPlugins 调用，以避免频繁调用 PluginProvider 注册，否则每次注册都会造成所有 config 重新计算，太重了
+  private _loadPlugin(pluginName: string) {
     try {
       // require.cache 的 key 是带 index.js 的，因此组装路径时也要带上
       const fullPath = process.env.NODE_ENV === 'development'
@@ -191,14 +185,16 @@ export class PluginManager {
       handlePluginCompatibility(plugin)
       console.log('[Plugin] 加载插件', plugin.id)
       this.pluginMap[plugin.id] = plugin
-      // todo register plugins
+      return plugin
     } catch (e) {
       console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
+      return undefined
     }
   }
 
   // 如果版本号有更新，则删除旧文件，加载新的文件
   private checkOfficialPluginsUpdate() {
+    const plugins2reload: string[] = []
     Object.entries(officialPluginsVersions).forEach(([name, version]) => {
       const currentVersion = this.pluginMap[name]?.version
       if (!currentVersion) return
@@ -208,9 +204,12 @@ export class PluginManager {
         // fs.rmdirSync(path.join(PLUGIN_DIR, name), { recursive: true })
         copyFolderSync(path.join(INTERNAL_PLUGIN_DIR, name), path.join(PLUGIN_DIR, name))
         // 再次加载插件
-        this.loadPlugin(name)
+        plugins2reload.push(name)
       }
     })
+    if (plugins2reload.length > 0) {
+      this.loadPlugins(plugins2reload)
+    }
   }
 
   // 手动重载插件
@@ -227,6 +226,7 @@ export class PluginManager {
 
   // 获取插件内容清单（不含插件具体逻辑，用于展示和更新 config）
   get pluginListManifest(): IPluginConfigDisplay[] {
+    // todo 本地不维护 pluginMap，通过 dicecore 事件通知前端
     return Object.values(this.pluginMap).map<IPluginConfigDisplay>(plugin => ({
       id: plugin.id,
       name: plugin.name || plugin.id || '--',
@@ -250,132 +250,6 @@ export class PluginManager {
         afterDiceRoll: (plugin.hook?.afterDiceRoll || []).map(withDefaults),
       }
     }))
-  }
-
-  // 提供 custom reply 的列表: fullId => config
-  get pluginCustomReplyMap(): Record<string, ICustomReplyConfig> {
-    const ret: Record<string, ICustomReplyConfig> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.customReply) return
-      plugin.customReply.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 roll decider 的列表：fullId => config
-  // get pluginRollDeciderMap(): Record<string, IRollDeciderConfig> {
-  //   const ret: Record<string, IRollDeciderConfig> = {}
-  //   Object.values(this.pluginMap).forEach(plugin => {
-  //     if (!plugin.rollDecider) return
-  //     plugin.rollDecider.forEach(item => {
-  //       ret[`${plugin.id}.${item.id}`] = item
-  //     })
-  //   })
-  //   return ret
-  // }
-
-  // 提供 alias roll 的列表：fullId => config
-  get pluginAliasRollMap(): Record<string, IAliasRollConfig> {
-    const ret: Record<string, IAliasRollConfig> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.aliasRoll) return
-      plugin.aliasRoll.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 custom text 的列表：fullId => config
-  get pluginCustomTextMap(): Record<string, ICustomTextConfig> {
-    const ret: Record<string, ICustomTextConfig> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.customText) return
-      plugin.customText.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 hook: onReceiveCommand
-  // fullId => IHookFunction<OnReceiveCommandCallback>
-  get hookOnReceiveCommandMap(): Record<string, IHookFunction<OnReceiveCommandCallback>> {
-    const ret: Record<string, IHookFunction<OnReceiveCommandCallback>> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.hook?.onReceiveCommand) return
-      plugin.hook.onReceiveCommand.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 hook: beforeParseDiceRoll
-  // fullId => IHookFunction<BeforeParseDiceRollCallback>
-  get hookBeforeParseDiceRollMap(): Record<string, IHookFunction<BeforeParseDiceRollCallback>> {
-    const ret: Record<string, IHookFunction<BeforeParseDiceRollCallback>> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.hook?.beforeParseDiceRoll) return
-      plugin.hook.beforeParseDiceRoll.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 hook: onCardEntryChange
-  // fullId => IHookFunction<OnCardEntryChangeCallback>
-  get hookOnCardEntryChangeMap(): Record<string, IHookFunction<OnCardEntryChangeCallback>> {
-    const ret: Record<string, IHookFunction<OnCardEntryChangeCallback>> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.hook?.onCardEntryChange) return
-      plugin.hook.onCardEntryChange.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 hook: onMessageReaction
-  // fullId => IHookFunction<OnMessageReactionCallback>
-  get hookOnMessageReactionMap(): Record<string, IHookFunction<OnMessageReactionCallback>> {
-    const ret: Record<string, IHookFunction<OnMessageReactionCallback>> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.hook?.onMessageReaction) return
-      plugin.hook.onMessageReaction.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 hook: beforeDiceRoll
-  // fullId => IHookFunction<BeforeDiceRollCallback>
-  get hookBeforeDiceRollMap(): Record<string, IHookFunction<BeforeDiceRollCallback>> {
-    const ret: Record<string, IHookFunction<BeforeDiceRollCallback>> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.hook?.beforeDiceRoll) return
-      plugin.hook.beforeDiceRoll.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
-  }
-
-  // 提供 hook: afterDiceRoll
-  // fullId => IHookFunction<AfterDiceRollCallback>
-  get hookAfterDiceRollMap(): Record<string, IHookFunction<AfterDiceRollCallback>> {
-    const ret: Record<string, IHookFunction<AfterDiceRollCallback>> = {}
-    Object.values(this.pluginMap).forEach(plugin => {
-      if (!plugin.hook?.afterDiceRoll) return
-      plugin.hook.afterDiceRoll.forEach(item => {
-        ret[`${plugin.id}.${item.id}`] = item
-      })
-    })
-    return ret
   }
 }
 

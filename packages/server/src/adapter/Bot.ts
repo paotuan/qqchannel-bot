@@ -1,13 +1,13 @@
 import type { ICardEntryChangeEvent } from '@paotuan/card'
 import type { IUserCommandContext, IUserCommand } from '@paotuan/config'
+import type { BasePtDiceRoll } from '@paotuan/dicecore'
 import type { IBotConfig, IBotInfo } from '@paotuan/types'
 import { Context, Bot as SatoriApi, ForkScope, GetEvents } from '@satorijs/satori'
-import { adapterConfig, adapterPlugin, getBotId, getChannelUnionId } from './utils'
+import { adapterConfig, adapterPlugin, ChannelUnionId, getBotId } from './utils'
 import { isEqual } from 'lodash'
 import { makeAutoObservable, runInAction } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
-import { BasePtDiceRoll } from '../service/dice'
 import { LogManager } from '../service/qapi/log'
 import { CustomReplyManager } from '../service/qapi/customReply'
 import { UserCommand } from '../model/UserCommand'
@@ -164,9 +164,7 @@ export class Bot {
 
   // 分派命令
   async dispatchCommand(userCommand: IUserCommand) {
-    const { platform, guildId, channelId } = userCommand.context
-    const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-    const config = this.wss.config.getChannelConfig(channelUnionId)
+    const config = this.wss.config.getChannelConfig(userCommand.context.channelUnionId as ChannelUnionId)
 
     // 注册监听器
     const unregisterListeners = this.registerCommonCommandProcessListeners(userCommand.context)
@@ -192,9 +190,7 @@ export class Bot {
   // 分派表情
   async dispatchMessageReaction(userCommand: IUserCommand) {
     const { context } = userCommand
-    const { platform, guildId, channelId } = context
-    const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-    const config = this.wss.config.getChannelConfig(channelUnionId)
+    const config = this.wss.config.getChannelConfig(context.channelUnionId as ChannelUnionId)
 
     // 注册监听器
     const unregisterListeners = this.registerCommonCommandProcessListeners(context)
@@ -211,9 +207,7 @@ export class Bot {
   }
 
   private registerCommonCommandProcessListeners(context: IUserCommandContext) {
-    const { platform, guildId, channelId } = context
-    const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-    const config = this.wss.config.getChannelConfig(channelUnionId)
+    const config = this.wss.config.getChannelConfig(context.channelUnionId as ChannelUnionId)
     const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
       config.hook_onCardEntryChange({ event, context })
     }

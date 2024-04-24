@@ -14,11 +14,7 @@
   ],
   "scripts": {
     "dev:client": "yarn workspace client run dev",
-    "build:client": "yarn workspace client run build",
     "dev:server": "yarn workspace server run dev",
-    "clean:server": "yarn workspace server run clean",
-    "build:server": "yarn workspace server run build",
-    "build:types": "yarn workspace @paotuan/types run build",
     "build": "yarn workspaces run build",
     "preview": "node packages/dist/bundle.js",
     "start": "pm2 start packages/dist/bundle.js --name qqchannel-bot",

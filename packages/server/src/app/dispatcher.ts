@@ -320,6 +320,5 @@ function handleUserDelete(client: WsClient, server: Wss, data: IUserDeleteReq) {
 
 function handlePluginReload(client: WsClient, server: Wss, data: IPluginReloadReq) {
   server.plugin.manualReloadPlugins(data)
-  server.config.updateByPluginManifest()
   client.send<string>({ cmd: 'plugin/reload', success: true, data: '' })
 }
