@@ -211,6 +211,7 @@ export interface ISceneSendMapImageReq {
 export interface IRiItem {
   type: 'actor' | 'npc'
   id: string
+  name: string
   seq: number
   seq2: number
 }

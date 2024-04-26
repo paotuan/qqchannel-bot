@@ -26,6 +26,7 @@ import type {
   IRiDeleteReq,
   IDiceRollReq, IUserDeleteReq, IPluginReloadReq, ILoginReqV2,
 } from '@paotuan/types'
+import { RiProvider } from '@paotuan/dicecore'
 import { getBotId } from '../adapter/utils'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
@@ -277,14 +278,7 @@ function handleRiSet(client: WsClient, server: Wss, data: IRiSetReq) {
   const bot = client.bot
   const channelUnionId = client.listenToChannelUnionId
   if (bot && channelUnionId) {
-    const riList = bot.dice.getRiListOfChannel(channelUnionId)
-    const exist = riList.find(item => item.id === data.id && item.type === data.type)
-    if (exist) {
-      exist.seq = data.seq
-      exist.seq2 = data.seq2
-    } else {
-      riList.push(data)
-    }
+    RiProvider.updateRiList(channelUnionId, [data])
   }
 }
 
@@ -292,11 +286,7 @@ function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
   const bot = client.bot
   const channelUnionId = client.listenToChannelUnionId
   if (bot && channelUnionId) {
-    const riList = bot.dice.getRiListOfChannel(channelUnionId)
-    const index = riList.findIndex(item => item.id === data.id && item.type === data.type)
-    if (index >= 0) {
-      riList.splice(index, 1)
-    }
+    RiProvider.removeRiList(channelUnionId, [data])
   }
 }
 

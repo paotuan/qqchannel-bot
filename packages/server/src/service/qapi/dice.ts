@@ -4,12 +4,12 @@ import {
   createDiceRoll,
   BasePtDiceRoll,
   StandardDiceRoll,
-  RiDiceRoll,
-  RiListDiceRoll,
-  CardProvider
+  CardProvider,
+  RiProvider,
+  IRiItem, DefaultRiState
 } from '@paotuan/dicecore'
 import type { UserRole, IUserCommand } from '@paotuan/config'
-import type { IRiItem, IDiceRollReq } from '@paotuan/types'
+import type { IDiceRollReq } from '@paotuan/types'
 import mitt from 'mitt'
 import { WsClient } from '../../app/wsclient'
 import { Bot } from '../../adapter/Bot'
@@ -52,7 +52,9 @@ export class DiceManager {
       }
     })
     this.opposedRollCache = new LRUCache({ max: 50 })
+    // 初始化先攻列表 store
     this.riListCache = {}
+    RiProvider.setState(new RiState(this.riListCache))
   }
 
   /**
@@ -151,11 +153,6 @@ export class DiceManager {
       updatedCards.forEach(card => {
         this.wss.cards.saveCard(card)
       })
-      // 特殊：保存先攻列表
-      if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
-        // todo
-        // roller.applyToRiList(this.riListCache)
-      }
       return roller
     } catch (e: any) {
       // 表达式不合法，无视之
@@ -170,10 +167,7 @@ export class DiceManager {
    * 获取某个子频道先攻列表
    */
   getRiListOfChannel(channelUnionId: ChannelUnionId) {
-    if (!this.riListCache[channelUnionId]) {
-      this.riListCache[channelUnionId] = []
-    }
-    return this.riListCache[channelUnionId]
+    return RiProvider.getRiList(channelUnionId)
   }
 
   /**
@@ -185,20 +179,13 @@ export class DiceManager {
       const config = this.wss.config.getChannelConfig(channelUnionId!)
       // 1. 投骰
       // 临时注册一份 card 和 link
-      const tempCardId = '__temp_card_id__'
-      const tempUserId = '__temp_user_id__'
-      CardProvider.registerCard(tempCardId, cardData)
-      CardProvider.linkCard(channelUnionId!, tempCardId, tempUserId)
+      CardProvider.registerCard(MockSystemCardId, cardData)
+      CardProvider.linkCard(channelUnionId!, MockSystemCardId, MockSystemUserId)
       const roll = createDiceRoll(
         expression,
-        { channelUnionId: channelUnionId!, userId: tempUserId, username: cardData.name, userRole: 'admin' },
+        { channelUnionId: channelUnionId!, userId: MockSystemUserId, username: cardData.name, userRole: 'admin' },
         { before: this.beforeDiceRollListener, after: this.afterDiceRollListener }
       )
-      // 代骰如果有副作用，目前也不持久化到卡上（毕竟现在主场景是从战斗面板发起，本来卡也不会持久化）
-      // 特殊：保存先攻列表会把这个人当成玩家，目前也先不能保存
-      // if (roller instanceof RiDiceRoll || roller instanceof RiListDiceRoll) {
-      //   roller.applyToRiList(this.riListCache)
-      // }
       // 2. 发消息
       const channel = this.bot.guilds.findChannel(channelId, guildId)
       if (!channel) throw new Error('频道不存在')
@@ -228,6 +215,16 @@ export class DiceManager {
 
   removeDiceRollListener(type: 'BeforeDiceRoll' | 'AfterDiceRoll', listener: (roll: BasePtDiceRoll) => void) {
     this.emitter.off(type, listener)
+  }
+}
+
+const MockSystemCardId = '__temp_card_id__'
+const MockSystemUserId = '__temp_user_id__'
+
+// 先屏蔽 system card 的先攻
+class RiState extends DefaultRiState {
+  override updateRiList(channelUnionId: string, change: Partial<IRiItem>[]) {
+    super.updateRiList(channelUnionId, change.filter(item => item.id !== MockSystemUserId))
   }
 }
 
