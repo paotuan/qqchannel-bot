@@ -3,6 +3,8 @@ import { BasePtDiceRoll } from '../base'
 import { at, AtUserPattern } from '../utils'
 import { parseDescriptions, ParseFlags } from '../utils/parseDescription'
 import { parseTemplate } from '../utils/parseTemplate'
+import { RiProvider } from '../../ri/ri-provider'
+import type { IRiItem } from '../../ri/state'
 
 // ri [1d20+1] [username],[1d20] [username]
 // init
@@ -42,7 +44,7 @@ export class RiDiceRoll extends BasePtDiceRoll {
         // ri 不一定是自己，且要区分玩家与 npc
         用户名: item.username || item.id,
         人物卡名: this.selfCard?.name ?? (item.username || item.id),
-        at用户: getRiName(item.type, item.id),
+        at用户: RiProvider.INSTANCE.getRiName(item),
         原始指令: this.rawExpression,
         描述: '先攻',
         掷骰结果: item.roll.total,
@@ -56,32 +58,23 @@ export class RiDiceRoll extends BasePtDiceRoll {
     }).join('\n')
   }
 
-  // ri 是走缓存，不走人物卡，不走 applyToCard 逻辑，自己处理了
-  // applyToRiList(riListCache: Record<string, IRiItem[]>) {
-  // if (this.notSupported) {
-  //   console.warn('私信场景不支持先攻列表')
-  // } else {
-  //   const list = riListCache[this.channelUnionId!]
-  //   this.rolls.forEach(item => {
-  //     const exist = list.find(other => other.type === item.type && other.id === item.id)
-  //     if (exist) {
-  //       exist.seq = item.roll.total
-  //       exist.seq2 = NaN
-  //     } else {
-  //       list.push({ type: item.type, id: item.id, seq: item.roll.total, seq2: NaN })
-  //     }
-  //   })
-  // }
-  // todo
-  // }
+  applyToCard() {
+    RiProvider.INSTANCE.updateRiList(this.context.channelUnionId, this.rolls.map(item => ({
+      type: item.type,
+      id: item.id,
+      name: item.username,
+      seq: item.roll.total,
+      seq2: NaN
+    })))
+    return []
+  }
 }
 
 export class RiListDiceRoll extends BasePtDiceRoll {
 
   private clear = false
   private delList: { id: string, type: 'npc' | 'actor' }[] = []
-  // private riList?: IRiItem[]
-  private riList?: any[]
+  private riList?: IRiItem[]
 
   override roll() {
     // init 其实是个普通指令，不是骰子，有固定格式，所以就不考虑复杂的一些情况了，也没意义
@@ -112,34 +105,24 @@ export class RiListDiceRoll extends BasePtDiceRoll {
     })
   }
 
-  // applyToRiList(riListCache: Record<string, IRiItem[]>) {
-  // if (this.notSupported) {
-  //   console.warn('私信场景不支持先攻列表')
-  // } else {
-  //   // 先存一份列表，避免 apply 后清空，output 获取不到
-  //   this.riList = [...riListCache[this.context.channelId!]]
-  //   // 真正处理
-  //   if (this.clear) {
-  //     riListCache[this.context.channelId!] = []
-  //   } else if (this.delList.length > 0) {
-  //     const list = riListCache[this.context.channelId!]
-  //     this.delList.forEach(({ id, type }) => {
-  //       const index = list.findIndex(item => item.type === type && item.id === id)
-  //       if (index >= 0) {
-  //         list.splice(index, 1)
-  //       }
-  //     })
-  //   }
-  // }
-  // todo
-  // }
+  applyToCard() {
+    // 先存一份列表，避免 apply 后清空，output 获取不到
+    this.riList = [...RiProvider.INSTANCE.getRiList(this.context.channelUnionId)]
+    // 真正处理
+    if (this.clear) {
+      RiProvider.INSTANCE.clearRiList(this.context.channelUnionId)
+    } else if (this.delList.length > 0) {
+      RiProvider.INSTANCE.updateRiList(this.context.channelUnionId, this.delList)
+    }
+    return []
+  }
 
   override get output() {
     if (!this.riList) {
       return this.t('roll.ri.unsupported')
     }
     if (this.delList.length > 0) {
-      const charaList = this.delList.map(item => getRiName(item.type, item.id))
+      const charaList = this.delList.map(item => RiProvider.INSTANCE.getRiName(item))
       return this.t('roll.ri.del', {
         人物列表: charaList.map((人物名, i) => ({ 人物名, last: i === charaList.length - 1 })),
         人物唯一: charaList.length === 0,
@@ -147,29 +130,11 @@ export class RiListDiceRoll extends BasePtDiceRoll {
       })
     } else {
       // 显示先攻列表
-      const descList = this.riList
-        .sort((a, b) => {
-          const seq1Res = compareSeq(a.seq, b.seq)
-          return seq1Res === 0 ? compareSeq(a.seq2, b.seq2) : seq1Res
-        })
-        .map((entry, i) => `${i + 1}. ${getRiName(entry.type, entry.id)} 🎲 ${isNaN(entry.seq) ? '--' : entry.seq}${isNaN(entry.seq2) ? '' : `(${entry.seq2})`}`)
-      const lines = ['当前先攻列表：', ...descList]
+      let listDesc = RiProvider.INSTANCE.getDescription(this.context.channelUnionId)
       if (this.clear) {
-        lines.push(this.t('roll.ri.clear'))
+        listDesc += '\n' + this.t('roll.ri.clear')
       }
-      return lines.join('\n')
+      return listDesc
     }
   }
-}
-
-// 先攻值比较
-function compareSeq(a: number, b: number) {
-  if (isNaN(a) && isNaN(b)) return 0
-  if (isNaN(a)) return 1
-  if (isNaN(b)) return -1
-  return b - a
-}
-
-function getRiName(type: 'npc' | 'actor', id: string) {
-  return type === 'npc' || id === 'system' ? id : at(id)
 }
