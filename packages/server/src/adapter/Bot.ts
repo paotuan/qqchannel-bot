@@ -1,17 +1,13 @@
-import type { ICardEntryChangeEvent } from '@paotuan/card'
-import type { IUserCommandContext, IUserCommand } from '@paotuan/config'
-import type { BasePtDiceRoll } from '@paotuan/dicecore'
 import type { IBotConfig, IBotInfo } from '@paotuan/types'
 import { Context, Bot as SatoriApi, ForkScope, GetEvents } from '@satorijs/satori'
-import { adapterConfig, adapterPlugin, ChannelUnionId, getBotId } from './utils'
+import { adapterConfig, adapterPlugin, getBotId } from './utils'
 import { isEqual } from 'lodash'
 import { makeAutoObservable, runInAction } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
 import { LogManager } from '../service/qapi/log'
-import { CustomReplyManager } from '../service/qapi/customReply'
 import { UserCommand } from '../model/UserCommand'
-import { DiceManager } from '../service/qapi/dice'
+import { CommandHandler } from '../service/commandHandler'
 
 /**
  * A bot connection to a platform
@@ -25,8 +21,7 @@ export class Bot {
   botInfo: IBotInfo | null = null
   readonly guilds: GuildManager
   readonly logs: LogManager
-  readonly customReply: CustomReplyManager
-  readonly dice: DiceManager
+  readonly commandHandler: CommandHandler
 
   // 维护当前工作子频道 // guildId => channelIds for quick search
   private readonly listeningChannels = new Map<string, Set<string>>()
@@ -46,10 +41,8 @@ export class Bot {
     this.guilds = new GuildManager(this)
     // 初始化 log 记录
     this.logs = new LogManager(this)
-    // 初始化自定义回复
-    this.customReply = new CustomReplyManager(this)
-    // 初始化骰子
-    this.dice = new DiceManager(this)
+    // 初始化命令处理器
+    this.commandHandler = new CommandHandler(this)
 
     // 初始化串行监听器
     this.on('message', async session => {
@@ -69,12 +62,14 @@ export class Bot {
             // 最近一条消息缓存到 channel 对象中
             const channel = this.guilds.findChannel(session.channelId, session.guildId)
             channel && (channel.lastSession = session)
+
+            // todo 旧版本 config 兼容
           }
 
           // 统一对消息进行 parse，判断是否是需要处理的指令
           const userCommand = UserCommand.fromMessage(this, session)
           if (!userCommand) return
-          await this.dispatchCommand(userCommand)
+          await this.commandHandler.handleCommand(userCommand)
         }
       } else {
         if (this.platform === 'qqguild') {
@@ -84,18 +79,16 @@ export class Bot {
           user && (user.lastSession = session)
         }
 
-        // 私信我们认为没有 config，因此只处理最简单的掷骰场景
-        // todo 后面可以考虑使用 default config
         const userCommand = UserCommand.fromMessage(this, session)
         if (!userCommand) return
-        await this.dice.handleDirectMessage(userCommand)
+        await this.commandHandler.handleCommand(userCommand)
       }
     })
 
     this.on('reaction-added', async session => {
       if (this.isListening(session.channelId, session.guildId)) {
         const userCommand = UserCommand.fromReaction(this, session)
-        await this.dispatchMessageReaction(userCommand)
+        await this.commandHandler.handleReaction(userCommand)
       }
     })
   }
@@ -160,71 +153,5 @@ export class Bot {
 
   on<K extends keyof GetEvents<Context>>(name: K, listener: GetEvents<Context>[K]) {
     this.context.on(name, listener)
-  }
-
-  // 分派命令
-  async dispatchCommand(userCommand: IUserCommand) {
-    const config = this.wss.config.getChannelConfig(userCommand.context.channelUnionId as ChannelUnionId)
-
-    // 注册监听器
-    const unregisterListeners = this.registerCommonCommandProcessListeners(userCommand.context)
-
-    // hook: OnReceiveCommandCallback 处理
-    await config.hook_onReceiveCommand(userCommand)
-
-    // 整体别名指令处理
-    userCommand.command = config.parseAliasRoll_command(userCommand.command)
-
-    // 自定义回复处理
-    const consumed = await this.customReply.handleGuildMessage(userCommand)
-
-    // 骰子指令处理
-    if (!consumed) {
-      await this.dice.handleGuildMessage(userCommand)
-    }
-
-    // 取消监听器
-    unregisterListeners()
-  }
-
-  // 分派表情
-  async dispatchMessageReaction(userCommand: IUserCommand) {
-    const { context } = userCommand
-    const config = this.wss.config.getChannelConfig(context.channelUnionId as ChannelUnionId)
-
-    // 注册监听器
-    const unregisterListeners = this.registerCommonCommandProcessListeners(context)
-
-    // hook: OnMessageReaction 处理
-    const handled = await config.hook_onMessageReaction({ context })
-    // 这里给个特殊逻辑，如果由插件处理过，就不走默认的逻辑了（自动检测技能检定），否则会显得奇怪
-    if (!handled) {
-      await this.dice.handleGuildReactions(userCommand)
-    }
-
-    // 取消监听器
-    unregisterListeners()
-  }
-
-  private registerCommonCommandProcessListeners(context: IUserCommandContext) {
-    const config = this.wss.config.getChannelConfig(context.channelUnionId as ChannelUnionId)
-    const cardEntryChangeListener = (event: ICardEntryChangeEvent) => {
-      config.hook_onCardEntryChange({ event, context })
-    }
-    this.wss.cards.addCardEntryChangeListener(cardEntryChangeListener)
-    const beforeDiceRollListener = (roll: BasePtDiceRoll) => {
-      config.hook_beforeDiceRoll(roll)
-    }
-    const afterDiceRollListener = (roll: BasePtDiceRoll) => {
-      config.hook_afterDiceRoll(roll)
-    }
-    this.dice.addDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
-    this.dice.addDiceRollListener('AfterDiceRoll', afterDiceRollListener)
-
-    return () => {
-      this.wss.cards.removeCardEntryChangeListener(cardEntryChangeListener)
-      this.dice.removeDiceRollListener('BeforeDiceRoll', beforeDiceRollListener)
-      this.dice.removeDiceRollListener('AfterDiceRoll', afterDiceRollListener)
-    }
   }
 }

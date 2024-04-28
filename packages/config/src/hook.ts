@@ -9,7 +9,10 @@ export interface IUserCommandContext {
   userId: string
   username: string
   userRole: UserRole
-  msgId: string
+  /**
+   * @deprecated
+   */
+  msgId?: string
   /**
    * @deprecated
    */
@@ -23,7 +26,14 @@ export interface IUserCommandContext {
    */
   channelId: string
   channelUnionId: string
+  /**
+   * @deprecated
+   */
   replyMsgId?: string
+  /**
+   * @deprecated
+   */
+  isDirect: boolean
   realUser: {
     userId: string
     username: string

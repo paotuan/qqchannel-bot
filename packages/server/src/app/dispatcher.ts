@@ -173,7 +173,7 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
     const bot = ws.bot
     const channelId = ws.listenToChannelUnionId
     if (bot && channelId) {
-      const list = bot.dice.getRiListOfChannel(channelId)
+      const list = RiProvider.getRiList(channelId)
       ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
     }
   })
@@ -293,8 +293,8 @@ function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
 async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRollReq) {
   const bot = client.bot
   if (bot) {
-    const errmsg = await bot.dice.manualDiceRollFromWeb(client, data)
-    client.send<string>({ cmd: 'dice/roll', success: !errmsg, data: errmsg })
+    await bot.commandHandler.manualDiceRollFromWeb(client, data)
+    client.send<string>({ cmd: 'dice/roll', success: true, data: '' })
   }
 }
 

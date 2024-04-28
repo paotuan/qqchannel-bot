@@ -113,7 +113,7 @@ export class PluginManager {
         return pluginConfig?.preference ?? {}
       },
       dispatchUserCommand: async (parsed) => {
-        return this.wss.bots.find(parsed.context.botId)?.dispatchCommand(parsed)
+        return this.wss.bots.find(parsed.context.botId)?.commandHandler.handleCommand(parsed)
       },
       _context: wss,
       _ // provide lodash for convenience

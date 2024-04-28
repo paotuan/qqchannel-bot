@@ -24,3 +24,5 @@ export {
 }
 
 export * from './dice'
+
+export * from './main/dispatch'

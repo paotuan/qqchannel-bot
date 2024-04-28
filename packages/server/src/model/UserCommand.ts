@@ -80,6 +80,7 @@ export class UserCommand implements IUserCommand {
       channelId: this.channelId,
       channelUnionId: getChannelUnionId(this.platform, this.guildId, this.channelId),
       replyMsgId: session.event.message?.quote?.id,
+      isDirect: session.isDirect,
       realUser
     }
   }
