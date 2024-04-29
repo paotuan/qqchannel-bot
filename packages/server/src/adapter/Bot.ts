@@ -5,7 +5,7 @@ import { isEqual } from 'lodash'
 import { makeAutoObservable, runInAction } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
-import { LogManager } from '../service/qapi/log'
+import { LogManager } from '../service/log'
 import { UserCommand } from '../model/UserCommand'
 import { CommandHandler } from '../service/commandHandler'
 

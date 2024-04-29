@@ -1,15 +1,15 @@
-import type { Wss } from '../../app/wss'
+import type { Wss } from '../app/wss'
 import type { IPlugin, IPluginElementCommonInfo } from '@paotuan/config'
 import { VERSION_CODE, VERSION_NAME, type IPluginRegisterContext, type IPluginConfigDisplay } from '@paotuan/types'
 import { makeAutoObservable } from 'mobx'
 import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
-import { copyFolderSync } from '../../utils'
+import { copyFolderSync } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { ICard } from '@paotuan/card'
 import Mustache from 'mustache'
-import { getChannelUnionId } from '../../adapter/utils'
+import { getChannelUnionId } from '../adapter/utils'
 import { parseTemplate, PluginProvider } from '@paotuan/dicecore'
 
 const INTERNAL_PLUGIN_DIR = process.env.NODE_ENV === 'development' ? path.resolve('./src/plugins') : path.resolve(__dirname, './plugins')

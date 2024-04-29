@@ -1,10 +1,10 @@
 import { makeAutoObservable } from 'mobx'
 import type { ILogPushResp, ILog } from '@paotuan/types'
 import { createLogger, transports, format, type Logger } from 'winston'
-import { Bot } from '../../adapter/Bot'
+import { Bot } from '../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
-import { ChannelUnionId, getChannelUnionId } from '../../adapter/utils'
-import { resolveRootDir } from '../../utils'
+import { ChannelUnionId, getChannelUnionId } from '../adapter/utils'
+import { resolveRootDir } from '../utils'
 
 export class LogManager {
   private readonly bot: Bot

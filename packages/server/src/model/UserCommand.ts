@@ -1,7 +1,6 @@
 import { Bot } from '../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
-import type { ICommand, BotContext } from '@paotuan/config'
-import { convertRoleIds } from '../service/dice/utils'
+import type { ICommand, BotContext, UserRole } from '@paotuan/config'
 import { getChannelUnionId } from '../adapter/utils'
 
 export class UserCommand implements ICommand<BotContext> {
@@ -151,5 +150,18 @@ export class UserCommand implements ICommand<BotContext> {
 
   static fromReaction(bot: Bot, session: Session) {
     return new UserCommand(bot, session, '', undefined)
+  }
+}
+
+// 用户权限 id 适配
+// https://bot.q.qq.com/wiki/develop/nodesdk/model/role.html#DefaultRoleIDs
+// todo kook 场景
+function convertRoleIds(ids: string[] = []): UserRole {
+  if (ids.includes('4')) {
+    return 'admin'
+  } else if (ids.includes('2') || ids.includes('5')) {
+    return 'manager'
+  } else {
+    return 'user'
   }
 }
