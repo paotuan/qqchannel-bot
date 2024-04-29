@@ -1,17 +1,12 @@
-import type {
-  ICustomReplyConfig,
-  ICustomReplyConfigItem,
-  ICustomReplyEnv,
-  IUserCommand,
-  IUserCommandContext
-} from '@paotuan/config'
+import type { ICommand, ICustomReplyConfig, ICustomReplyConfigItem } from '@paotuan/config'
 import Mustache from 'mustache'
 import { CardProvider } from '../../card/card-provider'
 import { parseTemplate } from '../../dice'
+import { at } from '../../dice/utils'
 
 // 处理自定义回复
 // 返回 [是否命中，处理结果]
-export async function handleCustomReply(processors: ICustomReplyConfig[], { command, context }: IUserCommand): Promise<[boolean, string | undefined]> {
+export async function handleCustomReply(processors: ICustomReplyConfig[], { command, context }: ICommand): Promise<[boolean, string | undefined]> {
   // 从上到下匹配
   for (const processor of processors) {
     const matchGroups = isMatch(processor, command)
@@ -23,7 +18,7 @@ export async function handleCustomReply(processors: ICustomReplyConfig[], { comm
   return [false, undefined]
 }
 
-async function parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, context: IUserCommandContext) {
+async function parseMessage(processor: ICustomReplyConfig, matchGroups: Record<string, string>, context: ICommand['context']) {
   try {
     if (!processor.items && !processor.handler) throw new Error('没有处理自定义回复的方法')
     const handler = processor.handler ?? randomReplyItem(processor.items!).reply
@@ -32,26 +27,18 @@ async function parseMessage(processor: ICustomReplyConfig, matchGroups: Record<s
     const userId = context.userId
     const userRole = context.userRole
     const channelUnionId = context.channelUnionId
-    const replyFunc = typeof handler === 'function' ? handler : ((env: ICustomReplyEnv, _matchGroup: Record<string, string>) => {
+    const replyFunc = typeof handler === 'function' ? handler : ((env: ICommand['context'], _matchGroup: Record<string, string>) => {
       return Mustache.render(handler, { ...env, ..._matchGroup }, undefined, { escape: value => value })
     })
     const card = CardProvider.INSTANCE.getCard(channelUnionId, userId)
-    const env: ICustomReplyEnv = {
-      botId: context.botId,
-      platform: context.platform,
-      channelId: context.channelId,
-      guildId: context.guildId,
-      userId,
-      userRole,
-      username,
+    const env: ICommand<any>['context'] = {
+      ...context,
+      // 新增一些便于用户在 ui 上可以直接使用的参数
       nick: username,
       用户名: username,
       人物卡名: card?.name ?? username,
-      // todo 这类参数后续都通过 IUserCommand<T> 的泛型 data 处理，dicecore 内部不感知
-      at: '',
-      at用户: '',
-      version: '',
-      realUser: context.realUser
+      at: at(userId),
+      at用户: at(userId)
     }
     const template = await replyFunc(env, matchGroups)
     // 替换 inline rolls

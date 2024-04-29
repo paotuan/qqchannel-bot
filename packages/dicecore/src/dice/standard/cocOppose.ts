@@ -1,21 +1,29 @@
-import { StandardDiceRoll } from './index'
-import { CocDiceRoll } from './coc'
 import type { SuccessLevel } from '@paotuan/config'
+import type { StandardDiceRoll } from './index'
+import { CocDiceRoll } from './coc'
+import type { IDiceRollContext } from '../utils/parseTemplate'
 
 // 对抗检定
 // this.context.opposedRoll 代表要和本次对抗的 roll
 export class CocOpposedDiceRoll extends CocDiceRoll {
 
+  private readonly _opposedRoll: StandardDiceRoll
+
+  constructor(fullExp: string, context: IDiceRollContext, opposedRoll: StandardDiceRoll, inlineRolls: any[] = []) {
+    super(fullExp, context, inlineRolls)
+    this._opposedRoll = opposedRoll
+  }
+
   override parseDescriptions(expression: string) {
     super.parseDescriptions(expression)
     // 回复消息进行对抗检定时，如果没有指定技能名描述，就认为是取相同的技能进行对抗
     if (this.skillsForTest.length === 0) {
-      this.skillsForTest.push(this.context.opposedRoll!.skillsForTest[0])
+      this.skillsForTest.push(this._opposedRoll.skillsForTest[0])
     }
   }
 
   override get output() {
-    const opposedResult = this.opposedRoll(this.context.opposedRoll!)
+    const opposedResult = this.opposedRoll(this._opposedRoll)
     if (opposedResult) {
       return super.output + '\n' + opposedResult
     } else {

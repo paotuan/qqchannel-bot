@@ -1,16 +1,13 @@
-import type { CommandSource, DiceCommand, UserRole } from '@paotuan/config'
+import type { ICommand } from '@paotuan/config'
 import { CardProvider } from '../../card/card-provider'
 import { ConfigProvider } from '../../config/config-provider'
-import { StandardDiceRoll } from '../standard'
 import { InlineDiceRoll } from '../standard/inline'
 
-export interface IDiceRollContext {
-  userId: string
-  username: string
-  userRole: UserRole
-  channelUnionId: string // 一个 channel 的唯一标识
-  opposedRoll?: StandardDiceRoll
-}
+export type IDiceRollContext = ICommand['context']
+
+// 标识指令来源，目前仅包含 message_template, 用于区分自定义回复/文案的格式化与骰子指令，目前仅供插件使用
+// 后续如有其他需要区分出具体指令的类型，可再加枚举区分
+type CommandSource = 'message_template'
 
 const ENTRY_REGEX = /\$\{(.*?)\}|\$([a-zA-Z\p{Unified_Ideograph}]+)/gu // match ${ any content } or $AnyContent
 const INLINE_ROLL_REGEX = /\[\[([^[\]]+)]]/ // match [[ any content ]]
@@ -28,16 +25,7 @@ export function parseTemplate(expression: string, context: IDiceRollContext, his
   // 如果是自定义回复直接触发的，或通过插件 sendMessage* 接口发送的消息，则不触发此 hook
   // 因为这些情况下发送的其实是文字而不是掷骰指令，可能造成插件错误处理这些情况
   if (source !== 'message_template') {
-    const diceCommand: DiceCommand = {
-      command: expression,
-      context: {
-        channelUnionId: context.channelUnionId,
-        userId: context.userId,
-        username: context.username,
-        userRole: context.userRole
-      },
-      source
-    }
+    const diceCommand: ICommand = { command: expression, context }
     config.hook_beforeParseDiceRoll(diceCommand)
     expression = diceCommand.command
   }

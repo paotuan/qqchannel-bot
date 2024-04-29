@@ -5,12 +5,12 @@ import type {
   ICustomReplyConfig,
   ICustomTextConfig,
   IRollDeciderConfig,
-  CustomTextKeys, IUserCommand,
+  CustomTextKeys,
   IHookFunction, OnReceiveCommandCallback,
-  BeforeParseDiceRollCallback, DiceCommand,
+  BeforeParseDiceRollCallback,
   OnCardEntryChangeCallback, CardEntryChange,
-  OnMessageReactionCallback, MessageReaction,
-  BeforeDiceRollCallback, AfterDiceRollCallback
+  OnMessageReactionCallback,
+  BeforeDiceRollCallback, AfterDiceRollCallback, ICommand
 } from '@paotuan/config'
 import { decideRoll, IRollDecideContext } from './helpers/decider'
 import type { IDiceRollContext } from '../dice/utils/parseTemplate'
@@ -71,7 +71,7 @@ export class ChannelConfig {
   /**
    * 处理自定义回复
    */
-  async handleCustomReply(command: IUserCommand) {
+  async handleCustomReply(command: ICommand) {
     return await handleCustomReply(this.customReplyProcessors, command)
   }
 
@@ -158,12 +158,12 @@ export class ChannelConfig {
   /**
    * Hook 处理
    */
-  async hook_onReceiveCommand(result: IUserCommand) {
+  async hook_onReceiveCommand(result: ICommand) {
     console.log('[Hook] 收到指令')
     await handleHooksAsync(this.getHookProcessors<OnReceiveCommandCallback>('onReceiveCommand'), result)
   }
 
-  hook_beforeParseDiceRoll(diceCommand: DiceCommand) {
+  hook_beforeParseDiceRoll(diceCommand: ICommand) {
     console.log('[Hook] 解析骰子指令前')
     handleHooks(this.getHookProcessors<BeforeParseDiceRollCallback>('beforeParseDiceRoll'), diceCommand)
   }
@@ -173,7 +173,7 @@ export class ChannelConfig {
     handleVoidHooks(this.getHookProcessors<OnCardEntryChangeCallback>('onCardEntryChange'), e)
   }
 
-  hook_onMessageReaction(e: MessageReaction) {
+  hook_onMessageReaction(e: ICommand) {
     console.log('[Hook] 收到表情表态')
     return handleLinearHooksAsync(this.getHookProcessors<OnMessageReactionCallback>('onMessageReaction'), e)
   }

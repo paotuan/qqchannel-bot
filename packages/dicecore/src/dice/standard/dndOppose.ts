@@ -1,24 +1,28 @@
 import { DndDiceRoll } from './dnd'
-import { StandardDiceRoll } from './index'
+import type { StandardDiceRoll } from './index'
+import type { IDiceRollContext } from '../utils/parseTemplate'
 
 export class DndOpposedRoll extends DndDiceRoll {
 
-  private get opposedRoll() {
-    return this.context.opposedRoll!
+  private readonly _opposedRoll: StandardDiceRoll
+
+  constructor(fullExp: string, context: IDiceRollContext, opposedRoll: StandardDiceRoll, inlineRolls: any[] = []) {
+    super(fullExp, context, inlineRolls)
+    this._opposedRoll = opposedRoll
   }
 
   override parseDescriptions(expression: string) {
     super.parseDescriptions(expression)
     // 回复消息进行对抗检定时，如果没有指定技能名描述，就认为是取相同的技能进行对抗
-    if (this.skillsForTest.length === 0 && this.opposedRoll.skillsForTest.length > 0) {
-      const skill = this.opposedRoll.skillsForTest[0].skill
+    if (this.skillsForTest.length === 0 && this._opposedRoll.skillsForTest.length > 0) {
+      const skill = this._opposedRoll.skillsForTest[0].skill
       // 只取 skill，tempValue 是 dnd 的 dc，在对抗时是没有意义的
       this.skillsForTest.push({ skill, tempValue: NaN, modifiedValue: NaN })
     }
   }
 
   override get output() {
-    const opposedResult = this.calculateResult(this.opposedRoll)
+    const opposedResult = this.calculateResult(this._opposedRoll)
     if (opposedResult) {
       return super.output + '\n' + opposedResult
     } else {

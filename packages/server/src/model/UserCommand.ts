@@ -1,18 +1,18 @@
 import { Bot } from '../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
-import type { IUserCommandContext, IUserCommand } from '@paotuan/config'
+import type { ICommand, BotContext } from '@paotuan/config'
 import { convertRoleIds } from '../service/dice/utils'
 import { getChannelUnionId } from '../adapter/utils'
 
-export class UserCommand implements IUserCommand {
+export class UserCommand implements ICommand<BotContext> {
 
   readonly session: Session
   command: string
-  private readonly substitute: IUserCommandContext['realUser'] | undefined
+  private readonly substitute: BotContext['realUser'] | undefined
   private readonly bot: Bot
   [key: string | number | symbol]: unknown
 
-  private constructor(bot: Bot, session: Session, command: string, substitute: IUserCommandContext['realUser'] | undefined) {
+  private constructor(bot: Bot, session: Session, command: string, substitute: BotContext['realUser'] | undefined) {
     this.session = session
     this.command = command
     this.substitute = substitute
@@ -65,7 +65,7 @@ export class UserCommand implements IUserCommand {
     }
   }
 
-  get context(): IUserCommandContext {
+  get context(): ICommand<BotContext>['context'] {
     const session = this.session
     const substitute = this.substitute
     const realUser = this.realUser
@@ -131,7 +131,7 @@ export class UserCommand implements IUserCommand {
       if (!isInstruction) throw new Error()
 
       // 是否是全局代骰
-      let substitute: IUserCommandContext['realUser'] | undefined = undefined
+      let substitute: BotContext['realUser'] | undefined = undefined
       const lastElem = elements.at(-1)
       if (lastElem && lastElem.type === 'at') {
         const userId = lastElem.attrs.id

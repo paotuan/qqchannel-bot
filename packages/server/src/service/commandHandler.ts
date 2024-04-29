@@ -1,6 +1,6 @@
 import LRUCache from 'lru-cache'
 import { makeAutoObservable } from 'mobx'
-import type { IUserCommand } from '@paotuan/config'
+import type { BotContext, ICommand } from '@paotuan/config'
 import {
   CardProvider,
   DefaultRiState,
@@ -54,9 +54,9 @@ export class CommandHandler {
   /**
    * 处理指令
    */
-  async handleCommand(userCommand: IUserCommand) {
+  async handleCommand(userCommand: ICommand<BotContext>) {
     const result = await dispatchCommand(userCommand, {
-      getOpposedRoll: c => this.getOpposedRoll(c)
+      getOpposedRoll: c => this.getOpposedRoll(c as ICommand<BotContext>)
     })
     await this.handleDispatchResult(userCommand, result)
   }
@@ -64,9 +64,9 @@ export class CommandHandler {
   /**
    * 处理表情表态
    */
-  async handleReaction(userCommand: IUserCommand) {
+  async handleReaction(userCommand: ICommand<BotContext>) {
     const result = await dispatchReaction(userCommand, {
-      getReactionCommand: c => this.getInstruction(c)
+      getReactionCommand: c => this.getInstruction(c as ICommand<BotContext>)
     })
     if (result) {
       await this.handleDispatchResult(userCommand, result)
@@ -79,7 +79,7 @@ export class CommandHandler {
   async manualDiceRollFromWeb(wsClient: WsClient, { expression, cardData }: IDiceRollReq) {
     const { listenToChannelUnionId: channelUnionId, listenToGuildId: guildId, listenToChannelId: channelId } = wsClient
     const config = this.bot.wss.config.getChannelConfig(channelUnionId!)
-    const userCommand: IUserCommand = {
+    const userCommand: ICommand<BotContext> = {
       command: expression,
       context: {
         botId: this.bot.id,
@@ -105,7 +105,7 @@ export class CommandHandler {
     await this.handleDispatchResult(userCommand, result)
   }
 
-  private async handleDispatchResult(userCommand: IUserCommand, result: IDispatchResult) {
+  private async handleDispatchResult(userCommand: ICommand<BotContext>, result: IDispatchResult) {
     // 处理自定义回复
     if (result.type === 'customReply') {
       if (!result.reply) return
@@ -139,14 +139,15 @@ export class CommandHandler {
   }
 
   // 获取对抗骰
-  private async getOpposedRoll(userCommand: IUserCommand) {
+  private async getOpposedRoll(userCommand: ICommand<BotContext>) {
     const replyMsgId = userCommand.context.replyMsgId
     return replyMsgId ? this.opposedRollCache.get(replyMsgId) : undefined
   }
 
   // 从文本内容中提取可能存在的指令
-  private async getInstruction(userCommand: IUserCommand) {
+  private async getInstruction(userCommand: ICommand<BotContext>) {
     const { channelId, msgId } = userCommand.context
+    if (!msgId) return
     // 获取原始消息
     const cacheMsg = await this.msgCache.fetch(`${channelId}$$$${msgId}`)
     if (!cacheMsg || cacheMsg.instruction === null) return
@@ -159,7 +160,7 @@ export class CommandHandler {
   // 发送消息
   // 如传入 forceUserId，则强制发给对应 user
   // 否则根据 isDirect 决定发给人或发给频道
-  private async sendMessage(userCommand: IUserCommand, content: string, forceUserId?: string) {
+  private async sendMessage(userCommand: ICommand<BotContext>, content: string, forceUserId?: string) {
     let { isDirect, userId } = userCommand.context
     const { channelId, guildId } = userCommand.context
     if (forceUserId) {

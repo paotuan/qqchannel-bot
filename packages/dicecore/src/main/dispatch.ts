@@ -1,4 +1,4 @@
-import type { IUserCommand, IUserCommandContext } from '@paotuan/config'
+import type { ICommand } from '@paotuan/config'
 import type { ICard, ICardEntryChangeEvent } from '@paotuan/card'
 import { ConfigProvider } from '../config/config-provider'
 import { BasePtDiceRoll, createDiceRoll, StandardDiceRoll } from '../dice'
@@ -7,8 +7,8 @@ import type { ChannelConfig } from '../config/config'
 
 export interface IDispatchOption {
   // skipCustomReply?: boolean
-  getOpposedRoll?: (command: IUserCommand) => Promise<StandardDiceRoll | undefined>
-  getReactionCommand?: (command: IUserCommand) => Promise<string | undefined>
+  getOpposedRoll?: (command: ICommand) => Promise<StandardDiceRoll | undefined>
+  getReactionCommand?: (command: ICommand) => Promise<string | undefined>
 }
 
 export interface IDispatchResult_CustomReply {
@@ -27,8 +27,8 @@ export type IDispatchResult = IDispatchResult_CustomReply | IDispatchResult_Dice
 /**
  * 处理用户输入
  */
-export async function dispatchCommand(userCommand: IUserCommand, options: IDispatchOption = {}): Promise<IDispatchResult> {
-  const { context, command } = userCommand
+export async function dispatchCommand(userCommand: ICommand, options: IDispatchOption = {}): Promise<IDispatchResult> {
+  const { context } = userCommand
   const config = ConfigProvider.INSTANCE.getConfig(context.channelUnionId)
 
   // 注册监听器
@@ -53,7 +53,7 @@ export async function dispatchCommand(userCommand: IUserCommand, options: IDispa
     // 是否有回复消息(目前仅用于对抗检定)
     const opposedRoll = await options.getOpposedRoll?.(userCommand)
     // 投骰
-    return tryRollDice(config, command, context, opposedRoll)
+    return tryRollDice(config, userCommand, opposedRoll)
   } finally {
     // 取消监听器
     eventBus.off('card-entry-change', cardEntryChangeListener)
@@ -63,7 +63,7 @@ export async function dispatchCommand(userCommand: IUserCommand, options: IDispa
 /**
  * 处理用户表情
  */
-export async function dispatchReaction(userCommand: IUserCommand, options: IDispatchOption = {}): Promise<IDispatchResult | undefined> {
+export async function dispatchReaction(userCommand: ICommand, options: IDispatchOption = {}): Promise<IDispatchResult | undefined> {
   const { context } = userCommand
   const config = ConfigProvider.INSTANCE.getConfig(context.channelUnionId)
 
@@ -75,7 +75,7 @@ export async function dispatchReaction(userCommand: IUserCommand, options: IDisp
 
   try {
     // hook: OnMessageReaction 处理
-    const handled = await config.hook_onMessageReaction({ context })
+    const handled = await config.hook_onMessageReaction(userCommand)
     // 这里给个特殊逻辑，如果由插件处理过，就不走默认的逻辑了（自动检测技能检定），否则会显得奇怪
     if (handled) return undefined
 
@@ -83,19 +83,18 @@ export async function dispatchReaction(userCommand: IUserCommand, options: IDisp
     const command = await options.getReactionCommand?.(userCommand)
     if (!command) return undefined
     const opposedRoll = await options.getOpposedRoll?.(userCommand)
-    return tryRollDice(config, command, context, opposedRoll)
+    return tryRollDice(config, userCommand, opposedRoll)
   } finally {
     // 取消监听器
     eventBus.off('card-entry-change', cardEntryChangeListener)
   }
 }
 
-function tryRollDice(config: ChannelConfig, command: string, context: IUserCommandContext, opposedRoll?: StandardDiceRoll): IDispatchResult_Dice {
+function tryRollDice(config: ChannelConfig, userCommand: ICommand, opposedRoll?: StandardDiceRoll): IDispatchResult_Dice {
   try {
-    const { channelUnionId, userId, username, userRole } = context
     const roller = createDiceRoll(
-      command,
-      { channelUnionId, userId, username, userRole, opposedRoll },
+      userCommand,
+      opposedRoll,
       {
         before: roll => config.hook_beforeDiceRoll(roll),
         after: roll => config.hook_afterDiceRoll(roll)

@@ -1,5 +1,6 @@
 import { DndCard, GeneralCard, ICard } from '@paotuan/card'
-import { IDiceRollContext, parseTemplate } from './parseTemplate'
+import type { ICommand } from '@paotuan/config'
+import { parseTemplate } from './parseTemplate'
 import { DiceRollEventListenerMap } from '../base'
 import { InlineDiceRoll } from '../standard/inline'
 import { ScDiceRoll } from '../special/sc'
@@ -19,7 +20,8 @@ import { ConfigProvider } from '../../config/config-provider'
 /**
  * 工厂方法创建骰子实例
  */
-export function createDiceRoll(expression: string, context: IDiceRollContext, listeners: DiceRollEventListenerMap = {}) {
+export function createDiceRoll(userCommand: ICommand, opposedRoll?: StandardDiceRoll, listeners: DiceRollEventListenerMap = {}) {
+  const { command: expression, context } = userCommand
   const selfCard = CardProvider.INSTANCE.getCard(context.channelUnionId, context.userId)
   const config = ConfigProvider.INSTANCE.getConfig(context.channelUnionId)
   // 根据指令前缀派发
@@ -54,12 +56,12 @@ export function createDiceRoll(expression: string, context: IDiceRollContext, li
     const roller = (() => {
       const parsedExpression = parseTemplate(expression, context, inlineRolls)
       // 对抗检定判断
-      if (context.opposedRoll && specialDiceConfig.opposeDice.enabled) {
-        const opposedType = getOpposedType(context.opposedRoll, selfCard)
+      if (opposedRoll && specialDiceConfig.opposeDice.enabled) {
+        const opposedType = getOpposedType(opposedRoll, selfCard)
         if (opposedType === 'coc') {
-          return new CocOpposedDiceRoll(parsedExpression, context, inlineRolls)
+          return new CocOpposedDiceRoll(parsedExpression, context, opposedRoll, inlineRolls)
         } else if (opposedType === 'dnd') {
-          return new DndOpposedRoll(parsedExpression, context, inlineRolls)
+          return new DndOpposedRoll(parsedExpression, context, opposedRoll, inlineRolls)
         }
       }
       // 走普通掷骰逻辑
