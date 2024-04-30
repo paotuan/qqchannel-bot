@@ -25,11 +25,6 @@ export class ConfigManager {
     this.initConfig()
   }
 
-  // 暂用于响应式地通知前端 config 有更新
-  getChannelConfig_Plain_Observable(channelUnionId: ChannelUnionId) {
-    return this.configMap[channelUnionId] || this.defaultConfig
-  }
-
   getChannelConfig(channelUnionId: ChannelUnionId | 'default') {
     if (channelUnionId === 'default') {
       return ConfigProvider.defaultConfig

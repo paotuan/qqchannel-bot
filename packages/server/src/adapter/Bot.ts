@@ -62,8 +62,6 @@ export class Bot {
             // 最近一条消息缓存到 channel 对象中
             const channel = this.guilds.findChannel(session.channelId, session.guildId)
             channel && (channel.lastSession = session)
-
-            // todo 旧版本 config 兼容
           }
 
           // 统一对消息进行 parse，判断是否是需要处理的指令
