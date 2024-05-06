@@ -15,7 +15,7 @@
       <label tabindex="0" class="btn btn-sm btn-square btn-outline border-base-300">
         <ChevronDoubleRightIcon class="size-4" />
       </label>
-      <ul tabindex="0" class="dropdown-content menu menu-compact p-2 shadow bg-base-100 rounded-box w-24">
+      <ul tabindex="0" class="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-24">
         <li><a @click="addTime(6)">+ 6s</a></li>
         <li><a @click="addTime(60)">+ 1m</a></li>
         <li><a @click="addTime(30 * 60)">+ 30m</a></li>
@@ -42,17 +42,17 @@ const addTime = (timeS: number) => {
 <style>
 .dp__theme_light {
   --tw-border-opacity: .2;
-  --dp-background-color: hsl(var(--b1));
-  --dp-text-color: hsl(var(--bc));
+  --dp-background-color: oklch(var(--b1));
+  --dp-text-color: oklch(var(--bc));
   /*--dp-hover-color: #f3f3f3;*/
-  --dp-hover-text-color: hsl(var(--bc));
+  --dp-hover-text-color: oklch(var(--bc));
   /*--dp-hover-icon-color: #959595;*/
-  --dp-primary-color: hsl(var(--p));
-  --dp-primary-text-color: hsl(var(--pc));
-  --dp-secondary-color: hsl(var(--s));
-  --dp-border-color: hsl(var(--bc) / var(--tw-border-opacity));
-  --dp-menu-border-color: hsl(var(--bc) / var(--tw-border-opacity));
-  --dp-border-color-hover: hsl(var(--bc) / var(--tw-border-opacity));
+  --dp-primary-color: oklch(var(--p));
+  --dp-primary-text-color: oklch(var(--pc));
+  --dp-secondary-color: oklch(var(--s));
+  --dp-border-color: oklch(var(--bc) / var(--tw-border-opacity));
+  --dp-menu-border-color: oklch(var(--bc) / var(--tw-border-opacity));
+  --dp-border-color-hover: oklch(var(--bc) / var(--tw-border-opacity));
   /*--dp-disabled-color: #f6f6f6;*/
   /*--dp-scroll-bar-background: #f3f3f3;*/
   /*--dp-scroll-bar-color: #959595;*/

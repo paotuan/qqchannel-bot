@@ -54,7 +54,7 @@ const customColumnDialogShow = ref(false)
   font-size: 0.875rem;
   line-height: 1.25rem;
   --tw-bg-opacity: 1;
-  background-color: hsl(var(--b2, var(--b1)) / var(--tw-bg-opacity));
+  background-color: oklch(var(--b2, var(--b1)) / var(--tw-bg-opacity));
   font-weight: 700;
 }
 

@@ -2,7 +2,7 @@
   <div class="py-1 flex gap-2">
     <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />
     <template v-if="!backgroundData">
-      <button class="btn btn-primary gap-2" @click="uploadBackground">
+      <button class="btn btn-primary" @click="uploadBackground">
         <PhotoIcon class="size-6" />上传背景图片
       </button>
     </template>

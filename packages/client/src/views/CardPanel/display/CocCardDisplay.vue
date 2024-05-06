@@ -18,7 +18,7 @@
       <div class="w-0" style="flex: 1 1 0">
         <!-- basic -->
         <div>
-          <table class="table table-compact table-zebra w-full">
+          <table class="table table-sm table-zebra w-full">
             <thead>
             <tr>
               <th class="w-1/3">状态</th>
@@ -57,7 +57,7 @@
         </div>
         <!-- props -->
         <div class="mt-4">
-          <table class="table table-compact table-zebra w-full">
+          <table class="table table-sm table-zebra w-full">
             <thead>
             <tr>
               <th>属性</th>
@@ -93,7 +93,7 @@
         <textarea v-model="cardData.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
       </div>
       <div class="w-0" style="flex: 2 1 0">
-        <table class="table table-compact table-zebra w-full">
+        <table class="table table-sm table-zebra w-full">
           <thead>
           <tr>
             <th>技能</th>
@@ -124,7 +124,7 @@
           </tbody>
         </table>
         <div class="mt-4 flex gap-2 items-start">
-          <table class="table table-compact table-zebra w-full" style="flex: 4 1 0">
+          <table class="table table-sm table-zebra w-full" style="flex: 4 1 0">
             <thead>
             <tr>
               <th class="w-1/4">武器/能力名</th>
@@ -147,7 +147,7 @@
             </tr>
             </tbody>
           </table>
-          <table class="table table-compact w-full" style="flex: 1 1 0">
+          <table class="table table-sm w-full" style="flex: 1 1 0">
             <thead>
             <tr><th>战斗属性</th></tr>
             </thead>
@@ -223,7 +223,7 @@ const deleteSkill = (name: string) => {
 }
 </script>
 <style scoped>
-.table-compact :where(td) {
+.table-sm :where(td) {
   padding: 0.25rem;
 }
 
@@ -236,6 +236,6 @@ const deleteSkill = (name: string) => {
 }
 
 .highlight {
-  background: hsl(var(--s)) !important;
+  background: oklch(var(--s)) !important;
 }
 </style>

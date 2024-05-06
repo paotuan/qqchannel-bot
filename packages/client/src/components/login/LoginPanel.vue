@@ -28,7 +28,10 @@
               <FormKook />
             </template>
             <template v-else>疑似发生错误，请尝试清除缓存</template>
-            <button class="btn btn-primary w-full mt-4 shadow-lg" :class="{ loading: bot.loginState === 'LOADING' }" @click="bot.connect()">连接！</button>
+            <button class="btn btn-primary w-full mt-4 shadow-lg" @click="bot.connect()">
+              <span v-if="bot.loginState === 'LOADING'" class="loading"></span>
+              连接！
+            </button>
           </div>
         </div>
       </div>

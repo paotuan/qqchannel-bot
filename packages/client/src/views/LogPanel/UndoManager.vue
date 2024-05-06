@@ -1,14 +1,12 @@
 <template>
   <div v-show="logStore.actionStack.length > 0" class="flex items-center justify-between mb-2 pr-2">
-    <button class="btn btn-sm btn-ghost gap-2" @click="logStore.undo(1)"><ArrowUturnLeftIcon class="size-4" />撤销</button>
+    <button class="btn btn-sm btn-ghost" @click="logStore.undo(1)"><ArrowUturnLeftIcon class="size-4" />撤销</button>
     <button class="btn btn-xs btn-outline" @click="openDialog">操作历史</button>
   </div>
   <d-modal v-model:visible="dialogVisible" title="操作历史">
     <div class="alert alert-info text-sm rounded-lg p-2">
-      <div>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 size-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span>单击以选择需要被撤回的操作历史</span>
-      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 size-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span>单击以选择需要被撤回的操作历史</span>
     </div>
     <div class="mt-2 overflow-y-auto" style="max-height: calc(100vh - 300px)">
       <div

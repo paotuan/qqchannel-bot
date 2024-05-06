@@ -12,7 +12,7 @@
           <span>如果找不到你想关联的玩家，请保持网页开启，并让 Ta 在频道里发一条消息，Ta 就会显示在选框中</span>
         </div>
         <div v-for="card in userCardList" :key="card.name" class="flex gap-2">
-          <button class="btn w-40 gap-2 justify-start flex-nowrap relative"
+          <button class="btn w-40 justify-start flex-nowrap relative"
                   :class="selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
@@ -24,7 +24,7 @@
         </div>
         <h3 class="font-bold mt-4">NPC / 敌人模板：</h3>
         <div v-for="card in templateCardList" :key="card.name" class="flex gap-2">
-          <button class="btn w-40 gap-2 justify-start flex-nowrap relative"
+          <button class="btn w-40 justify-start flex-nowrap relative"
                   :class="selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
@@ -97,6 +97,6 @@ watch(cardListFilters, () => {
 .toggle-btn:not(.btn-active) {
   color: #9ca3af;
   --tw-border-opacity: 0.2;
-  border-color: hsl(var(--bc) / var(--tw-border-opacity));
+  border-color: oklch(var(--bc) / var(--tw-border-opacity));
 }
 </style>

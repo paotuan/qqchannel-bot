@@ -63,7 +63,7 @@ const checkUpdate = async () => {
     <div class="navbar-start">
       <div class="dropdown">
         <label tabindex="0" class="btn btn-ghost normal-case text-xl">🎲 跑团 IO 机器人</label>
-        <ul tabindex="0" class="menu dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-40">
+        <ul tabindex="0" class="menu dropdown-content z-10 mt-3 p-2 shadow bg-base-100 rounded-box w-40">
           <li><a @click="checkUpdate">版本：{{ VERSION_NAME }}</a></li>
           <li><a @click="clearCache">清除缓存</a></li>
           <li><a href="https://paotuan.io" target="_blank">使用帮助<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
@@ -94,9 +94,7 @@ const checkUpdate = async () => {
   </div>
   <div class="toast toast-start">
     <div v-for="toast in ui.toasts" :key="toast.id" class="alert" :class="toastClass(toast.type)">
-      <div>
-        <span>{{ toast.msg }}</span>
-      </div>
+      <span>{{ toast.msg }}</span>
     </div>
   </div>
 </template>

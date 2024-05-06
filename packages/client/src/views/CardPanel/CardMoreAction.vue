@@ -3,7 +3,7 @@
     <label tabindex="0" class="btn btn-xs btn-circle btn-ghost">
       <EllipsisVerticalIcon class="size-4" />
     </label>
-    <ul tabindex="0" class="dropdown-content menu menu-compact shadow bg-base-100 rounded-md w-24">
+    <ul tabindex="0" class="dropdown-content z-10 menu shadow bg-base-100 rounded-md w-28">
       <li><a class="text-xs" @click="onManualDiceRoll()">掷骰</a></li>
       <li v-if="hasBotOwner"><a class="text-xs" @click="onManualDiceRoll(true)">暗骰</a></li>
       <li><a class="text-xs" @click="onEditManualDiceRoll()">编辑并掷骰</a></li>

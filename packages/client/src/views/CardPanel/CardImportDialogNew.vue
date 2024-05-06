@@ -1,5 +1,5 @@
 <template>
-  <button class="btn modal-button btn-primary gap-2" @click="open = true">
+  <button class="btn modal-button btn-primary" @click="open = true">
     <PlusCircleIcon class="size-6"/>
     导入人物卡
   </button>

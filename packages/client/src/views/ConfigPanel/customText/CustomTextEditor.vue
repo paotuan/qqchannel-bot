@@ -5,7 +5,7 @@
       <span>{{ meta.name }}</span>
       <div class="dropdown dropdown-hover dropdown-right">
         <label tabindex="0"><InformationCircleIcon class="size-4" /></label>
-        <div tabindex="0" class="dropdown-content p-2 shadow-lg bg-base-100 rounded-lg example-content" @click.stop>
+        <div tabindex="0" class="dropdown-content z-10 p-2 shadow-lg bg-base-100 rounded-lg example-content" @click.stop>
           <div v-html="meta.description" class="font-medium text-sm whitespace-pre example-text"></div>
         </div>
       </div>

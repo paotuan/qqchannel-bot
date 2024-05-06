@@ -45,7 +45,7 @@
         </div>
       </div>
       <!-- context menu -->
-      <ul ref="contextMenuRef" class="menu menu-compact bg-base-100 w-28 p-2 rounded-box absolute hidden">
+      <ul ref="contextMenuRef" class="menu menu-sm bg-base-100 w-28 p-2 rounded-box absolute hidden">
         <li v-if="contextMenuToken && contextMenuToken.name !== 'character'"><a @click="cloneNode">克隆</a></li>
         <li><a @click="moveToTop">置于顶层</a></li>
         <li><a @click="moveToBottom">置于底层</a></li>

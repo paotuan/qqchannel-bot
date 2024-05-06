@@ -6,10 +6,10 @@
     </div>
     <div class="mb-4 flex justify-between -mt-10">
 <!--      <div class="tooltip" data-tip="敬请期待">-->
-<!--        <button class="btn btn-primary gap-2" disabled><PlusCircleIcon class="size-6"/>插件市场</button>-->
+<!--        <button class="btn btn-primary" disabled><PlusCircleIcon class="size-6"/>插件市场</button>-->
 <!--      </div>-->
       <div />
-      <button class="btn btn-ghost gap-2" @click="reloadAllPlugins"><ArrowPathIcon class="size-4" />重载所有插件</button>
+      <button class="btn btn-ghost" @click="reloadAllPlugins"><ArrowPathIcon class="size-4" />重载所有插件</button>
     </div>
     <div class="card card-compact w-full bg-base-100 shadow-lg">
       <PluginList />

@@ -3,7 +3,7 @@
     <label tabindex="0">
       <slot></slot>
     </label>
-    <div tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-nowrap overflow-hidden">
+    <div tabindex="0" class="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box flex-nowrap overflow-hidden">
       <template v-if="!userEmpty">
         <ul class="w-52 max-h-96 -ml-1 mt-2 mb-12 overflow-y-auto">
           <slot name="list-top"></slot>
@@ -20,7 +20,7 @@
           </template>
         </ul>
         <div class="absolute bottom-0 left-0 right-0 bg-base-100">
-          <button class="btn btn-ghost gap-2 w-full" @click="ui.userManageDialogShow = true">
+          <button class="btn btn-ghost w-full" @click="ui.userManageDialogShow = true">
             <UserGroupIcon class="size-4" />成员管理
           </button>
         </div>

@@ -11,7 +11,7 @@
         </div>
       </template>
     </label>
-    <ul tabindex="0" class="dropdown-content menu menu-compact p-2 shadow bg-base-100 rounded-box w-52 max-h-60 -ml-1 mt-2 overflow-y-auto flex-nowrap">
+    <ul tabindex="0" class="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-52 max-h-60 -ml-1 mt-2 overflow-y-auto flex-nowrap">
       <li v-for="option in optionsAfterSearch" :key="option.value"><a @click="select(option.value)">{{ option.label }}</a></li>
     </ul>
   </div>

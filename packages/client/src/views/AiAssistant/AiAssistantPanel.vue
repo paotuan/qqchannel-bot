@@ -15,9 +15,7 @@
       </span>
       <div ref="conversationListEl" class="m-4 mt-0 p-2 flex-grow overflow-x-hidden overflow-y-auto border-common">
         <div class="alert alert-info text-sm p-3">
-          <div>
-            <span>关于 AI 的使用帮助请<a class="link" href="https://paotuan.io/admin/inspiration.html" target="_blank">查看这里</a>。服务器资源有限，请勿滥用。请考虑<a class="link" href="https://afdian.net/a/florastudio" target="_blank">支持我们</a>，帮助维持这个功能的长期运行！</span>
-          </div>
+          <span>关于 AI 的使用帮助请<a class="link" href="https://paotuan.io/admin/inspiration.html" target="_blank">查看这里</a>。服务器资源有限，请勿滥用。请考虑<a class="link" href="https://afdian.net/a/florastudio" target="_blank">支持我们</a>，帮助维持这个功能的长期运行！</span>
         </div>
         <div v-for="chat in chatStore.history" :key="chat.id" class="chat relative group" :class="chat.role === 'user' ? 'chat-end' : 'chat-start'">
           <div class="chat-bubble" :class="chat.isError ? 'chat-bubble-error' : chat.role === 'user' ? 'chat-bubble-primary' : 'chat-bubble-accent'">
@@ -34,10 +32,13 @@
         <div class="input-group input-group-sm">
           <input v-model="inputArea" type="text" placeholder="说些什么……" class="input input-bordered input-sm flex-grow" @keyup.enter="send" />
           <button tabindex="0" class="btn btn-sm btn-secondary">预设</button>
-          <button class="btn btn-sm btn-primary" :class="{ loading: chatStore.chatLoading }" @click="send">发送</button>
+          <button class="btn btn-sm btn-primary" @click="send">
+            <span v-if="chatStore.chatLoading" class="loading"></span>
+            发送
+          </button>
         </div>
         <!-- input-group 和 dropdown 的组合，很怪，不过先这样吧 -->
-        <ul tabindex="0" class="dropdown-content menu menu-compact p-2 mx-8 shadow bg-base-100 rounded-box w-30">
+        <ul tabindex="0" class="dropdown-content z-10 menu menu-sm p-2 mx-8 shadow bg-base-100 rounded-box w-30">
           <li v-for="item in presets" :key="item.key"><a @click="inputArea = item.content">{{ item.key }}</a></li>
         </ul>
       </div>
@@ -150,7 +151,7 @@ const settingDialogVisible = ref(false)
 .border-common {
   --tw-border-opacity: 0.2;
   border-width: 1px;
-  border-color: hsl(var(--bc) / var(--tw-border-opacity));
+  border-color: oklch(var(--bc) / var(--tw-border-opacity));
   border-radius: var(--rounded-btn, 0.5rem);
 }
 </style>

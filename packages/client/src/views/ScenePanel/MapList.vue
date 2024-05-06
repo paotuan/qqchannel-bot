@@ -11,7 +11,7 @@
       <span class="truncate">{{ map.name }}</span>
     </button>
     <template v-if="mapList.length < 10">
-      <button class="btn btn-primary gap-2 w-40" @click="createNewMap">
+      <button class="btn btn-primary w-40" @click="createNewMap">
         <PlusCircleIcon class="size-6"/>
         添加新场景
       </button>

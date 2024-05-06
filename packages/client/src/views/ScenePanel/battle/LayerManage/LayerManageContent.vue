@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex flex-col">
     <div class="flex justify-between">
-      <button class="btn btn-primary btn-sm gap-2 w-28" @click="createNewLayer">
+      <button class="btn btn-primary btn-sm w-28" @click="createNewLayer">
         <PlusCircleIcon class="size-4"/>新增图层
       </button>
       <span class="tooltip tooltip-left" data-tip="若图层顺序与实际有误，可尝试强制刷新顺序">

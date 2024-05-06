@@ -15,7 +15,7 @@
     "@paotuan/types": "1.0.0",
     "@vuepic/vue-datepicker": "^5.4.0",
     "@vueuse/core": "^9.13.0",
-    "daisyui": "^2.51.3",
+    "daisyui": "^4.10.5",
     "hotkeys-js": "^3.12.0",
     "konva": "^8.3.14",
     "md5": "^2.3.0",

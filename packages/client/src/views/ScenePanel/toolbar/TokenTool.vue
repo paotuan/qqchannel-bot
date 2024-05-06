@@ -1,10 +1,10 @@
 <template>
   <div class="py-1 flex gap-2">
     <div class="dropdown dropdown-top">
-      <label tabindex="0" class="btn btn-primary gap-2">
+      <label tabindex="0" class="btn btn-primary">
         <StarIcon class="size-6" />基本图形
       </label>
-      <ul tabindex="0" class="dropdown-content menu menu-compact p-2 shadow bg-base-100 rounded-box w-30">
+      <ul tabindex="0" class="dropdown-content z-10 menu menu-sm p-2 shadow bg-base-100 rounded-box w-30">
         <li><a @click="addBasicShape('circle')">圆形</a></li>
         <li><a @click="addBasicShape('rect')">矩形</a></li>
         <li><a @click="addBasicShape('polygon')">多边形</a></li>
@@ -35,7 +35,7 @@
       <span class="label-text font-bold">角数</span>
       <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editStarPoints" />
     </div>
-    <button class="btn btn-secondary gap-2" @click.stop="uploadCustomToken">
+    <button class="btn btn-secondary" @click.stop="uploadCustomToken">
       <PhotoIcon class="size-6" />上传图片
     </button>
     <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />

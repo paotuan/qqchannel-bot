@@ -26,7 +26,7 @@
       <div class="w-0" style="flex: 1 1 0">
         <!-- 基础信息 -->
         <div>
-          <table class="table table-compact table-zebra w-full">
+          <table class="table table-sm table-zebra w-full">
             <thead>
             <tr>
               <th colspan="4">基础信息</th>
@@ -76,7 +76,7 @@
         </div>
         <!-- props -->
         <div class="mt-4">
-          <table class="table table-compact table-zebra w-full">
+          <table class="table table-sm table-zebra w-full">
             <thead>
             <tr>
               <th class="w-1/4">属性</th>
@@ -103,7 +103,7 @@
         <textarea v-model="cardData.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
       </div>
       <div class="w-0" style="flex: 2 1 0">
-        <table class="table table-compact table-zebra w-full">
+        <table class="table table-sm table-zebra w-full">
           <thead>
           <tr>
             <th>技能</th>
@@ -144,7 +144,7 @@
         <div class="mt-4 flex gap-2 items-start">
           <div style="flex: 3 1 0">
             <!-- 物品 -->
-            <table class="table table-compact table-zebra w-full">
+            <table class="table table-sm table-zebra w-full">
               <thead>
               <tr>
                 <th colspan="2">物品</th>
@@ -167,7 +167,7 @@
               </tbody>
             </table>
             <!-- 武器 -->
-            <table class="table table-compact table-zebra w-full mt-4">
+            <table class="table table-sm table-zebra w-full mt-4">
               <thead>
               <tr>
                 <th class="w-1/4">装备/武器</th>
@@ -191,7 +191,7 @@
               </tbody>
             </table>
             <!-- 法术 -->
-            <table class="table table-compact table-zebra w-full mt-4">
+            <table class="table table-sm table-zebra w-full mt-4">
               <thead>
               <tr>
                 <th class="w-1/4">法术</th>
@@ -221,7 +221,7 @@
               </tbody>
             </table>
           </div>
-          <table class="table table-compact table-zebra w-36 flex-none">
+          <table class="table table-sm table-zebra w-36 flex-none">
             <thead>
             <tr><th>法术位</th></tr>
             </thead>
@@ -237,7 +237,7 @@
           </table>
         </div>
         <!-- 职业能力 -->
-        <table class="table table-compact table-zebra w-full mt-4">
+        <table class="table table-sm table-zebra w-full mt-4">
           <thead>
           <tr>
             <th class="w-1/4">职业能力</th>
@@ -267,7 +267,7 @@
           </tbody>
         </table>
         <!-- 专长 -->
-        <table class="table table-compact table-zebra w-full mt-4">
+        <table class="table table-sm table-zebra w-full mt-4">
           <thead>
           <tr>
             <th class="w-1/4">专长</th>
@@ -395,7 +395,7 @@ const openSpellData = (name: string) => {
 }
 </script>
 <style scoped>
-.table-compact :where(td) {
+.table-sm :where(td) {
   padding: 0.25rem;
 }
 
@@ -409,6 +409,6 @@ const openSpellData = (name: string) => {
 
 td.highlight,
 tr.highlight td {
-  background: hsl(var(--s)) !important;
+  background: oklch(var(--s)) !important;
 }
 </style>

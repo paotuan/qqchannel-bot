@@ -12,7 +12,7 @@
       </div>
       <div class="w-0" style="flex: 2 1 0">
         <!-- skills -->
-        <table class="table table-compact table-zebra w-full">
+        <table class="table table-sm table-zebra w-full">
           <thead>
           <tr>
             <th colspan="2" class="w-1/4">技能</th>
@@ -37,7 +37,7 @@
           </tbody>
         </table>
         <!-- abilities -->
-        <table class="table table-compact table-zebra w-full mt-4">
+        <table class="table table-sm table-zebra w-full mt-4">
           <thead>
           <tr>
             <th class="w-1/4">武器/能力名</th>
@@ -108,7 +108,7 @@ const deleteSkill = (name: string) => {
 }
 </script>
 <style scoped>
-.table-compact :where(td) {
+.table-sm :where(td) {
   padding: 0.25rem;
 }
 
