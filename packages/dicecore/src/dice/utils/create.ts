@@ -48,9 +48,6 @@ export function createDiceRoll(userCommand: ICommand, opposedRoll?: StandardDice
   } else if (expression.startsWith('nn') && specialDiceConfig.nnDice.enabled) {
     // 我寻思 nn 就不用 parseTemplate 了，纯指令不包含掷骰
     return dispatchNn(expression, context, inlineRolls).roll()
-  // } else if (expression.startsWith('log')) {
-  //   // log 也不需要 parseTemplate
-  //   return new LogSettingDiceRoll(expression, context, inlineRolls).roll()
   } else {
     // 普通检定/掷骰
     const roller = (() => {

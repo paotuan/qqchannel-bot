@@ -56,7 +56,8 @@ export class CommandHandler {
    */
   async handleCommand(userCommand: ICommand<BotContext>) {
     const result = await dispatchCommand(userCommand, {
-      getOpposedRoll: c => this.getOpposedRoll(c as ICommand<BotContext>)
+      getOpposedRoll: c => this.getOpposedRoll(c as ICommand<BotContext>),
+      interceptor: async c => this.bot.logs.handleBackgroundLogCommand(c as ICommand<BotContext>),
     })
     await this.handleDispatchResult(userCommand, result)
   }
@@ -106,32 +107,46 @@ export class CommandHandler {
   }
 
   private async handleDispatchResult(userCommand: ICommand<BotContext>, result: IDispatchResult) {
+    let msgSent = false
+    switch (result.type) {
     // 处理自定义回复
-    if (result.type === 'customReply') {
-      if (!result.reply) return
-      this.sendMessage(userCommand, result.reply)
-      return
-    }
-    // 处理掷骰结果
-    if (result.diceRoll) {
-      const { context } = userCommand
-      const roll = result.diceRoll
-      if (roll instanceof StandardDiceRoll && roll.hidden && !context.isDirect) { // 处理非私信场景的暗骰
-        const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
-        this.sendMessage(userCommand, channelMsg)
-        // 暗骰始终发送给消息发送人，不考虑代骰
-        this.sendMessage(userCommand, roll.output, context.realUser.userId)
-        return
-      } else {
-        const replyMsg = await this.sendMessage(userCommand, roll.output)
-        // 如果是可供对抗的投骰，记录下缓存
-        if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
-          this.opposedRollCache.set(replyMsg.id, roll)
-        }
-        return
+    case 'customReply': {
+      if (result.reply) {
+        this.sendMessage(userCommand, result.reply)
+        msgSent = true
       }
+      break
     }
-    if (userCommand.context.isDirect) {
+    case 'interceptor':
+      if (typeof result.payload === 'string') {
+        this.sendMessage(userCommand, result.payload)
+        msgSent = true
+      }
+      break
+    // 处理掷骰结果
+    case 'dice': {
+      if (result.diceRoll) {
+        const { context } = userCommand
+        const roll = result.diceRoll
+        if (roll instanceof StandardDiceRoll && roll.hidden && !context.isDirect) { // 处理非私信场景的暗骰
+          const channelMsg = roll.t('roll.hidden', { 描述: roll.description })
+          this.sendMessage(userCommand, channelMsg)
+          // 暗骰始终发送给消息发送人，不考虑代骰
+          this.sendMessage(userCommand, roll.output, context.realUser.userId)
+        } else {
+          const replyMsg = await this.sendMessage(userCommand, roll.output)
+          // 如果是可供对抗的投骰，记录下缓存
+          if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
+            this.opposedRollCache.set(replyMsg.id, roll)
+          }
+        }
+        msgSent = true
+      }
+      break
+    }
+    }
+
+    if (!msgSent && userCommand.context.isDirect) {
       // 私信至少给个回复吧，不然私信机器人3条达到限制了就很尴尬
       const selfNick = this.bot.botInfo?.username || ''
       await this.sendMessage(userCommand, `${selfNick}在的说`)

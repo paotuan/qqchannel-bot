@@ -9,6 +9,7 @@ export interface IDispatchOption {
   // skipCustomReply?: boolean
   getOpposedRoll?: (command: ICommand) => Promise<StandardDiceRoll | undefined>
   getReactionCommand?: (command: ICommand) => Promise<string | undefined>
+  interceptor?: (command: ICommand) => Promise<[boolean, unknown]>
 }
 
 export interface IDispatchResult_CustomReply {
@@ -22,7 +23,12 @@ export interface IDispatchResult_Dice {
   affectedCards?: ICard[]
 }
 
-export type IDispatchResult = IDispatchResult_CustomReply | IDispatchResult_Dice
+export interface IDispatchResult_Interceptor {
+  type: 'interceptor',
+  payload: unknown
+}
+
+export type IDispatchResult = IDispatchResult_CustomReply | IDispatchResult_Dice | IDispatchResult_Interceptor
 
 /**
  * 处理用户输入
@@ -48,6 +54,14 @@ export async function dispatchCommand(userCommand: ICommand, options: IDispatchO
     const [handled, reply] = await config.handleCustomReply(userCommand)
     if (handled) {
       return { type: 'customReply', reply }
+    }
+
+    // interceptor 处理
+    if (options.interceptor) {
+      const [handled, payload] = await options.interceptor(userCommand)
+      if (handled) {
+        return { type: 'interceptor', payload }
+      }
     }
 
     // 是否有回复消息(目前仅用于对抗检定)

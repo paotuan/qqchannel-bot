@@ -1,18 +1,20 @@
 import { makeAutoObservable } from 'mobx'
+import type { BotContext, ICommand } from '@paotuan/config'
 import type { ILogPushResp, ILog } from '@paotuan/types'
-import { createLogger, transports, format, type Logger } from 'winston'
 import { Bot } from '../adapter/Bot'
 import { Session, Element } from '@satorijs/satori'
-import { ChannelUnionId, getChannelUnionId } from '../adapter/utils'
-import { resolveRootDir } from '../utils'
+import { getChannelUnionId } from '../adapter/utils'
+import { LogBackground } from './logBackground'
 
 export class LogManager {
   private readonly bot: Bot
+  private readonly logBackground: LogBackground
   private get wss() { return this.bot.wss }
 
   constructor(bot: Bot) {
-    makeAutoObservable<this, 'backgroundLoggers'>(this, { backgroundLoggers: false })
+    makeAutoObservable(this)
     this.bot = bot
+    this.logBackground = new LogBackground(bot)
   }
 
   private get platform() {
@@ -89,58 +91,10 @@ export class LogManager {
     })
 
     // 记录后台 log
-    if (this.backgroundLogEnabled[channelUnionId]) {
-      this.backgroundLog(guildId, channelId, logs)
-    }
+    this.logBackground.logIfNeed(guildId, channelId, logs)
   }
 
-  // region 后台 log
-  private backgroundLogEnabled: Record<ChannelUnionId, boolean> = {}
-
-  // channelUnionId => logger
-  private readonly backgroundLoggers: Record<ChannelUnionId, Logger> = {}
-  // 上一次说话人 channelUnionId => username
-  private readonly lastUser: Record<ChannelUnionId, string> = {}
-
-  private getBackgroundLogger(guildId: string, channelId: string) {
-    const channelUnionId = getChannelUnionId(this.platform, guildId, channelId)
-    if (!this.backgroundLoggers[channelUnionId]) {
-      const channel = this.bot.guilds.findChannel(channelId, guildId)
-      const channelName = channel?.name ?? channelId
-      this.backgroundLoggers[channelUnionId] = createLogger({
-        format: backgroundLogFormatter,
-        transports: new transports.File({ filename: `${resolveRootDir('logs')}/${channelName}.txt`, maxsize: 1024 * 1024 })
-      })
-    }
-    return this.backgroundLoggers[channelUnionId]
+  handleBackgroundLogCommand(command: ICommand<BotContext>) {
+    return this.logBackground.detectEnabled(command)
   }
-
-  private backgroundLog(guildId: string, channelId: string, logs: ILog[]) {
-    const logger = this.getBackgroundLogger(guildId, channelId)
-    const channelUnionId = getChannelUnionId(this.platform, guildId, channelId)
-    logs.forEach(log => {
-      logger.info({ message: log, lastUser: this.lastUser[channelUnionId] })
-      this.lastUser[channelUnionId] = log.username || log.userId
-    })
-  }
-
-  setBackgroundLogEnabled(channelUnionId: ChannelUnionId, enabled: boolean) {
-    this.backgroundLogEnabled[channelUnionId] = enabled
-  }
-  // endregion
 }
-
-const backgroundLogFormatter = format.printf(info => {
-  const message = info.message as ILog
-  const lastUser = info.lastUser as string | undefined
-  const user = message.username || message.userId
-  const content = message.msgType === 'text' ? message.content : `[图片](${message.content})`
-  if (user === lastUser) {
-    return content
-  } else {
-    const date = new Date(Number(message.timestamp))
-    const pad2 = (v: number) => String(v).padStart(2, '0')
-    const timestamp = `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`
-    return `${user} ${timestamp}\n${content}`
-  }
-})
