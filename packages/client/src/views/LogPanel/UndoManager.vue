@@ -21,7 +21,7 @@
       </div>
     </div>
     <template #action>
-      <button class="btn btn-accent" @click="dialogVisible = false">取消</button>
+      <button class="btn" @click="dialogVisible = false">取消</button>
       <button class="btn btn-primary" :disabled="selectedActionIndex < 0" @click="submit">撤销选中操作</button>
     </template>
   </d-modal>

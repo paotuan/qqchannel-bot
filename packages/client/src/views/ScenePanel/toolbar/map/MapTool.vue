@@ -12,7 +12,7 @@
       </button>
       <div>
         <span class="label-text font-bold">缩放</span>
-        <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs range-secondary" @input="onScaleChange" />
+        <input :value="scale" type="range" min="0.1" max="2" step="0.01" class="range range-xs" @input="onScaleChange" />
       </div>
       <button class="btn btn-square btn-error" @click="clearBackground">
         <TrashIcon class="size-6" />

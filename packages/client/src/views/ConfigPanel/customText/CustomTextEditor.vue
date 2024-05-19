@@ -12,10 +12,10 @@
     </div>
     <div class="collapse-content">
       <div class="pl-6 pt-1">
-        <div v-for="(item, i) in data" :key="i" class="flex items-start mb-2">
-          <label class="input-group input-group-sm w-40">
-            <span class="px-2">权重</span>
-            <d-number-input v-model="item.weight" class="input-sm input-bordered w-20" />
+        <div v-for="(item, i) in data" :key="i" class="flex items-start gap-1 mb-2">
+          <label class="input input-bordered input-sm flex items-center gap-2">
+            <span class="flex-none">权重</span>
+            <d-number-input v-model="item.weight" class="w-12" />
           </label>
           <textarea v-model="item.text" class="textarea textarea-bordered w-full" placeholder="请输入文案模板" @blur="onBlur($event, i)" />
           <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: data.length <= 1 }" @click="deleteItem(i)">

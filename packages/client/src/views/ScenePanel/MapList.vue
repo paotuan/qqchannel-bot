@@ -4,7 +4,7 @@
       v-for="map in mapList"
       :key="map.id"
       class="btn border border-base-300 w-40"
-      :class="sceneStore.currentMapId === map.id ? 'btn-secondary' : 'btn-ghost bg-base-100'"
+      :class="sceneStore.currentMapId === map.id ? 'btn-neutral' : 'btn-ghost bg-base-100'"
       :title="map.name"
       @click.stop="sceneStore.switchMap(map.id)"
     >

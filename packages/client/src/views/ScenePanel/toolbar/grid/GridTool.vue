@@ -8,16 +8,16 @@
     </div>
     <div>
       <span class="label-text font-bold">间距</span>
-      <input :value="gridData.gap" type="range" min="10" max="100" step="1" class="range range-xs range-secondary" @input="onGapChange" />
+      <input :value="gridData.gap" type="range" min="10" max="100" step="1" class="range range-xs" @input="onGapChange" />
     </div>
     <div>
       <div>
         <span class="label-text font-bold">横向偏移&nbsp;</span>
-        <d-number-input v-model="gridData.xOffset" class="input-xs input-bordered w-12" />
+        <d-number-input v-model="gridData.xOffset" class="input input-xs input-bordered w-12" />
       </div>
       <div>
         <span class="label-text font-bold">纵向偏移&nbsp;</span>
-        <d-number-input v-model="gridData.yOffset" class="input-xs input-bordered w-12" />
+        <d-number-input v-model="gridData.yOffset" class="input input-xs input-bordered w-12" />
       </div>
     </div>
     <div class="flex flex-col items-start justify-end">

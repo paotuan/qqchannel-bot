@@ -5,7 +5,7 @@
       <!-- toolbar -->
       <MapBasicInfo class="absolute top-0 left-44 z-10" />
       <div class="absolute bottom-0 w-full flex">
-        <div class="px-8 py-1 mx-auto bg-base-100/50 rounded-3xl">
+        <div class="px-8 py-1 mx-auto bg-base-300/90 rounded-3xl">
           <div>
             <MapTool v-show="toolbarItem === 'map'" />
             <GridTool v-show="toolbarItem === 'grid'" />
@@ -15,28 +15,28 @@
           <div class="flex gap-4 justify-center">
             <button
               class="btn btn-circle border border-base-300"
-              :class="toolbarItem !== 'map' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+              :class="toolbarItem !== 'map' ? 'btn-ghost bg-base-100' : 'btn-neutral'"
               @click="selectToolbar('map')"
             >
               <MapIcon class="size-6" />
             </button>
             <button
                 class="btn btn-circle border border-base-300"
-                :class="toolbarItem !== 'grid' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+                :class="toolbarItem !== 'grid' ? 'btn-ghost bg-base-100' : 'btn-neutral'"
                 @click="selectToolbar('grid')"
             >
               <HashtagIcon class="size-6" />
             </button>
             <button
               class="btn btn-circle border border-base-300"
-              :class="toolbarItem !== 'token' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+              :class="toolbarItem !== 'token' ? 'btn-ghost bg-base-100' : 'btn-neutral'"
               @click="selectToolbar('token')"
             >
               <MapPinIcon class="size-6" />
             </button>
             <button
               class="btn btn-circle border border-base-300"
-              :class="toolbarItem !== 'text' ? 'btn-ghost bg-base-100' : 'btn-secondary'"
+              :class="toolbarItem !== 'text' ? 'btn-ghost bg-base-100' : 'btn-neutral'"
               @click="selectToolbar('text')"
             >
               <PencilIcon class="size-6" />

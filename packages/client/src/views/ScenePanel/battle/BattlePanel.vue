@@ -13,11 +13,11 @@
       <UserSelector />
       <CharacterList />
       <div class="flex gap-2 justify-between">
-        <button class="btn btn-secondary w-1/2" @click="sceneStore.sendMapImageSignal = true">
+        <button class="btn w-1/2" @click="sceneStore.sendMapImageSignal = true">
           <span v-if="sceneStore.sendMapImageSignal" class="loading"></span>
           发送地图
         </button>
-        <button class="btn btn-secondary w-1/2" @click="battleLogDialogVisible = true">发送战报</button>
+        <button class="btn w-1/2" @click="battleLogDialogVisible = true">发送战报</button>
       </div>
     </div>
     <LayerManage v-show="tab === 'layer'" />

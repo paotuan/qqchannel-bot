@@ -11,7 +11,7 @@
     </div>
     <div class="label-text mt-4">* 以当前人物卡的数据掷骰。通过这种方法掷骰无法记录人物卡的改动（例如 st 指令、技能成长标记等），如有需要请自行编辑。</div>
     <template #action>
-      <button class="btn btn-accent" @click="cardStore.manualDiceRollDialogShow = false">取消</button>
+      <button class="btn" @click="cardStore.manualDiceRollDialogShow = false">取消</button>
       <button class="btn btn-primary" @click="submit">掷骰</button>
     </template>
   </d-modal>

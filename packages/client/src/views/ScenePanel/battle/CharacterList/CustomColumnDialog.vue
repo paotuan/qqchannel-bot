@@ -15,7 +15,7 @@
       </button>
     </div>
     <template #action>
-      <button class="btn btn-accent" @click="close">取消</button>
+      <button class="btn" @click="close">取消</button>
       <button class="btn btn-primary" @click="submit">确定</button>
     </template>
   </d-modal>

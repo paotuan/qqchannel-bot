@@ -30,10 +30,10 @@
             <input v-model="processorLocal.command" type="text" placeholder="请输入匹配词" class="input input-bordered input-sm w-60 mx-2" />
             时，回复：
           </div>
-          <div v-for="(item, i) in processorLocal.items" :key="i" class="flex items-center mb-2">
-            <label class="input-group input-group-sm w-40">
-              <span class="px-2">权重</span>
-              <d-number-input v-model="item.weight" class="input-sm input-bordered w-20" />
+          <div v-for="(item, i) in processorLocal.items" :key="i" class="flex items-center gap-1 mb-2">
+            <label class="input input-bordered input-sm flex items-center gap-2">
+              <span class="flex-none">权重</span>
+              <d-number-input v-model="item.weight" class="w-12" />
             </label>
             <textarea v-model="item.reply as string" class="textarea textarea-bordered w-full custom-reply" placeholder="请输入回复内容" />
             <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: (processorLocal.items || []).length <= 1 }" @click="deleteReplyItem(i)">

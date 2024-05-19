@@ -33,6 +33,15 @@ code {
   border-bottom-width: 0px;
 }
 
+/* daisyui v4 调整 */
+.table th {
+  background-color: oklch(var(--b2, var(--b1)) / var(--tw-bg-opacity));
+}
+
+.collapse {
+  transition: none !important;
+}
+
 ::-webkit-scrollbar {
   @apply w-2;
 }

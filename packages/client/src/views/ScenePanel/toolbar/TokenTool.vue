@@ -25,17 +25,17 @@
     </div>
     <div v-show="selectedToken && selectedToken.name === 'polygon'">
       <span class="label-text font-bold">边数</span>
-      <input :value="shapeData.polygonSides" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editPolygonSides" />
+      <input :value="shapeData.polygonSides" type="range" min="3" max="8" step="1" class="range range-xs" @input="editPolygonSides" />
     </div>
     <div v-show="selectedToken && selectedToken.name === 'wedge'">
       <span class="label-text font-bold">角度</span>
-      <input :value="shapeData.wedgeAngle" type="range" min="10" max="360" step="1" class="range range-xs range-secondary" @input="editWedgeAngle" />
+      <input :value="shapeData.wedgeAngle" type="range" min="10" max="360" step="1" class="range range-xs" @input="editWedgeAngle" />
     </div>
     <div v-show="selectedToken && selectedToken.name === 'star'">
       <span class="label-text font-bold">角数</span>
-      <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs range-secondary" @input="editStarPoints" />
+      <input :value="shapeData.starPoints" type="range" min="3" max="8" step="1" class="range range-xs" @input="editStarPoints" />
     </div>
-    <button class="btn btn-secondary" @click.stop="uploadCustomToken">
+    <button class="btn" @click.stop="uploadCustomToken">
       <PhotoIcon class="size-6" />上传图片
     </button>
     <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />

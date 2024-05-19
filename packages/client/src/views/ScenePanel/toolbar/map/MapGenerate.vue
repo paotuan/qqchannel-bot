@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button class="btn btn-secondary" @click="dialogVisible = true">随机！</button>
+    <button class="btn" @click="dialogVisible = true">随机！</button>
     <iframe ref="iframeRef" :src="generatorUrl" class="fixed left-0 top-0" width="0" height="0" />
     <d-modal v-model:visible="dialogVisible" title="随机地图配置">
       <div class="grid grid-cols-3 gap-4">
@@ -86,7 +86,7 @@
         </div>
       </div>
       <template #action>
-        <button class="btn btn-accent" @click="dialogVisible = false">取消</button>
+        <button class="btn" @click="dialogVisible = false">取消</button>
         <button class="btn btn-primary" @click="onGenerate">生成！</button>
       </template>
     </d-modal>

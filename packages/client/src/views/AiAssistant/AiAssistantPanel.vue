@@ -29,10 +29,10 @@
         </div>
       </div>
       <div class="form-control flex-none w-full p-4 pt-0 dropdown dropdown-hover dropdown-top dropdown-end">
-        <div class="input-group input-group-sm">
-          <input v-model="inputArea" type="text" placeholder="说些什么……" class="input input-bordered input-sm flex-grow" @keyup.enter="send" />
-          <button tabindex="0" class="btn btn-sm btn-secondary">预设</button>
-          <button class="btn btn-sm btn-primary" @click="send">
+        <div class="join">
+          <input v-model="inputArea" type="text" placeholder="说些什么……" class="join-item input input-bordered input-sm flex-grow" @keyup.enter="send" />
+          <button tabindex="0" class="join-item btn btn-sm btn-secondary">预设</button>
+          <button class="join-item btn btn-sm btn-primary" @click="send">
             <span v-if="chatStore.chatLoading" class="loading"></span>
             发送
           </button>

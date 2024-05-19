@@ -13,7 +13,7 @@
         </div>
         <div v-for="card in userCardList" :key="card.name" class="flex gap-2">
           <button class="btn w-40 justify-start flex-nowrap relative"
-                  :class="selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
+                  :class="selectedCard === card ? 'btn-neutral' : 'btn-ghost border border-base-300'"
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
@@ -25,7 +25,7 @@
         <h3 class="font-bold mt-4">NPC / 敌人模板：</h3>
         <div v-for="card in templateCardList" :key="card.name" class="flex gap-2">
           <button class="btn w-40 justify-start flex-nowrap relative"
-                  :class="selectedCard === card ? 'btn-secondary' : 'btn-ghost border border-base-300'"
+                  :class="selectedCard === card ? 'btn-neutral' : 'btn-ghost border border-base-300'"
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />

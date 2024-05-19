@@ -68,7 +68,7 @@
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">先攻</button></td>
               <td colspan="3">
                 <span class="text-xs">临时值</span><number-input v-model="cardData.basic.先攻临时" allow-negative class="input input-ghost input-xs text-sm w-14"/>
-                <span class="text-xs font-medium text-gray-400">总值&nbsp;&nbsp;{{ modifiedValueOf('敏捷') + cardData.basic.先攻临时 }}</span>
+                <span class="text-xs font-medium opacity-60">总值&nbsp;&nbsp;{{ modifiedValueOf('敏捷') + cardData.basic.先攻临时 }}</span>
               </td>
             </tr>
             </tbody>
@@ -123,7 +123,7 @@
                 <td></td><td></td>
               </template>
               <template v-else-if="getPropCell(i, j).prop">
-                <td colspan="2"><button class="btn btn-xs btn-ghost font-medium text-gray-400">{{ getPropCell(i, j).prop + '系' }}</button></td>
+                <td colspan="2"><button class="btn btn-xs btn-ghost font-medium opacity-60">{{ getPropCell(i, j).prop + '系' }}</button></td>
               </template>
               <template v-else>
                 <td :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
@@ -132,7 +132,7 @@
                 <td class="flex items-center justify-between group" :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
                   <span>
                     <number-input v-model="cardData.skills[getSkillCell(i, j).skill]" allow-negative class="input input-ghost input-xs text-sm w-14"/>
-                    <span class="text-gray-400 text-xs">{{ skillTotalOf(getSkillCell(i, j).skill) }}</span>
+                    <span class="opacity-60 text-xs">{{ skillTotalOf(getSkillCell(i, j).skill) }}</span>
                   </span>
                   <CardMoreAction class="invisible group-hover:visible" :expression="getSkillCell(i, j).skill" :deletable="false" />
                 </td>
@@ -221,7 +221,7 @@
               </tbody>
             </table>
           </div>
-          <table class="table table-sm table-zebra w-36 flex-none">
+          <table class="table table-sm table-zebra w-40 flex-none">
             <thead>
             <tr><th>法术位</th></tr>
             </thead>
@@ -409,6 +409,7 @@ const openSpellData = (name: string) => {
 
 td.highlight,
 tr.highlight td {
-  background: oklch(var(--s)) !important;
+  color: oklch(var(--ac)) !important;
+  background: oklch(var(--a)) !important;
 }
 </style>

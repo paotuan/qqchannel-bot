@@ -2,7 +2,7 @@
   <d-modal title="编辑战报" :visible="props.visible" @update:visible="close">
     <textarea v-model="text" class="textarea textarea-bordered w-full h-80" />
     <template #action>
-      <button class="btn btn-accent" @click="close">取消</button>
+      <button class="btn" @click="close">取消</button>
       <button class="btn btn-primary" @click="submit">发送！</button>
     </template>
   </d-modal>

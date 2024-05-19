@@ -1,5 +1,5 @@
 <template>
-  <div class="tabs font-bold">
+  <div class="tabs tabs-boxed tabs-sm">
     <router-link v-for="tab in tabs" :key="tab.value" :to="tab.value" class="tab indicator"
        :class="{ 'tab-active': tab.value === route.path }">
       {{ tab.name }}

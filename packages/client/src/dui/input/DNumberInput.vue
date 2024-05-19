@@ -20,7 +20,6 @@ const onInput = (e: any) => {
   <input
       ref="input"
       type="number"
-      class="input"
       :value="String(props.modelValue)"
       @input="onInput"
   />

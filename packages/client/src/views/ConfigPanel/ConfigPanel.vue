@@ -42,7 +42,7 @@
         <button class="btn btn-primary w-52" :disabled="!configStore.edited" @click="configStore.requestSaveConfig(true)">保存为默认配置</button>
       </div>
       <div class="tooltip" data-tip="使用默认配置覆盖当前子频道的配置">
-        <button class="btn btn-accent w-52" @click="configStore.requestResetConfig()">重置到默认配置</button>
+        <button class="btn w-52" @click="configStore.requestResetConfig()">重置到默认配置</button>
       </div>
     </div>
   </div>

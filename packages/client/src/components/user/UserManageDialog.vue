@@ -33,7 +33,7 @@
           </div>
         </div>
         <span class="flex gap-2">
-          <button class="btn btn-accent" @click="close">取消</button>
+          <button class="btn" @click="close">取消</button>
           <button class="btn btn-error" :disabled="selectedUserIds.length === 0" @click="submit">确定移除</button>
         </span>
       </div>

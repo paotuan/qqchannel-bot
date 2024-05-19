@@ -35,12 +35,12 @@
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">理智</button></td>
               <td><number-input v-model="cocCard.SAN" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXSAN }}</td>
-              <td class="text-gray-400 text-xs">{{ Math.floor(cocCard.SAN / 2) }}/{{ Math.floor(cocCard.SAN / 5) }}</td>
+              <td class="opacity-60 text-xs">{{ Math.floor(cocCard.SAN / 2) }}/{{ Math.floor(cocCard.SAN / 5) }}</td>
             </tr>
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">克苏鲁神话</button></td>
               <td><number-input v-model="cocCard.CM" class="input input-ghost input-xs text-sm w-14"/></td>
-              <td class="text-gray-400 text-xs">{{ Math.floor(cocCard.CM / 2) }}/{{ Math.floor(cocCard.CM / 5) }}</td>
+              <td class="opacity-60 text-xs">{{ Math.floor(cocCard.CM / 2) }}/{{ Math.floor(cocCard.CM / 5) }}</td>
             </tr>
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">魔法</button></td>
@@ -50,7 +50,7 @@
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">信用评级</button></td>
               <td><number-input v-model="cardData.basic.信用" class="input input-ghost input-xs text-sm w-14"/></td>
-              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.信用 / 2) }}/{{ Math.floor(cardData.basic.信用 / 5) }}</td>
+              <td class="opacity-60 text-xs">{{ Math.floor(cardData.basic.信用 / 2) }}/{{ Math.floor(cardData.basic.信用 / 5) }}</td>
             </tr>
             </tbody>
           </table>
@@ -71,8 +71,8 @@
             <tr v-for="prop in propKeyOf(cardData)" :key="prop" class="group">
               <td><button class="btn btn-xs btn-ghost font-medium">{{ prop }}</button></td>
               <td class="w-1/4"><number-input v-model="cardData.props[prop]" class="input input-ghost input-xs text-sm w-full"/></td>
-              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.props[prop] / 2) }}</td>
-              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.props[prop] / 5) }}</td>
+              <td class="opacity-60 text-xs">{{ Math.floor(cardData.props[prop] / 2) }}</td>
+              <td class="opacity-60 text-xs">{{ Math.floor(cardData.props[prop] / 5) }}</td>
               <td style="padding: 0">
                 <CardMoreAction class="invisible group-hover:visible" :expression="prop" :deletable="false" />
               </td>
@@ -80,8 +80,8 @@
             <tr class="group">
               <td><button class="btn btn-xs btn-ghost font-medium">幸运</button></td>
               <td class="w-1/4"><number-input v-model="cardData.basic.LUCK" class="input input-ghost input-xs text-sm w-full"/></td>
-              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.LUCK / 2) }}</td>
-              <td class="text-gray-400 text-xs">{{ Math.floor(cardData.basic.LUCK / 5) }}</td>
+              <td class="opacity-60 text-xs">{{ Math.floor(cardData.basic.LUCK / 2) }}</td>
+              <td class="opacity-60 text-xs">{{ Math.floor(cardData.basic.LUCK / 5) }}</td>
               <td style="padding: 0">
                 <CardMoreAction class="invisible group-hover:visible" expression="幸运" :deletable="false" />
               </td>
@@ -114,7 +114,7 @@
                 <td :key="`value-${j}`" class="flex items-center justify-between group" :class="{ highlight: !!cardData.meta.skillGrowth[skill] }">
                   <span>
                     <number-input v-model="cardData.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
-                    <span class="text-gray-400 text-xs">{{ Math.floor(cardData.skills[skill] / 2) }}/{{ Math.floor(cardData.skills[skill] / 5) }}</span>
+                    <span class="opacity-60 text-xs">{{ Math.floor(cardData.skills[skill] / 2) }}/{{ Math.floor(cardData.skills[skill] / 5) }}</span>
                   </span>
                   <CardMoreAction class="invisible group-hover:visible" :expression="skill" @delete="deleteSkill(skill)" />
                 </td>
@@ -236,6 +236,7 @@ const deleteSkill = (name: string) => {
 }
 
 .highlight {
-  background: oklch(var(--s)) !important;
+  color: oklch(var(--ac)) !important;
+  background: oklch(var(--a)) !important;
 }
 </style>

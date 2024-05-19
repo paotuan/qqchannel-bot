@@ -6,7 +6,7 @@
     <div class="py-2">或上传本地图片：</div>
     <input :ref="el => noteStore.imageFileChooser = el as HTMLInputElement" type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" @change="handleFile"/>
     <template #action>
-      <button class="btn btn-accent" @click="open = false">取消</button>
+      <button class="btn" @click="open = false">取消</button>
       <button class="btn btn-primary" :disabled="submitDisabled" @click="submit">确定</button>
     </template>
   </d-modal>

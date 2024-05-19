@@ -7,7 +7,7 @@ export const useUIStore = defineStore('ui', {
   state: () => ({
     connectionStatus: true, // 连接状态
     toasts: [] as { id: number, type: ToastType, msg: string }[],
-    theme: localStorage.getItem('theme') || 'lemonade',
+    theme: localStorage.getItem('theme') || 'light',
     userManageDialogShow: false
   }),
   actions: {

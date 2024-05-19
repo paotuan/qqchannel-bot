@@ -1,8 +1,8 @@
 <template>
   <div class="form-control">
-    <label class="input-group input-group-sm">
-      <span><MagnifyingGlassIcon class="size-4" /></span>
-      <input v-model="filter.keyword" type="text" placeholder="搜索人物卡名" class="input input-bordered input-sm" />
+    <label class="input input-bordered input-sm flex items-center gap-2">
+      <MagnifyingGlassIcon class="size-4" />
+      <input v-model="filter.keyword" type="text" placeholder="搜索人物卡名" />
     </label>
   </div>
   <d-native-select v-model="filter.linkState" :options="linkStateOptions" placeholder="关联状态" select-class="select-bordered select-sm" clearable />
