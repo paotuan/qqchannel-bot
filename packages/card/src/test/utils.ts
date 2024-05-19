@@ -1,11 +1,4 @@
-import type { IDndCardData, ICocCardData, IGeneralCardData } from '@paotuan/card'
-import { NumberGenerator } from '@dice-roller/rpg-dice-roller'
-import { VERSION_CODE } from '../version'
-
-export const MockChannelId = '__mock_channel_id__'
-export const MockUserId = '__mock_user_id__'
-
-export const resetRandomEngine = (seed: number) => (NumberGenerator.generator.engine = { next: () => seed })
+import { IDndCardData, ICocCardData, IGeneralCardData, VERSION_CODE } from '../index'
 
 export function getCocCardProto(): ICocCardData {
   return {

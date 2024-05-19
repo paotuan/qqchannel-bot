@@ -1,35 +1,18 @@
 // 人物卡测试：getEntry，getAbility，别名，读取属性优先级，人物卡展示
+import { describe, expect, test, beforeEach } from 'vitest'
 import {
   getCocCardProto,
   getDndCardProto,
   getGeneralCardProto,
-  MockChannelId,
-  MockUserId,
-  resetRandomEngine
 } from './utils'
-import { GeneralCard, CocCard, DndCard } from '@paotuan/card'
-import { IDiceRollContext } from '../dice/utils/parseTemplate'
-import { createDiceRoll } from '../dice/utils/create'
-import { CardProvider } from '../card/card-provider'
+import { GeneralCard, CocCard, DndCard } from '../index'
 
-function createContext(): IDiceRollContext {
-  return {
-    userId: MockUserId,
-    username: 'Maca',
-    userRole: 'admin',
-    channelUnionId: MockChannelId,
-  }
-}
 
 describe('人物卡-coc', () => {
   let card: CocCard
 
   beforeEach(() => {
-    const cardData = getCocCardProto()
-    CardProvider.INSTANCE.registerCard(cardData.name, cardData)
-    CardProvider.INSTANCE.linkCard(MockChannelId, cardData.name, MockUserId)
-    card = CardProvider.INSTANCE.getCardById(cardData.name) as CocCard
-    resetRandomEngine(1)
+    card = new CocCard(getCocCardProto())
   })
 
   test('getAbility-内置', () => {
@@ -46,9 +29,6 @@ describe('人物卡-coc', () => {
     card.data.abilities.push({ name: 'db', expression: '1d10', ext: '' })
     const db = card.getAbility('db')
     expect(db).toEqual({ input: 'db', key: 'db', readonly: false, value: '1d10' })
-    const context = createContext()
-    const roller = createDiceRoll('1d3+$db', context)
-    expect(roller.output).toBe('Maca 🎲\n先是 🎲 db 1d10: [2] = 2\n最后 🎲 1d3+2: [2]+2 = 4')
   })
 
   test('getEntry-内置', () => {
@@ -65,9 +45,6 @@ describe('人物卡-coc', () => {
     card.data.skills['体格'] = 5
     const db = card.getEntry('体格')
     expect(db).toEqual({ input: '体格', key: '体格', readonly: false, value: 5, baseValue: 5, difficulty: 'normal', type: 'skills', isTemp: false })
-    const context = createContext()
-    const roller = createDiceRoll('1d3+$体格', context)
-    expect(roller.output).toBe('Maca 🎲 1d3+5: [2]+5 = 7')
   })
 
   test('setEntry-用户输入高于内置', () => {
@@ -86,7 +63,6 @@ describe('人物卡-dnd', () => {
 
   beforeEach(() => {
     card = new DndCard(getDndCardProto())
-    resetRandomEngine(1)
   })
 
   test('getEntry-内置', () => {
