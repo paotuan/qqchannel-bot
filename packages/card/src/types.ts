@@ -1,5 +1,4 @@
 import mitt from 'mitt'
-import { handleCardUpgrade } from './utils/upgrade'
 
 export type CardType = 'general' | 'coc' | 'dnd'
 
@@ -72,7 +71,7 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
   }
 
   constructor(data: D) {
-    this.data = handleCardUpgrade(data)
+    this.data = data
   }
 
   abstract getAbility(input: string): A | undefined

@@ -4,7 +4,7 @@ import { makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '@paotuan/types'
-import type { ICard, ICardData, ICardEntryChangeEvent } from '@paotuan/card'
+import { handleCardUpgrade, ICard, ICardData, ICardEntryChangeEvent } from '@paotuan/card'
 import mitt from 'mitt'
 import { ChannelUnionId } from '../adapter/utils'
 import { resolveRootDir } from '../utils'
@@ -58,7 +58,7 @@ export class CardManager {
         } else {
           // 人物卡文件
           try {
-            const card = JSON.parse(str) as ICardData
+            const card = handleCardUpgrade(JSON.parse(str))
             // 补充 created，lastModified if need
             if (!card.created && file.created) {
               card.created = file.created
@@ -70,7 +70,7 @@ export class CardManager {
             // 传入响应式对象，确保内部变化被监听到
             CardProvider.registerCard(card.name, this.cardMap[card.name])
           } catch (e) {
-            console.log(`[Card] ${file.path} 解析失败`)
+            console.log(`[Card] ${file.path} 解析失败`, e)
           }
         }
       })

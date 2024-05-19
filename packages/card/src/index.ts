@@ -3,6 +3,7 @@ import { CocCard, ICocCardData, getCocTempEntry, ICocCardEntry, ICocCardAbility 
 import { GeneralCard, IGeneralCardData } from './general'
 import { DndCard, IDndCardData, getSkillsMap, getPropOfSkill, IDndCardAbility, IDndCardEntry } from './dnd'
 import { VERSION_CODE } from './utils/version'
+import { handleCardUpgrade } from './utils/upgrade'
 
 function createCard(data: ICardData): ICard {
   switch (data.type) {
@@ -38,5 +39,6 @@ export {
   getSkillsMap,
   getPropOfSkill,
   createCard,
+  handleCardUpgrade,
   VERSION_CODE
 }
