@@ -4,6 +4,7 @@
   "description": "",
   "main": "bundle.js",
   "scripts": {
+    "build": "echo 'do nothing'",
     "bundle": "pkg . --compress GZip"
   },
   "bin": "bundle.js",

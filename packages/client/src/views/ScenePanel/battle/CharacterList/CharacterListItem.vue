@@ -39,6 +39,7 @@ const updateSeq = (chara: ISceneActor | ISceneNpc, type: 'seq' | 'seq2', value: 
     data: {
       type: chara.type,
       id: chara.userId,
+      name: chara.userId,
       seq: chara.seq,
       seq2: chara.seq2,
       [type]: value

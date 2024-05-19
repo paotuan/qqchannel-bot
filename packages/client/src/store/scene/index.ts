@@ -307,6 +307,7 @@ function addCharaSyncRiList(chara: ISceneActor | ISceneNpc) {
     data: {
       type: chara.type,
       id: chara.userId,
+      name: chara.userId,
       seq: chara.seq,
       seq2: chara.seq2
     }
