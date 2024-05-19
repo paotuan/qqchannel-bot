@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import { MockChannelId, MockUserId, resetRandomEngine } from './utils'
 import { IDiceRollContext } from '../dice/utils/parseTemplate'
 import { createDiceRoll } from '../dice/utils/create'
@@ -257,8 +257,6 @@ describe('未关联人物卡', () => {
 
   test('st 无人物卡', () => {
     const roller = createDiceRoll({ command: 'st', context })
-    expect(roller.output).toBe(`<@!${MockUserId}>没有关联人物卡`)
+    expect(roller.output).toBe(`<at id="${MockUserId}"/>没有关联人物卡`)
   })
 })
-
-export {}

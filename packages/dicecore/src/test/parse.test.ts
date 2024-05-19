@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { parseDescriptions2 } from '../dice/utils/parseDescription'
 
 describe('组合检定表达式解析', () =>{
