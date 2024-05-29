@@ -25,7 +25,7 @@
             </div>
             <!-- 子频道空数据展示 -->
             <div v-if="channelStore.list.length === 0" class="w-96">
-              <div class="font-bold my-4 loading">频道信息获取中...</div>
+              <div class="font-bold my-4"><span class="loading loading-spinner loading-md mr-4" />频道信息获取中...</div>
               <template v-if="showLoadingFailTips">
                 <div>如长时间获取不到频道信息：</div>
                 <ol class="list-decimal pl-4 mb-4">
