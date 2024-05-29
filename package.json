@@ -4,6 +4,8 @@
   "version": "2.0.0-alpha.1",
   "license": "MIT",
   "workspaces": [
+    "adapters/kook",
+    "adapters/qq",
     "packages/card",
     "packages/config",
     "packages/dicecore",

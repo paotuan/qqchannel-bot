@@ -35,4 +35,6 @@ tsconfig.tsbuildinfo
 /apps/dist/server
 /apps/dist/bin
 /apps/dist/log.txt
+/apps/**/lib
+/adapters/**/lib
 /packages/**/lib

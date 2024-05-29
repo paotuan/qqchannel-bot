@@ -12,7 +12,7 @@
     "@paotuan/api2d": "0.1.41",
     "@paotuan/card": "2.0.0",
     "@paotuan/config": "2.0.0",
-    "@paotuan/types": "1.0.0",
+    "@paotuan/types": "2.0.0",
     "@vuepic/vue-datepicker": "^5.4.0",
     "@vueuse/core": "^9.13.0",
     "daisyui": "^4.10.5",
