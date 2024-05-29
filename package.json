@@ -8,16 +8,16 @@
     "packages/config",
     "packages/dicecore",
     "packages/types",
-    "packages/server",
-    "packages/client",
-    "packages/dist"
+    "apps/server",
+    "apps/client",
+    "apps/dist"
   ],
   "scripts": {
     "dev:client": "yarn workspace client run dev",
     "dev:server": "yarn workspace server run dev",
     "build": "yarn workspaces run build",
-    "preview": "node packages/dist/bundle.js",
-    "start": "pm2 start packages/dist/bundle.js --name qqchannel-bot",
+    "preview": "node apps/dist/bundle.js",
+    "start": "pm2 start apps/dist/bundle.js --name qqchannel-bot",
     "stop": "pm2 stop qqchannel-bot",
     "test": "vitest"
   },

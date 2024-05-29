@@ -31,8 +31,8 @@ tsconfig.tsbuildinfo
 /config-backup/
 /plugins/
 /user/
-/packages/dist/client
-/packages/dist/server
-/packages/dist/bin
-/packages/dist/log.txt
+/apps/dist/client
+/apps/dist/server
+/apps/dist/bin
+/apps/dist/log.txt
 /packages/**/lib
