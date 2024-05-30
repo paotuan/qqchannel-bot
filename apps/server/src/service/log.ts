@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx'
 import type { BotContext, ICommand } from '@paotuan/config'
 import type { ILogPushResp, ILog } from '@paotuan/types'
 import { Bot } from '../adapter/Bot'
-import { Session, Element } from '@satorijs/satori'
+import { Session, Element } from '../adapter/satori'
 import { getChannelUnionId } from '../adapter/utils'
 import { LogBackground } from './logBackground'
 

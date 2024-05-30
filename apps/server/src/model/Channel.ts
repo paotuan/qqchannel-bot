@@ -1,6 +1,6 @@
-import { Bot } from '../adapter/Bot'
 import { makeAutoObservable } from 'mobx'
-import { Session, Universal } from '@satorijs/satori'
+import { Bot } from '../adapter/Bot'
+import { Session, Universal } from '../adapter/satori'
 import { removeBackspaces } from '../utils'
 import { qqguildV1_sendRawImage } from '../adapter/qqguild-v1'
 

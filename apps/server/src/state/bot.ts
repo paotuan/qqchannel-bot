@@ -1,4 +1,4 @@
-import { Universal } from '@satorijs/satori'
+import { Universal } from '../adapter/satori'
 
 /**
  * bot 级别需要同步的数据

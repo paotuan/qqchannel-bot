@@ -1,7 +1,7 @@
-import type { Bot } from '../adapter/Bot'
 import { makeAutoObservable, runInAction } from 'mobx'
 import { Guild } from './Guild'
-import { Universal } from '@satorijs/satori'
+import type { Bot } from '../adapter/Bot'
+import { Universal } from '../adapter/satori'
 import { Channel } from './Channel'
 import { User } from './User'
 

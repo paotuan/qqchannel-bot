@@ -1,5 +1,5 @@
 import type { IBotConfig, IBotInfo } from '@paotuan/types'
-import { Context, Bot as SatoriApi, ForkScope, GetEvents } from '@satorijs/satori'
+import { Context, SatoriApi, ForkScope, Events } from './satori'
 import { adapterConfig, adapterPlugin, getBotId } from './utils'
 import { isEqual } from 'lodash'
 import { makeAutoObservable, runInAction } from 'mobx'
@@ -16,7 +16,7 @@ export class Bot {
   readonly config: IBotConfig
   private readonly context = new Context()
   readonly api: SatoriApi
-  private readonly _fork: ForkScope<Context>
+  private readonly _fork: ForkScope
   readonly wss: Wss
   botInfo: IBotInfo | null = null
   readonly guilds: GuildManager
@@ -149,7 +149,7 @@ export class Bot {
     return isEqual(this.config, anotherConfig)
   }
 
-  on<K extends keyof GetEvents<Context>>(name: K, listener: GetEvents<Context>[K]) {
+  on<K extends keyof Events>(name: K, listener: Events[K]) {
     this.context.on(name, listener)
   }
 }

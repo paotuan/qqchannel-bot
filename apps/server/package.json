@@ -15,7 +15,7 @@
     "@paotuan/config": "2.0.0",
     "@paotuan/dicecore": "2.0.0",
     "@paotuan/types": "2.0.0",
-    "@satorijs/satori": "4.1.0",
+    "@satorijs/core": "4.1.0",
     "fast-glob": "^3.3.1",
     "form-data": "^4.0.0",
     "lru-cache": "^7.14.0",

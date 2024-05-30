@@ -1,6 +1,6 @@
-import { Bot } from '../adapter/Bot'
 import { makeAutoObservable } from 'mobx'
-import { Session } from '@satorijs/satori'
+import { Bot } from '../adapter/Bot'
+import { Session } from '../adapter/satori'
 import { removeBackspaces } from '../utils'
 
 // todo 后续与 interface/common 合并

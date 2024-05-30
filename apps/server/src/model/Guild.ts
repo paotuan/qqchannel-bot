@@ -1,10 +1,10 @@
-import { Bot } from '../adapter/Bot'
-import { makeAutoObservable, runInAction } from 'mobx'
-import { Channel } from './Channel'
-import { Universal } from '@satorijs/satori'
-import { User } from './User'
-import { VERSION_CODE } from '@paotuan/types'
 import fs from 'fs'
+import { makeAutoObservable, runInAction } from 'mobx'
+import { VERSION_CODE } from '@paotuan/types'
+import { Channel } from './Channel'
+import { Bot } from '../adapter/Bot'
+import { Universal } from '../adapter/satori'
+import { User } from './User'
 import { resolveRootDir } from '../utils'
 
 const USER_DIR = resolveRootDir('user')

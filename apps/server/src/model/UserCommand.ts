@@ -1,6 +1,6 @@
 import { Bot } from '../adapter/Bot'
-import { Session, Element } from '@satorijs/satori'
 import type { ICommand, BotContext, UserRole } from '@paotuan/config'
+import { Session, Element } from '../adapter/satori'
 import { getChannelUnionId } from '../adapter/utils'
 
 export class UserCommand implements ICommand<BotContext> {
