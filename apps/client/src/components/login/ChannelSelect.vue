@@ -47,6 +47,7 @@
                 <input type="radio" name="login_channel-select-radio" class="radio radio-primary"
                        :checked="checkedChannelId === channel.id" @click="checkedChannel = channel"/>
               </label>
+              <ChannelCreate :guild-id="checkedGuildId" />
             </div>
             <button class="btn btn-primary w-full -mt-4 shadow-lg" :disabled="!checkedChannel"
                     @click="listenTo(checkedChannel)">开始使用！
@@ -63,6 +64,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import type { IChannel } from '@paotuan/types'
 import { groupBy } from 'lodash'
 import { ArrowTopRightOnSquareIcon, VideoCameraIcon, MicrophoneIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/vue/24/outline'
+import ChannelCreate from './ChannelCreate.vue'
 
 const channelStore = useChannelStore()
 const channelsGroupByGuild = computed(() => groupBy(channelStore.list || [], channel => channel.guildId))

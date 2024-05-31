@@ -35,6 +35,13 @@ export default {
   on(cmd: Command, handler: (data: IMessage<unknown>) => void) {
     wsEmitter.on(cmd, data => handler(data as IMessage<unknown>))
   },
+  once(cmd: Command, handler: (data: IMessage<unknown>) => void) {
+    const _handler = (data: any) => {
+      wsEmitter.off(cmd, _handler)
+      handler(data as IMessage<unknown>)
+    }
+    wsEmitter.on(cmd, _handler)
+  },
   send<T>(msg: IMessage<T>) {
     ws.send(JSON.stringify(msg))
   }

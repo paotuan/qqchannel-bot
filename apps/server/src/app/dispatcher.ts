@@ -24,7 +24,7 @@ import type {
   IRiListResp,
   IRiSetReq,
   IRiDeleteReq,
-  IDiceRollReq, IUserDeleteReq, IPluginReloadReq, ILoginReqV2,
+  IDiceRollReq, IUserDeleteReq, IPluginReloadReq, ILoginReqV2, IChannelCreateReq,
 } from '@paotuan/types'
 import { RiProvider } from '@paotuan/dicecore'
 import { getBotId } from '../adapter/utils'
@@ -36,6 +36,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'channel/listen':
     handleListenToChannel(client, server, request.data as IListenToChannelReq)
+    break
+  case 'channel/create':
+    handleChannelCreate(client, server, request.data as IChannelCreateReq)
     break
   // case 'note/send':
   //   handleSendNote(client, server, request.data as INoteSendReq)
@@ -177,6 +180,19 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
     }
   })
+}
+
+async function handleChannelCreate(client: WsClient, server: Wss, data: IChannelCreateReq) {
+  const bot = client.bot
+  if (bot) {
+    const guild = bot.guilds.find(data.guildId)
+    if (guild) {
+      const success = await guild.createChannel(data.name)
+      client.send<string>({ cmd: 'channel/create', success, data: success ? '创建成功' : '创建失败' })
+      return
+    }
+  }
+  client.send<string>({ cmd: 'channel/create', success: false, data: '找不到频道信息' })
 }
 
 // function handleSendNote(client: WsClient, server: Wss, data: INoteSendReq) {

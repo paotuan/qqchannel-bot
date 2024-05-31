@@ -16,6 +16,8 @@ export class Guild {
   private readonly bot: Bot
   private channelsMap: Record<string, Channel> = {}
   private usersMap: Record<string, User> = {}
+  // 用于创建新的文字子频道，所在分组
+  private channelGroupId4Create: string | undefined
 
   constructor(bot: Bot, id: string, name?: string, icon?: string) {
     makeAutoObservable(this)
@@ -58,6 +60,17 @@ export class Guild {
   // deleteChannel(id: string) {
   //   delete this.channelsMap[id]
   // }
+
+  async createChannel(name: string) {
+    try {
+      const resp = await this.bot.api.createChannel(this.id, { type: Universal.Channel.Type.TEXT, name, parentId: this.channelGroupId4Create })
+      this.addChannel({ id: resp.id, name, type: Universal.Channel.Type.TEXT })
+      return true
+    } catch (e) {
+      console.error('[Guild] 创建子频道失败', e)
+      return false
+    }
+  }
 
   addOrUpdateUser(author: Universal.GuildMember & Universal.User) {
     const authorName = author.nick ?? author.nickname ?? author.name ?? author.username
@@ -130,10 +143,33 @@ export class Guild {
           .filter(channel => Channel.VALID_TYPES.includes(channel.type))
           .map(channel => new Channel(this.bot, channel.id, this.id, channel.name, channel.type))
         this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
+        this.detectChannelGroupId4Create(list)
       })
     } catch (e) {
       console.error('获取子频道信息失败', e)
     }
+  }
+
+  // 获取可用于创建文字子频道的分组 id
+  private detectChannelGroupId4Create(list: Universal.Channel[]) {
+    const categories = list.filter(channel => channel.type === Universal.Channel.Type.CATEGORY)
+    // qq 频道经测试，只能在活动类型下创建
+    const qqTextGroup = categories.find(channel => channel.name === '活动')
+    if (qqTextGroup) {
+      this.channelGroupId4Create = qqTextGroup.id
+      return
+    }
+    // 放到已经有其他文字子频道的分组下面，这样成功概率更高
+    const hasTextGroup = categories.find(category => {
+      const parentId = category.id
+      return !!list.find(channel => channel.type === Universal.Channel.Type.TEXT && channel.parentId === parentId)
+    })
+    if (hasTextGroup) {
+      this.channelGroupId4Create = hasTextGroup.id
+      return
+    }
+    // 都没有找到，默认取第一个
+    this.channelGroupId4Create = categories[0]?.id
   }
 
   // user 持久化相关

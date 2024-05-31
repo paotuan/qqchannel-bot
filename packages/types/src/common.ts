@@ -8,6 +8,7 @@ export type Command =
   | 'bot/info'  // res
   | 'channel/list' // res
   | 'channel/listen' // req
+  | 'channel/create' // req/res
   | 'channel/config' // req/res
   | 'channel/config/reset' // req
   | 'user/list' // res
@@ -67,6 +68,11 @@ export type IChannelListResp = IChannel[]
 export interface IListenToChannelReq {
   channelId: string
   guildId: string
+}
+
+export interface IChannelCreateReq {
+  guildId: string
+  name: string
 }
 
 export interface IChannelConfigReq {
