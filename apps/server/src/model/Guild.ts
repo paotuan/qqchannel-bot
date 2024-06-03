@@ -152,6 +152,8 @@ export class Guild {
 
   // 获取可用于创建文字子频道的分组 id
   private detectChannelGroupId4Create(list: Universal.Channel[]) {
+    // qq 频道需强制指定文字分组，kook 不需要
+    if (this.bot.platform !== 'qqguild') return
     const categories = list.filter(channel => channel.type === Universal.Channel.Type.CATEGORY)
     // qq 频道经测试，只能在活动类型下创建
     const qqTextGroup = categories.find(channel => channel.name === '活动')
