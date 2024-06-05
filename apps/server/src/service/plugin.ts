@@ -37,17 +37,10 @@ export class PluginManager {
       versionCode: VERSION_CODE,
       roll: exp => new DiceRoll(exp),
       render: (arg1, arg2, arg3) => Mustache.render(arg1, arg2, arg3, { escape: value => value }),
-      getCard: ({ platform, guildId, channelId, userId }) => {
-        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-        return this.wss.cards.getCard(channelUnionId, userId)
-      },
+      getCard: ({ channelUnionId, userId }) => this.wss.cards.getCard(channelUnionId, userId),
       saveCard: (card: ICard) => this.wss.cards.saveCard(card),
-      getLinkedCardUserList: ({ platform, guildId, channelId }) => {
-        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-        return Object.keys(this.wss.cards.getLinkMap(channelUnionId))
-      },
-      linkCard: ({ platform, guildId, channelId, userId }, cardName) => {
-        const channelUnionId = getChannelUnionId(platform, guildId, channelId)
+      getLinkedCardUserList: ({ channelUnionId }) => Object.keys(this.wss.cards.getLinkMap(channelUnionId)),
+      linkCard: ({ channelUnionId, userId }, cardName) => {
         if (userId && !cardName) {
           // 1. 如果传了 userId，没传 cardName，代表解除该 user 的卡关联
           const cardName = this.wss.cards.getCard(channelUnionId, userId)?.name

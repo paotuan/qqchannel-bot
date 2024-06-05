@@ -111,18 +111,18 @@ export class CardManager {
     }
   }
 
-  getLinkMap(channelUnionId: ChannelUnionId) {
+  getLinkMap(channelUnionId: string) {
     return CardProvider.getLinkMap(channelUnionId)
   }
 
   // 根据子频道和用户 id，获取该用户关联的人物卡
-  getCard(channelUnionId: ChannelUnionId, userId: string): ICard | undefined {
+  getCard(channelUnionId: string, userId: string): ICard | undefined {
     return CardProvider.getCard(channelUnionId, userId)
   }
 
   // 根据子频道、用户 id、人物卡名，关联人物卡. 不传 userId 代表取消这张卡的关联
   // 注：目前不会校验 cardName 是否真的存在这张卡
-  linkCard(channelUnionId: ChannelUnionId, cardName: string, userId?: string) {
+  linkCard(channelUnionId: string, cardName: string, userId?: string) {
     CardProvider.linkCard(channelUnionId, cardName, userId)
   }
 

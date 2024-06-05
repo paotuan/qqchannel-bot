@@ -38,3 +38,4 @@ tsconfig.tsbuildinfo
 /apps/**/lib
 /adapters/**/lib
 /packages/**/lib
+/packages/dicecore/src/test/plugins/
