@@ -1,5 +1,5 @@
 import type { Wss } from '../app/wss'
-import type { IPlugin, IPluginElementCommonInfo } from '@paotuan/config'
+import type { BotContext, ICommand, IPlugin, IPluginElementCommonInfo } from '@paotuan/config'
 import { VERSION_CODE, VERSION_NAME, type IPluginRegisterContext, type IPluginConfigDisplay } from '@paotuan/types'
 import { makeAutoObservable } from 'mobx'
 import fs from 'fs'
@@ -93,6 +93,19 @@ export class PluginManager {
           return user.sendMessage(content)
         } else {
           return user.sendMessage(`<img src="${msg}"/>`)
+        }
+      },
+      sendMessage: async (env, msg, options = {}) => {
+        const bot = this.wss.bots.find(env.botId)
+        if (!bot) return
+        const command: ICommand<BotContext> = { command: '', context: env }
+        const { msgType = 'text', skipParse = false } = options
+        // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
+        if (msgType === 'text') {
+          const content = skipParse ? msg : parseTemplate(msg, env, [], 'message_template')
+          return bot.commandHandler.sendMessage(command, content)
+        } else {
+          return bot.commandHandler.sendMessage(command, `<img src="${msg}"/>`)
         }
       },
       getConfig: ({ platform, guildId, channelId }) => {

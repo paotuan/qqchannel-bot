@@ -24,8 +24,15 @@ export interface IPluginRegisterContext {
   getLinkedCardUserList: (env: Env) => string[] // 获取当前频道关联了人物卡的 user id 列表
   linkCard: (env: Env, cardName?: string) => void
   queryCard: (query: ICardQuery) => ICard[]
+  /**
+   * @deprecated use {@link sendMessage} instead
+   */
   sendMessageToChannel: (env: Env, msg: string, options?: SendMessageOptions) => Promise<unknown>
+  /**
+   * @deprecated use {@link sendMessage} instead
+   */
   sendMessageToUser: (env: Env, msg: string, options?: SendMessageOptions) => Promise<unknown>
+  sendMessage: (env: Env, msg: string, options?: SendMessageOptions) => Promise<unknown>
   getConfig: (context: { platform: Platform, guildId: string, channelId: string }) => IChannelConfig
   getPreference: (context: { platform: Platform, guildId: string, channelId: string }) => Record<string, string>
   dispatchUserCommand: (context: ICommand<BotContext>) => Promise<void>

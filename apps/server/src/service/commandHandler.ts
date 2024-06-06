@@ -175,7 +175,7 @@ export class CommandHandler {
   // 发送消息
   // 如传入 forceUserId，则强制发给对应 user
   // 否则根据 isDirect 决定发给人或发给频道
-  private async sendMessage(userCommand: ICommand<BotContext>, content: string, forceUserId?: string) {
+  async sendMessage(userCommand: ICommand<BotContext>, content: string, forceUserId?: string) {
     let { isDirect, userId } = userCommand.context
     const { channelId, guildId } = userCommand.context
     if (forceUserId) {
@@ -184,10 +184,18 @@ export class CommandHandler {
     }
     if (isDirect) {
       const user = this.bot.guilds.findUser(userId, guildId)
-      return user?.sendMessage(content, userCommand.session)
+      if (!user) {
+        console.warn(`[SendMessage] 找不到用户, userId=${userId}, guildId=${guildId}`)
+        return
+      }
+      return user.sendMessage(content, userCommand.session)
     } else {
       const channel = this.bot.guilds.findChannel(channelId, guildId)
-      return channel?.sendMessage(content, userCommand.session)
+      if (!channel) {
+        console.warn(`[SendMessage] 找不到频道, channelId=${channelId}, guildId=${guildId}`)
+        return
+      }
+      return channel.sendMessage(content, userCommand.session)
     }
   }
 }
