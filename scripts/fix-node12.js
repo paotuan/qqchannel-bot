@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const distFile = path.resolve(__dirname, '../packages/dist/server/index.js')
+const distFile = path.resolve(__dirname, '../apps/dist/server/index.js')
 
 const data = fs.readFileSync(distFile)
 

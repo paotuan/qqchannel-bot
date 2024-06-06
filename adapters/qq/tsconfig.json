@@ -4,7 +4,7 @@
     "module": "commonjs",
     "sourceMap": true,
     "declaration": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "composite": true,
     "incremental": true,
     "skipLibCheck": true,

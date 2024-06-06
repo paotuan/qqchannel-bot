@@ -611,14 +611,6 @@
     "@satorijs/element" "^3.1.7"
     cosmokit "^1.6.2"
 
-"@satorijs/satori@4.1.0":
-  version "4.1.0"
-  resolved "https://registry.npmmirror.com/@satorijs/satori/-/satori-4.1.0.tgz#87fb9ffe4afe3dc944549c8a0e4f04c48125a403"
-  integrity sha512-PMx/XrN+UDtRwo9/q80E1N2Qtc80pgWYVMPIXxiMvOEoiQuIAr2wZhhP3IRR9/Uf+mXfCHIiohaX4cplMGvODw==
-  dependencies:
-    "@satorijs/core" "4.1.0"
-    cosmokit "^1.6.2"
-
 "@sinclair/typebox@^0.27.8":
   version "0.27.8"
   resolved "https://registry.npmmirror.com/@sinclair/typebox/-/typebox-0.27.8.tgz#6667fac16c436b5434a387a34dedb013198f6e6e"
