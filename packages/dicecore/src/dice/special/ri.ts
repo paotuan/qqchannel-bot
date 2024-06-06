@@ -4,7 +4,6 @@ import { at, AtUserPattern } from '../utils'
 import { parseDescriptions, ParseFlags } from '../utils/parseDescription'
 import { parseTemplate } from '../utils/parseTemplate'
 import { RiProvider } from '../../ri/ri-provider'
-import type { IRiItem } from '../../ri/state'
 
 // ri [1d20+1] [username],[1d20] [username]
 // init
@@ -74,7 +73,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
 
   private clear = false
   private delList: { id: string, type: 'npc' | 'actor' }[] = []
-  private riList?: IRiItem[]
+  private riListDescription = ''
 
   override roll() {
     // init 其实是个普通指令，不是骰子，有固定格式，所以就不考虑复杂的一些情况了，也没意义
@@ -107,7 +106,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
 
   applyToCard() {
     // 先存一份列表，避免 apply 后清空，output 获取不到
-    this.riList = [...RiProvider.INSTANCE.getRiList(this.context.channelUnionId)]
+    this.riListDescription = RiProvider.INSTANCE.getDescription(this.context.channelUnionId)
     // 真正处理
     if (this.clear) {
       RiProvider.INSTANCE.clearRiList(this.context.channelUnionId)
@@ -118,9 +117,6 @@ export class RiListDiceRoll extends BasePtDiceRoll {
   }
 
   override get output() {
-    if (!this.riList) {
-      return this.t('roll.ri.unsupported')
-    }
     if (this.delList.length > 0) {
       const charaList = this.delList.map(item => RiProvider.INSTANCE.getRiName(item))
       return this.t('roll.ri.del', {
@@ -130,7 +126,7 @@ export class RiListDiceRoll extends BasePtDiceRoll {
       })
     } else {
       // 显示先攻列表
-      let listDesc = RiProvider.INSTANCE.getDescription(this.context.channelUnionId)
+      let listDesc = this.riListDescription
       if (this.clear) {
         listDesc += '\n' + this.t('roll.ri.clear')
       }

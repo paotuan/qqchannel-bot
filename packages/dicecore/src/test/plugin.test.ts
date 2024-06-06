@@ -1,4 +1,4 @@
-import { beforeEach, describe, test, expect } from 'vitest'
+import { beforeEach, describe, test, expect, vi } from 'vitest'
 import { IDiceRollContext } from '../dice/utils/parseTemplate'
 import { getCocCardProto, MockChannelId, MockUserId, resetRandomEngine } from './utils'
 import { CardProvider } from '../card/card-provider'
@@ -22,6 +22,8 @@ function createContext(): IDiceRollContext {
   }
 }
 
+const mockPluginHandleDispatchResult = vi.fn()
+
 function registerPlugins(names: string[]) {
   const plugins = names.map(pluginName => {
     const fullPath = path.join(__dirname, 'plugins', pluginName, 'index.js')
@@ -42,9 +44,14 @@ function registerPlugins(names: string[]) {
         console.log('sendMessageToUser', msg, options)
       },
       getConfig: () => ConfigProvider.INSTANCE.defaultConfig.config,
-      getPreference: () => ({}),
+      getPreference: () => {
+        const channelConfig = ConfigProvider.INSTANCE.defaultConfig
+        const pluginConfig = channelConfig.config.plugins.find(plugin => plugin.id === pluginName)
+        return pluginConfig?.preference ?? {}
+      },
       dispatchUserCommand: async c => {
-        console.log(c)
+        const result = await dispatchCommand(c)
+        mockPluginHandleDispatchResult(result)
       },
       _
     }
@@ -178,4 +185,55 @@ describe('实验性指令设置', () => {
 //     const result = context.config.naiveParseInlineRolls('1d3+[[1d10+[[1+d6]]]]', context.getCard(MockUserId))
 //     expect(result).toBe('1d3+(1d10+(1+d6))')
 //   })
+})
+
+describe('COC 真实奖惩骰', () => {
+  let context: IDiceRollContext
+
+  beforeEach(() => {
+    context = createContext()
+    resetRandomEngine(1)
+    // 注册插件
+    registerPlugins(['io.paotuan.plugin.coc.realrbrp'])
+    // 禁用默认 rb rp
+    const config = ConfigProvider.INSTANCE.defaultConfig.config
+    ;['io.paotuan.embed.rb', 'io.paotuan.embed.rp'].forEach(id => {
+      const item = config.aliasRollIds.find(item => item.id === id)
+      item && (item.enabled = false)
+    })
+  })
+
+  test('奖励骰别名', async () => {
+    const result = await dispatchCommand({ command: 'rb', context })
+    const roller = (result as IDispatchResult_Dice).diceRoll
+    expect(roller.output).toBe('Maca 🎲 {11,11}kl1: {11, (11)d} = 11')
+  })
+
+  test('惩罚骰别名', async () => {
+    const result = await dispatchCommand({ command: 'rp2', context })
+    const roller = (result as IDispatchResult_Dice).diceRoll
+    expect(roller.output).toBe('Maca 🎲 {11,11,11}kh1: {(11)d, (11)d, 11} = 11')
+  })
+})
+
+describe('全局连续掷骰', () => {
+  let context: IDiceRollContext
+
+  beforeEach(() => {
+    context = createContext()
+    resetRandomEngine(1)
+    // 注册插件
+    registerPlugins(['io.paotuan.plugin.globalflags'])
+    mockPluginHandleDispatchResult.mockClear()
+  })
+
+  test('全局连续掷骰', async () => {
+    const result = await dispatchCommand({ command: 'd100 -x3', context })
+    const roller = (result as IDispatchResult_Dice).diceRoll
+    expect(roller.output).toBe('Maca 🎲 d100: [2] = 2')
+    setTimeout(() => {
+      // 连续掷骰是异步的
+      expect(mockPluginHandleDispatchResult).toHaveBeenCalledTimes(2)
+    }, 100)
+  })
 })

@@ -228,32 +228,29 @@ describe('未关联人物卡', () => {
     expect(roller.output).toBe('人物a 🎲 先攻 d20: [2] = 2\n人物b 🎲 先攻 20: 20 = 20\nMaca 🎲 先攻 d20: [2] = 2')
   })
 
-  // test('先攻列表', () => {
-  //   const riListCache: Record<string, IRiItem[]> = { [MockChannelId]: [] }
-  //   const initList = createDiceRoll({ command: 'ri人物a,20人物b,d20', context }) as RiDiceRoll
-  //   initList.applyToRiList(riListCache)
-  //   const roller = createDiceRoll({ command: 'init', context }) as RiListDiceRoll
-  //   roller.applyToRiList(riListCache)
-  //   expect(roller.output).toBe(`当前先攻列表：\n1. 人物b 🎲 20\n2. 人物a 🎲 2\n3. <@!${MockUserId}> 🎲 2`)
-  // })
-  //
-  // test('先攻删除', () => {
-  //   const riListCache: Record<string, IRiItem[]> = { [MockChannelId]: [] }
-  //   const initList = createDiceRoll({ command: 'ri人物a,20人物b,d20', context }) as RiDiceRoll
-  //   initList.applyToRiList(riListCache)
-  //   const roller = createDiceRoll({ command: 'init del 人物a', context }) as RiListDiceRoll
-  //   roller.applyToRiList(riListCache)
-  //   expect(roller.output).toBe('Maca 删除先攻：人物a')
-  // })
-  //
-  // test('先攻清空', () => {
-  //   const riListCache: Record<string, IRiItem[]> = { [MockChannelId]: [] }
-  //   const initList = createDiceRoll({ command: 'ri人物a,20人物b,d20', context }) as RiDiceRoll
-  //   initList.applyToRiList(riListCache)
-  //   const roller = createDiceRoll({ command: 'init clr', context }) as RiListDiceRoll
-  //   roller.applyToRiList(riListCache)
-  //   expect(roller.output).toBe(`当前先攻列表：\n1. 人物b 🎲 20\n2. 人物a 🎲 2\n3. <@!${MockUserId}> 🎲 2\n*先攻列表已清空`)
-  // })
+  test('先攻列表', () => {
+    const initList = createDiceRoll({ command: 'ri人物a,20人物b,d20', context })
+    initList.applyToCard()
+    const roller = createDiceRoll({ command: 'init', context })
+    roller.applyToCard()
+    expect(roller.output).toBe(`当前先攻列表：\n1. 人物b 🎲 20\n2. 人物a 🎲 2\n3. <at id="${MockUserId}"/> 🎲 2`)
+  })
+
+  test('先攻删除', () => {
+    const initList = createDiceRoll({ command: 'ri人物a,20人物b,d20', context })
+    initList.applyToCard()
+    const roller = createDiceRoll({ command: 'init del 人物a', context })
+    roller.applyToCard()
+    expect(roller.output).toBe('Maca 删除先攻：人物a')
+  })
+
+  test('先攻清空', () => {
+    const initList = createDiceRoll({ command: 'ri人物a,20人物b,d20', context })
+    initList.applyToCard()
+    const roller = createDiceRoll({ command: 'init clr', context })
+    roller.applyToCard()
+    expect(roller.output).toBe(`当前先攻列表：\n1. 人物b 🎲 20\n2. 人物a 🎲 2\n3. <at id="${MockUserId}"/> 🎲 2\n*先攻列表已清空`)
+  })
 
   test('st 无人物卡', () => {
     const roller = createDiceRoll({ command: 'st', context })
