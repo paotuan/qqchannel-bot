@@ -7,7 +7,7 @@
         </div>
       </template>
       <template v-else>
-        <div class="w-12 rounded-full bg-neutral-focus text-neutral-content">
+        <div class="w-12 rounded-full bg-neutral text-neutral-content">
           <span>{{ userInfo.nick.slice(0, 2) }}</span>
         </div>
       </template>
