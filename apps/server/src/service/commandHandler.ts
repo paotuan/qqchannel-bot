@@ -113,8 +113,8 @@ export class CommandHandler {
     case 'customReply': {
       if (result.reply) {
         this.sendMessage(userCommand, result.reply)
-        msgSent = true
       }
+      msgSent = true // 自定义回复可能在插件中已经回复了，此处默认为 true
       break
     }
     case 'interceptor':

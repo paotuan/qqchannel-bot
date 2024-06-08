@@ -1,6 +1,6 @@
 /* eslint-env node */
 
-module.exports = ({ roll, sendMessageToChannel, render, getPreference }) => {
+module.exports = ({ roll, sendMessage, render, getPreference }) => {
 
   function randCoc(roll) {
     const list = ['3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '3d6*5', '(2d6+6)*5', '3d6*5', '(2d6+6)*5', '3d6*5'].map(exp => roll(exp).total)
@@ -39,7 +39,7 @@ module.exports = ({ roll, sendMessageToChannel, render, getPreference }) => {
     id: 'io.paotuan.plugin.cardgen',
     name: '人物作成',
     description: '随机生成 COC/DND 人物属性',
-    version: 4,
+    version: 5,
     preference: [
       {
         key: 'text.cardgen',
@@ -71,7 +71,7 @@ module.exports = ({ roll, sendMessageToChannel, render, getPreference }) => {
                 if (i > 0 && i % 5 === 0) {
                   await new Promise(resolve => setTimeout(resolve, 1000))
                 }
-                sendMessageToChannel(env, `${render(pref['text.cardgen'], env)}\n${result[i]}`)
+                sendMessage(env, `${render(pref['text.cardgen'], env)}\n${result[i]}`)
               }
               return ''
             }
