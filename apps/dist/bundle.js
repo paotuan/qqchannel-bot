@@ -19,6 +19,9 @@ const chalk = require('chalk')
 const server = express()
 const staticPath = path.resolve(__dirname, './client')
 server.use(express.static(staticPath))
+server.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, './client/index.html')) // SPA support
+})
 
 const serverUrl = process.env.WS_SERVER_ADDR || 'localhost' // 如果通过该文件部署，必然不是前后端分离，server addr 是同一个
 const port = parseInt(process.env.WEB_PORT || '', 10) || 4175
