@@ -142,6 +142,12 @@ export class CommandHandler {
         }
         msgSent = true
       }
+      // 保存人物卡更新
+      if (result.affectedCards) {
+        result.affectedCards.forEach(card => {
+          this.bot.wss.cards.saveCard(card)
+        })
+      }
       break
     }
     }
