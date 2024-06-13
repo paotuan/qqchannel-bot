@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import publicIp from 'public-ip'
+import fetch from 'node-fetch'
 
 // https://www.zhangxinxu.com/wordpress/2021/01/dom-api-html-encode-decode/
 export function unescapeHTML(str: string) {
@@ -38,12 +38,31 @@ export function copyFolderSync(from: string, to: string) {
   })
 }
 
-export function detectPublicIP() {
-  publicIp.v4({ onlyHttps: true }).then((addr: string) => {
-    console.log('您当前的公网 IP 是：' + addr)
-  }).catch(() => {
-    console.error('获取公网 IP 失败')
-  })
+// https://github.com/sindresorhus/public-ip/blob/main/browser.js#L23C4-L23C31
+const detectUrls = [
+  'https://ipv4.icanhazip.com/',
+  'https://api.ipify.org/'
+]
+
+async function fetchIP(url: string) {
+  try {
+    const res = await fetch(url, { method: 'GET' })
+    const resp = await res.text()
+    return resp
+  } catch (e) {
+    return undefined
+  }
+}
+
+export async function detectPublicIP() {
+  for (const url of detectUrls) {
+    const addr = await fetchIP(url)
+    if (addr) {
+      console.log('您当前的公网 IP 是：' + addr)
+      return
+    }
+  }
+  console.error('获取公网 IP 失败，请检查您的网络连接')
 }
 
 // 获取某个文件夹名称基于 root 的路径
