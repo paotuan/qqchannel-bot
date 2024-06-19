@@ -32,13 +32,13 @@ ws.onerror = (data) => {
 }
 
 export default {
-  on(cmd: Command, handler: (data: IMessage<unknown>) => void) {
-    wsEmitter.on(cmd, data => handler(data as IMessage<unknown>))
+  on<T = unknown>(cmd: Command, handler: (data: IMessage<T>) => void) {
+    wsEmitter.on(cmd, data => handler(data as IMessage<T>))
   },
-  once(cmd: Command, handler: (data: IMessage<unknown>) => void) {
+  once<T = unknown>(cmd: Command, handler: (data: IMessage<T>) => void) {
     const _handler = (data: any) => {
       wsEmitter.off(cmd, _handler)
-      handler(data as IMessage<unknown>)
+      handler(data as IMessage<T>)
     }
     wsEmitter.on(cmd, _handler)
   },

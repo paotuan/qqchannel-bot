@@ -34,6 +34,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'bot/loginV2':
     handleLoginV2(client, server, request.data as ILoginReqV2)
     break
+  case 'bot/info':
+    handleGetBotInfo(client)
+    break
   case 'channel/listen':
     handleListenToChannel(client, server, request.data as IListenToChannelReq)
     break
@@ -103,12 +106,6 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
     client.bindToBot(bot.id)
     // 3. 返回登录成功
     client.send({ cmd: 'bot/loginV2', success: true, data: null })
-    // 4. watch bot info
-    client.autorun(ws => {
-      if (bot.botInfo) {
-        ws.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: bot.botInfo })
-      }
-    })
     // watch guild & channel info
     client.autorun(ws => {
       const channels: IChannel[] = bot.guilds.all.map(guild => guild.allChannels.map(channel => ({
@@ -128,6 +125,17 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
   } catch (e) {
     // 返回失败
     client.send({ cmd: 'bot/loginV2', success: false, data: null })
+  }
+}
+
+async function handleGetBotInfo(client: WsClient) {
+  const bot = client.bot
+  if (bot) {
+    const botInfo = await bot.getBotInfo()
+    client.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: botInfo })
+  } else {
+    // 未登录机器人，理论不可能
+    client.send<IBotInfoResp>({ cmd: 'bot/info', success: false, data: null })
   }
 }
 

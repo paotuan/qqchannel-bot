@@ -1,4 +1,4 @@
-import type { IBotInfo, ILoginReqV2, IBotConfig, IBotConfig_Kook, IBotConfig_QQ } from '@paotuan/types'
+import type { IBotInfo, ILoginReqV2, IBotConfig, IBotConfig_Kook, IBotConfig_QQ, IBotInfoResp } from '@paotuan/types'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { gtagEvent } from '../utils'
@@ -78,6 +78,16 @@ export const useBotStore = defineStore('bot', () => {
 
   const onLoginFinish = (success: boolean) => {
     loginState.value = success ? 'LOGIN' : 'NOT_LOGIN'
+    // 登录成功，拉取 bot 信息
+    if (success) {
+      ws.send({ cmd: 'bot/info', data: null })
+      ws.once<IBotInfoResp>('bot/info', resp => {
+        info.value = resp.data
+        if (info.value) {
+          gtagEvent('bot/info', { bot_name: info.value.username }, false)
+        }
+      })
+    }
   }
 
   const info = ref<IBotInfo | null>(null)

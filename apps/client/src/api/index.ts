@@ -1,6 +1,6 @@
 import ws from './ws'
 import type {
-  IBotInfo, ICardLinkResp,
+  ICardLinkResp,
   ICardTestResp,
   IChannel, IChannelConfigResp,
   ILog,
@@ -14,7 +14,7 @@ import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
 import { useCardStore } from '../store/card'
 import { useUserStore } from '../store/user'
-import { gtagEvent, Toast } from '../utils'
+import { Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
@@ -24,12 +24,6 @@ ws.on('bot/loginV2', message => {
   console.log('login success')
   const bot = useBotStore()
   bot.onLoginFinish(!!message.success)
-})
-
-ws.on('bot/info', message => {
-  const bot = useBotStore()
-  bot.info = message.data as IBotInfo
-  gtagEvent('bot/info', { bot_name: bot.info.username }, false)
 })
 
 ws.on('channel/list', data => {

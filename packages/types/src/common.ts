@@ -3,9 +3,8 @@ import type { ICardData } from '@paotuan/card'
 import type { IBotConfig } from './platform'
 
 export type Command =
-  | 'bot/login' // req/res
   | 'bot/loginV2' // req/res
-  | 'bot/info'  // res
+  | 'bot/info'  // req/res
   | 'channel/list' // res
   | 'channel/listen' // req
   | 'channel/create' // req/res
@@ -50,7 +49,7 @@ export interface IBotInfo {
 
 export type ILoginReqV2 = IBotConfig
 
-export type IBotInfoResp = IBotInfo
+export type IBotInfoResp = IBotInfo | null
 // endregion bot
 
 // region channel
