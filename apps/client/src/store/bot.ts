@@ -5,6 +5,7 @@ import { gtagEvent } from '../utils'
 import { computed, ref } from 'vue'
 import type { Platform } from '@paotuan/config'
 import md5 from 'md5'
+import { useChannelStore } from './channel'
 
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
@@ -71,9 +72,16 @@ export const useBotStore = defineStore('bot', () => {
     const isValid = formModelIsValid.value
     if (!isValid) return
     loginState.value = 'LOADING'
-    ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
     gtagEvent('bot/login', { platform: model.platform }, false)
     saveLoginInfo2LocalStorage(_model, model)
+    ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
+    ws.once('bot/loginV2', resp => {
+      console.log('login success')
+      onLoginFinish(!!resp.success)
+    })
+    // 开始监听 channel list
+    const channelStore = useChannelStore()
+    channelStore.waitForServerChannelList()
   }
 
   const onLoginFinish = (success: boolean) => {
@@ -92,7 +100,7 @@ export const useBotStore = defineStore('bot', () => {
 
   const info = ref<IBotInfo | null>(null)
 
-  return { platform, formModel, loginState, connect, onLoginFinish, info }
+  return { platform, formModel, loginState, connect, info }
 })
 
 function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, model: IBotConfig) {

@@ -55,6 +55,11 @@ export class Wss {
     client.send(message)
   }
 
+  // 发消息给某个登录了该 bot 的 client
+  sendToBot<T>(botId: string, message: IMessage<T>) {
+    this.clients.filter(client => client.botId === botId).forEach(client => client.send(message))
+  }
+
   // 发消息给正在监听某个频道的所有 client
   sendToChannel<T>(channelUnionId: ChannelUnionId, message: IMessage<T>) {
     this.clients.filter(client => client.listenToChannelUnionId === channelUnionId).forEach(client => {

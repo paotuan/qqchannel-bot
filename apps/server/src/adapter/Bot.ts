@@ -1,4 +1,4 @@
-import type { IBotConfig, IBotInfo } from '@paotuan/types'
+import type { IBotConfig, IBotInfo, IMessage } from '@paotuan/types'
 import { Context, Events, ForkScope, SatoriApi } from './satori'
 import { adapterConfig, adapterPlugin, getBotId } from './utils'
 import { isEqual } from 'lodash'
@@ -160,5 +160,10 @@ export class Bot {
 
   on<K extends keyof Events>(name: K, listener: Events[K]) {
     this.context.on(name, listener)
+  }
+
+  // 发送给登录了这个 bot 的所有 client
+  sendToClient<T>(message: IMessage<T>) {
+    this.wss.sendToBot<T>(this.id, message)
   }
 }

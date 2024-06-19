@@ -6,10 +6,8 @@ import type {
   ICardImportReq,
   ICardLinkReq,
   ICardLinkResp,
-  IChannel,
   IChannelConfigReq,
   IChannelConfigResp,
-  IChannelListResp,
   IListenToChannelReq,
   IMessage,
   INoteDeleteReq,
@@ -106,18 +104,8 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
     client.bindToBot(bot.id)
     // 3. 返回登录成功
     client.send({ cmd: 'bot/loginV2', success: true, data: null })
-    // watch guild & channel info
-    client.autorun(ws => {
-      const channels: IChannel[] = bot.guilds.all.map(guild => guild.allChannels.map(channel => ({
-        id: channel.id,
-        name: channel.name,
-        type: channel.type,
-        guildId: channel.guildId,
-        guildName: guild.name,
-        guildIcon: guild.icon
-      }))).flat()
-      ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
-    })
+    // 4. 推送一次 channel list
+    client.bot?.guilds.notifyChannelListChange()
     // 5. 返回插件信息
     client.autorun(ws => {
       ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })

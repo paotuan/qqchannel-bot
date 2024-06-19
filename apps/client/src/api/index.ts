@@ -1,15 +1,14 @@
 import ws from './ws'
+import type { ICardData } from '@paotuan/card'
 import type {
   ICardLinkResp,
   ICardTestResp,
-  IChannel, IChannelConfigResp,
+  IChannelConfigResp,
   ILog,
   INoteFetchResp,
   INoteSendResp,
   INoteSyncResp, IUser, IPluginConfigDisplay, IRiListResp
 } from '@paotuan/types'
-import { useBotStore } from '../store/bot'
-import { useChannelStore } from '../store/channel'
 import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
 import { useCardStore } from '../store/card'
@@ -18,18 +17,6 @@ import { Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
-import type { ICardData } from '@paotuan/card'
-
-ws.on('bot/loginV2', message => {
-  console.log('login success')
-  const bot = useBotStore()
-  bot.onLoginFinish(!!message.success)
-})
-
-ws.on('channel/list', data => {
-  const channel = useChannelStore()
-  channel.list = data.data as IChannel[] | null
-})
 
 ws.on('user/list', data => {
   const user = useUserStore()

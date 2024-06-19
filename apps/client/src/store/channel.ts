@@ -1,4 +1,4 @@
-import type { IChannel, ILog, IListenToChannelReq } from '@paotuan/types'
+import type { IChannel, ILog, IListenToChannelReq, IChannelListResp } from '@paotuan/types'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { useLogStore } from './log'
@@ -25,6 +25,21 @@ export const useChannelStore = defineStore('channel', {
       const linkElem = document.querySelector('link[rel=icon]')
       linkElem && ((linkElem as HTMLLinkElement).href = channel.guildIcon)
       gtagEvent('channel/listen')
+      // 已决定子频道，停止监听 channel list 的变化，因为没意义了
+      this.stopWaitForServerChannelList()
+    },
+    // 由于 server 目前维持着状态且存在补偿机制，我们还是要让 server 主动推过来
+    waitForServerChannelList() {
+      ws.on<IChannelListResp>('channel/list', data => {
+        this.list = data.data
+      })
+    },
+    stopWaitForServerChannelList() {
+      ws.off('channel/list')
+    },
+    // 让 server 主动重新请求并初始化 guild & channel
+    refetchServerChannelList() {
+      // todo 暂无特别必要
     }
   }
 })

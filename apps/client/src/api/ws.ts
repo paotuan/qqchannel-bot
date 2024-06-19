@@ -42,6 +42,9 @@ export default {
     }
     wsEmitter.on(cmd, _handler)
   },
+  off(cmd: Command) {
+    wsEmitter.off(cmd)
+  },
   send<T>(msg: IMessage<T>) {
     ws.send(JSON.stringify(msg))
   }

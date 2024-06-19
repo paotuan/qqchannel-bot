@@ -48,6 +48,7 @@ export class Guild {
 
   addChannel(channel: { id: string, name: string, type: number }) {
     this.channelsMap[channel.id] = new Channel(this.bot, channel.id, this.id, channel.name, channel.type)
+    this.bot.guilds.notifyChannelListChange()
   }
   //
   // updateChannel(channel: IChannel) {
@@ -143,6 +144,7 @@ export class Guild {
           .filter(channel => Channel.VALID_TYPES.includes(channel.type))
           .map(channel => new Channel(this.bot, channel.id, this.id, channel.name, channel.type))
         this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
+        this.bot.guilds.notifyChannelListChange()
         this.detectChannelGroupId4Create(list)
       })
     } catch (e) {
