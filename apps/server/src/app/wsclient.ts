@@ -1,6 +1,6 @@
 import type { WebSocket } from 'ws'
 import type { Wss } from './wss'
-import type { IMessage, ICardListResp } from '@paotuan/types'
+import type { IMessage, ICardListResp, IPluginConfigDisplay } from '@paotuan/types'
 import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
 import type { BotId } from '../adapter/utils'
 import { getChannelUnionId } from '../adapter/utils'
@@ -79,6 +79,9 @@ export class WsClient {
       const cardList = this.server.cards.cardList
       this.server.sendToClient<ICardListResp>(ws, { cmd: 'card/list', success: true, data: cardList })
     })
+
+    // 发送插件数据
+    server.sendToClient<IPluginConfigDisplay[]>(this, { cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
   }
 
   // 客户端绑定某个 bot 实例

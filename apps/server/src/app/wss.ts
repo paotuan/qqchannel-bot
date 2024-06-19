@@ -72,4 +72,9 @@ export class Wss {
   //     client.send(message)
   //   })
   // }
+
+  // 发消息给全部 client
+  sendToAll<T>(message: IMessage<T>) {
+    this.clients.forEach(client => client.send(message))
+  }
 }

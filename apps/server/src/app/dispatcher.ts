@@ -15,7 +15,6 @@ import type {
   INoteSendReq,
   IUser,
   IUserListResp,
-  IPluginConfigDisplay,
   INoteSendImageRawReq,
   ISceneSendMapImageReq,
   ISceneSendBattleLogReq,
@@ -106,10 +105,6 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
     client.send({ cmd: 'bot/loginV2', success: true, data: null })
     // 4. 推送一次 channel list
     client.bot?.guilds.notifyChannelListChange()
-    // 5. 返回插件信息
-    client.autorun(ws => {
-      ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
-    })
   } catch (e) {
     // 返回失败
     client.send({ cmd: 'bot/loginV2', success: false, data: null })

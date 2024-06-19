@@ -173,6 +173,8 @@ export class PluginManager {
       }
     })
     PluginProvider.register(newPlugins)
+    // 插件更新通知前端
+    this.wss.sendToAll({ cmd: 'plugin/list', success: true, data: this.pluginListManifest })
   }
 
   // 注意：只通过 loadPlugins 调用，以避免频繁调用 PluginProvider 注册，否则每次注册都会造成所有 config 重新计算，太重了
