@@ -85,10 +85,21 @@ export interface IChannelConfigResp {
 
 export interface IUser {
   id: string
-  nick: string
-  username: string
+  /**
+   * @deprecated
+   */
+  nick?: string
+  /**
+   * @deprecated
+   */
+  username?: string
+  name: string
   avatar: string
-  bot: boolean
+  /**
+   * @deprecated
+   */
+  bot?: boolean
+  isBot: boolean
   deleted: boolean
 }
 

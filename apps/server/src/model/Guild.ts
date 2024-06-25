@@ -100,7 +100,8 @@ export class Guild {
         guildId: this.id,
         name: authorName ?? author.id,
         avatar: author.avatar ?? '',
-        isBot: author.isBot ?? false
+        isBot: author.isBot ?? false,
+        deleted: false
       })
       this.usersMap[newUser.id] = newUser
       this.saveUsers()
