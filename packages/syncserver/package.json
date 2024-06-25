@@ -1,0 +1,20 @@
+{
+  "name": "@paotuan/syncserver",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.cjs",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "echo 'success'"
+  },
+  "dependencies": {
+    "lib0": "^0.2.52",
+    "lodash.debounce": "^4.0.8",
+    "ws": "^8.17.1",
+    "y-leveldb": "^0.1.0",
+    "y-protocols": "^1.0.5",
+    "y-websocket": "^2.0.3",
+    "yjs": "^13.5.6"
+  }
+}
