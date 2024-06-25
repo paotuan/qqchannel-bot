@@ -15,7 +15,7 @@
     "@paotuan/card": "2.0.0",
     "@paotuan/config": "2.0.0",
     "@paotuan/dicecore": "2.0.0",
-    "@paotuan/syncserver": "1.0.0",
+    "@paotuan/syncserver": "1.1.0",
     "@paotuan/types": "2.0.0",
     "@satorijs/core": "4.1.0",
     "fast-glob": "^3.3.1",

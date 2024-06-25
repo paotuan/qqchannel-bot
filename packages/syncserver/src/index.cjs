@@ -1,7 +1,10 @@
 const WebSocket = require('ws')
-const setupWSConnection = require('./utils.cjs').setupWSConnection
+const utils = require('./utils.cjs')
+const setupPersistence = utils.setupPersistence
+const setupWSConnection = utils.setupWSConnection
 
-exports.createWss = () => {
+exports.createWss = (options = {}) => {
+  setupPersistence(options.persistenceDir)
   const wss = new WebSocket.Server({ noServer: true })
   wss.on('connection', setupWSConnection)
   return wss
