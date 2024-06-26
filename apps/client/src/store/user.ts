@@ -7,15 +7,14 @@ export const useUserStore = defineStore('user', {
   }),
   getters: {
     list: state => Object.values(state.map),
-    enabledUserList: state => Object.values(state.map).filter(user => !user.bot && !user.deleted)
+    enabledUserList: state => Object.values(state.map).filter(user => !user.isBot && !user.deleted)
   },
   actions: {
     setUsers(list: IUser[]) {
       list.forEach(user => {
         // 机器人去除测试中尾缀
-        if (user.bot) {
-          user.nick = user.nick.replace(/-测试中$/, '')
-          user.username = user.username.replace(/-测试中$/, '')
+        if (user.isBot) {
+          user.name = user.name.replace(/-测试中$/, '')
         }
         this.map[user.id] = user
       })
@@ -25,7 +24,7 @@ export const useUserStore = defineStore('user', {
     },
     nickOf(id: string) {
       const user = this.of(id)
-      return user ? user.nick || user.username : ''
+      return user?.name ?? ''
     }
   }
 })

@@ -2,10 +2,10 @@
   <a class="inline-flex items-center gap-2" @click="emit('click', user)">
     <div class="avatar">
       <div class="w-6 rounded-full">
-        <img :src="user.avatar" :alt="user.nick" referrerpolicy="no-referrer" />
+        <img :src="user.avatar" :alt="user.name" referrerpolicy="no-referrer" />
       </div>
     </div>
-    <div>{{ user.nick }}</div>
+    <div>{{ user.name }}</div>
   </a>
 </template>
 <script setup lang="ts">

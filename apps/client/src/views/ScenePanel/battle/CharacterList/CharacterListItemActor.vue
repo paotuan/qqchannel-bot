@@ -3,19 +3,19 @@
     <div class="avatar" :class="{ 'placeholder': !userInfo.avatar }">
       <template v-if="userInfo.avatar">
         <div class="w-12 rounded-full">
-          <img :src="userInfo.avatar" :alt="userInfo.nick" referrerpolicy="no-referrer" />
+          <img :src="userInfo.avatar" :alt="userInfo.name" referrerpolicy="no-referrer" />
         </div>
       </template>
       <template v-else>
         <div class="w-12 rounded-full bg-neutral text-neutral-content">
-          <span>{{ userInfo.nick.slice(0, 2) }}</span>
+          <span>{{ userInfo.name.slice(0, 2) }}</span>
         </div>
       </template>
       <!-- 血条 -->
       <CharacterHpBar :hp="hp" :max-hp="maxHp" />
     </div>
     <div class="flex flex-col justify-between">
-      <div class="font-bold max-w-[7rem] truncate">{{ userInfo.nick }}</div>
+      <div class="font-bold max-w-[7rem] truncate">{{ userInfo.name }}</div>
       <span class="flex gap-1">
         <button class="btn btn-xs btn-outline btn-circle" :disabled="!userCard" @click.stop="selectCard">
           <DocumentTextIcon class="size-4" />

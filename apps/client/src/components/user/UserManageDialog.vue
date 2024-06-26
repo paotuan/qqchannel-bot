@@ -60,7 +60,7 @@ const keyword = ref('')
 const userOptions = computed(() => {
   if (!keyword.value) return userStore.enabledUserList
   const search = keyword.value.toLowerCase()
-  return userStore.enabledUserList.filter(user => user.nick.toLowerCase().includes(search) || user.username.toLowerCase().includes(search))
+  return userStore.enabledUserList.filter(user => user.name.toLowerCase().includes(search))
 })
 
 // log 处理方式

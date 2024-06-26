@@ -28,7 +28,7 @@ const noCardUsers = computed(() => userStore.enabledUserList.filter(u => !cardSt
 const keyword = ref('')
 const keywordContains = (user: IUser) => {
   const search = keyword.value.toLowerCase()
-  return user.nick.toLowerCase().includes(search) || user.username.toLowerCase().includes(search)
+  return user.name.toLowerCase().includes(search)
 }
 const haveCardUsersAfterSearch = computed(() => haveCardUsers.value.filter(user => keywordContains(user)))
 const noCardUsersAfterSearch = computed(() => noCardUsers.value.filter(user => keywordContains(user)).slice(0, 100)) // 默认展示 100 条
