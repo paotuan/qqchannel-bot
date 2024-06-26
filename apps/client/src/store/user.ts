@@ -1,24 +1,16 @@
 import { defineStore } from 'pinia'
-import type { IUser } from '@paotuan/types'
+import type { YGuildState } from '@paotuan/types'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    map: {} as Record<string, IUser>
+    yGuildStore: null as YGuildState | null
   }),
   getters: {
-    list: state => Object.values(state.map),
-    enabledUserList: state => Object.values(state.map).filter(user => !user.isBot && !user.deleted)
+    map: state => state.yGuildStore?.users ?? {},
+    list: state => Object.values(state.yGuildStore?.users ?? {}),
+    enabledUserList: state => Object.values(state.yGuildStore?.users ?? {}).filter(user => !user.isBot && !user.deleted)
   },
   actions: {
-    setUsers(list: IUser[]) {
-      list.forEach(user => {
-        // 机器人去除测试中尾缀
-        if (user.isBot) {
-          user.name = user.name.replace(/-测试中$/, '')
-        }
-        this.map[user.id] = user
-      })
-    },
     of(id: string) {
       return this.map[id]
     },

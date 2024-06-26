@@ -1,4 +1,3 @@
-import { makeAutoObservable, runInAction } from 'mobx'
 import { Guild } from './Guild'
 import type { Bot } from '../adapter/Bot'
 import { Universal } from '../adapter/satori'
@@ -11,7 +10,6 @@ export class GuildManager {
   private guildsMap: Record<string, Guild> = {}
 
   constructor(bot: Bot) {
-    makeAutoObservable(this)
     this.bot = bot
     this.fetchGuilds()
     this.initEventListeners()
@@ -80,11 +78,9 @@ export class GuildManager {
     try {
       const resp = await this.bot.api.getGuildList()
       const list = resp.data.slice(0, 10) // QQ 私域应该最多能加入 10 个频道，暂不考虑分页
-      runInAction(() => {
-        const guilds = list.map(info => new Guild(this.bot, info.id, info.name, info.avatar))
-        this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
-        this.notifyChannelListChange()
-      })
+      const guilds = list.map(info => new Guild(this.bot, info.id, info.name, info.avatar))
+      this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
+      this.notifyChannelListChange()
     } catch (e) {
       console.error('获取频道信息失败', e)
     }

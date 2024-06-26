@@ -1,4 +1,3 @@
-import { makeAutoObservable } from 'mobx'
 import { Bot } from '../adapter/Bot'
 import { Session, Universal } from '../adapter/satori'
 import { removeBackspaces } from '../utils'
@@ -17,7 +16,6 @@ export class Channel {
   private readonly bot: Bot
 
   constructor(bot: Bot, id: string, guildId: string, name: string | undefined, type: Universal.Channel.Type) {
-    makeAutoObservable(this)
     this.bot = bot
     this.id = id
     this.guildId = guildId

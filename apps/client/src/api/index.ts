@@ -7,21 +7,15 @@ import type {
   ILog,
   INoteFetchResp,
   INoteSendResp,
-  INoteSyncResp, IUser, IPluginConfigDisplay, IRiListResp
+  INoteSyncResp, IPluginConfigDisplay, IRiListResp
 } from '@paotuan/types'
 import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
 import { useCardStore } from '../store/card'
-import { useUserStore } from '../store/user'
 import { Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
-
-ws.on('user/list', data => {
-  const user = useUserStore()
-  user.setUsers((data.data || []) as IUser[])
-})
 
 ws.on('log/push', data => {
   const log = useLogStore()

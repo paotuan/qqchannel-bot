@@ -18,6 +18,7 @@
     "@paotuan/syncserver": "1.1.0",
     "@paotuan/types": "2.0.0",
     "@satorijs/core": "4.1.0",
+    "@syncedstore/core": "^0.6.0",
     "fast-glob": "^3.3.1",
     "form-data": "^4.0.0",
     "lru-cache": "^7.14.0",

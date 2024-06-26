@@ -10,7 +10,6 @@ export type Command =
   | 'channel/create' // req/res
   | 'channel/config' // req/res
   | 'channel/config/reset' // req
-  | 'user/list' // res
   | 'user/delete' // req
   | 'log/push' // res
   | 'note/send' // req/res
@@ -91,8 +90,7 @@ export interface IUser {
   deleted: boolean
 }
 
-export type IUserListResp = IUser[]
-
+// todo 干掉
 export type IUserDeleteReq = {
   ids: string[]
 }

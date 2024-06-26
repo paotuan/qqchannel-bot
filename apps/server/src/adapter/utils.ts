@@ -8,6 +8,7 @@ export function getBotId(platform: Platform, appid: string): BotId {
   return `${platform}:${appid}`
 }
 
+export type GuildUnionId = `${Platform}_${string}`
 export type ChannelUnionId = `${Platform}_${string}_${string}`
 export function getChannelUnionId(platform: Platform, guildId: string, channelId: string): ChannelUnionId {
   return `${platform}_${guildId}_${channelId}` // 保证可用作文件名

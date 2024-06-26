@@ -4,6 +4,7 @@ import ws from '../api/ws'
 import { useLogStore } from './log'
 import { watch } from 'vue'
 import { gtagEvent } from '../utils'
+import { initYStore } from './ystore'
 
 export const useChannelStore = defineStore('channel', {
   state: () => ({
@@ -27,6 +28,7 @@ export const useChannelStore = defineStore('channel', {
         this.selectLoading = false
         this.selected = channel.id
         initChannelRelatedStorage(channel.id)
+        initYStore()
         // 更新 title 和 favicon
         document.title = channel.name
         const linkElem = document.querySelector('link[rel=icon]')

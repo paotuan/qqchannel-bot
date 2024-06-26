@@ -1,4 +1,7 @@
-import type { IBotState } from './bot'
+import type { GuildUnionId } from '../adapter/utils'
+import { syncedStore } from '@syncedstore/core'
+import { YGuildState, YGuildStateShape } from '@paotuan/types'
+import { getYDoc } from '@paotuan/syncserver'
 
 /**
  * Synced store container
@@ -9,29 +12,18 @@ export class GlobalStore {
 
   // todo global state
 
-  // bot state
-  // botId => state
-  private botState = new Map<string, IBotState>()
+  // guild state
+  private guildState = new Map<GuildUnionId, YGuildState>()
 
-  getBotStore(botId: string) {
-    const state = this.botState.get(botId)
+  guild(guildUnionId: GuildUnionId) {
+    const state = this.guildState.get(guildUnionId)
     if (state) {
       return state
     } else {
-      const state = makeBotState()
-      this.botState.set(botId, state)
+      const doc = getYDoc(guildUnionId) // will load from db
+      const state = syncedStore(YGuildStateShape, doc) as YGuildState
+      this.guildState.set(guildUnionId, state)
       return state
-    }
-  }
-}
-
-function makeBotState(): IBotState {
-  return {
-    guilds: {
-      byId: {}
-    },
-    channels: {
-      byId: {}
     }
   }
 }
