@@ -45,6 +45,7 @@ exports.setupPersistence = (persistenceDir) => {
         ydoc.on('update', update => {
           ldb.storeUpdate(docName, update)
         })
+        console.info('Load from db:', docName)
       },
       writeState: async (_docName, _ydoc) => {}
     }
