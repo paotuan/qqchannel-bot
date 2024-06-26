@@ -10,7 +10,6 @@ export type Command =
   | 'channel/create' // req/res
   | 'channel/config' // req/res
   | 'channel/config/reset' // req
-  | 'user/delete' // req
   | 'log/push' // res
   | 'note/send' // req/res
   | 'note/sendImageRaw' // req/ res: note/send
@@ -88,11 +87,6 @@ export interface IUser {
   avatar: string
   isBot: boolean
   deleted: boolean
-}
-
-// todo 干掉
-export type IUserDeleteReq = {
-  ids: string[]
 }
 // endregion channel
 

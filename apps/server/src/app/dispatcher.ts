@@ -19,7 +19,7 @@ import type {
   IRiListResp,
   IRiSetReq,
   IRiDeleteReq,
-  IDiceRollReq, IUserDeleteReq, IPluginReloadReq, ILoginReqV2, IChannelCreateReq,
+  IDiceRollReq, IPluginReloadReq, ILoginReqV2, IChannelCreateReq,
 } from '@paotuan/types'
 import { RiProvider } from '@paotuan/dicecore'
 import { getBotId } from '../adapter/utils'
@@ -82,9 +82,6 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'dice/roll':
     handleManualDiceRoll(client, server, request.data as IDiceRollReq)
-    break
-  case 'user/delete':
-    handleUserDelete(client, server, request.data as IUserDeleteReq)
     break
   case 'plugin/reload':
     handlePluginReload(client, server, request.data as IPluginReloadReq)
@@ -284,16 +281,6 @@ async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRo
   if (bot) {
     await bot.commandHandler.manualDiceRollFromWeb(client, data)
     client.send<string>({ cmd: 'dice/roll', success: true, data: '' })
-  }
-}
-
-function handleUserDelete(client: WsClient, server: Wss, data: IUserDeleteReq) {
-  const bot = client.bot
-  if (bot) {
-    const guild = bot.guilds.find(client.listenToGuildId)
-    if (guild) {
-      guild.deleteUsersBatch(data.ids)
-    }
   }
 }
 

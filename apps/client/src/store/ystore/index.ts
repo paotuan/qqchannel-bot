@@ -4,11 +4,19 @@ import { YGuildState, YGuildStateShape } from '@paotuan/types'
 import { syncedStore, getYjsDoc } from '@syncedstore/core'
 import { WebsocketProvider } from 'y-websocket'
 import { serverAddr, serverPort } from '../../api/endpoint'
-import { useUserStore } from '../user'
+import { shallowRef } from 'vue'
 
-let yGuildStore: YGuildState | undefined
+const yGuildStoreRef = shallowRef<YGuildState | undefined>()
+
+let inited = false
 
 export function initYStore() {
+  if (inited) {
+    console.warn('[YStore] cannot init twice!')
+    return
+  }
+  inited = true
+
   const channelStore = useChannelStore()
   const selectedChannel = channelStore.selectedChannel
   if (!selectedChannel) {
@@ -23,11 +31,11 @@ export function initYStore() {
 
   // init guild store
   const [guildStore] = setupStore<YGuildState>(guildUnionId, YGuildStateShape)
-  yGuildStore = guildStore
+  yGuildStoreRef.value = guildStore
+}
 
-  // todo test
-  const userStore = useUserStore()
-  userStore.yGuildStore = guildStore
+export {
+  yGuildStoreRef
 }
 
 function setupStore<T>(roomname: string, shape: unknown) {

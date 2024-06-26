@@ -112,15 +112,6 @@ export class Guild {
     }
   }
 
-  deleteUsersBatch(ids: string[]) {
-    ids.forEach(id => {
-      const user = this.usersMap[id]
-      if (user && !user.deleted) {
-        user.deleted = true
-      }
-    })
-  }
-
   private async fetchChannels() {
     this.channelsMap = {}
     try {
