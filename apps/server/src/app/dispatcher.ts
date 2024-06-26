@@ -171,6 +171,8 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
     }
   })
+  // resp
+  client.send({ cmd: 'channel/listen', success: true, data: '' })
 }
 
 async function handleChannelCreate(client: WsClient, server: Wss, data: IChannelCreateReq) {

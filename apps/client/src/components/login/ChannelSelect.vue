@@ -50,7 +50,8 @@
               <ChannelCreate :guild-id="checkedGuildId" />
             </div>
             <button class="btn btn-primary w-full -mt-4 shadow-lg" :disabled="!checkedChannel"
-                    @click="listenTo(checkedChannel)">开始使用！
+                    @click="listenTo(checkedChannel)">
+              <span v-if="channelStore.selectLoading" class="loading loading-spinner" />开始使用！
             </button>
           </div>
         </div>

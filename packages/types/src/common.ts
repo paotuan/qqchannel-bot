@@ -6,7 +6,7 @@ export type Command =
   | 'bot/loginV2' // req/res
   | 'bot/info'  // req/res
   | 'channel/list' // res
-  | 'channel/listen' // req
+  | 'channel/listen' // req/res
   | 'channel/create' // req/res
   | 'channel/config' // req/res
   | 'channel/config/reset' // req
