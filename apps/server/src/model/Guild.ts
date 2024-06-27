@@ -155,8 +155,8 @@ export class Guild {
     // qq 频道需强制指定文字分组，kook 不需要
     if (this.bot.platform !== 'qqguild') return
     const categories = list.filter(channel => channel.type === Universal.Channel.Type.CATEGORY)
-    // qq 频道经测试，只能在活动类型下创建
-    const qqTextGroup = categories.find(channel => channel.name === '活动')
+    // qq 频道经测试，只能在 name = 讨论组 的 group 下创建 // 万一还有一些用的是原来的 活动 ？
+    const qqTextGroup = categories.find(channel => channel.name === '讨论组') || categories.find(channel => channel.name === '活动')
     if (qqTextGroup) {
       this.channelGroupId4Create = qqTextGroup.id
       return
@@ -171,6 +171,7 @@ export class Guild {
       return
     }
     // 都没有找到，默认取第一个
+    console.warn('[Guild] 未找到符合条件的文字子频道分组，QQ 接口可能改动。若创建子频道失败，请联系开发者')
     this.channelGroupId4Create = categories[0]?.id
   }
 
