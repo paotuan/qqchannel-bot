@@ -148,6 +148,8 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
     }
   })
+  // todo touch 一下 guild 和 channel store 以触发初始化，确保服务器状态权威 & 进行耗时操作
+  client.bot?.guilds.find(data.guildId)?.touchStore()
   // resp
   client.send({ cmd: 'channel/listen', success: true, data: '' })
 }

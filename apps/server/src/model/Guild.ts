@@ -6,8 +6,6 @@ import { User } from './User'
 import { GlobalStore } from '../state'
 import { GuildUnionId } from '../adapter/utils'
 
-// const USER_DIR = resolveRootDir('user')
-
 export class Guild {
   readonly id: string
   name: string
@@ -25,8 +23,6 @@ export class Guild {
     this.icon = icon || ''
     this.fetchChannels()
     // this.fetchUsers()
-    // todo 后续处理
-    // this.loadUsers()
   }
 
   get allChannels() {
@@ -39,6 +35,10 @@ export class Guild {
 
   private get store() {
     return GlobalStore.Instance.guild(this.guildUnionId)
+  }
+
+  touchStore() {
+    return this.store
   }
 
   findChannel(id: string): Channel | undefined {
@@ -156,67 +156,6 @@ export class Guild {
     // 都没有找到，默认取第一个
     this.channelGroupId4Create = categories[0]?.id
   }
-
-  // user 持久化相关
-  // private get userPersistenceFilename() {
-  //   return `${USER_DIR}/${this.bot.platform}_${this.id}.json`
-  // }
-  //
-  // private saveUsers() {
-  //   const allUsersOfGuild = Object.values(this.usersMap).map(user => user.toJSON)
-  //   console.log('[Guild] 保存用户列表，count=', allUsersOfGuild.length)
-  //   const data = { version: VERSION_CODE, list: allUsersOfGuild }
-  //   if (!fs.existsSync(USER_DIR)) {
-  //     fs.mkdirSync(USER_DIR)
-  //   }
-  //   fs.writeFile(this.userPersistenceFilename, JSON.stringify(data), (e) => {
-  //     if (e) {
-  //       console.error('[Guild] 保存用户列表失败', e)
-  //     }
-  //   })
-  // }
-  //
-  // private loadUsers() {
-  //   console.log('[Guild] 开始读取用户，guildId=', this.id)
-  //   const filename = this.userPersistenceFilename
-  //   if (!fs.existsSync(filename)) {
-  //     this.tryLoadV1Data()
-  //     return
-  //   }
-  //   try {
-  //     const str = fs.readFileSync(filename, 'utf8')
-  //     const { version, list } = JSON.parse(str) as { version: number, list: User['toJSON'][] }
-  //     const users = list.map(data => User.fromJSON(this.bot, data))
-  //     this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
-  //     // 一次性传给前端吧
-  //   } catch (e) {
-  //     console.error(`[Guild] ${filename} 用户列表解析失败`, e)
-  //   }
-  // }
-  //
-  // private tryLoadV1Data() {
-  //   if (this.bot.platform !== 'qqguild') return
-  //   const filename = `${USER_DIR}/${this.id}.json`
-  //   if (!fs.existsSync(filename)) return
-  //   try {
-  //     console.log('[Guild] 开始读取旧版用户列表，guildId=', this.id)
-  //     const str = fs.readFileSync(filename, 'utf8')
-  //     const { list } = JSON.parse(str)
-  //     const users: User[] = list.map((item: any) => User.fromJSON(this.bot, {
-  //       id: item.id,
-  //       guildId: item.guildId,
-  //       isBot: item.bot,
-  //       name: item.nick || item.username,
-  //       avatar: item.avatar,
-  //       deleted: item.deleted
-  //     }))
-  //     this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
-  //     // 保存一次避免下次再次处理
-  //     this.saveUsers()
-  //   } catch (e) {
-  //     console.error(`[Guild] ${filename} 用户列表解析失败`, e)
-  //   }
-  // }
 }
 
 // 从 Universal User 中获取 name
