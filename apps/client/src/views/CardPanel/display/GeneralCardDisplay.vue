@@ -64,8 +64,8 @@
 </template>
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject } from 'vue'
-import { SELECTED_CARD } from '../utils'
+import { computed } from 'vue'
+import { useCurrentSelectedCard } from '../utils'
 import type { GeneralCard } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
 import NumberInput from '../NumberInput.vue'
@@ -73,7 +73,7 @@ import TextInput from '../TextInput.vue'
 import CardMoreAction from '../CardMoreAction.vue'
 
 const cardStore = useCardStore()
-const generalCard = inject<ComputedRef<GeneralCard>>(SELECTED_CARD)! // 此处可以确保是 general card
+const generalCard = useCurrentSelectedCard<GeneralCard>()! // 此处可以确保是 general card
 const cardData = computed(() => generalCard.value.data)
 
 // 物品表格 分三栏

@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { useCardStore } from '../../store/card'
-import { computed, ComputedRef, inject, nextTick, ref } from 'vue'
-import { SELECTED_CARD } from './utils'
-import type { ICard } from '@paotuan/card'
+import { computed, nextTick, ref } from 'vue'
+import { useCurrentSelectedCard } from './utils'
 
 const props = defineProps<{ modelValue: number, allowNegative?: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: number): void }>()
 const input = ref<HTMLInputElement>()
 
 const cardStore = useCardStore()
-const selectedCard = inject<ComputedRef<ICard>>(SELECTED_CARD)! // 外部确保 card 存在
+const selectedCard = useCurrentSelectedCard()! // 外部确保 card 存在
 
 const vm = computed({
   get: () => {

@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { useCardStore } from '../../store/card'
+import { useCurrentSelectedCard } from './utils'
 
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: string): void }>()
 
 const cardStore = useCardStore()
+const selectedCard = useCurrentSelectedCard()
+
 const onInput = (e: any) => {
-  if (cardStore.selectedCard) {
-    cardStore.selectedCard.data.lastModified = Date.now()
-    cardStore.markCardEdited(cardStore.selectedCard.name)
+  if (selectedCard) {
+    selectedCard.value.data.lastModified = Date.now()
+    cardStore.markCardEdited(selectedCard.value.name)
   }
   emit('update:modelValue', e.target.value.trim())
 }

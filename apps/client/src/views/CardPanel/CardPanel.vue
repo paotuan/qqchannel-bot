@@ -13,28 +13,28 @@
         </div>
         <div v-for="card in userCardList" :key="card.name" class="flex gap-2">
           <button class="btn w-40 justify-start flex-nowrap relative"
-                  :class="selectedCard === card ? 'btn-neutral' : 'btn-ghost border border-base-300'"
+                  :class="cardStore.isCurrentSelected(card.name) ? 'btn-neutral' : 'btn-ghost border border-base-300'"
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
             <span class="truncate translate-y-1/4">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
-            <CheckCircleIcon v-show="selectedCard === card" class="size-6 ml-auto flex-none" />
+            <CheckCircleIcon v-show="cardStore.isCurrentSelected(card.name)" class="size-6 ml-auto flex-none" />
           </button>
           <user-selector :user-id="cardStore.linkedUserOf(card.name) || null" @select="cardStore.requestLinkUser(card.name, $event?.id)" />
         </div>
         <h3 class="font-bold mt-4">NPC / 敌人模板：</h3>
         <div v-for="card in templateCardList" :key="card.name" class="flex gap-2">
           <button class="btn w-40 justify-start flex-nowrap relative"
-                  :class="selectedCard === card ? 'btn-neutral' : 'btn-ghost border border-base-300'"
+                  :class="cardStore.isCurrentSelected(card.name) ? 'btn-neutral' : 'btn-ghost border border-base-300'"
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
             <span class="truncate translate-y-1/4">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
-            <CheckCircleIcon v-show="selectedCard === card" class="size-6 ml-auto flex-none" />
+            <CheckCircleIcon v-show="cardStore.isCurrentSelected(card.name)" class="size-6 ml-auto flex-none" />
           </button>
         </div>
       </div>
-      <CardDisplay :card="selectedCard" class="flex-grow" />
+      <CardDisplay v-if="selectedCard" :card="selectedCard" class="flex-grow" />
     </div>
   </div>
 </template>
@@ -76,7 +76,7 @@ const cardListAfterFilter = computed(() => {
   }
 
   if (cardListSorter.prop && cardListSorter.order) {
-    list = orderBy(list, card => card.data[cardListSorter.prop as keyof ICardData], cardListSorter.order)
+    list = orderBy(list, card => card[cardListSorter.prop as keyof ICardData], cardListSorter.order)
   }
   return list
 })

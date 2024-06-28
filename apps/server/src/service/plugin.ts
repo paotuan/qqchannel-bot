@@ -7,7 +7,6 @@ import path from 'path'
 import _ from 'lodash'
 import { copyFolderSync } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import type { ICard } from '@paotuan/card'
 import Mustache from 'mustache'
 import { getChannelUnionId } from '../adapter/utils'
 import { parseTemplate, PluginProvider } from '@paotuan/dicecore'
@@ -38,7 +37,7 @@ export class PluginManager {
       roll: exp => new DiceRoll(exp),
       render: (arg1, arg2, arg3) => Mustache.render(arg1, arg2, arg3, { escape: value => value }),
       getCard: ({ channelUnionId, userId }) => this.wss.cards.getCard(channelUnionId, userId),
-      saveCard: (card: ICard) => this.wss.cards.saveCard(card),
+      saveCard: () => void 0,
       getLinkedCardUserList: ({ channelUnionId }) => Object.keys(this.wss.cards.getLinkMap(channelUnionId)),
       linkCard: ({ channelUnionId, userId }, cardName) => {
         if (userId && !cardName) {

@@ -16,7 +16,6 @@ export type Command =
   | 'note/sync' // req/res
   | 'note/fetch' // req/res
   | 'note/delete' // req
-  | 'card/list' // res
   | 'card/import' // req/res
   | 'card/delete' // req
   | 'card/link'  // req/res
@@ -140,8 +139,6 @@ export interface ICardImportReq {
 }
 
 // export type ICardImportResp = ICardImportReq
-
-export type ICardListResp = ICardData[]
 
 export interface ICardDeleteReq {
   cardName: string

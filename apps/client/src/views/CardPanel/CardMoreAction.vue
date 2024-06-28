@@ -14,14 +14,13 @@
 <script setup lang="ts">
 import { EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../store/card'
-import { computed, ComputedRef, inject } from 'vue'
-import { SELECTED_CARD } from './utils'
-import type { ICard } from '@paotuan/card'
+import { computed } from 'vue'
+import { useCurrentSelectedCard } from './utils'
 import { useConfigStore } from '../../store/config'
 
 const props = withDefaults(defineProps<{ expression: string, deletable?: boolean }>(), { deletable: true })
 const emit = defineEmits<{ (e: 'delete'): void }>()
-const card = inject<ComputedRef<ICard>>(SELECTED_CARD)!
+const card = useCurrentSelectedCard()!
 
 const onDelete = () => {
   emit('delete')

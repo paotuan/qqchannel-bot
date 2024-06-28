@@ -1,14 +1,13 @@
 import fs from 'fs'
-import { globSync } from 'fast-glob'
-import { makeAutoObservable } from 'mobx'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
 import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '@paotuan/types'
-import { handleCardUpgrade, ICard, ICardData, ICardEntryChangeEvent } from '@paotuan/card'
+import type { ICard, ICardData, ICardEntryChangeEvent } from '@paotuan/card'
 import mitt from 'mitt'
 import { ChannelUnionId } from '../adapter/utils'
 import { resolveRootDir } from '../utils'
 import { CardProvider, DefaultCardLinker, Events, type ICardQuery } from '@paotuan/dicecore'
+import { GlobalStore } from '../state'
 
 const CARD_DIR = resolveRootDir('cards')
 const LINK_FILE_NAME = '/__link.json'
@@ -20,16 +19,16 @@ type LinkMap = Record<string, string> // userId => cardName
  */
 export class CardManager {
   private readonly wss: Wss
-  private readonly cardMap: Record<string, ICardData> = {} // 防止文件名和卡片内部名字不一样，导致名字重复，因此以名字做 key 存储，以内部名字为准
   private readonly channelLinkMap: Record<ChannelUnionId, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
   private readonly emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
 
-  get cardList() { return Object.values(this.cardMap) }
+  private get cardMap(): Record<string, ICardData> {
+    return GlobalStore.Instance.globalState.cards ?? {}
+  }
 
   constructor(wss: Wss) {
-    makeAutoObservable(this)
     this.wss = wss
-    this.initCardFiles()
+    this.initRegisterCards()
     // set linker
     CardProvider.setLinker(new DefaultCardLinker(this.channelLinkMap))
     // 注册监听器
@@ -37,47 +36,54 @@ export class CardManager {
     Events.on('card-link-change', () => saveLinkFile(this.channelLinkMap))
   }
 
-  private initCardFiles() {
-    try {
-      console.log('[Card] 开始读取人物卡')
-      if (!fs.existsSync(CARD_DIR)) {
-        return
-      }
-      const filesPath = globSync(`${CARD_DIR}/*.json`, { stats: true })
-      const files = filesPath.map(path=> ({ created: path.stats?.birthtimeMs, modified: path.stats?.mtimeMs, path: path.path }))
-      files.forEach(file => {
-        const str = fs.readFileSync(file.path, 'utf8')
-        if (file.path.endsWith(LINK_FILE_NAME)) {
-          // 人物卡关联
-          try {
-            const link = JSON.parse(str)
-            Object.assign(this.channelLinkMap, link)
-          } catch (e) {
-            console.log('[Card] 人物卡关联 解析失败')
-          }
-        } else {
-          // 人物卡文件
-          try {
-            const card = handleCardUpgrade(JSON.parse(str))
-            // 补充 created，lastModified if need
-            if (!card.created && file.created) {
-              card.created = file.created
-            }
-            if (!card.lastModified && file.modified) {
-              card.lastModified = file.modified
-            }
-            this.cardMap[card.name] = card
-            // 传入响应式对象，确保内部变化被监听到
-            CardProvider.registerCard(card.name, this.cardMap[card.name])
-          } catch (e) {
-            console.log(`[Card] ${file.path} 解析失败`, e)
-          }
-        }
-      })
-    } catch (e) {
-      console.error('[Card] 人物卡列表失败', e)
-    }
+  private initRegisterCards() {
+    const cardNames = Object.keys(this.cardMap)
+    cardNames.forEach(name => {
+      CardProvider.registerCard(name, this.cardMap[name])
+    })
   }
+
+  // private initCardFiles() {
+  //   try {
+  //     console.log('[Card] 开始读取人物卡')
+  //     if (!fs.existsSync(CARD_DIR)) {
+  //       return
+  //     }
+  //     const filesPath = globSync(`${CARD_DIR}/*.json`, { stats: true })
+  //     const files = filesPath.map(path=> ({ created: path.stats?.birthtimeMs, modified: path.stats?.mtimeMs, path: path.path }))
+  //     files.forEach(file => {
+  //       const str = fs.readFileSync(file.path, 'utf8')
+  //       if (file.path.endsWith(LINK_FILE_NAME)) {
+  //         // 人物卡关联
+  //         try {
+  //           const link = JSON.parse(str)
+  //           Object.assign(this.channelLinkMap, link)
+  //         } catch (e) {
+  //           console.log('[Card] 人物卡关联 解析失败')
+  //         }
+  //       } else {
+  //         // 人物卡文件
+  //         try {
+  //           const card = handleCardUpgrade(JSON.parse(str))
+  //           // 补充 created，lastModified if need
+  //           if (!card.created && file.created) {
+  //             card.created = file.created
+  //           }
+  //           if (!card.lastModified && file.modified) {
+  //             card.lastModified = file.modified
+  //           }
+  //           this.cardMap[card.name] = card
+  //           // 传入响应式对象，确保内部变化被监听到
+  //           CardProvider.registerCard(card.name, this.cardMap[card.name])
+  //         } catch (e) {
+  //           console.log(`[Card] ${file.path} 解析失败`, e)
+  //         }
+  //       }
+  //     })
+  //   } catch (e) {
+  //     console.error('[Card] 人物卡列表失败', e)
+  //   }
+  // }
 
   importCard(client: WsClient, req: ICardImportReq) {
     const { card } = req
@@ -86,12 +92,8 @@ export class CardManager {
     this.cardMap[cardName] = card
     // 传入响应式对象，确保内部变化被监听到
     CardProvider.registerCard(cardName, this.cardMap[cardName])
-    saveCardFile(this.cardMap[cardName])
+    // FIXME send to client
     this.wss.sendToChannel<null>(client.listenToChannelUnionId!, { cmd: 'card/import', success: true, data: null })
-  }
-
-  saveCard(card: ICard) {
-    saveCardFile(card.data)
   }
 
   deleteCard(client: WsClient, req: ICardDeleteReq) {
@@ -99,7 +101,6 @@ export class CardManager {
     console.log('[Card] 删除人物卡', cardName)
     delete this.cardMap[cardName]
     CardProvider.unregisterCard(cardName)
-    deleteCardFile(cardName)
   }
 
   handleLinkCard(client: WsClient, req: ICardLinkReq) {
@@ -138,31 +139,6 @@ export class CardManager {
 
   removeCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void) {
     this.emitter.off('EntryChange', listener)
-  }
-}
-
-function saveCardFile(cardData: ICardData) {
-  if (!fs.existsSync(CARD_DIR)) {
-    fs.mkdirSync(CARD_DIR)
-  }
-  const cardName = cardData.name
-  fs.writeFile(`${CARD_DIR}/${cardName}.json`, JSON.stringify(cardData), (e) => {
-    if (e) {
-      console.error('[Card] 人物卡写文件失败', e)
-    }
-  })
-}
-
-function deleteCardFile(name: string) {
-  try {
-    if (!fs.existsSync(CARD_DIR)) {
-      return
-    }
-    // 删除卡片
-    fs.unlinkSync(`${CARD_DIR}/${name}.json`)
-    console.log('[Card] 删除人物卡成功')
-  } catch (e) {
-    console.error('[Card] 删除人物卡失败', e)
   }
 }
 

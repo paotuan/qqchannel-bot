@@ -14,18 +14,19 @@
 </template>
 <script setup lang="ts">
 import { computed, provide } from 'vue'
-import { IS_TEMP_CARD, SELECTED_CARD } from '../utils'
+import { IS_TEMP_CARD, useCurrentSelectedCardProvider } from '../utils'
 import CocCardDisplay from './CocCardDisplay.vue'
 import DndCardDisplay from './DndCardDisplay.vue'
 import GeneralCardDisplay from './GeneralCardDisplay.vue'
-import type { ICard } from '@paotuan/card'
+import { createCard, ICardData } from '@paotuan/card'
 import ManualDiceRollDialog from '../ManualDiceRollDialog.vue'
 
-const props = withDefaults(defineProps<{ card?: ICard, isTempCard?: boolean }>(), { isTempCard: false })
+const props = withDefaults(defineProps<{ card: ICardData, isTempCard?: boolean }>(), { isTempCard: false })
 
-const selectedCard = computed(() => props.card)
-const selectedCardType = computed(() => selectedCard.value?.type)
-const selectedCardKey = computed(() => selectedCard.value?.name ?? '')
-provide(SELECTED_CARD, selectedCard)
+const selectedCardData = computed(() => props.card)
+const selectedCardType = computed(() => selectedCardData.value?.type)
+const selectedCardKey = computed(() => selectedCardData.value?.name ?? '')
+const selectedCard = computed(() => createCard(selectedCardData.value))
+useCurrentSelectedCardProvider(selectedCard)
 provide(IS_TEMP_CARD, props.isTempCard)
 </script>

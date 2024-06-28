@@ -9,68 +9,37 @@ import type {
 import ws from '../../api/ws'
 import { computed, reactive, ref } from 'vue'
 import { gtagEvent } from '../../utils'
-import { createCard, CocCard, type ICardData, type ICard } from '@paotuan/card'
+import { createCard, type ICardData } from '@paotuan/card'
+import { yGlobalStoreRef } from '../ystore'
 
 export const useCardStore = defineStore('card', () => {
-  const cardMap = reactive<Record<string, ICard>>({})
-  const cardEditedMap = reactive<Record<string, boolean>>({}) // 标识卡片是否有编辑未保存
+  const cardDataMap = computed(() => yGlobalStoreRef.value?.cards ?? {})
   const cardLinkMap = reactive<Record<string, string>>({}) // 卡片名 -> 用户 id
   const selectedCardId = ref('')
 
+  const isCurrentSelected = (cardName: string) => selectedCardId.value === cardName
+
   // 当前选中的人物卡
-  const selectedCard = computed(() => selectedCardId.value ? cardMap[selectedCardId.value] : undefined)
-  const allCards = computed(() => Object.values(cardMap))
+  const selectedCard = computed(() => selectedCardId.value ? cardDataMap.value[selectedCardId.value] : undefined)
+  const allCards = computed(() => Object.values(cardDataMap.value))
   const templateCardList = computed(() => allCards.value.filter(card => card.isTemplate))
   // 已存在的人物卡文件名
   const existNames = computed(() => allCards.value.map(card => card.name))
   const linkedUsers = computed(() => Object.values(cardLinkMap))
 
-  const of = (cardName: string) => cardMap[cardName]
+  const of = (cardName: string) => cardDataMap.value[cardName]
 
-  // region 卡片导入、更新相关，使用 plain data
+  // 卡片导入
   const importCard = (card: ICardData) => {
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
     gtagEvent('card/import')
   }
-
-  // 请求保存卡片（其实后端和导入的逻辑是一样的）
-  const requestSaveCard = (card: ICardData) => {
-    ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
-  }
-
-  // 全量更新人物卡
-  const updateCards = (cards: ICardData[]) => {
-    // 1. 不存在的 card 本地要删掉
-    const newExistNames = cards.map(card => card.name)
-    const name2delete = existNames.value.filter(name => !newExistNames.includes(name))
-    name2delete.forEach(cardName => {
-      delete cardMap[cardName]
-      delete cardEditedMap[cardName]
-      delete cardLinkMap[cardName]
-      if (selectedCardId.value === cardName) {
-        selectedCardId.value = ''
-      }
-    })
-    // 2. 存在的 card 根据条件更新
-    cards.forEach(card => {
-      const cardName = card.name
-      const oldCard = cardMap[cardName]
-      // 本地没这张卡片，或服务端的卡片修改时间更新，才覆盖，否则以本地的为准
-      if (!oldCard || oldCard.data.lastModified <= card.lastModified) {
-        cardMap[cardName] = createCard(card)
-        cardEditedMap[cardName] = false
-      }
-    })
-  }
-  // endregion
 
   // 删除人物卡
   const deleteCard = (cardName: string) => {
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     gtagEvent('card/delete')
     // 不管后端删除有没有成功，前端直接删除吧
-    delete cardMap[cardName]
-    delete cardEditedMap[cardName]
     delete cardLinkMap[cardName]
     selectedCardId.value = ''
   }
@@ -81,10 +50,12 @@ export const useCardStore = defineStore('card', () => {
   // 标记某张卡片被编辑
   // 注意：此处仅做 ui 上的标记，不处理 card 本身的时间戳更新
   // 如果通过 card api 更新卡片，会自动打时间戳。如果直接修改 card.data, 则由业务各自负责打时间戳
-  const markCardEdited = (cardName: string) => cardEditedMap[cardName] = true
+  // todo 待废弃
+  const markCardEdited = (cardName: string) => {}
 
   // 人物卡是否有编辑未保存
-  const isEdited = (cardName: string) => !!cardEditedMap[cardName]
+  // todo 待废弃
+  const isEdited = (cardName: string) => false
 
   // 关联玩家相关
   const linkedUserOf = (cardName: string) => cardLinkMap[cardName]
@@ -105,23 +76,25 @@ export const useCardStore = defineStore('card', () => {
   const getCardOfUser = (userId: string) => {
     for (const cardName of Object.keys(cardLinkMap)) {
       if (cardLinkMap[cardName] === userId) {
-        return cardMap[cardName]
+        // todo 后续看 createCard 放哪里?
+        return createCard(cardDataMap.value[cardName])
       }
     }
   }
 
   // 检定成功后处理
   const onTestSuccess = (cardName: string, skill: string) => {
-    const targetCard = of(cardName)
-    // 只有 coc 卡片的 skill 能成长，要判断下成功的是不是 skill.
-    if (targetCard?.type === 'coc') {
-      const cocCard = targetCard as CocCard
-      if (!cocCard.data.skills[skill]) return
-      const updated = cocCard.markSkillGrowth(skill)
-      if (updated) {
-        markCardEdited(cardName)
-      }
-    }
+    // todo 应该可以直接利用同步机制，无需特殊处理
+    // const targetCard = of(cardName)
+    // // 只有 coc 卡片的 skill 能成长，要判断下成功的是不是 skill.
+    // if (targetCard?.type === 'coc') {
+    //   const cocCard = targetCard as CocCard
+    //   if (!cocCard.data.skills[skill]) return
+    //   const updated = cocCard.markSkillGrowth(skill)
+    //   if (updated) {
+    //     markCardEdited(cardName)
+    //   }
+    // }
   }
 
   // 主动发起投骰相关
@@ -133,16 +106,15 @@ export const useCardStore = defineStore('card', () => {
 
   return {
     selectedCard,
+    isCurrentSelected,
     allCards,
     templateCardList,
     existNames,
     linkedUsers,
     of,
     importCard,
-    updateCards,
     selectCard,
     markCardEdited,
-    requestSaveCard,
     deleteCard,
     isEdited,
     linkedUserOf,

@@ -1,5 +1,4 @@
 import ws from './ws'
-import type { ICardData } from '@paotuan/card'
 import type {
   ICardLinkResp,
   ICardTestResp,
@@ -74,11 +73,6 @@ ws.on('card/import', data => {
   } else {
     Toast.error('人物卡保存失败！')
   }
-})
-
-ws.on('card/list', data => {
-  const cardStore = useCardStore()
-  cardStore.updateCards(data.data as ICardData[])
 })
 
 ws.on('card/link', data => {

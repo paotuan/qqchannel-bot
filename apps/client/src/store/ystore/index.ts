@@ -1,11 +1,12 @@
 import { useChannelStore } from '../channel'
 import { useBotStore } from '../bot'
-import { YGuildState, YGuildStateShape } from '@paotuan/types'
+import { YGlobalState, YGlobalStateShape, YGuildState, YGuildStateShape } from '@paotuan/types'
 import { syncedStore, getYjsDoc } from '@syncedstore/core'
 import { WebsocketProvider } from 'y-websocket'
 import { serverAddr, serverPort } from '../../api/endpoint'
 import { shallowRef } from 'vue'
 
+const yGlobalStoreRef = shallowRef<YGlobalState | undefined>()
 const yGuildStoreRef = shallowRef<YGuildState | undefined>()
 
 let inited = false
@@ -29,12 +30,17 @@ export function initYStore() {
   const guildUnionId = `${platform}_${selectedChannel.guildId}`
   const channelUnionId = `${guildUnionId}_${selectedChannel.id}`
 
+  // init global store
+  const [globalStore] = setupStore<YGlobalState>('global', YGlobalStateShape)
+  yGlobalStoreRef.value = globalStore
+
   // init guild store
   const [guildStore] = setupStore<YGuildState>(guildUnionId, YGuildStateShape)
   yGuildStoreRef.value = guildStore
 }
 
 export {
+  yGlobalStoreRef,
   yGuildStoreRef
 }
 

@@ -164,16 +164,16 @@
 </template>
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject } from 'vue'
+import { computed } from 'vue'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
 import type { CocCard, ICocCardData } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
-import { SELECTED_CARD } from '../utils'
+import { useCurrentSelectedCard } from '../utils'
 import CardMoreAction from '../CardMoreAction.vue'
 
 const cardStore = useCardStore()
-const cocCard = inject<ComputedRef<CocCard>>(SELECTED_CARD)! // 此处可以确保是 coc card
+const cocCard = useCurrentSelectedCard<CocCard>()! // 此处可以确保是 coc card
 const cardData = computed(() => cocCard.value.data)
 
 const propKeyOf = (card: ICocCardData) => {

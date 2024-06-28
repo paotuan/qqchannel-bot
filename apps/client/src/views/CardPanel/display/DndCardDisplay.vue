@@ -304,9 +304,9 @@
 </template>
 <script setup lang="ts">
 import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { XMarkIcon, InformationCircleIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
-import { SELECTED_CARD } from '../utils'
+import { useCurrentSelectedCard } from '../utils'
 import { getSkillsMap, type DndCard, type IDndCardData } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
 import TextInput from '../TextInput.vue'
@@ -315,7 +315,7 @@ import DndSpellsDataDialog from '../DndSpellsDataDialog.vue'
 import CardMoreAction from '../CardMoreAction.vue'
 
 const cardStore = useCardStore()
-const dndCard = inject<ComputedRef<DndCard>>(SELECTED_CARD)! // 此处可以确保是 dnd card
+const dndCard = useCurrentSelectedCard<DndCard>()! // 此处可以确保是 dnd card
 const cardData = computed(() => dndCard.value.data)
 
 // 属性值计算
