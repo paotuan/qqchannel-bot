@@ -22,7 +22,7 @@ const wsReadyStateClosed = 3 // eslint-disable-line
 // disable gc when using snapshots!
 const gcEnabled = process.env.GC !== 'false' && process.env.GC !== '0'
 /**
- * @type {{bindState: function(string,WSSharedDoc):void, writeState:function(string,WSSharedDoc):Promise<any>, provider: any}|null}
+ * @type {{bindState: function(string,WSSharedDoc,function):void, writeState:function(string,WSSharedDoc):Promise<any>, provider: any}|null}
  */
 let persistence = null
 
@@ -37,7 +37,7 @@ exports.setupPersistence = (persistenceDir) => {
     const ldb = new LeveldbPersistence(persistenceDir)
     persistence = {
       provider: ldb,
-      bindState: async (docName, ydoc) => {
+      bindState: async (docName, ydoc, onload) => {
         const persistedYdoc = await ldb.getYDoc(docName)
         const newUpdates = Y.encodeStateAsUpdate(ydoc)
         ldb.storeUpdate(docName, newUpdates)
@@ -46,6 +46,7 @@ exports.setupPersistence = (persistenceDir) => {
           ldb.storeUpdate(docName, update)
         })
         console.info('Load from db:', docName)
+        onload?.()
       },
       writeState: async (_docName, _ydoc) => {}
     }
@@ -164,14 +165,15 @@ exports.WSSharedDoc = WSSharedDoc
  * Gets a Y.Doc by name, whether in memory or on disk
  *
  * @param {string} docname - the name of the Y.Doc to find or create
+ * @param {function} onload - called when load from db
  * @param {boolean} gc - whether to allow gc on the doc (applies only when created)
  * @return {WSSharedDoc}
  */
-const getYDoc = (docname, gc = true) => map.setIfUndefined(docs, docname, () => {
+const getYDoc = (docname, onload, gc = true) => map.setIfUndefined(docs, docname, () => {
   const doc = new WSSharedDoc(docname)
   doc.gc = gc
   if (persistence !== null) {
-    persistence.bindState(docname, doc)
+    persistence.bindState(docname, doc, onload)
   }
   docs.set(docname, doc)
   return doc

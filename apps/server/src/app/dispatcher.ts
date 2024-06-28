@@ -23,6 +23,7 @@ import type {
 } from '@paotuan/types'
 import { RiProvider } from '@paotuan/dicecore'
 import { getBotId } from '../adapter/utils'
+import { GlobalStore } from '../state'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
   switch (request.cmd) {
@@ -117,7 +118,7 @@ async function handleGetBotInfo(client: WsClient) {
   }
 }
 
-function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
+async function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
   // watch card link info
@@ -148,8 +149,8 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
     }
   })
-  // todo touch 一下 guild 和 channel store 以触发初始化，确保服务器状态权威 & 进行耗时操作
-  client.bot?.guilds.find(data.guildId)?.touchStore()
+  // 初始化 guild 和 channel store
+  await GlobalStore.Instance.initGuildAndChannelState(client.platform!, data.guildId, data.channelId)
   // resp
   client.send({ cmd: 'channel/listen', success: true, data: '' })
 }

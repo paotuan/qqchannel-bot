@@ -7,5 +7,5 @@ declare module '@paotuan/syncserver' {
   }
 
   export function createWss(options?: ICreateWssOptions): WebSocket.Server<WebSocket>
-  export function getYDoc(docName: string, gc?: boolean): Doc
+  export function getYDoc(docName: string, onload?: () => void, gc?: boolean): Doc
 }

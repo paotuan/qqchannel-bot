@@ -37,10 +37,6 @@ export class Guild {
     return GlobalStore.Instance.guild(this.guildUnionId)
   }
 
-  touchStore() {
-    return this.store
-  }
-
   findChannel(id: string): Channel | undefined {
     return this.channelsMap[id]
   }
