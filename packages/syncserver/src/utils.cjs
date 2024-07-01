@@ -169,7 +169,7 @@ exports.WSSharedDoc = WSSharedDoc
  * @param {boolean} gc - whether to allow gc on the doc (applies only when created)
  * @return {WSSharedDoc}
  */
-const getYDoc = (docname, onload, gc = true) => map.setIfUndefined(docs, docname, () => {
+const getYDoc = (docname, onload = undefined, gc = true) => map.setIfUndefined(docs, docname, () => {
   const doc = new WSSharedDoc(docname)
   doc.gc = gc
   if (persistence !== null) {
@@ -228,13 +228,14 @@ const closeConn = (doc, conn) => {
     const controlledIds = doc.conns.get(conn)
     doc.conns.delete(conn)
     awarenessProtocol.removeAwarenessStates(doc.awareness, Array.from(controlledIds), null)
-    if (doc.conns.size === 0 && persistence !== null) {
-      // if persisted, we store state and destroy ydocument
-      persistence.writeState(doc.name, doc).then(() => {
-        doc.destroy()
-      })
-      docs.delete(doc.name)
-    }
+    // client 关闭时不要销毁 server 的状态
+    // if (doc.conns.size === 0 && persistence !== null) {
+    //   // if persisted, we store state and destroy ydocument
+    //   persistence.writeState(doc.name, doc).then(() => {
+    //     doc.destroy()
+    //   })
+    //   docs.delete(doc.name)
+    // }
   }
   conn.close()
 }
@@ -265,7 +266,8 @@ const pingTimeout = 30000
 exports.setupWSConnection = (conn, req, { docName = (req.url || '').slice(1).split('?')[0], gc = true } = {}) => {
   conn.binaryType = 'arraybuffer'
   // get doc, initialize if it does not exist yet
-  const doc = getYDoc(docName, gc)
+  // 根据目前的设计，确保这里的 getYDoc 都是已经初始化好的
+  const doc = getYDoc(docName)
   doc.conns.set(conn, new Set())
   // listen and reply to events
   conn.on('message', /** @param {ArrayBuffer} message */ message => messageListener(conn, doc, new Uint8Array(message)))
