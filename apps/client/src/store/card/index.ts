@@ -47,16 +47,6 @@ export const useCardStore = defineStore('card', () => {
   // 选择某张人物卡
   const selectCard = (cardName: string) => selectedCardId.value = cardName
 
-  // 标记某张卡片被编辑
-  // 注意：此处仅做 ui 上的标记，不处理 card 本身的时间戳更新
-  // 如果通过 card api 更新卡片，会自动打时间戳。如果直接修改 card.data, 则由业务各自负责打时间戳
-  // todo 待废弃
-  const markCardEdited = (cardName: string) => {}
-
-  // 人物卡是否有编辑未保存
-  // todo 待废弃
-  const isEdited = (cardName: string) => false
-
   // 关联玩家相关
   const linkedUserOf = (cardName: string) => cardLinkMap[cardName]
   const requestLinkUser = (cardName: string, userId: string | null | undefined) => {
@@ -114,9 +104,7 @@ export const useCardStore = defineStore('card', () => {
     of,
     importCard,
     selectCard,
-    markCardEdited,
     deleteCard,
-    isEdited,
     linkedUserOf,
     requestLinkUser,
     linkUser,

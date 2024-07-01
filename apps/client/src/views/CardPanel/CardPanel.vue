@@ -17,7 +17,7 @@
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
-            <span class="truncate translate-y-1/4">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
+            <span class="truncate translate-y-1/4">{{ card.name }}</span>
             <CheckCircleIcon v-show="cardStore.isCurrentSelected(card.name)" class="size-6 ml-auto flex-none" />
           </button>
           <user-selector :user-id="cardStore.linkedUserOf(card.name) || null" @select="cardStore.requestLinkUser(card.name, $event?.id)" />
@@ -29,7 +29,7 @@
                   :title="card.name"
                   @click="cardStore.selectCard(card.name)">
             <CardTypeBadge :type="card.type" class="absolute -top-1.5 -left-1.5" />
-            <span class="truncate translate-y-1/4">{{ card.name }}{{ cardStore.isEdited(card.name) ? ' *' : '' }}</span>
+            <span class="truncate translate-y-1/4">{{ card.name }}</span>
             <CheckCircleIcon v-show="cardStore.isCurrentSelected(card.name)" class="size-6 ml-auto flex-none" />
           </button>
         </div>

@@ -90,7 +90,7 @@
           </table>
         </div>
         <!-- ext -->
-        <textarea v-model="cardData.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
+        <textarea v-model.lazy="cardData.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
       </div>
       <div class="w-0" style="flex: 2 1 0">
         <table class="table table-sm table-zebra w-full">
@@ -163,7 +163,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useCardStore } from '../../../store/card'
 import { computed } from 'vue'
 import TextInput from '../TextInput.vue'
 import NumberInput from '../NumberInput.vue'
@@ -172,7 +171,6 @@ import CardToolbar from '../CardToolbar.vue'
 import { useCurrentSelectedCard } from '../utils'
 import CardMoreAction from '../CardMoreAction.vue'
 
-const cardStore = useCardStore()
 const cocCard = useCurrentSelectedCard<CocCard>()! // 此处可以确保是 coc card
 const cardData = computed(() => cocCard.value.data)
 
@@ -191,16 +189,12 @@ const skills = computed(() => {
 const toggleSkillGrowth = (skill: string) => {
   const targetCard = cocCard.value
   const marked = !!targetCard.data.meta.skillGrowth[skill]
-  const updated = !marked ? targetCard.markSkillGrowth(skill) : targetCard.cancelSkillGrowth(skill)
-  if (updated) {
-    cardStore.markCardEdited(targetCard.name)
-  }
+  !marked ? targetCard.markSkillGrowth(skill) : targetCard.cancelSkillGrowth(skill)
 }
 
 // 标记人物卡被编辑
 const markEdited = () => {
   cardData.value.lastModified = Date.now()
-  cardStore.markCardEdited(cocCard.value.name)
 }
 
 // 新增一条 ability

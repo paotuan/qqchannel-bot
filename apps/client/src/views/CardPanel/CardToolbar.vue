@@ -18,7 +18,6 @@ const isTempCard = inject<boolean>(IS_TEMP_CARD, false)
 // 批量增加技能
 const addSkillsBatch = (rawText: string) => {
   addAttributesBatch(selectedCard.value, rawText)
-  cardStore.markCardEdited(selectedCard.value.name)
 }
 
 // 删除人物卡二次确认

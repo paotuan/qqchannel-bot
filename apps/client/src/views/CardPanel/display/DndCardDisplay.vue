@@ -100,7 +100,7 @@
           </table>
         </div>
         <!-- ext -->
-        <textarea v-model="cardData.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
+        <textarea v-model.lazy="cardData.ext" class="textarea textarea-bordered w-full mt-4" placeholder="输入任意备注信息" @change="markEdited" />
       </div>
       <div class="w-0" style="flex: 2 1 0">
         <table class="table table-sm table-zebra w-full">
@@ -254,7 +254,7 @@
           <tr v-for="(line, i) in cardData.jobAbilities" :key="i" class="group">
             <td><text-input v-model="line.name" class="input input-ghost input-xs w-full"/></td>
             <td><number-input v-model="line.lv" class="input input-ghost input-xs text-sm w-14"/></td>
-            <td><textarea v-model="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
+            <td><textarea v-model.lazy="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
             <td style="padding: 0">
               <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('jobAbilities', i)">
                 <XMarkIcon class="size-4" />
@@ -284,7 +284,7 @@
           <tr v-for="(line, i) in cardData.specialists" :key="i" class="group">
             <td><text-input v-model="line.name" class="input input-ghost input-xs w-full"/></td>
             <td><number-input v-model="line.lv" class="input input-ghost input-xs text-sm w-14"/></td>
-            <td><textarea v-model="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
+            <td><textarea v-model.lazy="line.desc" class="textarea textarea-xs w-full min-h-[1.75rem] bg-transparent" @change="markEdited" /></td>
             <td style="padding: 0">
               <button class="btn btn-xs btn-circle btn-ghost invisible group-hover:visible" @click="deleteAbility('specialists', i)">
                 <XMarkIcon class="size-4" />
@@ -303,7 +303,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useCardStore } from '../../../store/card'
 import { computed, reactive, ref } from 'vue'
 import { XMarkIcon, InformationCircleIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
 import { useCurrentSelectedCard } from '../utils'
@@ -314,7 +313,6 @@ import NumberInput from '../NumberInput.vue'
 import DndSpellsDataDialog from '../DndSpellsDataDialog.vue'
 import CardMoreAction from '../CardMoreAction.vue'
 
-const cardStore = useCardStore()
 const dndCard = useCurrentSelectedCard<DndCard>()! // 此处可以确保是 dnd card
 const cardData = computed(() => dndCard.value.data)
 
@@ -355,10 +353,7 @@ const deleteItem = (name: string) => {
 const toggleSkillGrowth = (skill: string) => {
   const targetCard = dndCard.value
   const marked = !!targetCard.data.meta.experienced[skill]
-  const updated = !marked ? targetCard.markExperienced(skill) : targetCard.cancelExperienced(skill)
-  if (updated) {
-    cardStore.markCardEdited(targetCard.name)
-  }
+  !marked ? targetCard.markExperienced(skill) : targetCard.cancelExperienced(skill)
 }
 
 // 新增一条 ability
@@ -380,7 +375,6 @@ const deleteAbility = (type: 'equips' | 'spells' | 'jobAbilities' | 'specialists
 // 标记人物卡被编辑
 const markEdited = () => {
   cardData.value.lastModified = Date.now()
-  cardStore.markCardEdited(dndCard.value.name)
 }
 
 // 记录折叠状态
