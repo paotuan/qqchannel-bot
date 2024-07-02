@@ -1,6 +1,13 @@
 import type { ChannelUnionId, GuildUnionId } from '../adapter/utils'
 import { syncedStore } from '@syncedstore/core'
-import { YGlobalState, YGlobalStateShape, YGuildState, YGuildStateShape } from '@paotuan/types'
+import {
+  YChannelState,
+  YChannelStateShape,
+  YGlobalState,
+  YGlobalStateShape,
+  YGuildState,
+  YGuildStateShape
+} from '@paotuan/types'
 import { getYDoc } from '@paotuan/syncserver'
 import { migrateUser } from './migrateUser'
 import { migrateCards, upgradeCards } from './migrateCard'
@@ -46,6 +53,9 @@ export class GlobalStore {
   // guild state
   private guildState = new Map<GuildUnionId, YGuildState>()
 
+  // channel state
+  private channelState = new Map<ChannelUnionId, YChannelState>()
+
   async initGuildAndChannelState(platform: Platform, guildId: string, channelId: string) {
     const guildUnionId: GuildUnionId = `${platform}_${guildId}`
     const channelUnionId: ChannelUnionId = `${guildUnionId}_${channelId}`
@@ -61,7 +71,18 @@ export class GlobalStore {
       }))
     }
     // setup channel
-    // todo
+    const channelState = this.channelState.get(channelUnionId)
+    if (!channelState) {
+      promises.push(new Promise(resolve => {
+        const doc = getYDoc(channelUnionId, () => {
+          // todo linkMap 中 card 的存在性校验
+          resolve()
+        })
+        const state = syncedStore(YChannelStateShape, doc) as YChannelState
+        // todo migrateCardLink
+        this.channelState.set(channelUnionId, state)
+      }))
+    }
     await Promise.all(promises)
   }
 
@@ -71,5 +92,17 @@ export class GlobalStore {
       throw new Error(guildUnionId + ' not inited!')
     }
     return state
+  }
+
+  channel(channelUnionId: ChannelUnionId) {
+    const state = this.channelState.get(channelUnionId)
+    if (!state) {
+      throw new Error(channelUnionId + ' not inited!')
+    }
+    return state
+  }
+
+  get activeChannels() {
+    return Array.from(this.channelState.keys())
   }
 }

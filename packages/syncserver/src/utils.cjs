@@ -229,6 +229,7 @@ const closeConn = (doc, conn) => {
     doc.conns.delete(conn)
     awarenessProtocol.removeAwarenessStates(doc.awareness, Array.from(controlledIds), null)
     // client 关闭时不要销毁 server 的状态
+    // 我们的 bizServer 本质上也是一个特殊的 client
     // if (doc.conns.size === 0 && persistence !== null) {
     //   // if persisted, we store state and destroy ydocument
     //   persistence.writeState(doc.name, doc).then(() => {

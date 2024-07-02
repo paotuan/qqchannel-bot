@@ -13,7 +13,7 @@ export interface YGuildState {
 
 export interface YChannelState {
   config: IChannelConfig
-  cardLinkMap: Record<string, string>
+  cardLinkMap: Record<string, string> // userId => cardId
   // todo ri list
 }
 

@@ -1,22 +1,19 @@
 import { defineStore } from 'pinia'
-import type {
-  ICardDeleteReq,
-  ICardImportReq,
-  ICardLinkReq,
-  ICardLinkResp,
-  IDiceRollReq
-} from '@paotuan/types'
+import type { ICardDeleteReq, ICardImportReq, IDiceRollReq } from '@paotuan/types'
 import ws from '../../api/ws'
 import { computed, reactive, ref } from 'vue'
-import { gtagEvent } from '../../utils'
+import { gtagEvent, Toast } from '../../utils'
 import { createCard, type ICardData } from '@paotuan/card'
-import { yGlobalStoreRef } from '../ystore'
+import { yChannelStoreRef, yGlobalStoreRef } from '../ystore'
 
 export const useCardStore = defineStore('card', () => {
   const cardDataMap = computed(() => yGlobalStoreRef.value?.cards ?? {})
-  const cardLinkMap = reactive<Record<string, string>>({}) // 卡片名 -> 用户 id
-  const selectedCardId = ref('')
+  // userId => cardId
+  const cardLinkMapNew = computed(() => yChannelStoreRef.value?.cardLinkMap ?? {})
 
+  // 当前选择的人物卡相关 todo 或许不应该放在这里
+  const selectedCardId = ref('')
+  const selectCard = (cardName: string) => selectedCardId.value = cardName
   const isCurrentSelected = (cardName: string) => selectedCardId.value === cardName
 
   // 当前选中的人物卡
@@ -25,66 +22,66 @@ export const useCardStore = defineStore('card', () => {
   const templateCardList = computed(() => allCards.value.filter(card => card.isTemplate))
   // 已存在的人物卡文件名
   const existNames = computed(() => allCards.value.map(card => card.name))
-  const linkedUsers = computed(() => Object.values(cardLinkMap))
+  // 已存在关联的用户和人物卡名
+  const linkedUsers = computed(() => Object.keys(cardLinkMapNew.value))
+  const linkedCards = computed(() => Object.values(cardLinkMapNew.value))
 
   const of = (cardName: string) => cardDataMap.value[cardName]
 
   // 卡片导入
+  // 注：导入和删除还是发送到后端进行处理，因为要与 dicecore 同步
   const importCard = (card: ICardData) => {
-    ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
     gtagEvent('card/import')
+    ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
+    ws.once('card/import', data => {
+      if (data.success) {
+        Toast.success('人物卡保存成功！')
+      } else {
+        Toast.error('人物卡保存失败！')
+      }
+    })
   }
 
   // 删除人物卡
   const deleteCard = (cardName: string) => {
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     gtagEvent('card/delete')
-    // 不管后端删除有没有成功，前端直接删除吧
-    delete cardLinkMap[cardName]
+    // 人物卡关联关系后端删除后会自然同步到前端，前端无需处理
     selectedCardId.value = ''
   }
 
-  // 选择某张人物卡
-  const selectCard = (cardName: string) => selectedCardId.value = cardName
-
   // 关联玩家相关
-  const linkedUserOf = (cardName: string) => cardLinkMap[cardName]
-  const requestLinkUser = (cardName: string, userId: string | null | undefined) => {
-    ws.send<ICardLinkReq>({ cmd: 'card/link', data: { cardName, userId } })
-    gtagEvent('card/link')
-  }
-  const linkUser = (res: ICardLinkResp) => {
-    Object.keys(cardLinkMap).forEach(key => delete cardLinkMap[key])
-    res.forEach(({ cardName, userId }) => {
-      if (userId) {
-        cardLinkMap[cardName] = userId
+  // 人物卡关联数据结构比较简单，我们只要确保 linkUser 逻辑前后端一致，就直接同步整个 map 即可
+  const linkedUserOf = (cardName: string) => {
+    for (const userId of linkedUsers.value) {
+      if (cardLinkMapNew.value[userId] === cardName) {
+        return userId
       }
-    })
+    }
+    return undefined
+  }
+
+  const requestLinkUser = (cardName: string, userId: string | null | undefined) => {
+    gtagEvent('card/link')
+    // 如果 card 之前关联的别的人，要删掉
+    const oldUserId = linkedUserOf(cardName)
+    if (oldUserId && oldUserId !== userId) {
+      delete cardLinkMapNew.value[oldUserId]
+    }
+    // 关联上新的
+    if (userId) {
+      cardLinkMapNew.value[userId] = cardName
+    }
   }
 
   // 根据用户 id 反查关联卡片
   const getCardOfUser = (userId: string) => {
-    for (const cardName of Object.keys(cardLinkMap)) {
-      if (cardLinkMap[cardName] === userId) {
-        // todo 后续看 createCard 放哪里?
-        return createCard(cardDataMap.value[cardName])
-      }
-    }
-  }
-
-  // 检定成功后处理
-  const onTestSuccess = (cardName: string, skill: string) => {
-    // todo 应该可以直接利用同步机制，无需特殊处理
-    // const targetCard = of(cardName)
-    // // 只有 coc 卡片的 skill 能成长，要判断下成功的是不是 skill.
-    // if (targetCard?.type === 'coc') {
-    //   const cocCard = targetCard as CocCard
-    //   if (!cocCard.data.skills[skill]) return
-    //   const updated = cocCard.markSkillGrowth(skill)
-    //   if (updated) {
-    //     markCardEdited(cardName)
-    //   }
-    // }
+    const cardName = cardLinkMapNew.value[userId]
+    if (!cardName) return undefined
+    const cardData = cardDataMap.value[cardName]
+    if (!cardData) return undefined
+    // todo 后续看 createCard 放哪里?
+    return createCard(cardData)
   }
 
   // 主动发起投骰相关
@@ -92,6 +89,13 @@ export const useCardStore = defineStore('card', () => {
   const manualDiceRollReq = reactive<Partial<IDiceRollReq>>({ expression: '', cardData: undefined })
   const manualDiceRoll = (expression: string, cardData: ICardData) => {
     ws.send<IDiceRollReq>({ cmd: 'dice/roll', data: { expression, cardData } })
+    ws.once('dice/roll', data => {
+      if (data.success) {
+        Toast.success('掷骰成功！')
+      } else {
+        Toast.error(data.data as string)
+      }
+    })
   }
 
   return {
@@ -101,15 +105,14 @@ export const useCardStore = defineStore('card', () => {
     templateCardList,
     existNames,
     linkedUsers,
+    linkedCards,
     of,
     importCard,
     selectCard,
     deleteCard,
     linkedUserOf,
     requestLinkUser,
-    linkUser,
     getCardOfUser,
-    onTestSuccess,
     manualDiceRollDialogShow,
     manualDiceRollReq,
     manualDiceRoll

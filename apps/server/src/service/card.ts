@@ -1,12 +1,11 @@
-import fs from 'fs'
 import type { WsClient } from '../app/wsclient'
 import type { Wss } from '../app/wss'
-import type { ICardDeleteReq, ICardImportReq, ICardLinkReq } from '@paotuan/types'
+import type { ICardDeleteReq, ICardImportReq } from '@paotuan/types'
 import type { ICard, ICardData, ICardEntryChangeEvent } from '@paotuan/card'
 import mitt from 'mitt'
 import { ChannelUnionId } from '../adapter/utils'
 import { resolveRootDir } from '../utils'
-import { CardProvider, DefaultCardLinker, Events, type ICardQuery } from '@paotuan/dicecore'
+import { AbstractCardLinker, CardProvider, Events, type ICardQuery } from '@paotuan/dicecore'
 import { GlobalStore } from '../state'
 
 const CARD_DIR = resolveRootDir('cards')
@@ -19,7 +18,7 @@ type LinkMap = Record<string, string> // userId => cardName
  */
 export class CardManager {
   private readonly wss: Wss
-  private readonly channelLinkMap: Record<ChannelUnionId, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
+  // private readonly channelLinkMap: Record<ChannelUnionId, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
   private readonly emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
 
   private get cardMap(): Record<string, ICardData> {
@@ -30,10 +29,10 @@ export class CardManager {
     this.wss = wss
     this.initRegisterCards()
     // set linker
-    CardProvider.setLinker(new DefaultCardLinker(this.channelLinkMap))
+    CardProvider.setLinker(new YCardLinker())
     // 注册监听器
     Events.on('card-entry-change', event => this.emitter.emit('EntryChange', event))
-    Events.on('card-link-change', () => saveLinkFile(this.channelLinkMap))
+    // Events.on('card-link-change', () => saveLinkFile(this.channelLinkMap))
   }
 
   private initRegisterCards() {
@@ -92,8 +91,7 @@ export class CardManager {
     this.cardMap[cardName] = card
     // 传入响应式对象，确保内部变化被监听到
     CardProvider.registerCard(cardName, this.cardMap[cardName])
-    // FIXME send to client
-    this.wss.sendToChannel<null>(client.listenToChannelUnionId!, { cmd: 'card/import', success: true, data: null })
+    this.wss.sendToClient(client, { cmd: 'card/import', success: true, data: null })
   }
 
   deleteCard(client: WsClient, req: ICardDeleteReq) {
@@ -101,15 +99,6 @@ export class CardManager {
     console.log('[Card] 删除人物卡', cardName)
     delete this.cardMap[cardName]
     CardProvider.unregisterCard(cardName)
-  }
-
-  handleLinkCard(client: WsClient, req: ICardLinkReq) {
-    const { cardName, userId } = req
-    const channelUnionId = client.listenToChannelUnionId
-    if (channelUnionId) {
-      console.log('[Card] 关联人物卡', req)
-      this.linkCard(channelUnionId, cardName, userId ?? undefined)
-    }
   }
 
   getLinkMap(channelUnionId: string) {
@@ -142,13 +131,15 @@ export class CardManager {
   }
 }
 
-function saveLinkFile(link: Record<ChannelUnionId, LinkMap>) {
-  if (!fs.existsSync(CARD_DIR)) {
-    fs.mkdirSync(CARD_DIR)
+class YCardLinker extends AbstractCardLinker {
+  // 获取所有 channelId 是为了删除 card 时也正确删除所有 channel 对该 card 的关联
+  // 在此处我们只对当前已加载了状态的 channel 做处理，与 getLinkMap 的逻辑统一，且避免遍历数据库
+  // 对于此刻还未加载的 channel link map，在其从数据库加载之后，立刻做一次 card 是否存在的校验
+  protected getAllChannelUnionIds(): ChannelUnionId[] {
+    return GlobalStore.Instance.activeChannels
   }
-  fs.writeFile(`${CARD_DIR}${LINK_FILE_NAME}`, JSON.stringify(link), (e) => {
-    if (e) {
-      console.error('[Card] 人物卡写关联失败', e)
-    }
-  })
+
+  getLinkMap(channelUnionId: ChannelUnionId): Record<string, string> {
+    return GlobalStore.Instance.channel(channelUnionId).cardLinkMap
+  }
 }

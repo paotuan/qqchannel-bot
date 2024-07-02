@@ -12,22 +12,12 @@ export interface ICardLinker {
 type CardId = string
 type ChannelUnionId = string
 type UserId = string
-type ChannelLinkMap = Record<ChannelUnionId, Record<UserId, CardId>>
 
-export class DefaultCardLinker implements ICardLinker {
+export abstract class AbstractCardLinker implements ICardLinker {
 
-  private readonly channelLinkMap: ChannelLinkMap
+  abstract getLinkMap(channelUnionId: ChannelUnionId): Record<UserId, CardId>
 
-  constructor(map = {}) {
-    this.channelLinkMap = map
-  }
-
-  getLinkMap(channelUnionId: ChannelUnionId) {
-    if (!this.channelLinkMap[channelUnionId]) {
-      this.channelLinkMap[channelUnionId] = {}
-    }
-    return this.channelLinkMap[channelUnionId]
-  }
+  protected abstract getAllChannelUnionIds(): ChannelUnionId[]
 
   linkCard(channelUnionId: ChannelUnionId, cardId: CardId, userId?: UserId) {
     // 如果 card 之前关联的别的人，要删掉
@@ -49,8 +39,8 @@ export class DefaultCardLinker implements ICardLinker {
   }
 
   deleteCard(cardId: CardId) {
-    Object.keys(this.channelLinkMap).forEach(channelUnionId => {
-      const linkMap = this.channelLinkMap[channelUnionId]
+    this.getAllChannelUnionIds().forEach(channelUnionId => {
+      const linkMap = this.getLinkMap(channelUnionId)
       const user2delete = Object.keys(linkMap).find(uid => linkMap[uid] === cardId)
       if (user2delete) {
         delete linkMap[user2delete]
@@ -62,5 +52,26 @@ export class DefaultCardLinker implements ICardLinker {
         })
       }
     })
+  }
+}
+
+export class DefaultCardLinker extends AbstractCardLinker {
+
+  private readonly channelLinkMap: Record<ChannelUnionId, Record<UserId, CardId>>
+
+  constructor(map = {}) {
+    super()
+    this.channelLinkMap = map
+  }
+
+  override getLinkMap(channelUnionId: ChannelUnionId) {
+    if (!this.channelLinkMap[channelUnionId]) {
+      this.channelLinkMap[channelUnionId] = {}
+    }
+    return this.channelLinkMap[channelUnionId]
+  }
+
+  protected override getAllChannelUnionIds() {
+    return Object.keys(this.channelLinkMap)
   }
 }

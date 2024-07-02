@@ -1,6 +1,13 @@
 import { useChannelStore } from '../channel'
 import { useBotStore } from '../bot'
-import { YGlobalState, YGlobalStateShape, YGuildState, YGuildStateShape } from '@paotuan/types'
+import {
+  YChannelState,
+  YChannelStateShape,
+  YGlobalState,
+  YGlobalStateShape,
+  YGuildState,
+  YGuildStateShape
+} from '@paotuan/types'
 import { syncedStore, getYjsDoc } from '@syncedstore/core'
 import { WebsocketProvider } from 'y-websocket'
 import { serverAddr, serverPort } from '../../api/endpoint'
@@ -8,6 +15,7 @@ import { shallowRef } from 'vue'
 
 const yGlobalStoreRef = shallowRef<YGlobalState | undefined>()
 const yGuildStoreRef = shallowRef<YGuildState | undefined>()
+const yChannelStoreRef = shallowRef<YChannelState | undefined>()
 
 let inited = false
 
@@ -16,17 +24,14 @@ export function initYStore() {
     console.warn('[YStore] cannot init twice!')
     return
   }
-  inited = true
 
-  const channelStore = useChannelStore()
-  const selectedChannel = channelStore.selectedChannel
+  const selectedChannel = useChannelStore().selectedChannel
   if (!selectedChannel) {
     console.warn('[YStore] no channel selected!')
     return
   }
-  const botStore = useBotStore()
-  const platform = botStore.platform
 
+  const platform = useBotStore().platform
   const guildUnionId = `${platform}_${selectedChannel.guildId}`
   const channelUnionId = `${guildUnionId}_${selectedChannel.id}`
 
@@ -37,11 +42,18 @@ export function initYStore() {
   // init guild store
   const [guildStore] = setupStore<YGuildState>(guildUnionId, YGuildStateShape)
   yGuildStoreRef.value = guildStore
+
+  // init channel store
+  const [channelStore] = setupStore<YChannelState>(channelUnionId, YChannelStateShape)
+  yChannelStoreRef.value = channelStore
+
+  inited = true
 }
 
 export {
   yGlobalStoreRef,
-  yGuildStoreRef
+  yGuildStoreRef,
+  yChannelStoreRef
 }
 
 function setupStore<T>(roomname: string, shape: unknown) {

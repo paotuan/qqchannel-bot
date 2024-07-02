@@ -4,8 +4,6 @@ import type {
   IBotInfoResp,
   ICardDeleteReq,
   ICardImportReq,
-  ICardLinkReq,
-  ICardLinkResp,
   IChannelConfigReq,
   IChannelConfigResp,
   IListenToChannelReq,
@@ -59,9 +57,6 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
     break
   case 'card/delete':
     handleCardDelete(client, server, request.data as ICardDeleteReq)
-    break
-  case 'card/link':
-    handleCardLink(client, server, request.data as ICardLinkReq)
     break
   case 'channel/config':
     handleChannelConfig(client, server, request.data as IChannelConfigReq)
@@ -121,17 +116,6 @@ async function handleGetBotInfo(client: WsClient) {
 async function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
-  // watch card link info
-  client.autorun(ws => {
-    const channel = ws.listenToChannelUnionId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
-    if (channel) {
-      const linkMap = server.cards.getLinkMap(channel)
-      const data: ICardLinkResp = Object.entries(linkMap).map(([userId, cardName]) => ({ userId, cardName }))
-      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data })
-    } else {
-      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
-    }
-  })
   // watch channel config
   client.autorun(ws => {
     const channelId = ws.listenToChannelUnionId
@@ -214,11 +198,6 @@ function handleCardImport(client: WsClient, server: Wss, data: ICardImportReq) {
 
 function handleCardDelete(client: WsClient, server: Wss, data: ICardDeleteReq) {
   server.cards.deleteCard(client, data)
-}
-
-function handleCardLink(client: WsClient, server: Wss, data: ICardLinkReq) {
-  if (!client.listenToChannelId) return
-  server.cards.handleLinkCard(client, data)
 }
 
 function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfigReq) {

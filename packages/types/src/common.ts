@@ -18,8 +18,6 @@ export type Command =
   | 'note/delete' // req
   | 'card/import' // req/res
   | 'card/delete' // req
-  | 'card/link'  // req/res
-  | 'card/test' // res
   | 'plugin/list' // res
   | 'plugin/reload' // req/ res: string
   | 'scene/sendBattleLog' // req/ res: string
@@ -138,23 +136,8 @@ export interface ICardImportReq {
   card: ICardData
 }
 
-// export type ICardImportResp = ICardImportReq
-
 export interface ICardDeleteReq {
   cardName: string
-}
-
-export interface ICardLinkReq {
-  cardName: string
-  userId: string | null | undefined
-}
-
-export type ICardLinkResp = ICardLinkReq[]
-
-export interface ICardTestResp {
-  cardName: string
-  propOrSkill: string
-  success: boolean
 }
 // endregion card
 

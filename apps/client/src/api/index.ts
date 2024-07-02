@@ -1,7 +1,5 @@
 import ws from './ws'
 import type {
-  ICardLinkResp,
-  ICardTestResp,
   IChannelConfigResp,
   ILog,
   INoteFetchResp,
@@ -10,7 +8,6 @@ import type {
 } from '@paotuan/types'
 import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
-import { useCardStore } from '../store/card'
 import { Toast } from '../utils'
 import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
@@ -67,27 +64,6 @@ ws.on('note/fetch', data => {
   }
 })
 
-ws.on('card/import', data => {
-  if (data.success) {
-    Toast.success('人物卡保存成功！')
-  } else {
-    Toast.error('人物卡保存失败！')
-  }
-})
-
-ws.on('card/link', data => {
-  const cardStore = useCardStore()
-  cardStore.linkUser(data.data as ICardLinkResp)
-})
-
-ws.on('card/test', data => {
-  const res = data.data as ICardTestResp
-  if (res.success) {
-    const cardStore = useCardStore()
-    cardStore.onTestSuccess(res.cardName, res.propOrSkill)
-  }
-})
-
 ws.on('channel/config', data => {
   const res = data.data as IChannelConfigResp
   const configStore = useConfigStore()
@@ -126,14 +102,6 @@ ws.on('ri/list', data => {
   })
   const sceneStore = useSceneStore()
   sceneStore.updateCharacterRiList(res)
-})
-
-ws.on('dice/roll', data => {
-  if (data.success) {
-    Toast.success('掷骰成功！')
-  } else {
-    Toast.error(data.data as string)
-  }
 })
 
 ws.on('plugin/reload', () => {

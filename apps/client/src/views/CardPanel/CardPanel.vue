@@ -61,9 +61,9 @@ const cardListAfterFilter = computed(() => {
   let list = allCards.value
   // template 不参与是否关联玩家的判断
   if (cardListFilters.linkState === 'linked') {
-    list = list.filter(card => card.isTemplate || cardStore.linkedUserOf(card.name))
+    list = list.filter(card => card.isTemplate || cardStore.linkedCards.includes(card.name))
   } else if (cardListFilters.linkState === 'unlinked') {
-    list = list.filter(card => card.isTemplate || !cardStore.linkedUserOf(card.name))
+    list = list.filter(card => card.isTemplate || !cardStore.linkedCards.includes(card.name))
   }
 
   if (cardListFilters.cardType) {
