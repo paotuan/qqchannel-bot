@@ -96,6 +96,7 @@ export async function dispatchReaction(userCommand: ICommand, options: IDispatch
     // 投骰
     const command = await options.getReactionCommand?.(userCommand)
     if (!command) return undefined
+    userCommand.command = command
     const opposedRoll = await options.getOpposedRoll?.(userCommand)
     return tryRollDice(config, userCommand, opposedRoll)
   } finally {
