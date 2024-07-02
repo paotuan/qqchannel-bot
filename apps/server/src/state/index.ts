@@ -8,10 +8,11 @@ import {
   YGuildState,
   YGuildStateShape
 } from '@paotuan/types'
+import { Platform } from '@paotuan/config'
 import { getYDoc } from '@paotuan/syncserver'
 import { migrateUser } from './migrateUser'
 import { migrateCards, upgradeCards } from './migrateCard'
-import { Platform } from '@paotuan/config'
+import { checkCardExist, migrateCardLink } from './migrateCardLink'
 
 // todo move to @paotuan/types
 const GlobalDocName = 'global'
@@ -75,11 +76,11 @@ export class GlobalStore {
     if (!channelState) {
       promises.push(new Promise(resolve => {
         const doc = getYDoc(channelUnionId, () => {
-          // todo linkMap 中 card 的存在性校验
+          checkCardExist(state)
           resolve()
         })
         const state = syncedStore(YChannelStateShape, doc) as YChannelState
-        // todo migrateCardLink
+        migrateCardLink(state, channelUnionId)
         this.channelState.set(channelUnionId, state)
       }))
     }

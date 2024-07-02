@@ -28,7 +28,7 @@ export function migrateCards(store: YGlobalState) {
       }
       store.cards[card.name] = card
     } catch (e) {
-      console.log(`[Card] ${file.path} 解析失败`, e)
+      console.error(`[Card] ${file.path} 解析失败`, e)
     } finally {
       // 迁移完毕删除数据
       try {
