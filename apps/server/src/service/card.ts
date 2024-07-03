@@ -4,21 +4,14 @@ import type { ICardDeleteReq, ICardImportReq } from '@paotuan/types'
 import type { ICard, ICardData, ICardEntryChangeEvent } from '@paotuan/card'
 import mitt from 'mitt'
 import { ChannelUnionId } from '../adapter/utils'
-import { resolveRootDir } from '../utils'
 import { AbstractCardLinker, CardProvider, Events, type ICardQuery } from '@paotuan/dicecore'
 import { GlobalStore } from '../state'
-
-const CARD_DIR = resolveRootDir('cards')
-const LINK_FILE_NAME = '/__link.json'
-
-type LinkMap = Record<string, string> // userId => cardName
 
 /**
  * 管理本地人物卡
  */
 export class CardManager {
   private readonly wss: Wss
-  // private readonly channelLinkMap: Record<ChannelUnionId, LinkMap> = {} // channelId => 关联关系表。同一个人在不同的子频道可以关联不同的人物卡
   private readonly emitter = mitt<{ EntryChange: ICardEntryChangeEvent }>()
 
   private get cardMap(): Record<string, ICardData> {
@@ -32,7 +25,6 @@ export class CardManager {
     CardProvider.setLinker(new YCardLinker())
     // 注册监听器
     Events.on('card-entry-change', event => this.emitter.emit('EntryChange', event))
-    // Events.on('card-link-change', () => saveLinkFile(this.channelLinkMap))
   }
 
   private initRegisterCards() {
@@ -41,48 +33,6 @@ export class CardManager {
       CardProvider.registerCard(name, this.cardMap[name])
     })
   }
-
-  // private initCardFiles() {
-  //   try {
-  //     console.log('[Card] 开始读取人物卡')
-  //     if (!fs.existsSync(CARD_DIR)) {
-  //       return
-  //     }
-  //     const filesPath = globSync(`${CARD_DIR}/*.json`, { stats: true })
-  //     const files = filesPath.map(path=> ({ created: path.stats?.birthtimeMs, modified: path.stats?.mtimeMs, path: path.path }))
-  //     files.forEach(file => {
-  //       const str = fs.readFileSync(file.path, 'utf8')
-  //       if (file.path.endsWith(LINK_FILE_NAME)) {
-  //         // 人物卡关联
-  //         try {
-  //           const link = JSON.parse(str)
-  //           Object.assign(this.channelLinkMap, link)
-  //         } catch (e) {
-  //           console.log('[Card] 人物卡关联 解析失败')
-  //         }
-  //       } else {
-  //         // 人物卡文件
-  //         try {
-  //           const card = handleCardUpgrade(JSON.parse(str))
-  //           // 补充 created，lastModified if need
-  //           if (!card.created && file.created) {
-  //             card.created = file.created
-  //           }
-  //           if (!card.lastModified && file.modified) {
-  //             card.lastModified = file.modified
-  //           }
-  //           this.cardMap[card.name] = card
-  //           // 传入响应式对象，确保内部变化被监听到
-  //           CardProvider.registerCard(card.name, this.cardMap[card.name])
-  //         } catch (e) {
-  //           console.log(`[Card] ${file.path} 解析失败`, e)
-  //         }
-  //       }
-  //     })
-  //   } catch (e) {
-  //     console.error('[Card] 人物卡列表失败', e)
-  //   }
-  // }
 
   importCard(client: WsClient, req: ICardImportReq) {
     const { card } = req

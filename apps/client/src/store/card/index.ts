@@ -11,13 +11,6 @@ export const useCardStore = defineStore('card', () => {
   // userId => cardId
   const cardLinkMapNew = computed(() => yChannelStoreRef.value?.cardLinkMap ?? {})
 
-  // 当前选择的人物卡相关 todo 或许不应该放在这里
-  const selectedCardId = ref('')
-  const selectCard = (cardName: string) => selectedCardId.value = cardName
-  const isCurrentSelected = (cardName: string) => selectedCardId.value === cardName
-
-  // 当前选中的人物卡
-  const selectedCard = computed(() => selectedCardId.value ? cardDataMap.value[selectedCardId.value] : undefined)
   const allCards = computed(() => Object.values(cardDataMap.value))
   const templateCardList = computed(() => allCards.value.filter(card => card.isTemplate))
   // 已存在的人物卡文件名
@@ -47,7 +40,6 @@ export const useCardStore = defineStore('card', () => {
     ws.send<ICardDeleteReq>({ cmd: 'card/delete', data: { cardName } })
     gtagEvent('card/delete')
     // 人物卡关联关系后端删除后会自然同步到前端，前端无需处理
-    selectedCardId.value = ''
   }
 
   // 关联玩家相关
@@ -99,8 +91,6 @@ export const useCardStore = defineStore('card', () => {
   }
 
   return {
-    selectedCard,
-    isCurrentSelected,
     allCards,
     templateCardList,
     existNames,
@@ -108,7 +98,6 @@ export const useCardStore = defineStore('card', () => {
     linkedCards,
     of,
     importCard,
-    selectCard,
     deleteCard,
     linkedUserOf,
     requestLinkUser,

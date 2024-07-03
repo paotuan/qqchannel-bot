@@ -66,8 +66,11 @@ const maxHp = computed(() => userCard.value?.MAXHP ?? NaN)
 const router = useRouter()
 const selectCard = () => {
   if (!userCard.value) return
-  cardStore.selectCard(userCard.value!.name)
-  router.push('/card')
+  const cardName = userCard.value!.name
+  router.push({
+    path: '/card',
+    query: { selected: cardName }
+  })
 }
 
 const sceneStore = useSceneStore()
