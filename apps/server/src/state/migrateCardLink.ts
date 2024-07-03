@@ -6,8 +6,6 @@ import { GlobalStore } from './index'
 
 const CARD_DIR = resolveRootDir('cards')
 const LINK_FILE_NAME = '/__link.json'
-// 旧版数据的 platform 只可能有 qqguild 和 kook
-const StrictChannelUnionIdRegex = /^(qqguild|kook)_\d+_\d+$/
 
 export function migrateCardLink(store: YChannelState, channelUnionId: ChannelUnionId) {
   if (!fs.existsSync(CARD_DIR)) return
@@ -19,19 +17,23 @@ export function migrateCardLink(store: YChannelState, channelUnionId: ChannelUni
     const linkMap = JSON.parse(str) as Record<string, Record<string, string>>
     // 我们需要移除不合法的数据，并且只挑出和当前 channel 有关的数据
     let currentLinkMap: Record<string, string> | undefined
+    let currentLinkMapV1: Record<string, string> | undefined // 兼容下 v1 版本
     const remainingLinkMap: Record<string, Record<string, string>> = {}
     Object.keys(linkMap).forEach(_channelId => {
       if (_channelId === channelUnionId) {
         currentLinkMap = linkMap[_channelId]
-      } else if (_channelId.match(StrictChannelUnionIdRegex)) {
-        remainingLinkMap[_channelId] = linkMap[_channelId]
-      } else {
+      } else if (channelUnionId.startsWith('qqguild_') && channelUnionId.endsWith(`_${_channelId}`) && _channelId.match(/^\d+$/)) {
+        currentLinkMapV1 = linkMap[_channelId]
+      } else if (_channelId.includes('undefined')) {
         // illegal key, ignore
+      } else {
+        remainingLinkMap[_channelId] = linkMap[_channelId]
       }
     })
     // 如有当前 channel 的旧数据，迁移过去
-    if (currentLinkMap) {
-      store.cardLinkMap = currentLinkMap
+    const existData = currentLinkMap || currentLinkMapV1
+    if (existData) {
+      store.cardLinkMap = existData
     }
     // 如还剩余其他 channel 的旧数据，需要写回去
     if (Object.keys(remainingLinkMap).length > 0) {
