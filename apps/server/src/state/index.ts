@@ -13,6 +13,7 @@ import { getYDoc } from '@paotuan/syncserver'
 import { migrateUser } from './migrateUser'
 import { migrateCards, upgradeCards } from './migrateCard'
 import { checkCardExist, migrateCardLink } from './migrateCardLink'
+import { migrateConfig, registerAndUpgradeConfig } from './migrateConfig'
 
 // todo move to @paotuan/types
 const GlobalDocName = 'global'
@@ -36,10 +37,12 @@ export class GlobalStore {
       const doc = getYDoc(GlobalDocName, () => {
         // 确保数据库的数据 load 完成后，检查是否更新数据
         upgradeCards(state)
+        registerAndUpgradeConfig(state.defaultConfig, 'default')
         resolve()
       })
       const state = syncedStore(YGlobalStateShape, doc) as YGlobalState
       migrateCards(state)
+      migrateConfig(state.defaultConfig, 'default')
       this._globalState = state
     })
   }
@@ -77,10 +80,12 @@ export class GlobalStore {
       promises.push(new Promise(resolve => {
         const doc = getYDoc(channelUnionId, () => {
           checkCardExist(state)
+          registerAndUpgradeConfig(state.config, channelUnionId)
           resolve()
         })
         const state = syncedStore(YChannelStateShape, doc) as YChannelState
         migrateCardLink(state, channelUnionId)
+        migrateConfig(state.config, channelUnionId)
         this.channelState.set(channelUnionId, state)
       }))
     }

@@ -33,7 +33,7 @@ export function migrateCardLink(store: YChannelState, channelUnionId: ChannelUni
     // 如有当前 channel 的旧数据，迁移过去
     const existData = currentLinkMap || currentLinkMapV1
     if (existData) {
-      store.cardLinkMap = existData
+      Object.assign(store.cardLinkMap, existData)
     }
     // 如还剩余其他 channel 的旧数据，需要写回去
     if (Object.keys(remainingLinkMap).length > 0) {

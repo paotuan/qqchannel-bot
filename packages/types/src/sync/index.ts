@@ -5,6 +5,7 @@ import type { IUser } from '../common'
 export interface YGlobalState {
   cards: Record<string, ICardData>
   scenes: Record<string, unknown> // todo
+  defaultConfig: { current: IChannelConfig }
 }
 
 export interface YGuildState {
@@ -12,7 +13,7 @@ export interface YGuildState {
 }
 
 export interface YChannelState {
-  config: IChannelConfig
+  config: { current: IChannelConfig } // 需保证最外层 readonly
   cardLinkMap: Record<string, string> // userId => cardId
   // todo ri list
 }
@@ -20,7 +21,8 @@ export interface YChannelState {
 // https://syncedstore.org/docs/basics/installation#shape
 export const YGlobalStateShape = Object.freeze({
   cards: {},
-  scenes: {}
+  scenes: {},
+  defaultConfig: {}
 })
 
 export const YGuildStateShape = Object.freeze({

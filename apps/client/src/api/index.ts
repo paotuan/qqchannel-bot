@@ -1,6 +1,5 @@
 import ws from './ws'
 import type {
-  IChannelConfigResp,
   ILog,
   INoteFetchResp,
   INoteSendResp,
@@ -9,7 +8,6 @@ import type {
 import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
 import { Toast } from '../utils'
-import { useConfigStore } from '../store/config'
 import { usePluginStore } from '../store/plugin'
 import { useSceneStore } from '../store/scene'
 
@@ -62,12 +60,6 @@ ws.on('note/fetch', data => {
       store.msgMap[note.msgId] = note
     })
   }
-})
-
-ws.on('channel/config', data => {
-  const res = data.data as IChannelConfigResp
-  const configStore = useConfigStore()
-  configStore.onUpdateConfig(res.config)
 })
 
 ws.on('plugin/list', data => {

@@ -1,4 +1,3 @@
-import type { IChannelConfig } from '@paotuan/config'
 import type { ICardData } from '@paotuan/card'
 import type { IBotConfig } from './platform'
 
@@ -8,7 +7,7 @@ export type Command =
   | 'channel/list' // res
   | 'channel/listen' // req/res
   | 'channel/create' // req/res
-  | 'channel/config' // req/res
+  | 'channel/config/default' // req
   | 'channel/config/reset' // req
   | 'log/push' // res
   | 'note/send' // req/res
@@ -67,15 +66,6 @@ export interface IListenToChannelReq {
 export interface IChannelCreateReq {
   guildId: string
   name: string
-}
-
-export interface IChannelConfigReq {
-  config: IChannelConfig
-  setDefault: boolean
-}
-
-export interface IChannelConfigResp {
-  config: IChannelConfig
 }
 
 export interface IUser {

@@ -4,8 +4,6 @@ import type {
   IBotInfoResp,
   ICardDeleteReq,
   ICardImportReq,
-  IChannelConfigReq,
-  IChannelConfigResp,
   IListenToChannelReq,
   IMessage,
   INoteDeleteReq,
@@ -58,8 +56,8 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'card/delete':
     handleCardDelete(client, server, request.data as ICardDeleteReq)
     break
-  case 'channel/config':
-    handleChannelConfig(client, server, request.data as IChannelConfigReq)
+  case 'channel/config/default':
+    handleSetDefaultChannelConfig(client, server)
     break
   case 'channel/config/reset':
     handleResetChannelConfig(client, server)
@@ -116,14 +114,6 @@ async function handleGetBotInfo(client: WsClient) {
 async function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
-  // watch channel config
-  client.autorun(ws => {
-    const channelId = ws.listenToChannelUnionId
-    if (channelId) {
-      const config = server.config.getChannelConfig(channelId).config
-      ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
-    }
-  })
   // watch ri list
   client.autorun(ws => {
     const bot = ws.bot
@@ -200,14 +190,14 @@ function handleCardDelete(client: WsClient, server: Wss, data: ICardDeleteReq) {
   server.cards.deleteCard(client, data)
 }
 
-function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfigReq) {
+function handleSetDefaultChannelConfig(client: WsClient, server: Wss) {
   if (!client.listenToChannelUnionId) return
-  server.config.saveChannelConfig(client.listenToChannelUnionId, data)
+  server.config.setDefaultChannelConfig(client.listenToChannelUnionId)
 }
 
 function handleResetChannelConfig(client: WsClient, server: Wss) {
   if (!client.listenToChannelUnionId) return
-  server.config.resetChannelConfig(client)
+  server.config.resetChannelConfig(client.listenToChannelUnionId)
 }
 
 async function handleSceneSendBattleLog(client: WsClient, server: Wss, data: ISceneSendBattleLogReq) {
