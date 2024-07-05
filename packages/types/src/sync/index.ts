@@ -1,6 +1,6 @@
 import type { ICardData } from '@paotuan/card'
 import type { IChannelConfig } from '@paotuan/config'
-import type { IUser } from '../common'
+import type { IRiItem, IUser } from '../common'
 
 export interface YGlobalState {
   cards: Record<string, ICardData>
@@ -15,7 +15,7 @@ export interface YGuildState {
 export interface YChannelState {
   config: { current: IChannelConfig } // 需保证最外层 readonly
   cardLinkMap: Record<string, string> // userId => cardId
-  // todo ri list
+  ri: IRiItem[] // todo
 }
 
 // https://syncedstore.org/docs/basics/installation#shape
@@ -31,5 +31,6 @@ export const YGuildStateShape = Object.freeze({
 
 export const YChannelStateShape = Object.freeze({
   config: {},
-  cardLinkMap: {}
+  cardLinkMap: {},
+  ri: []
 })

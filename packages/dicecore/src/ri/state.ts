@@ -66,7 +66,8 @@ export class DefaultRiState implements IRiState {
   }
 
   clearRiList(channelUnionId: string) {
-    this.state[channelUnionId] = []
+    const list = this.getRiList(channelUnionId)
+    list.splice(0, list.length)
   }
 
   getDescription(channelUnionId: string) {
