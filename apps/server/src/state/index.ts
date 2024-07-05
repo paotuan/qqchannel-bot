@@ -14,6 +14,7 @@ import { migrateUser } from './migrateUser'
 import { migrateCards, upgradeCards } from './migrateCard'
 import { checkCardExist, migrateCardLink } from './migrateCardLink'
 import { migrateConfig, registerAndUpgradeConfig } from './migrateConfig'
+import { dump } from './dump'
 
 // todo move to @paotuan/types
 const GlobalDocName = 'global'
@@ -83,7 +84,7 @@ export class GlobalStore {
           registerAndUpgradeConfig(state.config, channelUnionId)
           resolve()
         })
-        const state = syncedStore(YChannelStateShape, doc) as YChannelState
+        const state = syncedStore(YChannelStateShape, doc) as unknown as YChannelState
         migrateCardLink(state, channelUnionId)
         migrateConfig(state.config, channelUnionId)
         this.channelState.set(channelUnionId, state)
@@ -110,5 +111,16 @@ export class GlobalStore {
 
   get activeChannels() {
     return Array.from(this.channelState.keys())
+  }
+
+  async dump() {
+    try {
+      const filename = await dump()
+      console.log('数据库导出成功：', filename)
+      return filename
+    } catch (e) {
+      console.error('数据库导出失败', e)
+      return false
+    }
   }
 }
