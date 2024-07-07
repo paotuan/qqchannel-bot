@@ -14,3 +14,9 @@ if (fs.existsSync(envScr)) {
   fs.cpSync(envScr, envDst)
   console.log('copy .env finish')
 }
+
+const leveldownSrc = path.resolve(__dirname, '../node_modules/leveldown/prebuilds')
+const leveldownDst = path.resolve(__dirname, '../apps/dist/server/prebuilds')
+
+fs.cpSync(leveldownSrc, leveldownDst, { recursive: true })
+console.log('copy napi prebuilds finish')

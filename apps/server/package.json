@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch src",
     "clean": "rimraf ../dist/server/* && rimraf ../../plugins/*",
-    "build": "npm run clean && tsc --project tsconfig.json --noEmit && esbuild src/index.ts --outfile=../dist/server/index.js --bundle --platform=node --target=node12 && node ../../scripts/fix-node12.js && node ../../scripts/copy-plugins.js"
+    "build": "npm run clean && tsc --project tsconfig.json --noEmit && esbuild src/index.ts --outfile=../dist/server/index.js --bundle --platform=node --target=node18 && node ../../scripts/copy-plugins.js"
   },
   "dependencies": {
     "@dice-roller/rpg-dice-roller": "^5.3.2",

@@ -12,7 +12,8 @@
   "pkg": {
     "assets": [
       "client/**/*",
-      "server/plugins/**/*"
+      "server/plugins/**/*",
+      "server/prebuilds/win32-x64/**/*"
     ],
     "targets": [
       "node18-win-x64"
