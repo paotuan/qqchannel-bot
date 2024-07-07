@@ -25,6 +25,7 @@ export type Command =
   | 'ri/set' // req
   | 'ri/delete' // req
   | 'dice/roll' // req/res
+  | 'db/export' // req/res
 
 export interface IMessage<T> {
   cmd: Command

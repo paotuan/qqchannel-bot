@@ -80,6 +80,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'plugin/reload':
     handlePluginReload(client, server, request.data as IPluginReloadReq)
     break
+  case 'db/export':
+    handleDbExport(client)
+    break
   }
 }
 
@@ -259,4 +262,9 @@ async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRo
 function handlePluginReload(client: WsClient, server: Wss, data: IPluginReloadReq) {
   server.plugin.manualReloadPlugins(data)
   client.send<string>({ cmd: 'plugin/reload', success: true, data: '' })
+}
+
+async function handleDbExport(client: WsClient) {
+  const filename = await GlobalStore.Instance.dump()
+  client.send<string>({ cmd: 'db/export', success: !!filename, data: filename || '' })
 }

@@ -53,7 +53,7 @@ function docGet<T extends YShapes>(doc: Doc, shape: T, prop: keyof T) {
   }
 }
 
-function createZip(record: Record<string, any>) {
+function createZip(record: Record<string, any>): Promise<string> {
   return new Promise((resolve, reject) => {
     const zipName = `dump_${nowDateStr()}.zip`
     const zipPath = `${resolveRootDir('')}${zipName}`
