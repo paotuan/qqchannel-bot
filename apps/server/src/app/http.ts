@@ -20,6 +20,16 @@ export async function setupServer(port: number) {
         bizServer.emit('connection', ws, request)
       })
     } else {
+      const docName = pathname.slice(1)
+      // 处理极端情况下的时序问题
+      // 正常时序：先 initGuildAndChannelState 然后允许 client 发起连接
+      // 异常时序：由于 server 重启但 client 仍然保留之前的页面，导致 ws 自动重连，但还未调用 initGuildAndChannelState
+      // 此时我们需拒绝连接并引导 client 网页刷新后重试
+      if (!GlobalStore.Instance.isInited(docName)) {
+        console.error('网页已过期，请刷新')
+        socket.destroy()
+        return
+      }
       syncServer.handleUpgrade(request, socket, head, ws => {
         syncServer.emit('connection', ws, request)
       })

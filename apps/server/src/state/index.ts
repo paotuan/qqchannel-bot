@@ -109,6 +109,13 @@ export class GlobalStore {
     return state
   }
 
+  isInited(roomname: string) {
+    if (roomname === GlobalDocName) {
+      return !!this._globalState
+    }
+    return !!(this.guildState.get(roomname as GuildUnionId) || this.channelState.get(roomname as ChannelUnionId))
+  }
+
   get activeChannels() {
     return Array.from(this.channelState.keys())
   }
