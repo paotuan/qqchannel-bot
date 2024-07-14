@@ -89,6 +89,8 @@ export function updateConfigByPlugin(config: IChannelConfig) {
   ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction', 'beforeDiceRoll', 'afterDiceRoll'] as const).forEach(prop => {
     baseRemove(config.hookIds[prop], item => !existIds.hookIds[prop].has(item.id))
   })
+  // 4. 如 config 中的 plugin 在 plugin manager 中已经不存在了，将 config 中的 plugin 移除
+  baseRemove(config.plugins, item => !manifest.find(plugin => plugin.id === item.id))
 
   return config
 }

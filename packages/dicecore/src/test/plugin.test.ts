@@ -24,7 +24,7 @@ function createContext(): IDiceRollContext {
 
 const mockPluginHandleDispatchResult = vi.fn()
 
-function registerPlugins(names: string[]) {
+export function registerPlugins(names: string[]) {
   const plugins = names.map(pluginName => {
     const fullPath = path.join(__dirname, 'plugins', pluginName, 'index.js')
     const registerContext/*: IPluginRegisterContext*/ = {
