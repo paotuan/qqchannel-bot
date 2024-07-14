@@ -4,7 +4,6 @@ import type { ILog } from '@paotuan/types'
 import { ChannelUnionId, getChannelUnionId } from '../adapter/utils'
 import { resolveRootDir } from '../utils'
 import type { Bot } from '../adapter/Bot'
-import { makeAutoObservable } from 'mobx'
 
 export class LogBackground {
   private readonly bot: Bot
@@ -16,7 +15,6 @@ export class LogBackground {
   private readonly lastUser: Record<ChannelUnionId, string> = {}
 
   constructor(bot: Bot) {
-    makeAutoObservable(this)
     this.bot = bot
   }
 
