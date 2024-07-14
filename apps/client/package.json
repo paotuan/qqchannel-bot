@@ -1,5 +1,6 @@
 {
   "name": "client",
+  "private": true,
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
@@ -13,6 +14,7 @@
     "@paotuan/card": "2.0.0",
     "@paotuan/config": "2.0.0",
     "@paotuan/types": "2.0.0",
+    "@syncedstore/core": "^0.6.0",
     "@vuepic/vue-datepicker": "^5.4.0",
     "@vueuse/core": "^9.13.0",
     "daisyui": "^4.10.5",
@@ -25,7 +27,9 @@
     "vue": "^3.2.37",
     "vue-konva": "^3.0.2",
     "vue-router": "^4.3.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "y-websocket": "^2.0.3",
+    "yjs": "^13.5.13"
   },
   "devDependencies": {
     "@types/gtag.js": "^0.0.12",

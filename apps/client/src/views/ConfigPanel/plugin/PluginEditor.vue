@@ -29,7 +29,7 @@
             <label class="label">
               <span class="label-text">{{ pref.label }}</span>
             </label>
-            <textarea v-model="pluginPref[pref.key]" class="textarea textarea-bordered w-full"></textarea>
+            <textarea v-model.lazy="pluginPref[pref.key]" class="textarea textarea-bordered w-full"></textarea>
           </div>
         </div>
       </div>

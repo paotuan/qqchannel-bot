@@ -84,11 +84,26 @@ export function updateConfigByPlugin(config: IChannelConfig) {
   })
   // 3. 如有 plugin 中已经不存在的功能，但 config 中还存在的，需要从 config 中去掉. (embed 须保留)
   ;(['customReplyIds', 'aliasRollIds', 'customTextIds'] as const).forEach(prop => {
-    config[prop] = config[prop].filter(item => item.id.startsWith('io.paotuan.embed') || existIds[prop].has(item.id))
+    baseRemove(config[prop], item => !item.id.startsWith('io.paotuan.embed') && !existIds[prop].has(item.id))
   })
   ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction', 'beforeDiceRoll', 'afterDiceRoll'] as const).forEach(prop => {
-    config.hookIds[prop] = config.hookIds[prop].filter(item => existIds.hookIds[prop].has(item.id))
+    baseRemove(config.hookIds[prop], item => !existIds.hookIds[prop].has(item.id))
   })
+  // 4. 如 config 中的 plugin 在 plugin manager 中已经不存在了，将 config 中的 plugin 移除
+  baseRemove(config.plugins, item => !manifest.find(plugin => plugin.id === item.id))
 
   return config
+}
+
+// syncstore 需要一个 in-place 的 remove。lodash 的不知道为什么会报错，自己写个简易版本
+function baseRemove<T>(arr: T[], predicate: (item: T) => boolean) {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const index = arr.findIndex(predicate)
+    if (index >= 0) {
+      arr.splice(index, 1)
+    } else {
+      break
+    }
+  }
 }

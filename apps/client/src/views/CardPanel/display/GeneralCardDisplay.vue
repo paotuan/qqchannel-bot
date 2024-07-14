@@ -8,7 +8,7 @@
     <div class="flex gap-2">
       <div class="w-0" style="flex: 1 1 0">
         <!-- ext -->
-        <textarea v-model="cardData.ext" class="textarea textarea-bordered w-full" placeholder="输入任意备注信息" @change="markEdited" />
+        <textarea v-model.lazy="cardData.ext" class="textarea textarea-bordered w-full" placeholder="输入任意备注信息" @change="markEdited" />
       </div>
       <div class="w-0" style="flex: 2 1 0">
         <!-- skills -->
@@ -63,17 +63,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useCardStore } from '../../../store/card'
-import { computed, ComputedRef, inject } from 'vue'
-import { SELECTED_CARD } from '../utils'
+import { computed } from 'vue'
+import { useCurrentSelectedCard } from '../utils'
 import type { GeneralCard } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
 import NumberInput from '../NumberInput.vue'
 import TextInput from '../TextInput.vue'
 import CardMoreAction from '../CardMoreAction.vue'
 
-const cardStore = useCardStore()
-const generalCard = inject<ComputedRef<GeneralCard>>(SELECTED_CARD)! // 此处可以确保是 general card
+const generalCard = useCurrentSelectedCard<GeneralCard>()! // 此处可以确保是 general card
 const cardData = computed(() => generalCard.value.data)
 
 // 物品表格 分三栏
@@ -86,7 +84,6 @@ const skills = computed(() => {
 // 标记人物卡被编辑
 const markEdited = () => {
   cardData.value.lastModified = Date.now()
-  cardStore.markCardEdited(cardData.value.name)
 }
 
 // 新增一条 ability

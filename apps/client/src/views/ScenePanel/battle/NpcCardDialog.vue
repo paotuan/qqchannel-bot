@@ -13,7 +13,7 @@
         </select>
         <button class="btn btn-primary btn-sm" :disabled="!selectedTemplate" @click="onApplyCard">使用此模板初始化！</button>
       </div>
-      <CardDisplay :card="currentCard" is-temp-card class="flex-grow overflow-y-auto" />
+      <CardDisplay v-if="currentCard" :card="currentCard.data" is-temp-card class="flex-grow overflow-y-auto" />
     </div>
   </d-modal>
 </template>
@@ -96,7 +96,7 @@ const onApplyCard = () => {
     card = createEmptyCardByType('general')
   } else {
     const originCard = cardStore.of(templateName)
-    card = cloneDeep(originCard)
+    card = createCard(cloneDeep(originCard))
     card.data.name = currentNpcName.value
   }
   // 赋给 npc

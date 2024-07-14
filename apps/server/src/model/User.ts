@@ -1,37 +1,55 @@
-import { makeAutoObservable } from 'mobx'
-import { Bot } from '../adapter/Bot'
 import { Session } from '../adapter/satori'
 import { removeBackspaces } from '../utils'
+import { IUser } from '@paotuan/types'
+import { Bot } from '../adapter/Bot'
 
-// todo 后续与 interface/common 合并
-interface _IUser {
-  id: string
-  guildId: string
-  name: string
-  avatar: string
-  isBot: boolean
-}
+export class User implements IUser {
 
-export class User implements _IUser {
-
-  readonly id: string
   readonly guildId: string
-  readonly isBot: boolean
-  avatar: string
-  name: string
-  deleted = false
 
   lastSession?: Session // 私信最新一条消息
-  private readonly bot: Bot
+  private readonly _bot: Bot
 
-  constructor(bot: Bot, proto: _IUser) {
-    makeAutoObservable(this)
-    this.id = proto.id
-    this.guildId = proto.guildId
-    this.isBot = proto.isBot
-    this.avatar = proto.avatar
-    this.name = proto.name
-    this.bot = bot
+  // 如果是 temp，代表 plain object
+  // 如果不是 temp，代表 syncstore 的 proxy 对象. 为此我们不能直接解构，只能在对象本身上修改
+  private readonly proto: IUser
+
+  get id() {
+    return this.proto.id
+  }
+
+  get isBot() {
+    return this.proto.isBot
+  }
+
+  get avatar() {
+    return this.proto.avatar
+  }
+
+  set avatar(value: string) {
+    this.proto.avatar = value
+  }
+
+  get name() {
+    return this.proto.name
+  }
+
+  set name(value: string) {
+    this.proto.name = value
+  }
+
+  get deleted() {
+    return this.proto.deleted
+  }
+
+  set deleted(value: boolean) {
+    this.proto.deleted = value
+  }
+
+  constructor(bot: Bot, guildId: string, proto: IUser) {
+    this._bot = bot
+    this.guildId = guildId
+    this.proto = proto
   }
 
   async sendMessage(content: string, session?: unknown) {
@@ -39,7 +57,7 @@ export class User implements _IUser {
     if (!(session instanceof Session)) {
       session = undefined
     }
-    if (this.bot.platform === 'qqguild') {
+    if (this._bot.platform === 'qqguild') {
       // 如没有指定发某条被动消息，则尝试尽量发被动
       if (!session) {
         session = this.getLastSessionForReply()
@@ -56,7 +74,7 @@ export class User implements _IUser {
       content = removeBackspaces(content.trim())
     }
     try {
-      const res = await this.bot.api.sendPrivateMessage(this.id, content, this.guildId, { session: session as Session | undefined })
+      const res = await this._bot.api.sendPrivateMessage(this.id, content, this.guildId, { session: session as Session | undefined })
       const messageId = res.at(-1)!
       console.log('[Message] 私信发送成功 ' + content)
       return { id: messageId, content }
@@ -83,7 +101,7 @@ export class User implements _IUser {
   // 理论上只有 userId 和 guildId 也可以使用，只是昵称和头像没有，因此遇到这种情况可以创建一个临时的 User 使用，避免阻塞主流程
   static createTemp(bot: Bot, id: string, guildId: string) {
     console.log('[User] create temp, id=', id, 'guildId=', guildId)
-    return new User(bot, { id, guildId, name: id, avatar: '', isBot: false })
+    return new User(bot, guildId, { id, name: id, avatar: '', isBot: false, deleted: false })
   }
 
   get toJSON() {
@@ -99,8 +117,7 @@ export class User implements _IUser {
 
   static fromJSON(bot: Bot, data: User['toJSON']) {
     data.isBot = (data as any).bot // 兼容旧版本数据
-    const user = new User(bot, data)
-    user.deleted = data.deleted
+    const user = new User(bot, data.guildId, data)
     return user
   }
 }

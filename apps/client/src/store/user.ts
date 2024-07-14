@@ -1,31 +1,27 @@
 import { defineStore } from 'pinia'
-import type { IUser } from '@paotuan/types'
+import { computed } from 'vue'
+import { yGuildStoreRef } from './ystore'
 
-export const useUserStore = defineStore('user', {
-  state: () => ({
-    map: {} as Record<string, IUser>
-  }),
-  getters: {
-    list: state => Object.values(state.map),
-    enabledUserList: state => Object.values(state.map).filter(user => !user.bot && !user.deleted)
-  },
-  actions: {
-    setUsers(list: IUser[]) {
-      list.forEach(user => {
-        // 机器人去除测试中尾缀
-        if (user.bot) {
-          user.nick = user.nick.replace(/-测试中$/, '')
-          user.username = user.username.replace(/-测试中$/, '')
-        }
-        this.map[user.id] = user
-      })
-    },
-    of(id: string) {
-      return this.map[id]
-    },
-    nickOf(id: string) {
-      const user = this.of(id)
-      return user ? user.nick || user.username : ''
-    }
+export const useUserStore = defineStore('user', () => {
+
+  const userMap = computed(() => yGuildStoreRef.value?.users ?? {})
+  const list = computed(() => Object.values(userMap.value))
+  const enabledUserList = computed(() => list.value.filter(user => !user.isBot && !user.deleted))
+
+  const of = (id: string) => userMap.value[id]
+  const nickOf = (id: string) => of(id)?.name ?? ''
+
+  const deleteUsers = (ids: string[]) => {
+    ids.forEach(id => {
+      const user = of(id)
+      user && (user.deleted = true)
+    })
+  }
+
+  return {
+    enabledUserList,
+    of,
+    nickOf,
+    deleteUsers
   }
 })

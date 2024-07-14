@@ -1,45 +1,29 @@
 import { defineStore } from 'pinia'
-import type { IChannelConfig } from '@paotuan/config'
-import { computed, nextTick, reactive, ref, watch } from 'vue'
+import { computed } from 'vue'
 import ws from '../../api/ws'
-import type { IChannelConfigReq } from '@paotuan/types'
 import { useCustomReply } from './useCustomReply'
-import { gtagEvent } from '../../utils'
+import { gtagEvent, Toast } from '../../utils'
 import { useRollDecider } from './useRollDecider'
 import { useAliasRoll } from './useAliasRoll'
 import { useCustomText } from './useCustomText'
+import { yChannelStoreRef } from '../ystore'
 
 export const useConfigStore = defineStore('config', () => {
-  const state = reactive({ config: null as IChannelConfig | null })
-  const edited = ref(false)
-
   // 获取 config
-  const config = computed(() => state.config)
-  watch(
-    () => state.config,
-    () => edited.value = true,
-    { deep: true }
-  )
+  const config = computed(() => yChannelStoreRef.value?.config.current ?? null)
 
-  // 接收从服务端的 config 更新。就不按照时间戳判断了
-  const onUpdateConfig = (config: IChannelConfig) => {
-    state.config = config
-    nextTick(() => {
-      edited.value = false
-    })
-  }
-
-  // 保存配置
-  const requestSaveConfig = (setDefault: boolean) => {
-    if (!config.value) return
-    ws.send<IChannelConfigReq>({ cmd: 'channel/config', data: { config: config.value, setDefault } })
-    gtagEvent('config/save')
+  // 设为默认配置
+  const requestSetDefault = () => {
+    ws.send<null>({ cmd: 'channel/config/default', data: null })
+    gtagEvent('config/setDefault')
+    Toast.success('操作成功')
   }
 
   // 重置配置
   const requestResetConfig = () => {
     ws.send<null>({ cmd: 'channel/config/reset', data: null })
     gtagEvent('config/reset')
+    Toast.success('操作成功')
   }
 
   // 自定义回复相关功能
@@ -53,15 +37,15 @@ export const useConfigStore = defineStore('config', () => {
 
   // 快捷设置
   const quickSet = (mode: 'coc' | 'dnd') => {
-    const config = state.config
-    if (!config) return
+    const _config = config.value
+    if (!_config) return
     // 默认骰
-    config.defaultRoll.expression = mode === 'coc' ? 'd100' : 'd20'
+    _config.defaultRoll.expression = mode === 'coc' ? 'd100' : 'd20'
     // 规则
     const ruleId = mode === 'coc' ? 'io.paotuan.embed.coc0' : 'io.paotuan.embed.dnd0'
-    const ruleExist = config.rollDeciderIds.includes(ruleId)
+    const ruleExist = _config.rollDeciderIds.includes(ruleId)
     if (ruleExist) {
-      config.rollDeciderId = ruleId
+      _config.rollDeciderId = ruleId
     }
     // 别名指令
     // const aliasRollIds = {
@@ -112,16 +96,14 @@ export const useConfigStore = defineStore('config', () => {
     // 特殊指令
     // config.specialDice.opposeDice.refineSuccessLevels = mode === 'coc'
     // config.specialDice.riDice.baseRoll = mode === 'coc' ? '$敏捷' : 'd20'
-    config.specialDice.scDice.enabled = mode === 'coc'
-    config.specialDice.enDice.enabled = mode === 'coc'
-    config.specialDice.dsDice.enabled = mode === 'dnd'
+    _config.specialDice.scDice.enabled = mode === 'coc'
+    _config.specialDice.enDice.enabled = mode === 'coc'
+    _config.specialDice.dsDice.enabled = mode === 'dnd'
   }
 
   return {
     config,
-    edited,
-    onUpdateConfig,
-    requestSaveConfig,
+    requestSetDefault,
     requestResetConfig,
     ...customReplyApis,
     ...rollDeciderApis,

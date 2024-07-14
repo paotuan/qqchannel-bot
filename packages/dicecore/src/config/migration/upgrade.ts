@@ -90,18 +90,18 @@ export function upgradeConfig(config: IChannelConfig) {
     config.customTextIds = []
     const embedText = getEmbedCustomText()
     config.embedPlugin.customText = [embedText]
-    // 由于默认的文案也有所改动，就不迁移了，需要用户升级后自己重新设置
-    // 但我们可以把用户旧的数据备份一下
-    const oldDeciderReplies: string[] = []
-    oldDeciderConfig.forEach(decider => {
-      oldDeciderReplies.push(decider.name + '\n' + decider.description)
-      const rules = decider.rules as any
-      oldDeciderReplies.push(rules.worst.expression + ' | ' + rules.worst.reply)
-      oldDeciderReplies.push(rules.best.expression + ' | ' + rules.best.reply)
-      oldDeciderReplies.push(rules.fail.expression + ' | ' + rules.fail.reply)
-      oldDeciderReplies.push(rules.success.expression + ' | ' + rules.success.reply)
-      oldDeciderReplies.push('\n')
-    })
+    // // 由于默认的文案也有所改动，就不迁移了，需要用户升级后自己重新设置
+    // // 但我们可以把用户旧的数据备份一下
+    // const oldDeciderReplies: string[] = []
+    // oldDeciderConfig.forEach(decider => {
+    //   oldDeciderReplies.push(decider.name + '\n' + decider.description)
+    //   const rules = decider.rules as any
+    //   oldDeciderReplies.push(rules.worst.expression + ' | ' + rules.worst.reply)
+    //   oldDeciderReplies.push(rules.best.expression + ' | ' + rules.best.reply)
+    //   oldDeciderReplies.push(rules.fail.expression + ' | ' + rules.fail.reply)
+    //   oldDeciderReplies.push(rules.success.expression + ' | ' + rules.success.reply)
+    //   oldDeciderReplies.push('\n')
+    // })
     // _writeUpgradeBacklog(oldDeciderReplies.join('\n'), channelId, 21)
     // 新增 /help 自定义回复
     const index = config.embedPlugin.customReply?.findIndex(item => item.id === 'help')

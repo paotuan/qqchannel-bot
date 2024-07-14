@@ -20,15 +20,15 @@ import UserSelectDropdown from '../../../components/user/UserSelectDropdown.vue'
 const userStore = useUserStore()
 const cardStore = useCardStore()
 // 已关联人物卡用户
-const haveCardUsers = computed(() => userStore.enabledUserList.filter(u => cardStore.getCardOfUser(u.id)))
+const haveCardUsers = computed(() => userStore.enabledUserList.filter(u => cardStore.linkedUsers.includes(u.id)))
 // 未关联人物卡用户
-const noCardUsers = computed(() => userStore.enabledUserList.filter(u => !cardStore.getCardOfUser(u.id)))
+const noCardUsers = computed(() => userStore.enabledUserList.filter(u => !cardStore.linkedUsers.includes(u.id)))
 
 // 搜索相关
 const keyword = ref('')
 const keywordContains = (user: IUser) => {
   const search = keyword.value.toLowerCase()
-  return user.nick.toLowerCase().includes(search) || user.username.toLowerCase().includes(search)
+  return user.name.toLowerCase().includes(search)
 }
 const haveCardUsersAfterSearch = computed(() => haveCardUsers.value.filter(user => keywordContains(user)))
 const noCardUsersAfterSearch = computed(() => noCardUsers.value.filter(user => keywordContains(user)).slice(0, 100)) // 默认展示 100 条

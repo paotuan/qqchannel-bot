@@ -17,7 +17,7 @@
             <span class="flex-none">权重</span>
             <d-number-input v-model="item.weight" class="w-12" />
           </label>
-          <textarea v-model="item.text" class="textarea textarea-bordered w-full" placeholder="请输入文案模板" @blur="onBlur($event, i)" />
+          <textarea v-model.lazy="item.text" class="textarea textarea-bordered w-full" placeholder="请输入文案模板" @blur="onBlur($event, i)" />
           <button class="btn btn-circle btn-ghost btn-xs ml-2" :class="{ invisible: data.length <= 1 }" @click="deleteItem(i)">
             <XMarkIcon class="size-4" />
           </button>

@@ -47,8 +47,7 @@ import { useUserStore } from '../../store/user'
 import { computed, ref } from 'vue'
 import DNativeSelect from '../../dui/select/DNativeSelect.vue'
 import UserItem from './UserItem.vue'
-import type { ILog, IUser, IUserDeleteReq } from '@paotuan/types'
-import ws from '../../api/ws'
+import type { ILog, IUser } from '@paotuan/types'
 import { Toast } from '../../utils'
 import { useLogStore } from '../../store/log'
 
@@ -60,7 +59,7 @@ const keyword = ref('')
 const userOptions = computed(() => {
   if (!keyword.value) return userStore.enabledUserList
   const search = keyword.value.toLowerCase()
-  return userStore.enabledUserList.filter(user => user.nick.toLowerCase().includes(search) || user.username.toLowerCase().includes(search))
+  return userStore.enabledUserList.filter(user => user.name.toLowerCase().includes(search))
 })
 
 // log 处理方式
@@ -115,7 +114,7 @@ const handleLogAction = () => {
 
 const submit = () => {
   handleLogAction() // 是否需要 log 处理
-  ws.send<IUserDeleteReq>({ cmd: 'user/delete', data: { ids: selectedUserIds.value } })
+  userStore.deleteUsers(selectedUserIds.value)
   Toast.success('操作成功')
   close()
 }

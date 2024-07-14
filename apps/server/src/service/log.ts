@@ -1,4 +1,3 @@
-import { makeAutoObservable } from 'mobx'
 import type { BotContext, ICommand } from '@paotuan/config'
 import type { ILogPushResp, ILog } from '@paotuan/types'
 import { Bot } from '../adapter/Bot'
@@ -12,7 +11,6 @@ export class LogManager {
   private get wss() { return this.bot.wss }
 
   constructor(bot: Bot) {
-    makeAutoObservable(this)
     this.bot = bot
     this.logBackground = new LogBackground(bot)
   }

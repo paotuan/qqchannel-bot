@@ -18,7 +18,12 @@ export class PluginProvider {
     return Array.from(this.pluginMap.values())
   }
 
-  register(plugins: IPlugin[]) {
+  register(plugins: IPlugin[], clearOld = false) {
+    if (clearOld) {
+      for (const pluginId of this.pluginMap.keys()) {
+        this._unregister(pluginId)
+      }
+    }
     if (plugins.length > 0) {
       for (const plugin of plugins) {
         this._register(plugin.id, plugin)
@@ -58,6 +63,10 @@ export class PluginProvider {
     }
     this.pluginId2ItemIds.delete(pluginId)
     this.pluginMap.delete(pluginId)
+  }
+
+  getPlugin(pluginId: PluginId) {
+    return this.pluginMap.get(pluginId)
   }
 
   // 调用方保证类型正确

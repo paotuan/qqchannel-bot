@@ -1,29 +1,22 @@
-import type { IChannelConfig } from '@paotuan/config'
 import type { ICardData } from '@paotuan/card'
 import type { IBotConfig } from './platform'
 
 export type Command =
-  | 'bot/login' // req/res
   | 'bot/loginV2' // req/res
-  | 'bot/info'  // res
+  | 'bot/info'  // req/res
   | 'channel/list' // res
-  | 'channel/listen' // req
+  | 'channel/listen' // req/res
   | 'channel/create' // req/res
-  | 'channel/config' // req/res
+  | 'channel/config/default' // req
   | 'channel/config/reset' // req
-  | 'user/list' // res
-  | 'user/delete' // req
   | 'log/push' // res
   | 'note/send' // req/res
   | 'note/sendImageRaw' // req/ res: note/send
   | 'note/sync' // req/res
   | 'note/fetch' // req/res
   | 'note/delete' // req
-  | 'card/list' // res
   | 'card/import' // req/res
   | 'card/delete' // req
-  | 'card/link'  // req/res
-  | 'card/test' // res
   | 'plugin/list' // res
   | 'plugin/reload' // req/ res: string
   | 'scene/sendBattleLog' // req/ res: string
@@ -32,6 +25,7 @@ export type Command =
   | 'ri/set' // req
   | 'ri/delete' // req
   | 'dice/roll' // req/res
+  | 'db/export' // req/res
 
 export interface IMessage<T> {
   cmd: Command
@@ -50,7 +44,7 @@ export interface IBotInfo {
 
 export type ILoginReqV2 = IBotConfig
 
-export type IBotInfoResp = IBotInfo
+export type IBotInfoResp = IBotInfo | null
 // endregion bot
 
 // region channel
@@ -75,28 +69,12 @@ export interface IChannelCreateReq {
   name: string
 }
 
-export interface IChannelConfigReq {
-  config: IChannelConfig
-  setDefault: boolean
-}
-
-export interface IChannelConfigResp {
-  config: IChannelConfig
-}
-
 export interface IUser {
   id: string
-  nick: string
-  username: string
+  name: string
   avatar: string
-  bot: boolean
+  isBot: boolean
   deleted: boolean
-}
-
-export type IUserListResp = IUser[]
-
-export type IUserDeleteReq = {
-  ids: string[]
 }
 // endregion channel
 
@@ -149,25 +127,8 @@ export interface ICardImportReq {
   card: ICardData
 }
 
-// export type ICardImportResp = ICardImportReq
-
-export type ICardListResp = ICardData[]
-
 export interface ICardDeleteReq {
   cardName: string
-}
-
-export interface ICardLinkReq {
-  cardName: string
-  userId: string | null | undefined
-}
-
-export type ICardLinkResp = ICardLinkReq[]
-
-export interface ICardTestResp {
-  cardName: string
-  propOrSkill: string
-  success: boolean
 }
 // endregion card
 

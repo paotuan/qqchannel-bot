@@ -1,13 +1,11 @@
 import type { Wss } from '../app/wss'
 import type { BotContext, ICommand, IPlugin, IPluginElementCommonInfo } from '@paotuan/config'
 import { VERSION_CODE, VERSION_NAME, type IPluginRegisterContext, type IPluginConfigDisplay } from '@paotuan/types'
-import { makeAutoObservable } from 'mobx'
 import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
 import { copyFolderSync } from '../utils'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import type { ICard } from '@paotuan/card'
 import Mustache from 'mustache'
 import { getChannelUnionId } from '../adapter/utils'
 import { parseTemplate, PluginProvider } from '@paotuan/dicecore'
@@ -17,10 +15,8 @@ const PLUGIN_DIR = './plugins' // prod 环境外部插件文件夹
 
 export class PluginManager {
   private readonly wss: Wss
-  private readonly pluginMap: Record<string, IPlugin> = {}
 
   constructor(wss: Wss) {
-    makeAutoObservable<this, 'wss'>(this, { wss: false })
     this.wss = wss
     const pluginNames = this.extractOfficialPluginsIfNeed()
     this.loadPlugins(pluginNames)
@@ -38,7 +34,7 @@ export class PluginManager {
       roll: exp => new DiceRoll(exp),
       render: (arg1, arg2, arg3) => Mustache.render(arg1, arg2, arg3, { escape: value => value }),
       getCard: ({ channelUnionId, userId }) => this.wss.cards.getCard(channelUnionId, userId),
-      saveCard: (card: ICard) => this.wss.cards.saveCard(card),
+      saveCard: () => void 0,
       getLinkedCardUserList: ({ channelUnionId }) => Object.keys(this.wss.cards.getLinkMap(channelUnionId)),
       linkCard: ({ channelUnionId, userId }, cardName) => {
         if (userId && !cardName) {
@@ -164,7 +160,7 @@ export class PluginManager {
     return Array.from(pluginNames)
   }
 
-  private loadPlugins(pluginNames: string[]) {
+  private loadPlugins(pluginNames: string[], clearOld = false) {
     const newPlugins: IPlugin[] = []
     pluginNames.forEach(pluginName => {
       const plugin = this._loadPlugin(pluginName)
@@ -172,7 +168,10 @@ export class PluginManager {
         newPlugins.push(plugin)
       }
     })
-    PluginProvider.register(newPlugins)
+    PluginProvider.register(newPlugins, clearOld)
+    // todo clear old 需要 delete cache，不过不管也可以
+    // 插件更新通知前端
+    this.wss.sendToAll({ cmd: 'plugin/list', success: true, data: this.pluginListManifest })
   }
 
   // 注意：只通过 loadPlugins 调用，以避免频繁调用 PluginProvider 注册，否则每次注册都会造成所有 config 重新计算，太重了
@@ -190,7 +189,6 @@ export class PluginManager {
       plugin.id ||= pluginName
       handlePluginCompatibility(plugin)
       console.log('[Plugin] 加载插件', plugin.id)
-      this.pluginMap[plugin.id] = plugin
       return plugin
     } catch (e) {
       console.error(`[Plugin] 加载插件 ${pluginName} 出错：`, e)
@@ -202,7 +200,7 @@ export class PluginManager {
   private checkOfficialPluginsUpdate() {
     const plugins2reload: string[] = []
     Object.entries(officialPluginsVersions).forEach(([name, version]) => {
-      const currentVersion = this.pluginMap[name]?.version
+      const currentVersion =  PluginProvider.getPlugin(name)?.version
       if (!currentVersion) return
       if (version > currentVersion) {
         console.log(`[Plugin] 检测到插件 ${name} 有更新，即将进行更新。若更新后功能异常，请尝试重新启动软件。`)
@@ -226,14 +224,13 @@ export class PluginManager {
     } else {
       // 读取并载入所有的插件
       const pluginNames = this.extractOfficialPluginsIfNeed()
-      this.loadPlugins(pluginNames)
+      this.loadPlugins(pluginNames, true)
     }
   }
 
   // 获取插件内容清单（不含插件具体逻辑，用于展示和更新 config）
   get pluginListManifest(): IPluginConfigDisplay[] {
-    // todo 本地不维护 pluginMap，通过 dicecore 事件通知前端
-    return Object.values(this.pluginMap).map<IPluginConfigDisplay>(plugin => ({
+    return PluginProvider.allPlugins.map<IPluginConfigDisplay>(plugin => ({
       id: plugin.id,
       name: plugin.name || plugin.id || '--',
       description: plugin.description ?? '',

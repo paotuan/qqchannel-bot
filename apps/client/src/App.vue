@@ -12,6 +12,7 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { Toast } from './utils'
 import { VERSION_NAME } from '@paotuan/types'
 import AiAssistant from './components/nav/AiAssistant.vue'
+import ws from './api/ws'
 
 const bot = useBotStore()
 const channel = useChannelStore()
@@ -57,15 +58,27 @@ const checkUpdate = async () => {
     console.warn(e)
   }
 }
+
+const exportDb = () => {
+  ws.send<null>({ cmd: 'db/export', data: null })
+  ws.once<string>('db/export', resp => {
+    if (resp.success) {
+      Toast.success(`导出成功！数据保存至 ${resp.data}`)
+    } else {
+      Toast.error('导出失败')
+    }
+  })
+}
 </script>
 <template>
   <div class="navbar bg-base-100 shadow-lg">
     <div class="navbar-start">
       <div class="dropdown">
         <label tabindex="0" class="btn btn-ghost normal-case text-xl">🎲 跑团 IO 机器人</label>
-        <ul tabindex="0" class="menu dropdown-content z-10 mt-3 p-2 shadow bg-base-100 rounded-box w-40">
+        <ul tabindex="0" class="menu dropdown-content z-20 mt-3 p-2 shadow bg-base-100 rounded-box w-40">
           <li><a @click="checkUpdate">版本：{{ VERSION_NAME }}</a></li>
           <li><a @click="clearCache">清除缓存</a></li>
+          <li><a @click="exportDb">导出数据</a></li>
           <li><a href="https://paotuan.io" target="_blank">使用帮助<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
           <li><a href="https://pd.qq.com/s/fjp30g" target="_blank">官方频道<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
           <li><a href="https://afdian.net/a/florastudio" target="_blank">支持我们<ArrowTopRightOnSquareIcon class="size-4" /></a></li>

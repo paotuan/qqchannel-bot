@@ -31,18 +31,18 @@
           <template v-if="processorLocal.scope === 'expression'">
             <div class="flex items-center">
               当表达式匹配
-              <input v-model="processorLocal.command" type="text" placeholder="请输入匹配表达式" class="input input-bordered input-sm w-60 mx-2" />
+              <input v-model.lazy="processorLocal.command" type="text" placeholder="请输入匹配表达式" class="input input-bordered input-sm w-60 mx-2" />
               时，将它解析为：
-              <input v-model="processorLocal.replacer" type="text" placeholder="请输入解析后的表达式" class="input input-bordered input-sm w-60 mx-2" />
+              <input v-model.lazy="processorLocal.replacer" type="text" placeholder="请输入解析后的表达式" class="input input-bordered input-sm w-60 mx-2" />
             </div>
           </template>
           <template v-else>
             <div class="flex items-center">
               当指令
               <d-native-select v-model="processorLocal.trigger" :options="matchOptions" select-class="select-bordered select-sm" class="w-32 ml-2" placeholder="选择匹配方式" />
-              <input v-model="processorLocal.command" type="text" placeholder="请输入匹配指令" class="input input-bordered input-sm w-60 mx-2" />
+              <input v-model.lazy="processorLocal.command" type="text" placeholder="请输入匹配指令" class="input input-bordered input-sm w-60 mx-2" />
               时，将它解析为：
-              <input v-model="processorLocal.replacer" type="text" placeholder="请输入解析后的指令" class="input input-bordered input-sm w-60 mx-2" />
+              <input v-model.lazy="processorLocal.replacer" type="text" placeholder="请输入解析后的指令" class="input input-bordered input-sm w-60 mx-2" />
             </div>
           </template>
         </template>

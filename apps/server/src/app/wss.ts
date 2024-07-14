@@ -13,17 +13,16 @@ import { ChannelUnionId } from '../adapter/utils'
  * The server is a singleton websocket server
  */
 export class Wss {
-  private readonly server: WebSocketServer
+  readonly server: WebSocketServer
   private readonly clients: WsClient[] = []
   readonly bots = new BotManager(this)
   readonly cards = new CardManager(this)
   readonly plugin = new PluginManager(this)
-  readonly config = new ConfigManager(this)
+  readonly config = new ConfigManager()
 
-  constructor(port: number) {
+  constructor() {
     makeAutoObservable<this, 'server'>(this, { server: false })
-    this.server = new WebSocketServer({ port })
-    console.log('WebSocket 服务已启动，端口号 ' + port)
+    this.server = new WebSocketServer({ noServer: true })
 
     this.server.on('close', () => {
       console.log('WebSocket 服务已关闭')
@@ -55,6 +54,11 @@ export class Wss {
     client.send(message)
   }
 
+  // 发消息给某个登录了该 bot 的 client
+  sendToBot<T>(botId: string, message: IMessage<T>) {
+    this.clients.filter(client => client.botId === botId).forEach(client => client.send(message))
+  }
+
   // 发消息给正在监听某个频道的所有 client
   sendToChannel<T>(channelUnionId: ChannelUnionId, message: IMessage<T>) {
     this.clients.filter(client => client.listenToChannelUnionId === channelUnionId).forEach(client => {
@@ -67,4 +71,9 @@ export class Wss {
   //     client.send(message)
   //   })
   // }
+
+  // 发消息给全部 client
+  sendToAll<T>(message: IMessage<T>) {
+    this.clients.forEach(client => client.send(message))
+  }
 }

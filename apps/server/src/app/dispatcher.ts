@@ -4,35 +4,30 @@ import type {
   IBotInfoResp,
   ICardDeleteReq,
   ICardImportReq,
-  ICardLinkReq,
-  ICardLinkResp,
-  IChannel,
-  IChannelConfigReq,
-  IChannelConfigResp,
-  IChannelListResp,
   IListenToChannelReq,
   IMessage,
   INoteDeleteReq,
   INoteFetchReq,
   INoteSendReq,
-  IUser,
-  IUserListResp,
-  IPluginConfigDisplay,
   INoteSendImageRawReq,
   ISceneSendMapImageReq,
   ISceneSendBattleLogReq,
   IRiListResp,
   IRiSetReq,
   IRiDeleteReq,
-  IDiceRollReq, IUserDeleteReq, IPluginReloadReq, ILoginReqV2, IChannelCreateReq,
+  IDiceRollReq, IPluginReloadReq, ILoginReqV2, IChannelCreateReq,
 } from '@paotuan/types'
 import { RiProvider } from '@paotuan/dicecore'
 import { getBotId } from '../adapter/utils'
+import { GlobalStore } from '../state'
 
 export function dispatch(client: WsClient, server: Wss, request: IMessage<unknown>) {
   switch (request.cmd) {
   case 'bot/loginV2':
     handleLoginV2(client, server, request.data as ILoginReqV2)
+    break
+  case 'bot/info':
+    handleGetBotInfo(client)
     break
   case 'channel/listen':
     handleListenToChannel(client, server, request.data as IListenToChannelReq)
@@ -61,11 +56,8 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'card/delete':
     handleCardDelete(client, server, request.data as ICardDeleteReq)
     break
-  case 'card/link':
-    handleCardLink(client, server, request.data as ICardLinkReq)
-    break
-  case 'channel/config':
-    handleChannelConfig(client, server, request.data as IChannelConfigReq)
+  case 'channel/config/default':
+    handleSetDefaultChannelConfig(client, server)
     break
   case 'channel/config/reset':
     handleResetChannelConfig(client, server)
@@ -85,11 +77,11 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'dice/roll':
     handleManualDiceRoll(client, server, request.data as IDiceRollReq)
     break
-  case 'user/delete':
-    handleUserDelete(client, server, request.data as IUserDeleteReq)
-    break
   case 'plugin/reload':
     handlePluginReload(client, server, request.data as IPluginReloadReq)
+    break
+  case 'db/export':
+    handleDbExport(client)
     break
   }
 }
@@ -103,74 +95,28 @@ async function handleLoginV2(client: WsClient, server: Wss, data: ILoginReqV2) {
     client.bindToBot(bot.id)
     // 3. 返回登录成功
     client.send({ cmd: 'bot/loginV2', success: true, data: null })
-    // 4. watch bot info
-    client.autorun(ws => {
-      if (bot.botInfo) {
-        ws.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: bot.botInfo })
-      }
-    })
-    // watch guild & channel info
-    client.autorun(ws => {
-      const channels: IChannel[] = bot.guilds.all.map(guild => guild.allChannels.map(channel => ({
-        id: channel.id,
-        name: channel.name,
-        type: channel.type,
-        guildId: channel.guildId,
-        guildName: guild.name,
-        guildIcon: guild.icon
-      }))).flat()
-      ws.send<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
-    })
-    // 5. 返回插件信息
-    client.autorun(ws => {
-      ws.send<IPluginConfigDisplay[]>({ cmd: 'plugin/list', success: true, data: server.plugin.pluginListManifest })
-    })
+    // 4. 推送一次 channel list
+    client.bot?.guilds.notifyChannelListChange()
   } catch (e) {
     // 返回失败
     client.send({ cmd: 'bot/loginV2', success: false, data: null })
   }
 }
 
-function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
+async function handleGetBotInfo(client: WsClient) {
+  const bot = client.bot
+  if (bot) {
+    const botInfo = await bot.getBotInfo()
+    client.send<IBotInfoResp>({ cmd: 'bot/info', success: true, data: botInfo })
+  } else {
+    // 未登录机器人，理论不可能
+    client.send<IBotInfoResp>({ cmd: 'bot/info', success: false, data: null })
+  }
+}
+
+async function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
   client.listenTo(data.channelId, data.guildId)
-  // watch user list
-  client.autorun(ws => {
-    const bot = ws.bot
-    if (bot) {
-      const guild = bot.guilds.find(ws.listenToGuildId)
-      if (guild) {
-        const users: IUser[] = guild.allUsers.map(user => ({
-          id: user.id,
-          nick: user.name,
-          username: user.name,
-          avatar: user.avatar,
-          bot: user.isBot,
-          deleted: user.deleted
-        }))
-        ws.send<IUserListResp>({ cmd: 'user/list', success: true, data: users })
-      }
-    }
-  })
-  // watch card link info
-  client.autorun(ws => {
-    const channel = ws.listenToChannelUnionId // 因为是 autorun 所以每次取最新的（虽然目前并没有办法改变）
-    if (channel) {
-      const linkMap = server.cards.getLinkMap(channel)
-      const data: ICardLinkResp = Object.entries(linkMap).map(([userId, cardName]) => ({ userId, cardName }))
-      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data })
-    } else {
-      ws.send<ICardLinkResp>({ cmd: 'card/link', success: true, data: [] })
-    }
-  })
-  // watch channel config
-  client.autorun(ws => {
-    const channelId = ws.listenToChannelUnionId
-    if (channelId) {
-      const config = server.config.getChannelConfig(channelId).config
-      ws.send<IChannelConfigResp>({ cmd: 'channel/config', success: true, data: { config } })
-    }
-  })
   // watch ri list
   client.autorun(ws => {
     const bot = ws.bot
@@ -180,6 +126,10 @@ function handleListenToChannel(client: WsClient, server: Wss, data: IListenToCha
       ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
     }
   })
+  // 初始化 guild 和 channel store
+  await GlobalStore.Instance.initGuildAndChannelState(client.platform!, data.guildId, data.channelId)
+  // resp
+  client.send({ cmd: 'channel/listen', success: true, data: '' })
 }
 
 async function handleChannelCreate(client: WsClient, server: Wss, data: IChannelCreateReq) {
@@ -243,19 +193,14 @@ function handleCardDelete(client: WsClient, server: Wss, data: ICardDeleteReq) {
   server.cards.deleteCard(client, data)
 }
 
-function handleCardLink(client: WsClient, server: Wss, data: ICardLinkReq) {
-  if (!client.listenToChannelId) return
-  server.cards.handleLinkCard(client, data)
-}
-
-function handleChannelConfig(client: WsClient, server: Wss, data: IChannelConfigReq) {
+function handleSetDefaultChannelConfig(client: WsClient, server: Wss) {
   if (!client.listenToChannelUnionId) return
-  server.config.saveChannelConfig(client.listenToChannelUnionId, data)
+  server.config.setDefaultChannelConfig(client.listenToChannelUnionId)
 }
 
 function handleResetChannelConfig(client: WsClient, server: Wss) {
   if (!client.listenToChannelUnionId) return
-  server.config.resetChannelConfig(client)
+  server.config.resetChannelConfig(client.listenToChannelUnionId)
 }
 
 async function handleSceneSendBattleLog(client: WsClient, server: Wss, data: ISceneSendBattleLogReq) {
@@ -314,17 +259,12 @@ async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRo
   }
 }
 
-function handleUserDelete(client: WsClient, server: Wss, data: IUserDeleteReq) {
-  const bot = client.bot
-  if (bot) {
-    const guild = bot.guilds.find(client.listenToGuildId)
-    if (guild) {
-      guild.deleteUsersBatch(data.ids)
-    }
-  }
-}
-
 function handlePluginReload(client: WsClient, server: Wss, data: IPluginReloadReq) {
   server.plugin.manualReloadPlugins(data)
   client.send<string>({ cmd: 'plugin/reload', success: true, data: '' })
+}
+
+async function handleDbExport(client: WsClient) {
+  const filename = await GlobalStore.Instance.dump()
+  client.send<string>({ cmd: 'db/export', success: !!filename, data: filename || '' })
 }

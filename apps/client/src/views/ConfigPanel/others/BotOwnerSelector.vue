@@ -27,7 +27,7 @@ const emit = defineEmits<{ (e: 'select', value: IUser | null): void }>()
 
 const userStore = useUserStore()
 // 支持通过指令关联人物卡后，可能出现本地没有这个人信息的情况。此时生成一个临时用户，至少让这里可以回显出来
-const createTempUser = (id: string): IUser => ({ id, avatar: '', nick: id, username: id, bot: false, deleted: false })
+const createTempUser = (id: string): IUser => ({ id, avatar: '', name: id, isBot: false, deleted: false })
 const currentUser = computed(() => props.userId ? (userStore.of(props.userId) ?? createTempUser(props.userId)) : null)
 
 // 搜索相关
@@ -35,7 +35,7 @@ const editMode = ref(false)
 const keyword = ref('')
 const keywordContains = (user: IUser) => {
   const search = keyword.value.toLowerCase()
-  return user.nick.toLowerCase().includes(search) || user.username.toLowerCase().includes(search)
+  return user.name.toLowerCase().includes(search)
 }
 const realUsersAfterSearch = computed(() => userStore.enabledUserList.filter(user => keywordContains(user)).slice(0, 100)) // 默认展示 100 条，避免人数多时卡顿，可通过搜索缩小范围
 

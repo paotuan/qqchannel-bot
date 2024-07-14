@@ -1,10 +1,11 @@
-import type { IBotInfo, ILoginReqV2, IBotConfig, IBotConfig_Kook, IBotConfig_QQ } from '@paotuan/types'
+import type { IBotInfo, ILoginReqV2, IBotConfig, IBotConfig_Kook, IBotConfig_QQ, IBotInfoResp } from '@paotuan/types'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { gtagEvent } from '../utils'
 import { computed, ref } from 'vue'
 import type { Platform } from '@paotuan/config'
 import md5 from 'md5'
+import { useChannelStore } from './channel'
 
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
@@ -71,18 +72,35 @@ export const useBotStore = defineStore('bot', () => {
     const isValid = formModelIsValid.value
     if (!isValid) return
     loginState.value = 'LOADING'
-    ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
     gtagEvent('bot/login', { platform: model.platform }, false)
     saveLoginInfo2LocalStorage(_model, model)
+    ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
+    ws.once('bot/loginV2', resp => {
+      console.log('login success')
+      onLoginFinish(!!resp.success)
+    })
+    // 开始监听 channel list
+    const channelStore = useChannelStore()
+    channelStore.waitForServerChannelList()
   }
 
   const onLoginFinish = (success: boolean) => {
     loginState.value = success ? 'LOGIN' : 'NOT_LOGIN'
+    // 登录成功，拉取 bot 信息
+    if (success) {
+      ws.send({ cmd: 'bot/info', data: null })
+      ws.once<IBotInfoResp>('bot/info', resp => {
+        info.value = resp.data
+        if (info.value) {
+          gtagEvent('bot/info', { bot_name: info.value.username }, false)
+        }
+      })
+    }
   }
 
   const info = ref<IBotInfo | null>(null)
 
-  return { platform, formModel, loginState, connect, onLoginFinish, info }
+  return { platform, formModel, loginState, connect, info }
 })
 
 function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, model: IBotConfig) {

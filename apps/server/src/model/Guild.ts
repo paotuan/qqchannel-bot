@@ -1,13 +1,10 @@
-import fs from 'fs'
-import { makeAutoObservable, runInAction } from 'mobx'
-import { VERSION_CODE } from '@paotuan/types'
+import { IUser } from '@paotuan/types'
 import { Channel } from './Channel'
 import { Bot } from '../adapter/Bot'
 import { Universal } from '../adapter/satori'
 import { User } from './User'
-import { resolveRootDir } from '../utils'
-
-const USER_DIR = resolveRootDir('user')
+import { GlobalStore } from '../state'
+import { GuildUnionId } from '../adapter/utils'
 
 export class Guild {
   readonly id: string
@@ -20,22 +17,24 @@ export class Guild {
   private channelGroupId4Create: string | undefined
 
   constructor(bot: Bot, id: string, name?: string, icon?: string) {
-    makeAutoObservable(this)
     this.bot = bot
     this.id = id
     this.name = name || id
     this.icon = icon || ''
     this.fetchChannels()
     // this.fetchUsers()
-    this.loadUsers()
   }
 
   get allChannels() {
     return Object.values(this.channelsMap)
   }
 
-  get allUsers() {
-    return Object.values(this.usersMap)
+  private get guildUnionId(): GuildUnionId {
+    return `${this.bot.platform}_${this.id}`
+  }
+
+  private get store() {
+    return GlobalStore.Instance.guild(this.guildUnionId)
   }
 
   findChannel(id: string): Channel | undefined {
@@ -48,6 +47,7 @@ export class Guild {
 
   addChannel(channel: { id: string, name: string, type: number }) {
     this.channelsMap[channel.id] = new Channel(this.bot, channel.id, this.id, channel.name, channel.type)
+    this.bot.guilds.notifyChannelListChange()
   }
   //
   // updateChannel(channel: IChannel) {
@@ -73,36 +73,31 @@ export class Guild {
   }
 
   addOrUpdateUser(author: Universal.GuildMember & Universal.User) {
-    const authorName = author.nick ?? author.nickname ?? author.name ?? author.username
+    const authorName = getUserName(author)
     const user = this.usersMap[author.id]
     if (user) {
-      // 判断是否有更新需要持久化
-      let updated = false
+      // 判断是否有更新
       if (authorName && authorName !== user.name) {
         user.name = authorName
-        updated = true
       }
       if (author.avatar && author.avatar !== user.avatar) {
         user.avatar = author.avatar
-        updated = true
       }
       if (user.deleted) {
         user.deleted = false
-        updated = true
-      }
-      if (updated) {
-        this.saveUsers()
       }
     } else {
-      const newUser = new User(this.bot, {
+      const newUserProto: IUser = {
         id: author.id,
-        guildId: this.id,
         name: authorName ?? author.id,
         avatar: author.avatar ?? '',
-        isBot: author.isBot ?? false
-      })
+        isBot: author.isBot ?? false,
+        deleted: false
+      }
+      // 新用户存入 syncstore
+      this.store.users[newUserProto.id] = newUserProto
+      const newUser = new User(this.bot, this.id, this.store.users[newUserProto.id])
       this.usersMap[newUser.id] = newUser
-      this.saveUsers()
     }
   }
 
@@ -110,21 +105,6 @@ export class Guild {
     const user = this.usersMap[id]
     if (user && !user.deleted) {
       user.deleted = true
-      this.saveUsers()
-    }
-  }
-
-  deleteUsersBatch(ids: string[]) {
-    let updated = false
-    ids.forEach(id => {
-      const user = this.usersMap[id]
-      if (user && !user.deleted) {
-        user.deleted = true
-        updated = true
-      }
-    })
-    if (updated) {
-      this.saveUsers()
     }
   }
 
@@ -138,13 +118,12 @@ export class Guild {
         list.push(...data)
         nextToken = next
       } while (nextToken)
-      runInAction(() => {
-        const channels = list
-          .filter(channel => Channel.VALID_TYPES.includes(channel.type))
-          .map(channel => new Channel(this.bot, channel.id, this.id, channel.name, channel.type))
-        this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
-        this.detectChannelGroupId4Create(list)
-      })
+      const channels = list
+        .filter(channel => Channel.VALID_TYPES.includes(channel.type))
+        .map(channel => new Channel(this.bot, channel.id, this.id, channel.name, channel.type))
+      this.channelsMap = channels.reduce((obj, chan) => Object.assign(obj, { [chan.id]: chan }), {})
+      this.bot.guilds.notifyChannelListChange()
+      this.detectChannelGroupId4Create(list)
     } catch (e) {
       console.error('获取子频道信息失败', e)
     }
@@ -174,65 +153,15 @@ export class Guild {
     console.warn('[Guild] 未找到符合条件的文字子频道分组，QQ 接口可能改动。若创建子频道失败，请联系开发者')
     this.channelGroupId4Create = categories[0]?.id
   }
+}
 
-  // user 持久化相关
-  private get userPersistenceFilename() {
-    return `${USER_DIR}/${this.bot.platform}_${this.id}.json`
+// 从 Universal User 中获取 name
+function getUserName(author: Universal.GuildMember & Universal.User) {
+  // 部分场景使用的仍是已废弃字段
+  let name = author.nick ?? author.nickname ?? author.name ?? author.username
+  // qq 机器人去除测试中尾缀
+  if (name && author.isBot) {
+    name = name.replace(/-测试中$/, '')
   }
-
-  private saveUsers() {
-    const allUsersOfGuild = Object.values(this.usersMap).map(user => user.toJSON)
-    console.log('[Guild] 保存用户列表，count=', allUsersOfGuild.length)
-    const data = { version: VERSION_CODE, list: allUsersOfGuild }
-    if (!fs.existsSync(USER_DIR)) {
-      fs.mkdirSync(USER_DIR)
-    }
-    fs.writeFile(this.userPersistenceFilename, JSON.stringify(data), (e) => {
-      if (e) {
-        console.error('[Guild] 保存用户列表失败', e)
-      }
-    })
-  }
-
-  private loadUsers() {
-    console.log('[Guild] 开始读取用户，guildId=', this.id)
-    const filename = this.userPersistenceFilename
-    if (!fs.existsSync(filename)) {
-      this.tryLoadV1Data()
-      return
-    }
-    try {
-      const str = fs.readFileSync(filename, 'utf8')
-      const { version, list } = JSON.parse(str) as { version: number, list: User['toJSON'][] }
-      const users = list.map(data => User.fromJSON(this.bot, data))
-      this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
-      // 一次性传给前端吧
-    } catch (e) {
-      console.error(`[Guild] ${filename} 用户列表解析失败`, e)
-    }
-  }
-
-  private tryLoadV1Data() {
-    if (this.bot.platform !== 'qqguild') return
-    const filename = `${USER_DIR}/${this.id}.json`
-    if (!fs.existsSync(filename)) return
-    try {
-      console.log('[Guild] 开始读取旧版用户列表，guildId=', this.id)
-      const str = fs.readFileSync(filename, 'utf8')
-      const { list } = JSON.parse(str)
-      const users: User[] = list.map((item: any) => User.fromJSON(this.bot, {
-        id: item.id,
-        guildId: item.guildId,
-        isBot: item.bot,
-        name: item.nick || item.username,
-        avatar: item.avatar,
-        deleted: item.deleted
-      }))
-      this.usersMap = users.reduce((obj, user) => Object.assign(obj, { [user.id]: user }), {})
-      // 保存一次避免下次再次处理
-      this.saveUsers()
-    } catch (e) {
-      console.error(`[Guild] ${filename} 用户列表解析失败`, e)
-    }
-  }
+  return name
 }

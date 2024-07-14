@@ -20,6 +20,9 @@ export interface IPluginRegisterContext {
   roll: (exp: string) => unknown
   render: (template: string, view: any, partials?: any) => string
   getCard: (env: Env) => ICard | undefined
+  /**
+   * @deprecated now card will be saved automatically
+   */
   saveCard: (card: ICard) => void
   getLinkedCardUserList: (env: Env) => string[] // 获取当前频道关联了人物卡的 user id 列表
   linkCard: (env: Env, cardName?: string) => void

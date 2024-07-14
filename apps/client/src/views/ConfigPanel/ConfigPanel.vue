@@ -9,6 +9,9 @@
       <li class="menu-title mt-4"><span>快捷设置</span></li>
       <li class="tooltip tooltip-right" :data-tip="cocDesc.join(`&#xa;`)"><a @click="quickSet('coc')">设为 COC 常用规则</a></li>
       <li class="tooltip tooltip-right" :data-tip="dndDesc.join(`&#xa;`)"><a @click="quickSet('dnd')">设为 DND 常用规则</a></li>
+      <li class="menu-title mt-4"><span>配置在失焦后自动保存<br>你还可以选择：</span></li>
+      <li class="tooltip tooltip-right" :data-tip="setDefaultDesc.join(`&#xa;`)"><a @click="configStore.requestSetDefault()">保存为默认配置</a></li>
+      <li class="tooltip tooltip-right" data-tip="使用默认配置覆盖当前子频道的配置"><a @click="configStore.requestResetConfig()">重置到默认配置</a></li>
     </ul>
     <div class="max-w-4xl mx-auto" style="--btn-text-case: none">
       <template v-if="currentMenu === 'customReply'">
@@ -32,18 +35,6 @@
       <template v-else-if="currentMenu === 'hook'">
         <HookPanel />
       </template>
-    </div>
-    <!-- 底部栏 -->
-    <div class="fixed left-12 right-12 bottom-0 p-4 bg-base-100 flex justify-center gap-4 shadow-lg rounded-t-2xl">
-      <div class="tooltip" data-tip="保存为当前子频道的配置">
-        <button class="btn btn-primary w-52" :disabled="!configStore.edited" @click="configStore.requestSaveConfig(false)">保存</button>
-      </div>
-      <div class="tooltip" data-tip="保存为所有子频道的默认配置。如果其他子频道没有单独的配置，将会使用默认配置">
-        <button class="btn btn-primary w-52" :disabled="!configStore.edited" @click="configStore.requestSaveConfig(true)">保存为默认配置</button>
-      </div>
-      <div class="tooltip" data-tip="使用默认配置覆盖当前子频道的配置">
-        <button class="btn w-52" @click="configStore.requestResetConfig()">重置到默认配置</button>
-      </div>
     </div>
   </div>
 </template>
@@ -73,6 +64,11 @@ const menuList: { label: string, value: NavMenu }[] = [
   { label: '特殊指令&杂项', value: 'others' },
   { label: '插件管理', value: 'plugin' },
   { label: '钩子函数', value: 'hook' }
+]
+
+const setDefaultDesc = [
+  '保存为所有子频道的默认配置',
+  '后续新的子频道初始即使用此配置'
 ]
 
 // quick set

@@ -1,8 +1,8 @@
-import type { IBotConfig, IBotInfo } from '@paotuan/types'
-import { Context, SatoriApi, ForkScope, Events } from './satori'
+import type { IBotConfig, IBotInfo, IMessage } from '@paotuan/types'
+import { Context, Events, ForkScope, SatoriApi } from './satori'
 import { adapterConfig, adapterPlugin, getBotId } from './utils'
 import { isEqual } from 'lodash'
-import { makeAutoObservable, runInAction } from 'mobx'
+import { action, makeAutoObservable } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
 import { LogManager } from '../service/log'
@@ -18,6 +18,8 @@ export class Bot {
   readonly api: SatoriApi
   private readonly _fork: ForkScope
   readonly wss: Wss
+
+  private readonly _botInfoPromise: Promise<IBotInfo | null>
   botInfo: IBotInfo | null = null
   readonly guilds: GuildManager
   readonly logs: LogManager
@@ -34,7 +36,10 @@ export class Bot {
     // @ts-ignore wtf
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
     this.api = this.context.bots.find(bot => bot.platform === config.platform)!
-    this.fetchBotInfo()
+
+    // 获取 bot 信息
+    this._botInfoPromise = this.fetchBotInfo()
+    this._botInfoPromise.then(action(info => (this.botInfo = info)))
 
     // 初始化各项功能
     // 初始化 bot 所在频道信息
@@ -122,16 +127,20 @@ export class Bot {
   private async fetchBotInfo() {
     try {
       const user = (await this.api.getLogin()).user!
-      runInAction(() => {
-        this.botInfo = {
-          id: user.id,
-          username: (user.name ?? '').replace(/-测试中$/, ''),
-          avatar: user.avatar ?? '',
-        }
-      })
+      return {
+        id: user.id,
+        username: (user.name ?? '').replace(/-测试中$/, ''),
+        avatar: user.avatar ?? '',
+      }
     } catch (e) {
       console.error('获取机器人信息失败', e)
+      return null
     }
+  }
+
+  // 确保请求已经完成，获取 bot 信息，并避免重复请求
+  async getBotInfo() {
+    return await this._botInfoPromise
   }
 
   async start() {
@@ -151,5 +160,10 @@ export class Bot {
 
   on<K extends keyof Events>(name: K, listener: Events[K]) {
     this.context.on(name, listener)
+  }
+
+  // 发送给登录了这个 bot 的所有 client
+  sendToClient<T>(message: IMessage<T>) {
+    this.wss.sendToBot<T>(this.id, message)
   }
 }

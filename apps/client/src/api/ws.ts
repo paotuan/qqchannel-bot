@@ -1,9 +1,8 @@
 import mitt from 'mitt'
 import type { IMessage, Command } from '@paotuan/types'
 import { useUIStore } from '../store/ui'
+import { serverAddr, serverPort } from './endpoint'
 
-const serverAddr = localStorage.getItem('WS_SERVER_ADDR') ?? import.meta.env.WS_SERVER_ADDR ?? location.hostname ?? 'localhost'
-const serverPort = localStorage.getItem('WS_SERVER_PORT') ?? import.meta.env.WS_SERVER_PORT ?? '4174'
 const ws = new WebSocket(`ws://${serverAddr}:${serverPort}`)
 const wsEmitter = mitt()
 
@@ -32,15 +31,18 @@ ws.onerror = (data) => {
 }
 
 export default {
-  on(cmd: Command, handler: (data: IMessage<unknown>) => void) {
-    wsEmitter.on(cmd, data => handler(data as IMessage<unknown>))
+  on<T = unknown>(cmd: Command, handler: (data: IMessage<T>) => void) {
+    wsEmitter.on(cmd, data => handler(data as IMessage<T>))
   },
-  once(cmd: Command, handler: (data: IMessage<unknown>) => void) {
+  once<T = unknown>(cmd: Command, handler: (data: IMessage<T>) => void) {
     const _handler = (data: any) => {
       wsEmitter.off(cmd, _handler)
-      handler(data as IMessage<unknown>)
+      handler(data as IMessage<T>)
     }
     wsEmitter.on(cmd, _handler)
+  },
+  off(cmd: Command) {
+    wsEmitter.off(cmd)
   },
   send<T>(msg: IMessage<T>) {
     ws.send(JSON.stringify(msg))

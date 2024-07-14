@@ -1,23 +1,18 @@
-import { makeAutoObservable, runInAction } from 'mobx'
 import { Guild } from './Guild'
 import type { Bot } from '../adapter/Bot'
 import { Universal } from '../adapter/satori'
 import { Channel } from './Channel'
 import { User } from './User'
+import type { IChannel, IChannelListResp } from '@paotuan/types'
 
 export class GuildManager {
   private readonly bot: Bot
   private guildsMap: Record<string, Guild> = {}
 
   constructor(bot: Bot) {
-    makeAutoObservable(this)
     this.bot = bot
     this.fetchGuilds()
     this.initEventListeners()
-  }
-
-  get all() {
-    return Object.values(this.guildsMap)
   }
 
   find(guildId: string): Guild | undefined {
@@ -83,10 +78,9 @@ export class GuildManager {
     try {
       const resp = await this.bot.api.getGuildList()
       const list = resp.data.slice(0, 10) // QQ 私域应该最多能加入 10 个频道，暂不考虑分页
-      runInAction(() => {
-        const guilds = list.map(info => new Guild(this.bot, info.id, info.name, info.avatar))
-        this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
-      })
+      const guilds = list.map(info => new Guild(this.bot, info.id, info.name, info.avatar))
+      this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
+      this.notifyChannelListChange()
     } catch (e) {
       console.error('获取频道信息失败', e)
     }
@@ -94,6 +88,7 @@ export class GuildManager {
 
   private addGuild({ id, name, icon }: { id: string, name: string, icon: string }) {
     this.guildsMap[id] = new Guild(this.bot, id, name, icon)
+    this.notifyChannelListChange()
   }
 
   // private updateGuild({ id, name, icon }: { id: string, name: string, icon: string }) {
@@ -151,5 +146,19 @@ export class GuildManager {
     this.bot.on('guild-member-added', session => this.addOrUpdateUser(session.author, session.guildId))
     this.bot.on('guild-member-updated', session => this.addOrUpdateUser(session.author, session.guildId))
     this.bot.on('guild-member-removed', session => this.deleteUser(session.userId, session.guildId))
+  }
+
+  // channel list 更新通知客户端
+  notifyChannelListChange() {
+    const guilds = Object.values(this.guildsMap)
+    const channels: IChannel[] = guilds.map(guild => guild.allChannels.map(channel => ({
+      id: channel.id,
+      name: channel.name,
+      type: channel.type,
+      guildId: channel.guildId,
+      guildName: guild.name,
+      guildIcon: guild.icon
+    }))).flat()
+    this.bot.sendToClient<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
   }
 }
