@@ -49,10 +49,9 @@ const userInfo = computed<IUser>(() => {
   // user 信息缺失时至少给个兜底，避免报错
   return info ?? {
     id: props.chara.userId,
-    nick: props.chara.userId,
-    username: props.chara.userId,
+    name: props.chara.userId,
     avatar: '',
-    bot: false,
+    isBot: false,
     deleted: false
   }
 })
