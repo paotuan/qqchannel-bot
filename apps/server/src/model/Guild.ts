@@ -21,7 +21,10 @@ export class Guild {
     this.id = id
     this.name = name || id
     this.icon = icon || ''
-    this.fetchChannels()
+    // qq 群不支持获取列表
+    if (bot.platform !== 'qq') {
+      this.fetchChannels()
+    }
     // this.fetchUsers()
   }
 

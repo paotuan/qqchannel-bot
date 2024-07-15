@@ -6,8 +6,8 @@
         <div class="py-2 flex flex-col gap-2">
           <div v-for="platform in platformOptions" :key="platform.value"
                class="p-1 pr-4 -mr-2 cursor-pointer flex items-center gap-2 rounded-l-lg "
-               :class="bot.platform === platform.value ? 'bg-base-100 shadow-md' : 'text-primary-content hover:bg-primary'"
-               @click="bot.platform = platform.value">
+               :class="currPlatform === platform.value ? 'bg-base-100 shadow-md' : 'text-primary-content hover:bg-primary'"
+               @click="currPlatform = platform.value">
             <div class="avatar">
               <div class="w-12 rounded-lg">
                 <img :src="platform.icon" style="object-fit: contain"/>
@@ -21,10 +21,10 @@
             <div class="card-title">登录机器人</div>
           </div>
           <div>
-            <template v-if="bot.platform === 'qqguild'">
+            <template v-if="currPlatform === 'qq'">
               <FormQQ />
             </template>
-            <template v-else-if="bot.platform === 'kook'">
+            <template v-else-if="currPlatform === 'kook'">
               <FormKook />
             </template>
             <template v-else>疑似发生错误，请尝试清除缓存</template>
@@ -41,15 +41,17 @@
 <script setup lang="ts">
 import { useBotStore } from '../../store/bot'
 import FormQQ from './FormQQ.vue'
-import type { Platform } from '@paotuan/config'
 import qqLogo from '../../assets/qq.png'
 import kookLogo from '../../assets/kook.ico'
 import FormKook from './FormKook.vue'
+import { ref } from 'vue'
 
 const bot = useBotStore()
 
+type Platform = 'qq' | 'kook'
+const currPlatform = ref<Platform>(bot.platform === 'qqguild' ? 'qq' : bot.platform)
 const platformOptions: { value: Platform, icon: string }[] = [
-  { value: 'qqguild', icon: qqLogo },
+  { value: 'qq', icon: qqLogo },
   { value: 'kook', icon: kookLogo },
 ]
 </script>

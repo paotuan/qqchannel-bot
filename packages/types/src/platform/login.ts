@@ -1,5 +1,5 @@
 export interface IBotConfig_QQ {
-  platform: 'qqguild'
+  platform: 'qqguild' | 'qq'
   appid: string
   secret: string
   token: string

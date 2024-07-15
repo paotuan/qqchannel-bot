@@ -66,7 +66,7 @@ export class Bot {
           // 记录 log
           this.logs.onReceivedMessage(session)
 
-          if (this.platform === 'qqguild') {
+          if (this.platform === 'qqguild' || this.platform === 'qq') {
             // 最近一条消息缓存到 channel 对象中
             const channel = this.guilds.findChannel(session.channelId, session.guildId)
             channel && (channel.lastSession = session)
@@ -78,7 +78,7 @@ export class Bot {
           await this.commandHandler.handleCommand(userCommand)
         }
       } else {
-        if (this.platform === 'qqguild') {
+        if (this.platform === 'qqguild' || this.platform === 'qq') {
           // 最近一条消息缓存到 user 对象中
           const srcGuildId = session.guildId.split('_')[0]
           const user = this.guilds.findUser(session.userId, srcGuildId)

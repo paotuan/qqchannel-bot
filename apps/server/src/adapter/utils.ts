@@ -25,6 +25,7 @@ export function asChannelUnionId(maybeUnionId: string) {
 export function adapterPlugin(platform: Platform) {
   switch (platform) {
   case 'qqguild':
+  case 'qq':
     return qqAdapter
   case 'kook':
     return kookAdapter
@@ -36,15 +37,17 @@ export function adapterPlugin(platform: Platform) {
 export function adapterConfig(config: IBotConfig) {
   switch (config.platform) {
   case 'qqguild':
-    return adapterQQ(config)
+    return adapterQQGuild(config)
   case 'kook':
     return adapterKook(config)
+  case 'qq':
+    return adapterQQ(config)
   // default:
   //   throw new Error(`Not implement platform: ${config.platform}`)
   }
 }
 
-function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
+function adapterQQGuild(config: IBotConfig_QQ): QQBot.Config {
   const type = config.type ?? 'private'
   return {
     id: config.appid,
@@ -57,6 +60,18 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
       | (type === 'private' ? QQ.Intents.GUILD_MESSAGES : QQ.Intents.PUBLIC_GUILD_MESSAGES)
       | QQ.Intents.GUILD_MESSAGE_REACTIONS
       | QQ.Intents.DIRECT_MESSAGES,
+    retryWhen: []
+  }
+}
+
+function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
+  return {
+    id: config.appid,
+    secret: config.secret,
+    token: config.token,
+    type: config.type ?? 'private',
+    sandbox: config.sandbox ?? false,
+    intents: QQ.Intents.USER_MESSAGE,
     retryWhen: []
   }
 }

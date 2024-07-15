@@ -10,7 +10,7 @@ import { useChannelStore } from './channel'
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
 type Platform2ConfigMap = {
-  qqguild?: IBotConfig_QQ
+  qqguild?: IBotConfig_QQ // qq/qqguild 特殊处理，都在同一个 form 里
   kook?: IBotConfig_Kook
 }
 
@@ -20,7 +20,7 @@ export const useBotStore = defineStore('bot', () => {
   const platform = ref<Platform>(_platform ?? 'qqguild')
 
   const formQQ = ref<IBotConfig_QQ>(_model.qqguild ?? {
-    platform: 'qqguild', // 群和频道是一起的，但现在暂时只支持通过频道登录
+    platform: 'qqguild',
     appid: '',
     secret: '',
     token: '',
@@ -37,6 +37,7 @@ export const useBotStore = defineStore('bot', () => {
   const formModel = computed(() => {
     switch (platform.value) {
     case 'qqguild':
+    case 'qq':
       return formQQ.value
     case 'kook':
       return formKook.value
@@ -48,6 +49,7 @@ export const useBotStore = defineStore('bot', () => {
   const formModelIsValid = computed(() => {
     switch (platform.value) {
     case 'qqguild':
+    case 'qq':
     {
       const form = formQQ.value
       return !!(form.appid && form.secret && form.token)
@@ -105,7 +107,8 @@ export const useBotStore = defineStore('bot', () => {
 
 function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, model: IBotConfig) {
   localStorage.setItem('login-platform', model.platform)
-  const newData = { ...allData, [model.platform]: model }
+  const platformSaveKey = model.platform === 'qq' ? 'qqguild' : model.platform
+  const newData: Platform2ConfigMap = { ...allData, [platformSaveKey]: model }
   localStorage.setItem('login-model', JSON.stringify(newData))
 }
 
