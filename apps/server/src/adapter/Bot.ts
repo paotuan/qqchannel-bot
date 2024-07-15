@@ -55,11 +55,14 @@ export class Bot {
       if (session.userId === this.botInfo?.id) return
       // 区分私信场景
       if (!session.isDirect) {
-        // 根据消息中的用户信息更新成员信息
+        // 根据消息中的频道信息，更新内存中的频道和子频道
         this.guilds.addGuildChannelByMessage(session.event.guild, session.event.channel)
-        this.guilds.addOrUpdateUserByMessage(session.event.guild, session.author)
 
         if (this.isListening(session.channelId, session.guildId)) {
+          // 根据消息中的用户信息更新成员信息
+          // 注意我们只在 listening 的频道里面进行更新，因为非 listening 的频道，它的 yStore 没有初始化，而我们又依赖 yStore 进行同步和持久化
+          // 未来可进行流程上的优化，将 yStore 初始化放在收到第一条消息时进行。这样还可以实现例如 audit mode。不过这个需要再设计
+          this.guilds.addOrUpdateUserByMessage(session.event.guild, session.author)
           // 记录 log
           this.logs.onReceivedMessage(session)
 
