@@ -8,6 +8,7 @@ import { GuildManager } from '../model/GuildManager'
 import { LogManager } from '../service/log'
 import { UserCommand } from '../model/UserCommand'
 import { CommandHandler } from '../service/commandHandler'
+import { NickHandler } from '../service/nickHandler'
 
 /**
  * A bot connection to a platform
@@ -23,6 +24,7 @@ export class Bot {
   botInfo: IBotInfo | null = null
   readonly guilds: GuildManager
   readonly logs: LogManager
+  readonly nickHandler: NickHandler
   readonly commandHandler: CommandHandler
 
   // 维护当前工作子频道 // guildId => channelIds for quick search
@@ -46,6 +48,8 @@ export class Bot {
     this.guilds = new GuildManager(this)
     // 初始化 log 记录
     this.logs = new LogManager(this)
+    // 初始化 nick 处理器
+    this.nickHandler = new NickHandler(this)
     // 初始化命令处理器
     this.commandHandler = new CommandHandler(this)
 

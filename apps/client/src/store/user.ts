@@ -18,10 +18,16 @@ export const useUserStore = defineStore('user', () => {
     })
   }
 
+  const setUserNick = (id: string, nick: string) => {
+    const user = of(id)
+    user && (user.name = nick)
+  }
+
   return {
     enabledUserList,
     of,
     nickOf,
-    deleteUsers
+    deleteUsers,
+    setUserNick
   }
 })

@@ -15,11 +15,11 @@
       <div
         v-for="user in userOptions as IUser[]"
         :key="user.id"
-        class="select select-bordered bg-none items-center gap-2 truncate"
+        class="select select-bordered bg-none items-center gap-2 truncate pr-2"
         :class="{ 'user-selected': selected(user.id) }"
         @click="toggleUser(user.id)"
       >
-        <UserItem :user="user" />
+        <UserEditItem :user="user" />
       </div>
     </div>
     <template #action>
@@ -46,10 +46,10 @@ import { useUIStore } from '../../store/ui'
 import { useUserStore } from '../../store/user'
 import { computed, ref } from 'vue'
 import DNativeSelect from '../../dui/select/DNativeSelect.vue'
-import UserItem from './UserItem.vue'
 import type { ILog, IUser } from '@paotuan/types'
 import { Toast } from '../../utils'
 import { useLogStore } from '../../store/log'
+import UserEditItem from './UserEditItem.vue'
 
 const ui = useUIStore()
 const userStore = useUserStore()

@@ -57,7 +57,19 @@ export class CommandHandler {
   async handleCommand(userCommand: ICommand<BotContext>) {
     const result = await dispatchCommand(userCommand, {
       getOpposedRoll: c => this.getOpposedRoll(c as ICommand<BotContext>),
-      interceptor: async c => this.bot.logs.handleBackgroundLogCommand(c as ICommand<BotContext>),
+      interceptor: async c => {
+        // .log 特殊指令处理
+        const [handled, payload] = this.bot.logs.handleBackgroundLogCommand(c as ICommand<BotContext>)
+        if (handled) {
+          return [true, payload]
+        }
+        // .nick 特殊指令处理
+        const [handled2, payload2] = this.bot.nickHandler.handleManualSetNickCommand(c as ICommand<BotContext>)
+        if (handled2) {
+          return [true, payload2]
+        }
+        return [false, undefined]
+      },
     })
     await this.handleDispatchResult(userCommand, result)
   }
