@@ -71,6 +71,10 @@ export class GuildManager {
 
   addOrUpdateUserByMessage(_guild?: Universal.Guild, _author?: Universal.GuildMember & Universal.User) {
     if (!_guild || !_author) return
+    // qq 群获取头像特殊处理
+    if (this.bot.platform === 'qq' && !_author.avatar) {
+      _author.avatar = `https://q.qlogo.cn/qqapp/${this.bot.appid}/${_author.id}/100`
+    }
     this.addOrUpdateUser(_author, _guild.id)
   }
 

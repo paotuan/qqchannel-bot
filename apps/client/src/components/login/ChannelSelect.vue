@@ -11,10 +11,10 @@
                  @click="checkedGuildId = guildId">
               <div class="avatar">
                 <div class="w-12 rounded-lg">
-                  <img :src="channelsGroupByGuild[guildId][0].guildIcon" referrerpolicy="no-referrer" />
+                  <img :src="channelsGroupByGuild[guildId][0].guildIcon || qqLogo" referrerpolicy="no-referrer" />
                 </div>
               </div>
-              <div>{{ channelsGroupByGuild[guildId][0].guildName }}</div>
+              <div class="max-w-40 truncate" :title="channelsGroupByGuild[guildId][0].guildName">{{ channelsGroupByGuild[guildId][0].guildName }}</div>
             </div>
           </div>
           <!-- 右侧 -->
@@ -25,14 +25,20 @@
             </div>
             <!-- 子频道空数据展示 -->
             <div v-if="channelStore.list.length === 0" class="w-96">
-              <div class="font-bold my-4"><span class="loading loading-spinner loading-md mr-4" />频道信息获取中...</div>
-              <template v-if="showLoadingFailTips">
-                <div>如长时间获取不到频道信息：</div>
-                <ol class="list-decimal pl-4 mb-4">
-                  <li>请检查机器人登录信息是否填写正确。</li>
-                  <li>请检查机器人是否真的已经被添加到了频道中。</li>
-                  <li>可能是第三方接口挂了。可以在频道里发一条消息，频道 ID 就会展示在此处。</li>
-                </ol>
+              <!-- qq 群特殊提示 -->
+              <template v-if="botStore.platform === 'qq'">
+                <div class="font-bold my-4">请在群内 @ 机器人，以获取本群的 OpenID</div>
+              </template>
+              <template v-else>
+                <div class="font-bold my-4"><span class="loading loading-spinner loading-md mr-4" />频道信息获取中...</div>
+                <template v-if="showLoadingFailTips">
+                  <div>如长时间获取不到频道信息：</div>
+                  <ol class="list-decimal pl-4 mb-4">
+                    <li>请检查机器人登录信息是否填写正确。</li>
+                    <li>请检查机器人是否真的已经被添加到了频道中。</li>
+                    <li>可能是第三方接口挂了。可以在频道里发一条消息，频道 ID 就会展示在此处。</li>
+                  </ol>
+                </template>
               </template>
             </div>
             <!-- 子频道选择 -->
@@ -41,13 +47,15 @@
                      class="label cursor-pointer p-2 rounded-xl border"
                      :class="checkedChannelId === channel.id ? 'border-primary' : 'border-base-300'">
                 <span class="inline-flex items-center gap-2">
-                  <component :is="iconByChannel(channel)" class="size-4" :class="colorByChannel(channel)" />
-                  <span class="label-text">{{ channel.name }}</span>
+                  <component :is="iconByChannel(channel)" class="size-4 flex-none" :class="colorByChannel(channel)" />
+                  <span class="label-text break-all line-clamp-1" :title="channel.name">{{ channel.name }}</span>
                 </span>
-                <input type="radio" name="login_channel-select-radio" class="radio radio-primary"
+                <input type="radio" name="login_channel-select-radio" class="radio radio-primary flex-none"
                        :checked="checkedChannelId === channel.id" @click="checkedChannel = channel"/>
               </label>
-              <ChannelCreate :guild-id="checkedGuildId" />
+              <template v-if="botStore.platform !== 'qq'">
+                <ChannelCreate :guild-id="checkedGuildId" />
+              </template>
             </div>
             <button class="btn btn-primary w-full -mt-4 shadow-lg" :disabled="!checkedChannel"
                     @click="listenTo(checkedChannel)">
@@ -66,6 +74,8 @@ import type { IChannel } from '@paotuan/types'
 import { groupBy } from 'lodash'
 import { ArrowTopRightOnSquareIcon, VideoCameraIcon, MicrophoneIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/vue/24/outline'
 import ChannelCreate from './ChannelCreate.vue'
+import qqLogo from '../../assets/qq.png'
+import { useBotStore } from '../../store/bot'
 
 const channelStore = useChannelStore()
 const channelsGroupByGuild = computed(() => groupBy(channelStore.list || [], channel => channel.guildId))
@@ -119,6 +129,8 @@ onMounted(() => {
     showLoadingFailTips.value = true
   }, 5000)
 })
+
+const botStore = useBotStore()
 </script>
 <style scoped>
 .loading::before {

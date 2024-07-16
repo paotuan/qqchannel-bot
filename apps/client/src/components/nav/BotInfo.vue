@@ -1,6 +1,6 @@
 <template>
   <div v-if="bot.info" class="flex items-center gap-2 mr-2">
-    <div>{{ bot.info.username }}
+    <div class="max-w-60 line-clamp-2 break-all">{{ bot.info.username }}
       <template v-if="channel.selectedChannel">
         @{{ channel.selectedChannel.guildName }}-{{ channel.selectedChannel.name }}
       </template>
