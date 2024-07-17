@@ -26,15 +26,19 @@ export abstract class AbstractCardLinker implements ICardLinker {
     if (user2delete) {
       delete linkMap[user2delete]
     }
-    // 关联上新的
+    let oldCardId: string | undefined = undefined
     if (userId) {
+      // 记录 userId 以前关联的 card
+      oldCardId = linkMap[userId]
+      // userId 关联上新的 card
       linkMap[userId] = cardId
     }
     eventBus.emit('card-link-change', {
       channelUnionId,
       cardId,
       oldUserId: user2delete,
-      userId
+      userId,
+      oldCardId
     })
   }
 
@@ -48,7 +52,8 @@ export abstract class AbstractCardLinker implements ICardLinker {
           channelUnionId,
           cardId,
           oldUserId: user2delete,
-          userId: undefined
+          userId: undefined,
+          oldCardId: undefined
         })
       }
     })

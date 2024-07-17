@@ -148,7 +148,7 @@ export function upgradeConfig(config: IChannelConfig) {
     config.version = 26 // 1.7.0
   }
   if (config.version < 29) {
-    config.specialDice.nnDice = { enabled: true, writable: 'all' }
+    config.specialDice.nnDice = { enabled: true, writable: 'all', updateNick: 'whenEmpty' }
     config.version = 29 // 1.7.3
   }
   if (config.version < 30) {
@@ -201,6 +201,10 @@ export function upgradeConfig(config: IChannelConfig) {
       config.hookIds.beforeParseDiceRoll.push({ id: 'io.paotuan.plugin.compatible.detectDefaultRoll', enabled: !!(config as any).parseRule.detectDefaultRoll })
     }
     config.version = 35 // 1.8.3
+  }
+  if (config.version < 43) {
+    config.specialDice.nnDice.updateNick = 'whenEmpty'
+    config.version = 43 // 2.0.0-alpha.6
   }
   return config as IChannelConfig
 }

@@ -31,7 +31,8 @@ export interface ISpecialDiceConfig {
   riDice: { enabled: boolean, baseRoll: string }
   stDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
   dsDice: { enabled: boolean }
-  nnDice: { enabled: boolean, writable: 'all' | 'none' | 'manager' }
+  // updateNick 理论上不适合放这里，因为并不是 config 或 dicecore 通用的配置，而是依赖于外部自行实现的一个附加功能
+  nnDice: { enabled: boolean, writable: 'all' | 'none' | 'manager', updateNick: 'never' | 'whenEmpty' | 'always' }
   opposeDice: { enabled: boolean }
   inMessageDice: { enabled: boolean }
 }

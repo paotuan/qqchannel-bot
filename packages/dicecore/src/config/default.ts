@@ -360,7 +360,7 @@ export function getSpecialDiceConfig(): ISpecialDiceConfig {
     riDice: { enabled: true, baseRoll: 'd20' },
     stDice: { enabled: true, writable: 'all' },
     dsDice: { enabled: true },
-    nnDice: { enabled: true, writable: 'all' },
+    nnDice: { enabled: true, writable: 'all', updateNick: 'whenEmpty' },
     opposeDice: { enabled: true },
     inMessageDice: { enabled: true } // 暂不处理
   }
