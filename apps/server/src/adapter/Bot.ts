@@ -127,7 +127,7 @@ export class Bot {
   }
 
   // 是否正在监听某个子频道
-  private isListening(channelId: string, guildId: string) {
+  isListening(channelId: string, guildId: string) {
     return !!this.listeningChannels.get(guildId)?.has(channelId)
   }
 

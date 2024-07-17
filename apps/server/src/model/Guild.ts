@@ -80,6 +80,11 @@ export class Guild {
     const user = this.usersMap[author.id]
     if (user) {
       // 判断是否有更新
+      // 注意如果 nn.updateNick 为 always，导致昵称被更新为人物卡后
+      // 如果我们能获取到平台昵称，用户下次发消息仍然会使用平台昵称更新
+      // 考虑到这并不是我们最初的设计场景（最初只是为了简化解决 qq 获取不到昵称问题），就先不处理了
+      // 用户昵称为 guild 维度，而人物卡关联为 channel 维度，无论怎么处理，都会显得有点奇怪
+      // 比较完善的做法可能需要引入私有备注（per channel）的概念，但引入了更多的复杂度，私以为绝大多数时候用不到
       if (authorName && authorName !== user.name) {
         user.name = authorName
       }

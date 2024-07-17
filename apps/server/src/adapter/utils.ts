@@ -22,6 +22,12 @@ export function asChannelUnionId(maybeUnionId: string) {
   }
 }
 
+// 外部确保 channelUnionId 格式合法
+export function splitChannelUnionId(channelUnionId: ChannelUnionId): [string, string, string] {
+  const arr = channelUnionId.split('_')
+  return [arr[0], arr[1], arr[2]]
+}
+
 export function adapterPlugin(platform: Platform) {
   switch (platform) {
   case 'qqguild':
