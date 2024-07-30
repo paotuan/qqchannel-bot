@@ -5,8 +5,8 @@ import { isEqual } from 'lodash'
 import { YChannelStateShape, YGlobalStateShape, YGuildStateShape } from '@paotuan/types'
 import JSZip from 'jszip'
 
-const ChannelUnionIdRegex = /^[a-z]+_\d+_\d+$/
-const GuildUnionIdRegex = /^[a-z]+_\d+$/
+const ChannelUnionIdRegex = /^[a-z]+_[A-Za-z0-9]+_[A-Za-z0-9]+$/
+const GuildUnionIdRegex = /^[a-z]+_[A-Za-z0-9]+$/
 
 export async function dump() {
   const ldb = getPersistence()?.provider
