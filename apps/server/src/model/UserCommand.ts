@@ -142,6 +142,33 @@ export class UserCommand implements ICommand<BotContext> {
 
       const fullExp = elements.map(elem => elem.toString()).join('').trim()
 
+      // 支持纯文本 @xx 形式的代骰，可以 @人物卡名 或 @用户昵称。昵称无需打全，但有且只有唯一匹配的时候才生效
+      // 注意目前代骰记录的是 userId，因此 @人物卡名 也只能支持已关联了玩家的人物卡。对于其他人物卡代骰将在后续优化
+      // 同理由于涉及关联关系，在私信中不能应用这段逻辑
+      if (!substitute && !session.isDirect) {
+        const manualAtIndex = fullExp.lastIndexOf('@')
+        if (manualAtIndex >= 0 && manualAtIndex < fullExp.length - 1) {
+          const search = fullExp.slice(manualAtIndex + 1).toLowerCase()
+          // 先查找人物卡名，毕竟如果要 at 用户，（除了 qq 群）用正常的 at 就可以了
+          const userId = queryUserIdFromCard(search, bot, session)
+          if (userId) {
+            const user = bot.guilds.findUser(userId, session.guildId)
+            const username = user?.name ?? userId
+            substitute = { userId, username }
+          }
+          // 再查找用户名
+          if (!substitute) {
+            const users = bot.guilds.queryUser({ name: search }, session.guildId)
+            const exactUser = users.find(u => u.name === search)
+            if (exactUser) {
+              substitute = { userId: exactUser.id, username: exactUser.name }
+            } else if (users.length === 1) {
+              substitute = { userId: users[0].id, username: users[0].name }
+            }
+          }
+        }
+      }
+
       return new UserCommand(bot, session, fullExp, substitute)
     } catch (e) {
       return undefined
@@ -164,4 +191,30 @@ function convertRoleIds(ids: string[] = []): UserRole {
   } else {
     return 'user'
   }
+}
+
+
+function queryUserIdFromCard(search: string, bot: Bot, session: Session) {
+  const channelUnionId = getChannelUnionId(bot.platform, session.guildId, session.channelId)
+  // userId -> cardId
+  const linkedMap = bot.wss.cards.getLinkMap(channelUnionId)
+  const linedCardIds = Object.values(linkedMap)
+  // 我们需要的只是名字，因此无需调用 queryCard，直接从已关联的人物卡名字中查询
+  const keyword = search // .toLowerCase() 外部已经 toLowerCase
+  const availableNames = linedCardIds.filter(name => name.toLowerCase().includes(keyword))
+  let foundCard: string | undefined
+  const exactCard = availableNames.find(name => name.toLowerCase() === keyword)
+  if (exactCard) {
+    foundCard = exactCard
+  } else if (availableNames.length === 1) {
+    foundCard = availableNames[0]
+  }
+  if (!foundCard) return undefined
+  // 确定了人物卡后，反查人物卡对应的用户
+  for (const userId of Object.keys(linkedMap)) {
+    if (linkedMap[userId] === foundCard) {
+      return userId
+    }
+  }
+  return undefined
 }

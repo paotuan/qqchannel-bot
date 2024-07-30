@@ -1,4 +1,4 @@
-import { Guild } from './Guild'
+import { Guild, IUserQuery } from './Guild'
 import type { Bot } from '../adapter/Bot'
 import { Universal } from '../adapter/satori'
 import { Channel } from './Channel'
@@ -33,6 +33,12 @@ export class GuildManager {
       }
     }
     return guild.findUser(userId)
+  }
+
+  queryUser(query: IUserQuery, guildId: string) {
+    const guild = this.find(guildId)
+    if (!guild) return []
+    return guild.queryUser(query)
   }
 
   findChannel(channelId: string, guildId: string) {

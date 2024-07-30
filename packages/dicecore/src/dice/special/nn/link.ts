@@ -24,6 +24,12 @@ export class NnLinkDiceRoll extends BasePtDiceRoll {
   override roll() {
     this.keyword = this.rawExpression.slice(2).trim()
     this.availableCards = this.queryCard({ name: this.keyword, isTemplate: false })
+    // 如有精确匹配，则只取精确匹配的人物卡
+    const keywordLowerCase = this.keyword.toLowerCase()
+    const exactCard = this.availableCards.find(card => card.name.toLowerCase() === keywordLowerCase)
+    if (exactCard) {
+      this.availableCards = [exactCard]
+    }
     return this
   }
 

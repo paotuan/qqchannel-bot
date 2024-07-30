@@ -6,6 +6,12 @@ import { User } from './User'
 import { GlobalStore } from '../state'
 import { GuildUnionId } from '../adapter/utils'
 
+export interface IUserQuery {
+  name?: string
+  // isBot?: boolean 强制 false
+  // deleted?: boolean 强制 false
+}
+
 export class Guild {
   readonly id: string
   name: string
@@ -46,6 +52,15 @@ export class Guild {
 
   findUser(id: string) {
     return this.usersMap[id] ?? User.createTemp(this.bot, id, this.id)
+  }
+
+  queryUser(query: IUserQuery = {}) {
+    let list = Array.from(Object.values(this.usersMap)).filter(u => !u.deleted && !u.isBot)
+    if (query.name) {
+      const keyword = query.name.toLowerCase()
+      list = list.filter(data => data.name.toLowerCase().includes(keyword))
+    }
+    return list
   }
 
   addChannel(channel: { id: string, name: string, type: number }) {
