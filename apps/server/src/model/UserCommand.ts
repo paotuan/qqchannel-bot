@@ -140,8 +140,7 @@ export class UserCommand implements ICommand<BotContext> {
         elements.splice(-1, 1)
       }
 
-      const fullExp = elements.map(elem => elem.toString()).join('').trim()
-
+      let fullExp = elements.map(elem => elem.toString()).join('').trim()
       // 支持纯文本 @xx 形式的代骰，可以 @人物卡名 或 @用户昵称。昵称无需打全，但有且只有唯一匹配的时候才生效
       // 注意目前代骰记录的是 userId，因此 @人物卡名 也只能支持已关联了玩家的人物卡。对于其他人物卡代骰将在后续优化
       // 同理由于涉及关联关系，在私信中不能应用这段逻辑
@@ -166,6 +165,10 @@ export class UserCommand implements ICommand<BotContext> {
               substitute = { userId: users[0].id, username: users[0].name }
             }
           }
+        }
+        // 如查找到代骰，消息内容移除代骰部分
+        if (substitute) {
+          fullExp = fullExp.slice(0, manualAtIndex)
         }
       }
 
