@@ -18,9 +18,10 @@ export class Guild {
   icon: string
   private readonly bot: Bot
   private channelsMap: Record<string, Channel> = {}
-  private usersMap: Record<string, User> = {}
   // 用于创建新的文字子频道，所在分组
   private channelGroupId4Create: string | undefined
+  // 按需将 IUser 转化为 User 对象
+  private usersCache = new Map<string, User>()
 
   constructor(bot: Bot, id: string, name?: string, icon?: string) {
     this.bot = bot
@@ -51,11 +52,20 @@ export class Guild {
   }
 
   findUser(id: string) {
-    return this.usersMap[id] ?? User.createTemp(this.bot, id, this.id)
+    if (this.usersCache.has(id)) {
+      return this.usersCache.get(id)!
+    }
+    const proto = this.store.users[id]
+    if (proto) {
+      const user = new User(this.bot, this.id, proto)
+      this.usersCache.set(id, user)
+      return user
+    }
+    return User.createTemp(this.bot, id, this.id)
   }
 
-  queryUser(query: IUserQuery = {}) {
-    let list = Array.from(Object.values(this.usersMap)).filter(u => !u.deleted && !u.isBot)
+  queryIUser(query: IUserQuery = {}) {
+    let list = Object.values(this.store.users).filter(u => !u.deleted && !u.isBot)
     if (query.name) {
       const keyword = query.name.toLowerCase()
       list = list.filter(data => data.name.toLowerCase().includes(keyword))
@@ -92,7 +102,7 @@ export class Guild {
 
   addOrUpdateUser(author: Universal.GuildMember & Universal.User) {
     const authorName = getUserName(author)
-    const user = this.usersMap[author.id]
+    const user = this.store.users[author.id]
     if (user) {
       // 判断是否有更新
       // 注意如果 nn.updateNick 为 always，导致昵称被更新为人物卡后
@@ -119,13 +129,11 @@ export class Guild {
       }
       // 新用户存入 syncstore
       this.store.users[newUserProto.id] = newUserProto
-      const newUser = new User(this.bot, this.id, this.store.users[newUserProto.id])
-      this.usersMap[newUser.id] = newUser
     }
   }
 
   deleteUser(id: string) {
-    const user = this.usersMap[id]
+    const user = this.store.users[id]
     if (user && !user.deleted) {
       user.deleted = true
     }

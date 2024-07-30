@@ -157,7 +157,7 @@ export class UserCommand implements ICommand<BotContext> {
           }
           // 再查找用户名
           if (!substitute) {
-            const users = bot.guilds.queryUser({ name: search }, session.guildId)
+            const users = bot.guilds.queryIUser({ name: search }, session.guildId)
             const exactUser = users.find(u => u.name === search)
             if (exactUser) {
               substitute = { userId: exactUser.id, username: exactUser.name }

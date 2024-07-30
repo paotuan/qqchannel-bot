@@ -35,10 +35,10 @@ export class GuildManager {
     return guild.findUser(userId)
   }
 
-  queryUser(query: IUserQuery, guildId: string) {
+  queryIUser(query: IUserQuery, guildId: string) {
     const guild = this.find(guildId)
     if (!guild) return []
-    return guild.queryUser(query)
+    return guild.queryIUser(query)
   }
 
   findChannel(channelId: string, guildId: string) {
