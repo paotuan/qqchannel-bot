@@ -28,6 +28,10 @@
               <!-- qq 群特殊提示 -->
               <template v-if="botStore.platform === 'qq'">
                 <div class="font-bold my-4">请在群内 @ 机器人，以获取本群的 OpenID</div>
+                <div v-if="qqLastGroupTempChannel" class="mb-8">
+                  <div class="mb-2">上次使用：</div>
+                  <ChannelLabel :channel="qqLastGroupTempChannel" :checked="true" />
+                </div>
               </template>
               <template v-else>
                 <div class="font-bold my-4"><span class="loading loading-spinner loading-md mr-4" />频道信息获取中...</div>
@@ -43,22 +47,13 @@
             </div>
             <!-- 子频道选择 -->
             <div v-else-if="checkedGuildId" class="grid grid-cols-2 gap-2 w-96 bg-base-100 pt-4 pb-12">
-              <label v-for="channel in channelsGroupByGuild[checkedGuildId]" :key="channel.id"
-                     class="label cursor-pointer p-2 rounded-xl border"
-                     :class="checkedChannelId === channel.id ? 'border-primary' : 'border-base-300'">
-                <span class="inline-flex items-center gap-2">
-                  <component :is="iconByChannel(channel)" class="size-4 flex-none" :class="colorByChannel(channel)" />
-                  <span class="label-text break-all line-clamp-1" :title="channel.name">{{ channel.name }}</span>
-                </span>
-                <input type="radio" name="login_channel-select-radio" class="radio radio-primary flex-none"
-                       :checked="checkedChannelId === channel.id" @click="checkedChannel = channel"/>
-              </label>
+              <ChannelLabel v-for="channel in channelsGroupByGuild[checkedGuildId]" :key="channel.id" :channel="channel"
+                            :checked="checkedChannelId === channel.id" @check="checkedChannel = channel" />
               <template v-if="botStore.platform !== 'qq'">
                 <ChannelCreate :guild-id="checkedGuildId" />
               </template>
             </div>
-            <button class="btn btn-primary w-full -mt-4 shadow-lg" :disabled="!checkedChannel"
-                    @click="listenTo(checkedChannel)">
+            <button class="btn btn-primary w-full -mt-4 shadow-lg" :disabled="!channelToLaunch" @click="launch">
               <span v-if="channelStore.selectLoading" class="loading loading-spinner" />开始使用！
             </button>
           </div>
@@ -72,10 +67,11 @@ import { useChannelStore } from '../../store/channel'
 import { computed, onMounted, ref, watch } from 'vue'
 import type { IChannel } from '@paotuan/types'
 import { groupBy } from 'lodash'
-import { ArrowTopRightOnSquareIcon, VideoCameraIcon, MicrophoneIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/vue/24/outline'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import ChannelCreate from './ChannelCreate.vue'
 import qqLogo from '../../assets/qq.png'
 import { useBotStore } from '../../store/bot'
+import ChannelLabel from './ChannelLabel.vue'
 
 const channelStore = useChannelStore()
 const channelsGroupByGuild = computed(() => groupBy(channelStore.list || [], channel => channel.guildId))
@@ -94,33 +90,7 @@ watch(channelsGroupByGuild, value => {
 // 切换频道时，清除子频道的选择，避免引起误会
 watch(checkedGuildId, () => (checkedChannel.value = null))
 
-const listenTo = (channel: IChannel | null) => channelStore.listenTo(channel!)
-
 const openMultiWindow = () => window.open(location.href)
-
-const iconByChannel = (channel: IChannel) => {
-  switch (channel.type) {
-  case 10005:
-    return VideoCameraIcon
-  case 2:
-    return MicrophoneIcon
-  case 0:
-  default:
-    return ChatBubbleBottomCenterTextIcon
-  }
-}
-
-const colorByChannel = (channel: IChannel) => {
-  switch (channel.type) {
-  case 10005:
-    return 'text-red-600'
-  case 2:
-    return 'text-purple-600'
-  case 0:
-  default:
-    return 'text-blue-600'
-  }
-}
 
 // 展示子频道获取不到提示
 const showLoadingFailTips = ref(false)
@@ -131,6 +101,39 @@ onMounted(() => {
 })
 
 const botStore = useBotStore()
+
+// qq 群特殊处理，记录上次使用的群 openId 用于快速进入
+const qqLastGroupTempChannel = computed<IChannel | null>(() => {
+  const openId = localStorage.getItem('qqLastGroupOpenId')
+  return openId ? {
+    id: openId,
+    name: openId,
+    type: 0,
+    guildId: openId,
+    guildName: openId,
+    guildIcon: ''
+  } : null
+})
+
+const channelToLaunch = computed(() => {
+  // 优先使用用户已选的 channel
+  let channel = checkedChannel.value
+  // qq 群特殊处理，可选项为 0 的情况下，可以使用上次已选的 openId
+  if (botStore.platform === 'qq' && !channel && Object.keys(channelsGroupByGuild.value).length === 0) {
+    channel = qqLastGroupTempChannel.value
+  }
+  return channel
+})
+
+const launch = () => {
+  const channel = channelToLaunch.value
+  if (!channel) return
+  channelStore.listenTo(channel)
+  // qq 群特殊处理，记录一下 open id
+  if (botStore.platform === 'qq') {
+    localStorage.setItem('qqLastGroupOpenId', channel.id)
+  }
+}
 </script>
 <style scoped>
 .loading::before {

@@ -22,6 +22,8 @@ export const useChannelStore = defineStore('channel', {
       if (this.selectLoading) return
       // 已决定子频道，停止监听 channel list 的变化，因为没意义了
       this.stopWaitForServerChannelList()
+      // 可能 channel 是一个 temp channel，不在 list 里面。这种情况手动添加该 channel 到 list 中
+      this.ensureChannelExist(channel)
       this.selectLoading = true
       ws.send<IListenToChannelReq>({ cmd: 'channel/listen', data: { channelId: channel.id, guildId: channel.guildId } })
       ws.once('channel/listen', () => {
@@ -48,6 +50,15 @@ export const useChannelStore = defineStore('channel', {
     // 让 server 主动重新请求并初始化 guild & channel
     refetchServerChannelList() {
       // todo 暂无特别必要
+    },
+    ensureChannelExist(channel: IChannel) {
+      if (!this.list) {
+        this.list = []
+      }
+      const exist = this.list.find(item => item.id === channel.id && item.guildId === channel.guildId)
+      if (!exist) {
+        this.list.push(channel)
+      }
     }
   }
 })
