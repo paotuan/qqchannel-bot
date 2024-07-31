@@ -90,6 +90,11 @@ class YCardLinker extends AbstractCardLinker {
   }
 
   getLinkMap(channelUnionId: ChannelUnionId): Record<string, string> {
-    return GlobalStore.Instance.channel(channelUnionId).cardLinkMap
+    // 私信场景 channelUnionId 是一个无效的值，兜底返回 {}
+    if (GlobalStore.Instance.isInited(channelUnionId)) {
+      return GlobalStore.Instance.channel(channelUnionId).cardLinkMap
+    } else {
+      return {}
+    }
   }
 }
