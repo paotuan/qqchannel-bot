@@ -47,9 +47,9 @@ export class UserCommand implements ICommand<BotContext> {
       if (this.platform === 'qqguild') {
         // qq 频道提取私信机器人所在的 src guild
         return session.guildId.split('_')[0]
-      } else if (this.platform === 'kook') {
-        // kook 无私信频道概念，兜底留个空字符串
-        return session.guildId || ''
+      } else {
+        // 其余平台私信无频道概念，留空
+        return ''
       }
     }
     return session.guildId
@@ -58,10 +58,9 @@ export class UserCommand implements ICommand<BotContext> {
   get channelId() {
     const session = this.session
     if (session.isDirect) {
-      return session.channelId.split('_')[1]
-    } else {
-      return session.channelId
+      return '' // 私信场景留空
     }
+    return session.channelId
   }
 
   get context(): ICommand<BotContext>['context'] {
@@ -77,7 +76,10 @@ export class UserCommand implements ICommand<BotContext> {
       platform: this.platform,
       guildId: this.guildId,
       channelId: this.channelId,
-      channelUnionId: getChannelUnionId(this.platform, this.guildId, this.channelId),
+      // channelUnionId 私信场景，与其每个平台都产生不可预测的行为，不如统一置空
+      // 使用 ICommand 接口时便可通过是否含有 channelUnionId 区分是否为私信场景
+      // 如果后续有对私信场景做比较重的处理，可以再考虑设计私信场景 id 的组装方式
+      channelUnionId: session.isDirect ? '' : getChannelUnionId(this.platform, this.guildId, this.channelId),
       replyMsgId: session.event.message?.quote?.id,
       isDirect: session.isDirect,
       realUser

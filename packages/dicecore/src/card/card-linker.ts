@@ -20,6 +20,7 @@ export abstract class AbstractCardLinker implements ICardLinker {
   protected abstract getAllChannelUnionIds(): ChannelUnionId[]
 
   linkCard(channelUnionId: ChannelUnionId, cardId: CardId, userId?: UserId) {
+    if (!channelUnionId) return // 私信场景
     // 如果 card 之前关联的别的人，要删掉
     const linkMap = this.getLinkMap(channelUnionId)
     const user2delete = Object.keys(linkMap).find(userId => linkMap[userId] === cardId)
@@ -70,6 +71,7 @@ export class DefaultCardLinker extends AbstractCardLinker {
   }
 
   override getLinkMap(channelUnionId: ChannelUnionId) {
+    if (!channelUnionId) return {} // 私信场景
     if (!this.channelLinkMap[channelUnionId]) {
       this.channelLinkMap[channelUnionId] = {}
     }

@@ -110,6 +110,9 @@ export class GlobalStore {
   }
 
   isInited(roomname: string) {
+    if (!roomname) {
+      return false
+    }
     if (roomname === GlobalDocName) {
       return !!this._globalState
     }

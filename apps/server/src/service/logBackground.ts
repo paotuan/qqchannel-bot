@@ -1,5 +1,5 @@
 import { createLogger, format, transports, type Logger } from 'winston'
-import type { BotContext, ICommand } from '@paotuan/config'
+import type { ICommand } from '@paotuan/config'
 import type { ILog } from '@paotuan/types'
 import { ChannelUnionId, getChannelUnionId } from '../adapter/utils'
 import { resolveRootDir } from '../utils'
@@ -51,9 +51,9 @@ export class LogBackground {
   }
 
   // 根据消息判断是否是控制 log 开关的指令
-  detectEnabled(userCommand: ICommand<BotContext>): [boolean, string | undefined] {
+  detectEnabled(userCommand: ICommand): [boolean, string | undefined] {
     // 私信暂不考虑
-    if (userCommand.context.isDirect) {
+    if (!userCommand.context.channelUnionId) {
       return [false, undefined]
     }
     const expression = userCommand.command

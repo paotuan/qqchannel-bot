@@ -31,6 +31,7 @@ export class DefaultRiState implements IRiState {
   }
 
   getRiList(channelUnionId: string) {
+    if (!channelUnionId) return [] // 私信场景
     if (!this.state[channelUnionId]) {
       this.state[channelUnionId] = []
     }

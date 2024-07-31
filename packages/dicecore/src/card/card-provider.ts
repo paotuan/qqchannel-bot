@@ -58,6 +58,7 @@ export class CardProvider {
   }
 
   getCard(channelUnionId: string, userId: string) {
+    if (!channelUnionId) return undefined // 私信场景
     const linkMap = this.getLinkMap(channelUnionId)
     const cardId = linkMap[userId]
     return this.getCardById(cardId)
