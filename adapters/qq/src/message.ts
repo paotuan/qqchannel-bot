@@ -241,8 +241,9 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
     const send = async () => {
       try {
         if (this.session.isDirect) {
-          const { sendResult: { msg_id } } = await this.bot.internal.sendPrivateMessage(this.session.channelId, data)
-          session.messageId = msg_id
+          const resp = await this.bot.internal.sendPrivateMessage(this.session.channelId, data)
+          session.messageId = resp.id
+          session.timestamp = new Date(resp.timestamp).valueOf()
         } else {
           const resp = await this.bot.internal.sendMessage(this.session.channelId, data)
           if (resp.id) {
