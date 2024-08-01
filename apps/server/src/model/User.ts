@@ -1,4 +1,4 @@
-import { Session } from '../adapter/satori'
+import { Session, Universal } from '../adapter/satori'
 import { removeBackspaces } from '../utils'
 import { IUser } from '@paotuan/types'
 import { Bot } from '../adapter/Bot'
@@ -67,6 +67,10 @@ export class User implements IUser {
       // qq 群场景，私信需要被动，但不能用群的消息 id，因此 session 非私信（暗骰）场景需要丢弃
       if (!(session instanceof Session && session.isDirect)) {
         session = this.getLastSessionForReply()
+        // satori bug, qq 私信不传 session 判断 direct 出错
+        if (!session) {
+          session = this._bot.api.session({ channel: { id: this.id, type: Universal.Channel.Type.DIRECT } })
+        }
       }
     } else {
       // kook 的实现，从 channel 发私信会导致 channelId 优先于私信 chat_code, 导致消息被发送到 channel 中
