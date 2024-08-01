@@ -24,15 +24,25 @@ export class GuildManager {
   findUser(userId: string, guildId: string) {
     const guild = this.find(guildId)
     if (!guild) {
-      if (this.bot.platform === 'kook') {
-        // kook 用户无频道概念，因此 guildId 为空（私信场景）时，可以返回一个 temp user，不影响发消息
-        return User.createTemp(this.bot, userId, guildId)
-      } else {
-        console.error('[GuildManager]频道信息不存在，guildId=', guildId, 'userId=', userId)
-        return undefined
-      }
+      // 对大多数平台来说，用户没有频道的概念
+      // (注：qq 频道有。qq 群号称用户 openid 与群有关，但实际无关，发消息走的是好友而非群临时会话)
+      // 因此 guildId 为空（私信场景）时，可以返回一个 temp user，通常不影响发消息
+      return User.createTemp(this.bot, userId, guildId)
     }
     return guild.findUser(userId)
+  }
+
+  // 对于没有 guildId 的场景（私信等）在所有频道中寻找该用户
+  // 考虑到 bot 已经限制了同一个 platform，大概率不会出现不同用户撞 id 的情况
+  // 不过可能出现一个 user 有多个对象（例如一个机器人加入了 n 个群）
+  findUserInAllGuilds(userId: string) {
+    const ret: User[] = []
+    Object.values(this.guildsMap).forEach(guild => {
+      if (guild.existUser(userId)) {
+        ret.push(guild.findUser(userId))
+      }
+    })
+    return ret
   }
 
   queryIUser(query: IUserQuery, guildId: string) {
@@ -72,6 +82,24 @@ export class GuildManager {
       // 现在 satori 类型适配不全。如果能收到消息说明总归是 valid 的类型，兜底按文字子频道处理也没什么问题
       const type = Channel.VALID_TYPES.includes(_channel.type) ? _channel.type : Universal.Channel.Type.TEXT
       guild.addChannel({ id: channelId, name: _channel.name ?? channelId, type })
+    }
+  }
+
+  // qq 群快捷登录逻辑，此时后端还未生成 guild 和 channel 对象
+  // 大部分时候这不是问题，因为之后在群里发送一条消息就会自动创建出来
+  // 但极端情况：例如快捷登录群后，只进行私聊，而私聊又会用到 guild 的信息（查找兜底昵称）
+  // 为此我们在登录时就把 guild 和 channel 创建出来
+  addGuildChannelByAutoLogin(guildId: string, channelId: string) {
+    let guild = this.guildsMap[guildId]
+    if (!guild) {
+      console.log('Create guild by auto login, id =', guildId)
+      this.addGuild({ id: guildId, name: guildId, icon: '' })
+      guild = this.guildsMap[guildId]
+    }
+    const channel = guild.findChannel(channelId)
+    if (!channel) {
+      console.log('Create channel by auto login, id =', channelId)
+      guild.addChannel({ id: channelId, name: channelId, type: Universal.Channel.Type.TEXT })
     }
   }
 

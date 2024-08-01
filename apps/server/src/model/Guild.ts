@@ -64,6 +64,10 @@ export class Guild {
     return User.createTemp(this.bot, id, this.id)
   }
 
+  existUser(id: string) {
+    return !!this.store.users[id]
+  }
+
   queryIUser(query: IUserQuery = {}) {
     let list = Object.values(this.store.users).filter(u => !u.deleted && !u.isBot)
     if (query.name) {

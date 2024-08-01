@@ -26,7 +26,7 @@ export class NickHandler {
     const { userId, guildId } = userCommand.context
     const user = this.bot.guilds.findUser(userId, guildId)
 
-    if (expression.startsWith('nick') && user) {
+    if (expression.startsWith('nick')) {
       const content = expression.slice(4).trim()
       if (['x', 'clr', 'clear'].includes(content)) {
         // 清除昵称. 与 addUser 一致，名称默认取 id
@@ -71,7 +71,6 @@ export class NickHandler {
 
   private handleUpdateNick(mode: UpdateMode, { userId, guildId, cardId, oldCardId }: UpdateContext) {
     const user = this.bot.guilds.findUser(userId, guildId)
-    if (!user) return
     const shouldUpdate = mode === 'always' // 始终更新
       || !user.name || (user.name === user.id) // 名称为空或等于 id，认为没有名字
       || (!!oldCardId && user.name === oldCardId) // 名字等于旧人物卡名，认为也是上次关联人物卡更新过来的，那么这次更换人物卡后，也同步更新名字

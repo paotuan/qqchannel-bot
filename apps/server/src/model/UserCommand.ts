@@ -32,8 +32,19 @@ export class UserCommand implements ICommand<BotContext> {
     // 适配部分情况下接口不返回昵称的情况（例如 kook 表情表态）
     let username = author.nick ?? author.nickname ?? author.name ?? author.username
     if (typeof username === 'undefined') {
-      const user = this.bot.guilds.findUser(session.userId, session.guildId)
-      if (user) username = user.name
+      if (session.guildId) {
+        const user = this.bot.guilds.findUser(session.userId, session.guildId)
+        username = user.name
+      } else {
+        // 无 guildId，通常为私信场景，从全部 guild 中找一个能用的昵称
+        const users = this.bot.guilds.findUserInAllGuilds(session.userId)
+        for (const user of users) {
+          if (user.name && user.name !== user.id) {
+            username = user.name
+            break
+          }
+        }
+      }
     }
     return {
       userId: session.userId,

@@ -196,10 +196,6 @@ export class CommandHandler {
     }
     if (isDirect) {
       const user = this.bot.guilds.findUser(userId, guildId)
-      if (!user) {
-        console.warn(`[SendMessage] 找不到用户, userId=${userId}, guildId=${guildId}`)
-        return
-      }
       return user.sendMessage(content, userCommand.session)
     } else {
       const channel = this.bot.guilds.findChannel(channelId, guildId)

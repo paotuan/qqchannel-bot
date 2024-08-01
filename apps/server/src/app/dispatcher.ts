@@ -116,6 +116,7 @@ async function handleGetBotInfo(client: WsClient) {
 
 async function handleListenToChannel(client: WsClient, server: Wss, data: IListenToChannelReq) {
   console.log('选择频道：', data.channelId)
+  client.bot?.guilds.addGuildChannelByAutoLogin(data.guildId, data.channelId)
   client.listenTo(data.channelId, data.guildId)
   // watch ri list
   client.autorun(ws => {

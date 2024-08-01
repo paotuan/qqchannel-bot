@@ -57,9 +57,15 @@ export class User implements IUser {
     if (!(session instanceof Session)) {
       session = undefined
     }
-    if (this._bot.platform === 'qqguild') {
+    const platform = this._bot.platform
+    if (platform === 'qqguild') {
       // 如没有指定发某条被动消息，则尝试尽量发被动
       if (!session) {
+        session = this.getLastSessionForReply()
+      }
+    } else if (platform === 'qq') {
+      // qq 群场景，私信需要被动，但不能用群的消息 id，因此 session 非私信（暗骰）场景需要丢弃
+      if (!(session instanceof Session && session.isDirect)) {
         session = this.getLastSessionForReply()
       }
     } else {
