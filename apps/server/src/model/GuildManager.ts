@@ -121,6 +121,10 @@ export class GuildManager {
       const guilds = list.map(info => new Guild(this.bot, info.id, info.name, info.avatar))
       this.guildsMap = guilds.reduce((obj, guild) => Object.assign(obj, { [guild.id]: guild }), {})
       this.notifyChannelListChange()
+      // 若 guild 拉取成功但数量为 0，给个提示以避免有些用户不看前端的提示
+      if (list.length === 0) {
+        console.warn('[GuildManager]获取频道数量为 0，请确认机器人是否已加入到频道中！')
+      }
     } catch (e) {
       console.error('获取频道信息失败', e)
     }
