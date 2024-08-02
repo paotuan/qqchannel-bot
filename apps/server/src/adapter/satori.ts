@@ -14,7 +14,7 @@ export class Context extends SatoriContext {
     super(config)
     try {
       this.provide('http', undefined, true)
-      this.plugin(HTTP, config.request)
+      this.plugin(HTTP, { baseURL: 'http://localhost:4174' })
     } catch (e) {
       console.log(e)
     }

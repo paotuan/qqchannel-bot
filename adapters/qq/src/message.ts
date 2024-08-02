@@ -138,7 +138,8 @@ export class QQGuildMessageEncoder<C extends Context = Context> extends MessageE
   }
 
   async resolveFile(attrs: Dict, download = false) {
-    if (!download && !await this.bot.ctx.http.isLocal(attrs.src || attrs.url)) {
+    const isLocal = (url: string) => !url.startsWith('http://') && !url.startsWith('https://')
+    if (!download && !isLocal(attrs.src || attrs.url)) {
       return this.fileUrl = attrs.src || attrs.url
     }
     const { data, filename, type } = await this.bot.ctx.http.file(this.fileUrl || attrs.src || attrs.url, attrs)
