@@ -37,7 +37,7 @@ export class NickHandler {
         user.name = content
         return [true, `已设置昵称为 ${content}`]
       }
-      return [true, '请使用 .nick xxx 设置用户昵称']
+      return [true, `当前昵称为 ${user.name}`]
     }
     return [false, undefined]
   }
