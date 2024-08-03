@@ -81,7 +81,7 @@ const exportDb = () => {
           <li><a @click="exportDb">导出数据</a></li>
           <li><a href="https://paotuan.io" target="_blank">使用帮助<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
           <li><a href="https://pd.qq.com/s/fjp30g" target="_blank">官方频道<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
-          <li><a href="https://afdian.net/a/florastudio" target="_blank">支持我们<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
+          <li><a href="https://afdian.com/a/florastudio" target="_blank">支持我们<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
         </ul>
       </div>
     </div>

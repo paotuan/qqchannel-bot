@@ -15,7 +15,7 @@
       </span>
       <div ref="conversationListEl" class="m-4 mt-0 p-2 flex-grow overflow-x-hidden overflow-y-auto border-common">
         <div class="alert alert-info text-sm p-3">
-          <span>关于 AI 的使用帮助请<a class="link" href="https://paotuan.io/admin/inspiration.html" target="_blank">查看这里</a>。服务器资源有限，请勿滥用。请考虑<a class="link" href="https://afdian.net/a/florastudio" target="_blank">支持我们</a>，帮助维持这个功能的长期运行！</span>
+          <span>关于 AI 的使用帮助请<a class="link" href="https://paotuan.io/admin/inspiration.html" target="_blank">查看这里</a>。服务器资源有限，请勿滥用。请考虑<a class="link" href="https://afdian.com/a/florastudio" target="_blank">支持我们</a>，帮助维持这个功能的长期运行！</span>
         </div>
         <div v-for="chat in chatStore.history" :key="chat.id" class="chat relative group" :class="chat.role === 'user' ? 'chat-end' : 'chat-start'">
           <div class="chat-bubble" :class="chat.isError ? 'chat-bubble-error' : chat.role === 'user' ? 'chat-bubble-primary' : 'chat-bubble-accent'">
