@@ -10,7 +10,7 @@ import { RiProvider } from '../../ri/ri-provider'
 // init clr
 export class RiDiceRoll extends BasePtDiceRoll {
 
-  private readonly rolls: { type: 'actor' | 'npc', id: string, username?: string, roll: DiceRoll }[] = [] // username 用于展示
+  private readonly rolls: { type: 'actor' | 'npc', id: string, username: string, roll: DiceRoll }[] = [] // username 用于展示
 
   override roll() {
     const removeRi = this.rawExpression.slice(2).trim()
@@ -30,7 +30,7 @@ export class RiDiceRoll extends BasePtDiceRoll {
       this.rolls.push({
         type,
         id: desc || this.context.userId,
-        username: type === 'actor' ? this.context.username : undefined,
+        username: type === 'actor' ? this.context.username : desc,
         roll: diceRoll
       })
     })

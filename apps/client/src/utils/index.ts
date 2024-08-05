@@ -42,3 +42,7 @@ export function openHelpDoc(path: string) {
 
 const eventBus = mitt()
 export { eventBus }
+
+export function isEmptyNumber(num: number | null | undefined) {
+  return num === null || typeof num === 'undefined' || isNaN(num)
+}

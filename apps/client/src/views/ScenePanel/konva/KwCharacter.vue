@@ -24,7 +24,7 @@ import type { ICharacterItem } from '../../../store/scene/map-types'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useUserStore } from '../../../store/user'
 import { useCardStore } from '../../../store/card'
-import { ISceneNpc, useSceneStore } from '../../../store/scene'
+import { useSceneStore } from '../../../store/scene'
 import KwImage from './KwImage.vue'
 import Konva from 'konva'
 import { clamp } from 'lodash'
@@ -57,10 +57,10 @@ const sceneStore = useSceneStore()
 const actorInfo = computed(() => {
   if (charaType.value === 'actor') {
     return sceneStore.charactersSorted.find(
-      chara => chara.type === 'actor' && chara.userId === charaId.value
-    ) as ISceneNpc | undefined
+      chara => chara.type === 'actor' && chara.id === charaId.value
+    )
   } else {
-    return null
+    return undefined
   }
 })
 
@@ -80,10 +80,10 @@ watch(() => userInfo.value?.avatar, async avatarUrl => {
 const npcInfo = computed(() => {
   if (charaType.value === 'npc') {
     return sceneStore.charactersSorted.find(
-      chara => chara.type === 'npc' && chara.userId === charaId.value
-    ) as ISceneNpc | undefined
+      chara => chara.type === 'npc' && chara.id === charaId.value
+    )
   } else {
-    return null
+    return undefined
   }
 })
 

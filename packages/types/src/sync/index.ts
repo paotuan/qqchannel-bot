@@ -15,7 +15,7 @@ export interface YGuildState {
 export interface YChannelState {
   config: { current: IChannelConfig } // 需保证最外层 readonly
   cardLinkMap: Record<string, string> // userId => cardId
-  ri: IRiItem[] // todo
+  ri: IRiItem[]
 }
 
 // https://syncedstore.org/docs/basics/installation#shape

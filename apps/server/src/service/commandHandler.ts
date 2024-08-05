@@ -3,7 +3,7 @@ import { makeAutoObservable } from 'mobx'
 import type { BotContext, ICommand } from '@paotuan/config'
 import {
   CardProvider,
-  DefaultRiState,
+  AbstractRiState,
   dispatchCommand,
   dispatchReaction,
   IDispatchResult, IRiItem, RiProvider,
@@ -14,6 +14,7 @@ import type { Bot } from '../adapter/Bot'
 import { qqguildV1_getMessageContent } from '../adapter/qqguild-v1'
 import type { WsClient } from '../app/wsclient'
 import type { ChannelUnionId } from '../adapter/utils'
+import { GlobalStore } from '../state'
 
 interface IMessageCache {
   text?: string
@@ -41,14 +42,12 @@ export class CommandHandler {
   })
   // 对抗检定缓存 msgid => roll
   private readonly opposedRollCache: LRUCache<string, StandardDiceRoll> = new LRUCache({ max: 50 })
-  // 先攻列表缓存 channelId => ri list
-  private readonly riListCache: Record<ChannelUnionId, IRiItem[]> = {}
 
   constructor(bot: Bot) {
     makeAutoObservable(this)
     this.bot = bot
     // 初始化先攻列表 store
-    RiProvider.setState(new RiState(this.riListCache))
+    RiProvider.setState(new YRiState())
   }
 
   /**
@@ -211,8 +210,16 @@ export class CommandHandler {
 const MockSystemCardId = '__temp_card_id__'
 const MockSystemUserId = '__temp_user_id__'
 
-// 先屏蔽 system card 的先攻
-class RiState extends DefaultRiState {
+class YRiState extends AbstractRiState {
+  override getRiList(channelUnionId: ChannelUnionId): IRiItem[] {
+    if (GlobalStore.Instance.isInited(channelUnionId)) {
+      return GlobalStore.Instance.channel(channelUnionId).ri
+    } else {
+      return []
+    }
+  }
+
+  // 先屏蔽 system card 的先攻
   override updateRiList(channelUnionId: string, change: Partial<IRiItem>[]) {
     super.updateRiList(channelUnionId, change.filter(item => item.id !== MockSystemUserId))
   }

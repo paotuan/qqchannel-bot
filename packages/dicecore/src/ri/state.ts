@@ -2,8 +2,12 @@ import { at } from '../dice/utils'
 
 export interface IRiItem {
   type: 'actor' | 'npc'
+  // 对于玩家是用户 id，对于 npc 就是名称
   id: string
+  // 对于玩家是用户名，对于 npc 同 id
   name: string
+  // npc 可上传
+  avatar?: string
   seq: number
   seq2: number
 }
@@ -22,21 +26,9 @@ export interface IRiState {
   getRiName(item: Partial<IRiItem>): string
 }
 
-export class DefaultRiState implements IRiState {
+export abstract class AbstractRiState implements IRiState {
 
-  private readonly state: Record<string, IRiItem[]>
-
-  constructor(map = {}) {
-    this.state = map
-  }
-
-  getRiList(channelUnionId: string) {
-    if (!channelUnionId) return [] // 私信场景
-    if (!this.state[channelUnionId]) {
-      this.state[channelUnionId] = []
-    }
-    return this.state[channelUnionId]
-  }
+  abstract getRiList(channelUnionId: string): IRiItem[]
 
   updateRiList(channelUnionId: string, change: Partial<IRiItem>[]) {
     const list = this.getRiList(channelUnionId)
@@ -73,23 +65,46 @@ export class DefaultRiState implements IRiState {
 
   getDescription(channelUnionId: string) {
     const descList = this.getRiList(channelUnionId)
+      .slice()
       .sort((a, b) => {
         const seq1Res = this.compareSeq(a.seq, b.seq)
         return seq1Res === 0 ? this.compareSeq(a.seq2, b.seq2) : seq1Res
       })
-      .map((entry, i) => `${i + 1}. ${this.getRiName(entry)} 🎲 ${isNaN(entry.seq) ? '--' : entry.seq}${isNaN(entry.seq2) ? '' : `(${entry.seq2})`}`)
+      .map((entry, i) => `${i + 1}. ${this.getRiName(entry)} 🎲 ${isEmptyNumber(entry.seq) ? '--' : entry.seq}${isEmptyNumber(entry.seq2) ? '' : `(${entry.seq2})`}`)
     const lines = ['当前先攻列表：', ...descList]
     return lines.join('\n')
   }
 
   protected compareSeq(a: number, b: number) {
-    if (isNaN(a) && isNaN(b)) return 0
-    if (isNaN(a)) return 1
-    if (isNaN(b)) return -1
+    if (isEmptyNumber(a) && isEmptyNumber(b)) return 0
+    if (isEmptyNumber(a)) return 1
+    if (isEmptyNumber(b)) return -1
     return b - a
   }
 
   getRiName(item: Partial<IRiItem>) {
     return item.type === 'npc' ? (item.name ?? item.id ?? '') : at(item.id!)
   }
+}
+
+export class DefaultRiState extends AbstractRiState {
+
+  private readonly state: Record<string, IRiItem[]>
+
+  constructor(map = {}) {
+    super()
+    this.state = map
+  }
+
+  override getRiList(channelUnionId: string) {
+    if (!channelUnionId) return [] // 私信场景
+    if (!this.state[channelUnionId]) {
+      this.state[channelUnionId] = []
+    }
+    return this.state[channelUnionId]
+  }
+}
+
+function isEmptyNumber(num: number | null | undefined) {
+  return num === null || typeof num === 'undefined' || isNaN(num)
 }

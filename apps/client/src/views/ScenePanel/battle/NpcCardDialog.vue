@@ -31,7 +31,7 @@ import CardTemplateSelect from './CardTemplateSelect.vue'
 // npc 所关联的人物卡
 const sceneStore = useSceneStore()
 const cardStore = useCardStore()
-const currentNpcName = computed(() => sceneStore.currentCardNpc?.userId || '')
+const currentNpcName = computed(() => sceneStore.currentCardNpc?.id || '')
 const currentCardData = computed(() => currentNpcName.value ? cardStore.of(currentNpcName.value) : undefined)
 
 // 选择人物卡模板

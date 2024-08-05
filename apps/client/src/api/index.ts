@@ -3,7 +3,7 @@ import type {
   ILog,
   INoteFetchResp,
   INoteSendResp,
-  INoteSyncResp, IPluginConfigDisplay, IRiListResp
+  INoteSyncResp, IPluginConfigDisplay
 } from '@paotuan/types'
 import { useLogStore } from '../store/log'
 import { useNoteStore } from '../store/note'
@@ -84,16 +84,6 @@ ws.on('scene/sendBattleLog', data => {
   } else {
     Toast.error('战报发送失败！')
   }
-})
-
-ws.on('ri/list', data => {
-  const res = data.data as IRiListResp
-  res.forEach(item => {
-    item.seq = item.seq === null ? NaN : item.seq
-    item.seq2 = item.seq2 === null ? NaN : item.seq2
-  })
-  const sceneStore = useSceneStore()
-  sceneStore.updateCharacterRiList(res)
 })
 
 ws.on('plugin/reload', () => {

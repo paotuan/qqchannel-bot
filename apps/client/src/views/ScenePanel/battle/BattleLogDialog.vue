@@ -15,6 +15,7 @@ import { useUserStore } from '../../../store/user'
 import { useCardStore } from '../../../store/card'
 import ws from '../../../api/ws'
 import type { ISceneSendBattleLogReq } from '@paotuan/types'
+import { isEmptyNumber } from '../../../utils'
 
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{ (e: 'update:visible', value: boolean): void }>()
@@ -27,14 +28,14 @@ const generateLog = () => {
   let log = formatDate(sceneStore.timeIndicator) + ' ' + (sceneStore.currentMap?.name ?? '')
   log += `\n战斗轮 第 ${sceneStore.turn} 轮\n成员：\n`
   log += sceneStore.charactersSorted.map(chara => {
-    const username = chara.type === 'actor' ? userStore.nickOf(chara.userId) : chara.userId
-    const userCard = chara.type === 'actor' ? cardStore.getCardOfUser(chara.userId) : cardStore.getCardOfId(chara.userId)
+    const username = chara.type === 'actor' ? userStore.nickOf(chara.id) : chara.id
+    const userCard = chara.type === 'actor' ? cardStore.getCardOfUser(chara.id) : cardStore.getCardOfId(chara.id)
     const userHp = userCard?.HP ?? '?'
     const userMaxHp = userCard?.MAXHP ?? '?'
-    const hasSeq = !isNaN(chara.seq) || !isNaN(chara.seq2)
+    const hasSeq = !isEmptyNumber(chara.seq) || !isEmptyNumber(chara.seq2)
     let line = sceneStore.currentSelectedCharacter === chara ? '▶ ' : '\u3000'
     line += `${username} HP${userHp}/${userMaxHp}`
-    if (hasSeq) line += ` 先攻${chara.seq || ''}` + (isNaN(chara.seq2) ? '' : `(${chara.seq2})`)
+    if (hasSeq) line += ` 先攻${chara.seq || ''}` + (isEmptyNumber(chara.seq2) ? '' : `(${chara.seq2})`)
     return line
   }).join('\n')
   return log

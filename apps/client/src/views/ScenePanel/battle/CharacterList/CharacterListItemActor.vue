@@ -31,25 +31,24 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneActor, useSceneStore } from '../../../../store/scene'
+import { useSceneStore } from '../../../../store/scene'
 import { computed } from 'vue'
 import { useUserStore } from '../../../../store/user'
 import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import { useCardStore } from '../../../../store/card'
 import CharacterHpBar from './CharacterHpBar.vue'
-import ws from '../../../../api/ws'
-import type { IRiDeleteReq, IUser } from '@paotuan/types'
+import type { IRiItem, IUser } from '@paotuan/types'
 import { useRouter } from 'vue-router'
 
-const props = defineProps<{ chara: ISceneActor }>()
+const props = defineProps<{ chara: IRiItem }>()
 
 const userStore = useUserStore()
 const userInfo = computed<IUser>(() => {
-  const info = userStore.of(props.chara.userId)
+  const info = userStore.of(props.chara.id)
   // user 信息缺失时至少给个兜底，避免报错
   return info ?? {
-    id: props.chara.userId,
-    name: props.chara.userId,
+    id: props.chara.id,
+    name: props.chara.id,
     avatar: '',
     isBot: false,
     deleted: false
@@ -57,7 +56,7 @@ const userInfo = computed<IUser>(() => {
 })
 
 const cardStore = useCardStore()
-const userCard = computed(() => cardStore.getCardOfUser(props.chara.userId))
+const userCard = computed(() => cardStore.getCardOfUser(props.chara.id))
 const hp = computed(() => userCard.value?.HP ?? NaN)
 const maxHp = computed(() => userCard.value?.MAXHP ?? NaN)
 
@@ -73,12 +72,9 @@ const selectCard = () => {
 }
 
 const sceneStore = useSceneStore()
-const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('actor', props.chara.userId)
+const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('actor', props.chara.id)
 
 const deleteCharacter = () => {
   sceneStore.deleteCharacter(props.chara)
-  // 同步服务端先攻列表
-  // 之所以放在这里，是为了避免放在 store deleteCharacter 中潜在的套娃风险
-  ws.send<IRiDeleteReq>({ cmd: 'ri/delete', data: { id: props.chara.userId, type: 'actor' } })
 }
 </script>

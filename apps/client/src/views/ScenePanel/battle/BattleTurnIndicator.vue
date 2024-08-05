@@ -67,14 +67,14 @@ const prevChara = () => {
   const currentChara = sceneStore.currentSelectedCharacter
   // 没选中情况下，默认选最后一个
   if (!currentChara) {
-    sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[sceneStore.charactersSorted.length - 1]
+    sceneStore.currentSelectedCharacter = sceneStore.charactersSorted.at(-1)
     return
   }
   const index = sceneStore.charactersSorted.indexOf(currentChara)
   if (index === 0) {
     if (sceneStore.turn > 1) {
       sceneStore.turn--
-      sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[sceneStore.charactersSorted.length - 1]
+      sceneStore.currentSelectedCharacter = sceneStore.charactersSorted.at(-1)
     }
   } else {
     sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[index - 1]

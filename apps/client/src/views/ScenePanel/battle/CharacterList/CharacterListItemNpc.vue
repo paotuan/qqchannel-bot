@@ -3,12 +3,12 @@
     <div class="avatar" :class="{ 'placeholder': !props.chara.avatar }" @click.stop="uploadAvatar">
       <template v-if="props.chara.avatar">
         <div class="w-12 rounded-full">
-          <img :src="props.chara.avatar" :alt="props.chara.userId" referrerpolicy="no-referrer" />
+          <img :src="props.chara.avatar" :alt="props.chara.id" referrerpolicy="no-referrer" />
         </div>
       </template>
       <template v-else>
         <div class="w-12 rounded-full bg-neutral text-neutral-content">
-          <span>{{ props.chara.userId.slice(0, 2) }}</span>
+          <span>{{ props.chara.id.slice(0, 2) }}</span>
         </div>
       </template>
       <input ref="realUploadBtn" type="file" name="filename" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" class="hidden" @change="handleFile" />
@@ -16,7 +16,7 @@
       <CharacterHpBar v-if="npcCardnn" :hp="npcCardnn.HP" :max-hp="npcCardnn.MAXHP" />
     </div>
     <div class="flex flex-col justify-between">
-      <div class="font-bold max-w-[7rem] truncate">{{ props.chara.userId }}</div>
+      <div class="font-bold max-w-[7rem] truncate">{{ props.chara.id }}</div>
       <span class="flex gap-1">
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="showNpcCard">
           <DocumentTextIcon class="size-4" />
@@ -35,22 +35,21 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ISceneNpc, useSceneStore } from '../../../../store/scene'
+import { useSceneStore } from '../../../../store/scene'
 import { DocumentTextIcon, MapPinIcon, TrashIcon, Square2StackIcon } from '@heroicons/vue/24/outline'
 import CharacterHpBar from './CharacterHpBar.vue'
 import { computed, ref } from 'vue'
-import ws from '../../../../api/ws'
-import type { IRiDeleteReq } from '@paotuan/types'
 import { useCardStore } from '../../../../store/card'
+import { IRiItem } from '@paotuan/types'
 
-const props = defineProps<{ chara: ISceneNpc }>()
+const props = defineProps<{ chara: IRiItem }>()
 
 const sceneStore = useSceneStore()
 const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
-const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.userId)
+const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.id)
 // npc 卡片信息（for template
 const cardStore = useCardStore()
-const npcCardnn = computed(() => cardStore.getCardOfId(props.chara.userId)!)
+const npcCardnn = computed(() => cardStore.getCardOfId(props.chara.id)!)
 
 // 上传 npc 头像
 const realUploadBtn = ref<HTMLInputElement>()
@@ -74,8 +73,5 @@ const uploadAvatar = () => {
 
 const deleteCharacter = () => {
   sceneStore.deleteCharacter(props.chara)
-  // 同步服务端先攻列表
-  // 之所以放在这里，是为了避免放在 store deleteCharacter 中潜在的套娃风险
-  ws.send<IRiDeleteReq>({ cmd: 'ri/delete', data: { id: props.chara.userId, type: 'npc' } })
 }
 </script>

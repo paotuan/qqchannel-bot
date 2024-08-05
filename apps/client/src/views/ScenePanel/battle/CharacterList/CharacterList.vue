@@ -22,7 +22,7 @@
       </div>
     </div>
     <div class="-mx-4 overflow-y-auto" style="height: calc(100% - 2.5rem)">
-      <CharacterListItem v-for="chara in charaList" :key="chara.userId" :chara="chara" />
+      <CharacterListItem v-for="chara in charaList" :key="chara.id" :chara="chara" />
     </div>
     <!-- 自定义列 -->
     <CustomColumnDialog v-model:visible="customColumnDialogShow" />

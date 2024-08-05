@@ -12,12 +12,8 @@ import type {
   INoteSendImageRawReq,
   ISceneSendMapImageReq,
   ISceneSendBattleLogReq,
-  IRiListResp,
-  IRiSetReq,
-  IRiDeleteReq,
   IDiceRollReq, IPluginReloadReq, ILoginReqV2, IChannelCreateReq,
 } from '@paotuan/types'
-import { RiProvider } from '@paotuan/dicecore'
 import { getBotId } from '../adapter/utils'
 import { GlobalStore } from '../state'
 
@@ -68,12 +64,6 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'scene/sendMapImage':
     handleSceneSendMapImage(client, server, request.data as ISceneSendMapImageReq)
     break
-  case 'ri/set':
-    handleRiSet(client, server, request.data as IRiSetReq)
-    break
-  case 'ri/delete':
-    handleRiDelete(client, server, request.data as IRiDeleteReq)
-    break
   case 'dice/roll':
     handleManualDiceRoll(client, server, request.data as IDiceRollReq)
     break
@@ -118,15 +108,6 @@ async function handleListenToChannel(client: WsClient, server: Wss, data: IListe
   console.log('选择频道：', data.channelId)
   client.bot?.guilds.addGuildChannelByAutoLogin(data.guildId, data.channelId)
   client.listenTo(data.channelId, data.guildId)
-  // watch ri list
-  client.autorun(ws => {
-    const bot = ws.bot
-    const channelId = ws.listenToChannelUnionId
-    if (bot && channelId) {
-      const list = RiProvider.getRiList(channelId)
-      ws.send<IRiListResp>({ cmd: 'ri/list', success: true, data: list })
-    }
-  })
   // 初始化 guild 和 channel store
   await GlobalStore.Instance.initGuildAndChannelState(client.platform!, data.guildId, data.channelId)
   // resp
@@ -232,24 +213,6 @@ async function handleSceneSendMapImage(client: WsClient, server: Wss, data: ISce
     }
   }
   client.send<string>({ cmd: 'scene/sendMapImage', success: false, data: '发送失败' })
-}
-
-function handleRiSet(client: WsClient, server: Wss, data: IRiSetReq) {
-  data.seq = data.seq === null ? NaN : data.seq
-  data.seq2 = data.seq2 === null ? NaN : data.seq2
-  const bot = client.bot
-  const channelUnionId = client.listenToChannelUnionId
-  if (bot && channelUnionId) {
-    RiProvider.updateRiList(channelUnionId, [data])
-  }
-}
-
-function handleRiDelete(client: WsClient, server: Wss, data: IRiDeleteReq) {
-  const bot = client.bot
-  const channelUnionId = client.listenToChannelUnionId
-  if (bot && channelUnionId) {
-    RiProvider.removeRiList(channelUnionId, [data])
-  }
 }
 
 async function handleManualDiceRoll(client: WsClient, server: Wss, data: IDiceRollReq) {

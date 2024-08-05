@@ -5,9 +5,10 @@ import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
 import { getDefaultStageData, useStage } from './map'
 import type { IStageData } from './map-types'
-import { VERSION_CODE, type IRiItem, type IRiSetReq } from '@paotuan/types'
-import ws from '../../api/ws'
-import type { ICard } from '@paotuan/card'
+import { IRiItem, VERSION_CODE } from '@paotuan/types'
+import { yChannelStoreRef } from '../ystore'
+import { isEmptyNumber } from '../../utils'
+import { useCardStore } from '../card'
 
 // 场景地图
 export interface ISceneMap {
@@ -17,26 +18,6 @@ export interface ISceneMap {
   createAt: number,
   stage: ReturnType<typeof useStage>,
   data?: unknown // stage.toJson() 临时保存数据库用
-}
-
-// 先攻列表角色
-export interface ISceneActor {
-  type: 'actor'
-  userId: string // 用户 id
-  seq: number
-  seq2: number
-}
-
-export interface ISceneNpc {
-  type: 'npc'
-  userId: string // npc 唯一标识，同时也用作展示
-  avatar?: string // npc 图片，可上传
-  seq: number
-  seq2: number
-  /**
-   * @deprecated
-   */
-  embedCard?: ICard
 }
 
 export const useSceneStore = defineStore('scene', () => {
@@ -113,106 +94,73 @@ export const useSceneStore = defineStore('scene', () => {
   const turn = ref(1)
 
   // 人物列表
-  const characters = reactive<(ISceneActor | ISceneNpc)[]>(temp_loadCharacterList())
+  const characters = computed(() => yChannelStoreRef.value?.ri ?? [])
   const charactersSorted = computed(
-    () => [...characters].sort((a, b) => {
+    () => characters.value.toSorted((a, b) => {
       const seq1Res = compareSeq(a.seq, b.seq)
       return seq1Res === 0 ? compareSeq(a.seq2, b.seq2) : seq1Res
     })
   )
   // 当前选择人物
-  const currentSelectedCharacter = ref<ISceneActor | ISceneNpc | null>(null)
+  const currentSelectedCharacter = ref<IRiItem | undefined>(undefined)
 
   // 添加人物，如果人物已存在，则改为选中该人物以提示用户
-  const addCharacter = (chara: ISceneActor | ISceneNpc) => {
-    const existCharacter = characters.find(exist => chara.type === exist.type && chara.userId === exist.userId)
+  const addCharacter = (chara: IRiItem) => {
+    const existCharacter = characters.value.find(exist => chara.type === exist.type && chara.id === exist.id)
     if (existCharacter) {
       currentSelectedCharacter.value = existCharacter
     } else {
-      characters.push(chara)
-      // 同步服务端
-      addCharaSyncRiList(chara)
+      characters.value.push(chara)
     }
   }
 
   // 删除人物
-  const deleteCharacter = (chara: ISceneActor | ISceneNpc) => {
-    const index = characters.indexOf(chara)
+  const deleteCharacter = (chara: IRiItem) => {
+    const index = characters.value.indexOf(chara)
     if (index >= 0) {
-      characters.splice(index, 1)
-      // 如果该人物正被选中，则移除选中态
-      if (currentSelectedCharacter.value === chara) {
-        currentSelectedCharacter.value = null
-      }
-      // 移除该人物在地图中的 token
-      mapList.value.forEach(map => {
-        map.stage.removeCharacter(chara.type, chara.userId)
-      })
+      characters.value.splice(index, 1)
+      // 删除人物不强制移除 token，可以选中该 token 让用户自己选择是否要删除
+      // 例如想要清空先攻列表重骰的情况不代表想移除 token
+      currentSelectedCharacter.value = chara
     }
   }
 
-  // 人物列表自动保存
-  watch(characters, value => {
-    temp_saveCharacterList(value)
-  }, { deep: true })
-
-  // 更新人物先攻列表
-  const updateCharacterRiList = (list: IRiItem[]) => {
-    // 1. 删除不存在的角色
-    const charas2delete = characters.filter(chara => {
-      const exist = list.find(ri => ri.type === chara.type && ri.id === chara.userId)
-      return !exist
-    })
-    // charas2delete.forEach(chara => deleteCharacter(chara))
-    // 不删除，只清空先攻，以避免现在同步的问题。人物列表只由前端决定
-    charas2delete.forEach(chara => {
-      chara.seq = NaN
-      chara.seq2 = NaN
-    })
-    // 2. 更新或添加角色
-    list.forEach(ri => {
-      const exist = characters.find(chara => ri.type === chara.type && ri.id === chara.userId)
-      if (exist) {
-        exist.seq = ri.seq
-        exist.seq2 = ri.seq2
-      } else {
-        characters.push({ type: ri.type, userId: ri.id, seq: ri.seq, seq2: ri.seq2 })
-      }
-    })
-  }
-
   // 复制 npc
-  const duplicateNpc = (chara: ISceneNpc) => {
+  const duplicateNpc = (chara: IRiItem) => {
     const dup = cloneDeep(chara)
     // 改名，提取后面的数字
-    const matchNum = chara.userId.match(/(\d+)$/)
-    const nameWithoutNum = matchNum ? chara.userId.slice(0, matchNum.index) : chara.userId // 去掉后面的数字
+    const matchNum = chara.id.match(/(\d+)$/)
+    const nameWithoutNum = matchNum ? chara.id.slice(0, matchNum.index) : chara.id // 去掉后面的数字
     const pattern = new RegExp(`^${escapeRegExp(nameWithoutNum)}(\\d+)$`)
     // 找到当前列表中符合 名字+数字 的 npc 中，最大的数字
     let maxNum = 1
-    characters.forEach(exist => {
+    characters.value.forEach(exist => {
       if (exist.type === 'npc') {
-        const match = exist.userId.match(pattern)
+        const match = exist.id.match(pattern)
         if (match) {
           const num = parseInt(match[1])
           maxNum = Math.max(num, maxNum)
         }
       }
     })
-    dup.userId = nameWithoutNum + (maxNum + 1)
+    dup.id = dup.name = nameWithoutNum + (maxNum + 1)
     // 加入列表
-    characters.push(dup)
-    // 同步服务端
-    addCharaSyncRiList(dup)
+    characters.value.push(dup)
+    // 如果原 npc 有人物卡，则也复制人物卡
+    const cardStore = useCardStore()
+    const cardData = cardStore.of(chara.id)
+    if (cardData) {
+      const dupCardData = cloneDeep(cardData)
+      dupCardData.name = dup.id
+      cardStore.importCard(dupCardData)
+    }
   }
 
   // 当前选中展示人物卡的 npc 名字
   const currentCardNpcName = ref<string | null>(null)
-  const currentCardNpc = computed<ISceneNpc | null>({
-    get: () => currentCardNpcName.value
-      ? characters.find(chara => chara.type === 'npc' && chara.userId === currentCardNpcName.value) as ISceneNpc
-      : null,
-    set: (value: ISceneNpc | null) => (currentCardNpcName.value = value ? value.userId : null)
+  const currentCardNpc = computed<IRiItem | null>({
+    get: () => characters.value.find(chara => chara.type === 'npc' && chara.id === currentCardNpcName.value) ?? null,
+    set: (value: IRiItem | null) => (currentCardNpcName.value = value ? value.id : null)
   })
 
   // 发送地图图片指示器
@@ -236,7 +184,6 @@ export const useSceneStore = defineStore('scene', () => {
     currentSelectedCharacter,
     addCharacter,
     deleteCharacter,
-    updateCharacterRiList,
     duplicateNpc,
     currentCardNpcName,
     currentCardNpc,
@@ -303,74 +250,13 @@ async function deleteMapInDB(item: ISceneMap) {
   }
 }
 
-// 添加角色同步到服务端先攻列表
-function addCharaSyncRiList(chara: ISceneActor | ISceneNpc) {
-  ws.send<IRiSetReq>({
-    cmd: 'ri/set',
-    data: {
-      type: chara.type,
-      id: chara.userId,
-      name: chara.userId,
-      seq: chara.seq,
-      seq2: chara.seq2
-    }
-  })
-}
-
 // 先攻值比较
 function compareSeq(a: number, b: number) {
-  if (isNaN(a) && isNaN(b)) return 0
-  if (isNaN(a)) return 1
-  if (isNaN(b)) return -1
+  if (isEmptyNumber(a) && isEmptyNumber(b)) return 0
+  if (isEmptyNumber(a)) return 1
+  if (isEmptyNumber(b)) return -1
   return b - a
 }
-
-// region 临时本地保存人物列表
-function temp_saveCharacterList(list: (ISceneActor | ISceneNpc)[]) {
-  // 不存先攻，避免和后端的同步问题
-  const data = list.map(item => {
-    if (item.type === 'actor') {
-      const { seq, seq2, ...rest } = item
-      return { ...rest }
-    } else {
-      const { embedCard, seq, seq2, ...rest } = item
-      return { ...rest }
-    }
-  })
-  const save = JSON.stringify({ version: VERSION_CODE, data })
-  localStorage.setItem('scene-characterList', save)
-}
-
-function temp_loadCharacterList(): (ISceneActor | ISceneNpc)[] {
-  const save = localStorage.getItem('scene-characterList')
-  if (!save) return []
-  try {
-    const { data } = JSON.parse(save)
-    const list = data.map((item: any) => {
-      if (item.type === 'actor') {
-        return {
-          type: 'actor',
-          userId: item.userId,
-          seq: NaN,
-          seq2: NaN
-        } as ISceneActor
-      } else {
-        return {
-          type: 'npc',
-          userId: item.userId,
-          avatar: item.avatar,
-          seq: NaN,
-          seq2: NaN,
-          embedCard: undefined
-        } as ISceneNpc
-      }
-    })
-    return list
-  } catch (e) {
-    return []
-  }
-}
-// endregion
 
 function saveCustomColumns(list: { id: string, name: string }[]) {
   const save = JSON.stringify({ version: VERSION_CODE, data: list })

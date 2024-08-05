@@ -47,7 +47,7 @@ const select = (user: IUser) => {
   if (userCard?.type === 'coc') {
     seq = userCard.getEntry('敏捷')?.value ?? NaN
   }
-  sceneStore.addCharacter({ type: 'actor', userId: user.id, seq, seq2: NaN })
+  sceneStore.addCharacter({ type: 'actor', id: user.id, name: user.name, seq, seq2: NaN })
   blur()
 }
 
@@ -57,7 +57,8 @@ const keydownEnter = () => {
   if (firstOption) {
     select(firstOption)
   } else {
-    sceneStore.addCharacter({ type: 'npc', userId: keyword.value.trim(), seq: NaN, seq2: NaN })
+    const npcId = keyword.value.trim()
+    sceneStore.addCharacter({ type: 'npc', id: npcId, name: npcId, seq: NaN, seq2: NaN })
     blur()
   }
 }

@@ -1,4 +1,5 @@
 import type { ICardData } from '@paotuan/card'
+import type { IRiItem } from '@paotuan/dicecore'
 import type { IBotConfig } from './platform'
 
 export type Command =
@@ -21,9 +22,6 @@ export type Command =
   | 'plugin/reload' // req/ res: string
   | 'scene/sendBattleLog' // req/ res: string
   | 'scene/sendMapImage' // req/ res: string
-  | 'ri/list' // res
-  | 'ri/set' // req
-  | 'ri/delete' // req
   | 'dice/roll' // req/res
   | 'db/export' // req/res
 
@@ -175,20 +173,7 @@ export interface ISceneSendMapImageReq {
   data: string
 }
 
-export interface IRiItem {
-  type: 'actor' | 'npc'
-  id: string
-  name: string
-  seq: number
-  seq2: number
-}
-
-export type IRiListResp = IRiItem[]
-export type IRiSetReq = IRiItem
-export interface IRiDeleteReq {
-  type: 'actor' | 'npc'
-  id: string
-}
+export { IRiItem }
 
 // 手动代骰
 export interface IDiceRollReq {
