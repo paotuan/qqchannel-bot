@@ -1,5 +1,4 @@
 import LRUCache from 'lru-cache'
-import { makeAutoObservable } from 'mobx'
 import type { BotContext, ICommand } from '@paotuan/config'
 import {
   CardProvider,
@@ -44,7 +43,6 @@ export class CommandHandler {
   private readonly opposedRollCache: LRUCache<string, StandardDiceRoll> = new LRUCache({ max: 50 })
 
   constructor(bot: Bot) {
-    makeAutoObservable(this)
     this.bot = bot
     // 初始化先攻列表 store
     RiProvider.setState(new YRiState())

@@ -2,7 +2,6 @@ import type { IBotConfig, IBotInfo, IMessage } from '@paotuan/types'
 import { Context, Events, ForkScope, SatoriApi } from './satori'
 import { adapterConfig, adapterPlugin, getBotId } from './utils'
 import { isEqual } from 'lodash'
-import { action, makeAutoObservable } from 'mobx'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
 import { LogManager } from '../service/log'
@@ -31,7 +30,6 @@ export class Bot {
   private readonly listeningChannels = new Map<string, Set<string>>()
 
   constructor(config: IBotConfig, wss: Wss) {
-    makeAutoObservable<this, 'listeningChannels'>(this, { listeningChannels: false })
     this.wss = wss
     this.config = config
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -41,7 +39,7 @@ export class Bot {
 
     // 获取 bot 信息
     this._botInfoPromise = this.fetchBotInfo()
-    this._botInfoPromise.then(action(info => (this.botInfo = info)))
+    this._botInfoPromise.then(info => (this.botInfo = info))
 
     // 初始化各项功能
     // 初始化 bot 所在频道信息

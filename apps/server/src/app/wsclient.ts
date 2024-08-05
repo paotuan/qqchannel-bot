@@ -1,7 +1,6 @@
 import type { WebSocket } from 'ws'
 import type { Wss } from './wss'
 import type { IMessage, IPluginConfigDisplay } from '@paotuan/types'
-import { autorun, IReactionDisposer, makeAutoObservable } from 'mobx'
 import type { BotId } from '../adapter/utils'
 import { getChannelUnionId } from '../adapter/utils'
 
@@ -18,7 +17,6 @@ export class WsClient {
 
   private readonly server: Wss
   private readonly ws: WebSocket
-  private readonly disposers: IReactionDisposer[] = []
 
   get botId() {
     return this._botId
@@ -49,7 +47,6 @@ export class WsClient {
   }
 
   constructor(ws: WebSocket, server: Wss) {
-    makeAutoObservable<this, 'ws'>(this, { ws: false })
     this.ws = ws
     this.server = server
     ws.on('message', (rawData: Buffer) => {
@@ -64,13 +61,11 @@ export class WsClient {
 
     ws.on('close', () => {
       console.log('客户端关闭')
-      this.disposeAllEffects()
       this.server.removeClient(this)
     })
 
     ws.on('error', e => {
       console.error('客户端因发生错误而关闭', e)
-      this.disposeAllEffects()
       this.server.removeClient(this)
     })
 
@@ -94,17 +89,5 @@ export class WsClient {
   // 发送给网页
   send<T>(data: IMessage<T>) {
     this.ws.send(JSON.stringify(data))
-  }
-
-  // 注册 ws 相关的 effect
-  autorun(effect: (ws: WsClient) => void) {
-    const dispose = autorun(() => effect(this))
-    this.disposers.push(dispose)
-  }
-
-  // 取消注册所有的 effect
-  disposeAllEffects() {
-    this.disposers.forEach(dispose => dispose())
-    this.disposers.length = 0
   }
 }

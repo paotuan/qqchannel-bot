@@ -2,7 +2,6 @@ import { WebSocketServer } from 'ws'
 import type { IMessage } from '@paotuan/types'
 import { WsClient } from './wsclient'
 import { dispatch } from './dispatcher'
-import { makeAutoObservable } from 'mobx'
 import { CardManager } from '../service/card'
 import { ConfigManager } from '../service/config'
 import { PluginManager } from '../service/plugin'
@@ -21,7 +20,6 @@ export class Wss {
   readonly config = new ConfigManager()
 
   constructor() {
-    makeAutoObservable<this, 'server'>(this, { server: false })
     this.server = new WebSocketServer({ noServer: true })
 
     this.server.on('close', () => {
