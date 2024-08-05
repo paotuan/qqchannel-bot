@@ -76,6 +76,14 @@ export const useCardStore = defineStore('card', () => {
     return createCard(cardData)
   }
 
+  // 根据卡片 id 获取卡片对象
+  const getCardOfId = (cardName: string) => {
+    const cardData = of(cardName)
+    if (!cardData) return undefined
+    // todo 与 getCardOfUser 保持一致
+    return createCard(cardData)
+  }
+
   // 主动发起投骰相关
   const manualDiceRollDialogShow = ref(false)
   const manualDiceRollReq = reactive<Partial<IDiceRollReq>>({ expression: '', cardData: undefined })
@@ -102,6 +110,7 @@ export const useCardStore = defineStore('card', () => {
     linkedUserOf,
     requestLinkUser,
     getCardOfUser,
+    getCardOfId,
     manualDiceRollDialogShow,
     manualDiceRollReq,
     manualDiceRoll

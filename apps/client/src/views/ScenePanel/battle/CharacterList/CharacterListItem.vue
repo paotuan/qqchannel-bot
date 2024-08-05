@@ -52,7 +52,7 @@ const card = computed<ICard | undefined>(() => {
   if (chara.value.type === 'actor') {
     return cardStore.getCardOfUser(chara.value.userId)
   } else {
-    return chara.value.embedCard
+    return cardStore.getCardOfId(chara.value.userId)
   }
 })
 

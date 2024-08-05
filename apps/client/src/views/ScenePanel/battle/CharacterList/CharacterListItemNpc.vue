@@ -41,6 +41,7 @@ import CharacterHpBar from './CharacterHpBar.vue'
 import { computed, ref } from 'vue'
 import ws from '../../../../api/ws'
 import type { IRiDeleteReq } from '@paotuan/types'
+import { useCardStore } from '../../../../store/card'
 
 const props = defineProps<{ chara: ISceneNpc }>()
 
@@ -48,7 +49,8 @@ const sceneStore = useSceneStore()
 const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
 const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.userId)
 // npc 卡片信息（for template
-const npcCardnn = computed(() => props.chara.embedCard!)
+const cardStore = useCardStore()
+const npcCardnn = computed(() => cardStore.getCardOfId(props.chara.userId)!)
 
 // 上传 npc 头像
 const realUploadBtn = ref<HTMLInputElement>()

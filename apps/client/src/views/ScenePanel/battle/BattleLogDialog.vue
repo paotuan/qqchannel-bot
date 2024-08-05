@@ -28,7 +28,7 @@ const generateLog = () => {
   log += `\n战斗轮 第 ${sceneStore.turn} 轮\n成员：\n`
   log += sceneStore.charactersSorted.map(chara => {
     const username = chara.type === 'actor' ? userStore.nickOf(chara.userId) : chara.userId
-    const userCard = chara.type === 'actor' ? cardStore.getCardOfUser(chara.userId) : chara.embedCard
+    const userCard = chara.type === 'actor' ? cardStore.getCardOfUser(chara.userId) : cardStore.getCardOfId(chara.userId)
     const userHp = userCard?.HP ?? '?'
     const userMaxHp = userCard?.MAXHP ?? '?'
     const hasSeq = !isNaN(chara.seq) || !isNaN(chara.seq2)

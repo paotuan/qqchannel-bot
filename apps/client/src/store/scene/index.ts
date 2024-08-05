@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, reactive, ref, toRaw, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useIndexedDBStore } from '../../utils/db'
 import { cloneDeep, escapeRegExp, throttle } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
@@ -7,7 +7,7 @@ import { getDefaultStageData, useStage } from './map'
 import type { IStageData } from './map-types'
 import { VERSION_CODE, type IRiItem, type IRiSetReq } from '@paotuan/types'
 import ws from '../../api/ws'
-import { createCard, type ICard } from '@paotuan/card'
+import type { ICard } from '@paotuan/card'
 
 // 场景地图
 export interface ISceneMap {
@@ -33,6 +33,9 @@ export interface ISceneNpc {
   avatar?: string // npc 图片，可上传
   seq: number
   seq2: number
+  /**
+   * @deprecated
+   */
   embedCard?: ICard
 }
 
@@ -331,7 +334,7 @@ function temp_saveCharacterList(list: (ISceneActor | ISceneNpc)[]) {
       return { ...rest }
     } else {
       const { embedCard, seq, seq2, ...rest } = item
-      return { ...rest, embedCardData: toRaw(embedCard?.data) }
+      return { ...rest }
     }
   })
   const save = JSON.stringify({ version: VERSION_CODE, data })
@@ -358,7 +361,7 @@ function temp_loadCharacterList(): (ISceneActor | ISceneNpc)[] {
           avatar: item.avatar,
           seq: NaN,
           seq2: NaN,
-          embedCard: item.embedCardData ? createCard(item.embedCardData) : undefined
+          embedCard: undefined
         } as ISceneNpc
       }
     })

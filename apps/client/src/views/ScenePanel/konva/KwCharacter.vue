@@ -49,7 +49,7 @@ const userCard = computed(() => {
   if (charaType.value === 'actor') {
     return cardStore.getCardOfUser(charaId.value)
   } else {
-    return npcInfo.value?.embedCard
+    return cardStore.getCardOfId(charaId.value)
   }
 })
 

@@ -4,7 +4,6 @@ import { useCardStore } from '../../store/card'
 import { useRoute, useRouter } from 'vue-router'
 
 const SELECTED_CARD = Symbol('SELECTED_CARD')
-export const IS_TEMP_CARD = Symbol('IS_TEMP_CARD')
 
 export function useCurrentSelectedCardProvider(card: ComputedRef<ICard>) {
   provide(SELECTED_CARD, card)
