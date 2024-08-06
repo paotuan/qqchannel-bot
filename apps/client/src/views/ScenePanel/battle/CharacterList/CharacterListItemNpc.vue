@@ -21,7 +21,7 @@
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="showNpcCard">
           <DocumentTextIcon class="size-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.currentMap" @click.stop="addCharacterToken">
+        <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.hasCurrentMap" @click.stop="addCharacterToken">
           <MapPinIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="sceneStore.duplicateNpc(props.chara)">
@@ -46,7 +46,7 @@ const props = defineProps<{ chara: IRiItem }>()
 
 const sceneStore = useSceneStore()
 const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
-const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('npc', props.chara.id)
+const addCharacterToken = () => sceneStore.addCharacterToken('npc', props.chara.id)
 // npc 卡片信息（for template
 const cardStore = useCardStore()
 const npcCardnn = computed(() => cardStore.getCardOfId(props.chara.id)!)

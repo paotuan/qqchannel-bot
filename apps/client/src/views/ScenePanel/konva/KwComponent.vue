@@ -9,12 +9,13 @@
   </template>
 </template>
 <script setup lang="ts">
-import type { IBaseStageItem, ILayer } from '../../../store/scene/map-types'
+import type { IBaseStageItem } from '@paotuan/types'
+import type { ILayer } from '../../../store/scene/map-types'
 import KwImage from './KwImage.vue'
 import KwText from './KwText.vue'
 import KwCharacter from './KwCharacter.vue'
 
-const props = defineProps<{ item: IBaseStageItem }>()
+defineProps<{ item: IBaseStageItem }>()
 
 // item => Konva 映射
 const getKonvaComponent = (type: string) => {

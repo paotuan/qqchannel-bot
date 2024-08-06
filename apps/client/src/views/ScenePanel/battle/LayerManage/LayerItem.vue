@@ -27,21 +27,22 @@
   </div>
 </template>
 <script setup lang="ts">
+import type { IBaseStageItem } from '@paotuan/types'
 import { useSortable } from './useSortable'
-import type { IBaseStageItem, ILayer } from '../../../../store/scene/map-types'
+import type { ILayer } from '../../../../store/scene/map-types'
 import { computed, ref, toRefs } from 'vue'
 import { ChevronRightIcon, ChevronDownIcon, EyeIcon, EyeSlashIcon, ViewfinderCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import { useSceneStore } from '../../../../store/scene'
+import { useCurrentMap } from '../../provide'
 
 const props = defineProps<{ item: IBaseStageItem }>()
 const { item } = toRefs(props)
 const isLayer = computed(() => item.value.name === 'layer')
 const layerCollapsed = ref(false)
 
-const sortableRef = useSortable()
+const currentMap = useCurrentMap()
+const currentMapData = computed(() => currentMap.stage)
+const sortableRef = useSortable(currentMapData)
 
-const sceneStore = useSceneStore()
-const currentMapData = computed(() => sceneStore.currentMap!.stage)
 const selectSelfOnStage = () => {
   if (isLayer.value && (item.value as ILayer).children.length === 0) return // layer 没内容不给选中
   currentMapData.value.selectNodeIds = [item.value.id]

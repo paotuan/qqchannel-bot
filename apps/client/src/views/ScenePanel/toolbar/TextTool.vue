@@ -18,11 +18,11 @@
 </template>
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
-import { useSceneStore } from '../../../store/scene'
 import type { ITextEditConfig, ITextLabel } from '../../../store/scene/map-types'
+import { useCurrentMap } from '../provide'
 
-const sceneStore = useSceneStore()
-const currentMapData = computed(() => sceneStore.currentMap!.stage)
+const currentMap = useCurrentMap()
+const currentMapData = computed(() => currentMap.stage)
 
 const selectedText = computed<ITextLabel | null>(() => {
   if (currentMapData.value.selectNodeIds.length === 1) { // 只考虑选中单个节点的情况

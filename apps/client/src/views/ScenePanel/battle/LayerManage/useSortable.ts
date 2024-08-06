@@ -1,11 +1,10 @@
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, Ref, ref } from 'vue'
 import Sortable from 'sortablejs'
-import { useSceneStore } from '../../../../store/scene'
+import { useSceneMap } from '../../../../store/scene/map'
 
-export function useSortable() {
-  const sceneStore = useSceneStore()
-  const currentMapData = computed(() => sceneStore.currentMap!.stage)
+type MapStage = ReturnType<typeof useSceneMap>['stage']
 
+export function useSortable(stage: Ref<MapStage>) {
   const sortableRef = ref(null)
   onMounted(() => {
     if (sortableRef.value) {
@@ -18,7 +17,7 @@ export function useSortable() {
         swapThreshold: 0.65,
         onEnd: (event) => {
           if (typeof event.oldIndex !== 'undefined' && typeof event.newIndex !== 'undefined') {
-            currentMapData.value.moveNode(event.from.dataset.id, event.oldIndex, event.to.dataset.id, event.newIndex)
+            stage.value.moveNode(event.from.dataset.id, event.oldIndex, event.to.dataset.id, event.newIndex)
           } else {
             console.warn('from:', event.from.dataset.id, '|', event.oldIndex)
             console.warn('to:', event.to.dataset.id, '|', event.newIndex)

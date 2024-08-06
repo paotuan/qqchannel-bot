@@ -1,7 +1,7 @@
 <template>
   <div :key="refreshKey" class="h-full">
-    <template v-if="sceneStore.currentMap">
-      <LayerManageContent :key="sceneStore.currentMapId!" @refresh="refreshKey++" />
+    <template v-if="hasData">
+      <LayerManageContent :key="key" @refresh="refreshKey++" />
     </template>
     <template v-else>
       <div>请在页面左侧选择地图</div>
@@ -9,10 +9,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useSceneStore } from '../../../../store/scene'
 import LayerManageContent from './LayerManageContent.vue'
 import { ref } from 'vue'
+import { useMapKey } from '../../provide'
 
-const sceneStore = useSceneStore()
+const { key, hasData } = useMapKey()
 const refreshKey = ref(1)
 </script>

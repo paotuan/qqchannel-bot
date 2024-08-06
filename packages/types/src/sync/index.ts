@@ -1,10 +1,11 @@
 import type { ICardData } from '@paotuan/card'
 import type { IChannelConfig } from '@paotuan/config'
 import type { IRiItem, IUser } from '../common'
+import type { ISceneMap } from '../scene'
 
 export interface YGlobalState {
   cards: Record<string, ICardData>
-  scenes: Record<string, unknown> // todo
+  scenes: Record<string, ISceneMap>
   defaultConfig: { current: IChannelConfig }
 }
 

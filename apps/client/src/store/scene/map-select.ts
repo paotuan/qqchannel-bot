@@ -1,5 +1,5 @@
 import { nextTick, ref } from 'vue'
-import type { IBaseStageItem } from './map-types'
+import type { IBaseStageItem } from '@paotuan/types'
 
 export function useStageSelect() {
   const selectNodeIds = ref<string[]>([]) // transformer 选中的 node id

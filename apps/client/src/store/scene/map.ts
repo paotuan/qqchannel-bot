@@ -1,9 +1,9 @@
-import { reactive, ref, toRaw } from 'vue'
+import { computed, reactive, toRef } from 'vue'
 import type {
   ICircleToken,
   IRectToken,
   IPolygonToken,
-  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem, IGridConfig, ILayer, IStageData,
+  IWedgeToken, IStarToken, IArrowToken, ITextLabel, ICharacterItem, ILayer,
   ICustomToken, ITextEditConfig, IToken, ITokenEditConfig
 } from './map-types'
 import { nanoid } from 'nanoid/non-secure'
@@ -11,6 +11,7 @@ import { cloneDeep } from 'lodash'
 import { useStageBackground } from './map-background'
 import { useStageItems } from './map-items'
 import { useStageSelect } from './map-select'
+import type { ISceneMap, IStageData } from '@paotuan/types'
 
 export const getDefaultStageData: () => IStageData = () => ({
   x: 0,
@@ -26,14 +27,31 @@ export const getDefaultStageData: () => IStageData = () => ({
   }
 })
 
+// 由视图层去调用，外部通过 key 重置，确保同一个 scene 里面 data 是不可变的
+// 有助于简化响应式传递，方法内部可以做一些性能优化的处理
+export function useSceneMap(data: ISceneMap) {
+  const id = computed(() => data.id)
+  const createAt = computed(() => data.createAt)
+  const name = toRef(data, 'name')
+
+  const stage = useStage(data.stage)
+
+  return reactive({
+    id,
+    createAt,
+    name,
+    stage
+  })
+}
+
 // initial value, 相当于构造函数
-export function useStage(data: IStageData = getDefaultStageData()) {
-  const x = ref(data.x)
-  const y = ref(data.y)
+function useStage(data: IStageData) {
+  const x = toRef(data, 'x')
+  const y = toRef(data, 'y')
   const { background, setBackground, setBackgroundScale } = useStageBackground(data, x, y)
   const { getItem, findItem, addItem, removeItem, moveItem, items } = useStageItems(data)
   const { selectNodeIds, selectNode, clearSelection } = useStageSelect()
-  const grid = reactive<IGridConfig>(data.grid)
+  const grid = computed(() => data.grid)
 
   // 添加 token
   const addToken = (type: string, config: ITokenEditConfig) => {
@@ -160,18 +178,18 @@ export function useStage(data: IStageData = getDefaultStageData()) {
   const bringToFront = (id: string) => {
     const [self, parent] = findItem(item => item.id === id)
     if (!self) return
-    const list = parent?.children ?? items
+    const list = parent?.children ?? items.value
     const selfOldIndex = list.indexOf(self)
     if (selfOldIndex < 0) return // 理论上不可能
     // 新的 index，如果都是在顶级移动，需要考虑 remove 以后 index - 1
-    moveNode(parent?.id, selfOldIndex, undefined, list === items ? items.length - 1 : items.length)
+    moveNode(parent?.id, selfOldIndex, undefined, list === items.value ? items.value.length - 1 : items.value.length)
   }
 
   // 移到底层
   const bringToBottom = (id: string) => {
     const [self, parent] = findItem(item => item.id === id)
     if (!self) return
-    const list = parent?.children ?? items
+    const list = parent?.children ?? items.value
     const selfOldIndex = list.indexOf(self)
     if (selfOldIndex < 0) return // 理论上不可能
     moveNode(parent?.id, selfOldIndex, undefined, 0)
@@ -192,14 +210,6 @@ export function useStage(data: IStageData = getDefaultStageData()) {
       clearSelection()
     }
   }
-
-  const toJson: () => IStageData = () => ({
-    x: x.value,
-    y: y.value,
-    background: toRaw(background.value),
-    items: toRaw(items),
-    grid: toRaw(grid)
-  })
 
   // 统一套一层 reactive 以获得正确的类型推断
   // 不然在外面被 reactive 包裹后发生 ref 解包，导致 ReturnType<typeof useStage> 推断出的类型和实际不一致
@@ -224,7 +234,6 @@ export function useStage(data: IStageData = getDefaultStageData()) {
     bringToFront,
     bringToBottom,
     destroyNode,
-    toJson
   })
 }
 

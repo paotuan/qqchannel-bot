@@ -1,26 +1,4 @@
-// 对 stage 上存在的各种元素进行建模，抽象出 map 的数据结构
-
-// map 整体数据结构
-export interface IStageData {
-  x: number
-  y: number
-  background: IStageBackground | null
-  items: IBaseStageItem[]
-  grid: IGridConfig
-}
-
-// 基础 token
-export interface IBaseStageItem {
-  name: string // used as type
-  id: string
-  x: number
-  y: number
-  scaleX: number
-  scaleY: number
-  rotation: number
-  visible: boolean
-  'data-remark': string // 备注
-}
+import type { IBaseStageItem } from '@paotuan/types'
 
 // 图层
 export interface ILayer extends IBaseStageItem {
@@ -88,13 +66,6 @@ export interface ITextLabel extends IBaseStageItem {
   padding: number
 }
 
-// 背景图片
-export interface IStageBackground extends IBaseStageItem {
-  name: 'map'
-  'data-src': string
-  // listening: false
-}
-
 // 玩家/npc 标识
 export interface ICharacterItem extends IBaseStageItem {
   name: 'character'
@@ -116,13 +87,4 @@ export interface ITextEditConfig {
   text: string
   fill: string
   stroke: string
-}
-
-// 网格数据兼配置项
-export interface IGridConfig {
-  show: boolean
-  gap: number
-  stroke: string
-  xOffset: number
-  yOffset: number
 }

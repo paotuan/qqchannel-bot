@@ -10,6 +10,7 @@ import Konva from 'konva'
 import ws from '../../../api/ws'
 import type { ISceneSendMapImageReq } from '@paotuan/types'
 import { gtagEvent } from '../../../utils'
+import { useCurrentMap } from '../provide'
 
 interface Props {
   size: { width: number, height: number }
@@ -22,8 +23,8 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const sceneStore = useSceneStore()
-const currentMapData = computed(() => sceneStore.currentMap!.stage)
+const currentMap = useCurrentMap()
+const currentMapData = computed(() => currentMap.stage)
 
 const stageConfig = computed(() => ({
   x: currentMapData.value.x,
@@ -122,6 +123,7 @@ function getDirectLayerChild(node: Konva.Node) {
 
 // 获取原始 stage 数据
 const stageRef = ref()
+const sceneStore = useSceneStore()
 watch(() => sceneStore.sendMapImageSignal, (value) => {
   if (value) {
     // 获取 stage 图片并发送消息 todo stage 范围是否可以展示全

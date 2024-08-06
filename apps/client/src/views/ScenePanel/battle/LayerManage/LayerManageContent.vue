@@ -18,16 +18,16 @@ import LayerItem from './LayerItem.vue'
 import { ArrowPathRoundedSquareIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { computed } from 'vue'
 import { useSortable } from './useSortable'
-import { useSceneStore } from '../../../../store/scene'
+import { useCurrentMapProvider } from '../../provide'
 
-const emit = defineEmits<{ (e: 'refresh'): void }>()
+defineEmits<{ (e: 'refresh'): void }>()
 
-const sceneStore = useSceneStore()
-const currentMapData = computed(() => sceneStore.currentMap!.stage)
+const currentMap = useCurrentMapProvider()
+const currentMapData = computed(() => currentMap.stage)
 
 const createNewLayer = () => currentMapData.value.addLayer()
 
-const sortableRef = useSortable()
+const sortableRef = useSortable(currentMapData)
 </script>
 <style scoped>
 

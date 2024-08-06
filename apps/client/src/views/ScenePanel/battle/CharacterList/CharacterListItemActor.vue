@@ -20,7 +20,7 @@
         <button class="btn btn-xs btn-outline btn-circle" :disabled="!userCard" @click.stop="selectCard">
           <DocumentTextIcon class="size-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.currentMap" @click.stop="addCharacterToken">
+        <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.hasCurrentMap" @click.stop="addCharacterToken">
           <MapPinIcon class="size-4" />
         </button>
         <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">
@@ -72,7 +72,7 @@ const selectCard = () => {
 }
 
 const sceneStore = useSceneStore()
-const addCharacterToken = () => sceneStore.currentMap?.stage.addCharacter('actor', props.chara.id)
+const addCharacterToken = () => sceneStore.addCharacterToken('actor', props.chara.id)
 
 const deleteCharacter = () => {
   sceneStore.deleteCharacter(props.chara)

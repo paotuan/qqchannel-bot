@@ -7,8 +7,8 @@
   </KonvaGroup>
 </template>
 <script setup lang="ts">
-import { useSceneStore } from '../../../store/scene'
 import { computed } from 'vue'
+import { useCurrentMap } from '../provide'
 
 interface Props {
   size: { width: number, height: number }
@@ -16,8 +16,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const sceneStore = useSceneStore()
-const currentMapData = computed(() => sceneStore.currentMap!.stage)
+const currentMap = useCurrentMap()
+const currentMapData = computed(() => currentMap.stage)
 // 为了营造无缝地图的假象，画线时把宽度和高度都扩大两倍
 const gridData = computed(() => currentMapData.value.grid)
 

@@ -1,9 +1,9 @@
-import type { IStageData, IStageBackground } from './map-types'
-import { Ref, ref } from 'vue'
+import type { IStageData } from '@paotuan/types'
+import { readonly, Ref, toRef } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 
 export function useStageBackground(data: IStageData, x: Ref<number>, y: Ref<number>) {
-  const background = ref<IStageBackground | null>(data.background)
+  const background = toRef(data, 'background')
 
   // 设置场景背景
   const setBackground = (src: string | null, scale = 0.5) => {
@@ -33,5 +33,5 @@ export function useStageBackground(data: IStageData, x: Ref<number>, y: Ref<numb
     }
   }
 
-  return { background, setBackground, setBackgroundScale }
+  return { background: readonly(background), setBackground, setBackgroundScale }
 }

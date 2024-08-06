@@ -1,6 +1,6 @@
 <template>
   <div class="flex-grow">
-    <template v-if="currentMap">
+<!--    <template v-if="currentMap">-->
       <MapContent @token-menu="onContextMenu" />
       <!-- toolbar -->
       <MapBasicInfo class="absolute top-0 left-44 z-10" />
@@ -51,7 +51,7 @@
         <li><a @click="moveToBottom">置于底层</a></li>
         <li><a @click="destroyNode">删除</a></li>
       </ul>
-    </template>
+<!--    </template>-->
   </div>
 </template>
 <script setup lang="ts">
@@ -61,14 +61,12 @@ import MapTool from './toolbar/map/MapTool.vue'
 import TokenTool from './toolbar/TokenTool.vue'
 import TextTool from './toolbar/TextTool.vue'
 import { BasicShape, basicShapes } from './toolbar/utils'
-import { useSceneStore } from '../../store/scene'
 import MapBasicInfo from './MapBasicInfo.vue'
 import MapContent from './konva/MapContent.vue'
 import GridTool from './toolbar/grid/GridTool.vue'
+import { useCurrentMapProvider } from './provide'
 
-// scene store
-const sceneStore = useSceneStore()
-const currentMap = computed(() => sceneStore.currentMap)
+const currentMap = useCurrentMapProvider()
 
 // 当前选中的 toolbar item
 type ToolbarItem = 'map' | 'token' | 'text' | 'grid' | null
@@ -76,9 +74,9 @@ const toolbarItem = ref<ToolbarItem>(null)
 const selectToolbar = (item: ToolbarItem | null) => toolbarItem.value = item === toolbarItem.value ? null : item
 
 // region 选择 token 逻辑
-watch(() => currentMap.value?.stage.selectNodeIds, ids => {
+watch(() => currentMap.stage.selectNodeIds, ids => {
   if (ids && ids.length === 1) {
-    const token = currentMap.value!.stage.getItem(ids[0])
+    const token = currentMap.stage.getItem(ids[0])
     if (!token) return
     // 切换到对应的菜单，以供编辑
     if (token.name === 'text') {
@@ -92,7 +90,7 @@ watch(() => currentMap.value?.stage.selectNodeIds, ids => {
 
 // // region 右键事件
 const contextMenuTokenId = ref<string | null>(null) // 触发右键的 Konva Node
-const contextMenuToken = computed(() => contextMenuTokenId.value ? currentMap.value?.stage.getItem(contextMenuTokenId.value) : undefined)
+const contextMenuToken = computed(() => contextMenuTokenId.value ? currentMap.stage.getItem(contextMenuTokenId.value) : undefined)
 const contextMenuRef = ref<HTMLUListElement>() // 右键菜单 elem
 // 点击右键显示菜单
 const onContextMenu = ({ id, x, y }: { id: string, x: number, y: number }) => {
@@ -120,7 +118,7 @@ onBeforeUnmount(() => {
 
 // 通用右键事件
 const cloneNode = () => {
-  const stage = currentMap.value?.stage
+  const stage = currentMap.stage
   const itemId = contextMenuTokenId.value
   if (stage && itemId) {
     stage.duplicateToken(itemId)
@@ -128,7 +126,7 @@ const cloneNode = () => {
 }
 
 const moveToTop = () => {
-  const stage = currentMap.value?.stage
+  const stage = currentMap.stage
   const itemId = contextMenuTokenId.value
   if (stage && itemId) {
     stage.bringToFront(itemId)
@@ -136,7 +134,7 @@ const moveToTop = () => {
 }
 
 const moveToBottom = () => {
-  const stage = currentMap.value?.stage
+  const stage = currentMap.stage
   const itemId = contextMenuTokenId.value
   if (stage && itemId) {
     stage.bringToBottom(itemId)
@@ -144,7 +142,7 @@ const moveToBottom = () => {
 }
 
 const destroyNode = () => {
-  const stage = currentMap.value?.stage
+  const stage = currentMap.stage
   const itemId = contextMenuTokenId.value
   if (stage && itemId) {
     stage.destroyNode(itemId)

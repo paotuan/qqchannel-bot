@@ -24,20 +24,20 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { PhotoIcon, TrashIcon } from '@heroicons/vue/24/outline'
-import { useSceneStore } from '../../../../store/scene'
 import MapGenerate from './MapGenerate.vue'
+import { useCurrentMap } from '../../provide'
 
 const realUploadBtn = ref<HTMLInputElement>()
 
 // 背景图片数据
-const sceneStore = useSceneStore()
-const backgroundData = computed(() => sceneStore.currentMap!.stage.background)
+const currentMap = useCurrentMap()
+const backgroundData = computed(() => currentMap.stage.background)
 const scale = computed({
   get() {
     return backgroundData.value?.scaleX ?? 0.5 // background 的 scaleX 和 scaleY 是相等的
   },
   set(value) {
-    sceneStore.currentMap!.stage.setBackgroundScale(value)
+    currentMap.stage.setBackgroundScale(value)
   }
 })
 
@@ -47,7 +47,7 @@ const handleFile = (e: Event) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       const imageUrl = e.target!.result as string
-      sceneStore.currentMap!.stage.setBackground(imageUrl, scale.value)
+      currentMap.stage.setBackground(imageUrl, scale.value)
       realUploadBtn.value!.value = ''
     }
     reader.readAsDataURL(files![0])
@@ -63,10 +63,10 @@ const uploadBackground = () => {
 }
 
 const clearBackground = () => {
-  sceneStore.currentMap!.stage.setBackground(null)
+  currentMap.stage.setBackground(null)
 }
 
 const onGenerateMap = (value: string) => {
-  sceneStore.currentMap!.stage.setBackground(value)
+  currentMap.stage.setBackground(value)
 }
 </script>

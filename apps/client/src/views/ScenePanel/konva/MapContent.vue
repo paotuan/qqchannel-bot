@@ -19,15 +19,15 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useSceneStore } from '../../../store/scene'
 import KwImage from './KwImage.vue'
 import KwStage from './KwStage.vue'
 import KwTransformer from './KwTransformer.vue'
 import KwGrid from './KwGrid.vue'
 import KwComponent from './KwComponent.vue'
+import { useCurrentMap } from '../provide'
 
-const sceneStore = useSceneStore()
-const currentMapData = computed(() => sceneStore.currentMap!.stage)
+const currentMap = useCurrentMap()
+const currentMapData = computed(() => currentMap.stage)
 
 // 初始化场景宽高
 const stageSize = reactive({ width: 0, height: 0 })

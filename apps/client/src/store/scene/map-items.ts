@@ -1,17 +1,18 @@
-import type { IStageData, IBaseStageItem, ILayer } from './map-types'
-import { reactive } from 'vue'
+import type { IStageData, IBaseStageItem } from '@paotuan/types'
+import type { ILayer } from './map-types'
+import { computed, reactive } from 'vue'
 
 export function useStageItems(data: IStageData) {
-  const items = reactive<IBaseStageItem[]>(data.items)
+  const items = computed(() => data.items)
   const itemsMap = reactive(items2Map(data.items, {})) // 以 id 索引
 
   const getItem = (id: string) => itemsMap[id]
 
   // 递归查找 item, 返回 item 本身和它所在的 parent
-  const findItem = (predicate: (value: IBaseStageItem) => boolean) => findItemRecursively(undefined, items, predicate)
+  const findItem = (predicate: (value: IBaseStageItem) => boolean) => findItemRecursively(undefined, items.value, predicate)
 
   const addItem = (item: IBaseStageItem, parent?: ILayer) => {
-    const list = parent?.children ?? items
+    const list = parent?.children ?? items.value
     list.push(item)
     itemsMap[item.id] = item
   }
@@ -20,7 +21,7 @@ export function useStageItems(data: IStageData) {
     const [realItem, parent] = findItem(value => value.id === item.id)
     if (!realItem) return
     // 1. 从父元素中删除自己
-    const list = parent?.children ?? items
+    const list = parent?.children ?? items.value
     const targetIndex = list.findIndex(i => i === realItem)
     if (targetIndex < 0) return // 理论上不可能
     list.splice(targetIndex, 1)
@@ -31,8 +32,8 @@ export function useStageItems(data: IStageData) {
 
   // 拖动排序
   const moveItem = (from: string | undefined, fromIndex: number, to: string | undefined, toIndex: number) => {
-    const fromList = from ? (getItem(from) as ILayer)?.children : items
-    const toList = to ? (getItem(to) as ILayer)?.children : items
+    const fromList = from ? (getItem(from) as ILayer)?.children : items.value
+    const toList = to ? (getItem(to) as ILayer)?.children : items.value
     if (!fromList || !toList) return // 理论上不可能
     const [movedItem] = fromList.splice(fromIndex, 1)
     toList.splice(toIndex, 0, movedItem)

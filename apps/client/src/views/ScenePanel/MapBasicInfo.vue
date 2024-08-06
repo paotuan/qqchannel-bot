@@ -14,21 +14,22 @@
 </template>
 <script setup lang="ts">
 import { useSceneStore } from '../../store/scene'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+import { useCurrentMap } from './provide'
 
 const sceneStore = useSceneStore()
-const currentScene = computed(() => sceneStore.currentMap!)
+const currentScene = useCurrentMap()
 
 const oldName = ref('')
 const onEditName = (e: Event) => {
   const newName = (e.target as HTMLInputElement).value.trim()
   if (newName === oldName.value) return // 没改变
-  if (!newName) currentScene.value.name = oldName.value // 置空，就还是恢复成老名字吧
+  if (!newName) currentScene.name = oldName.value // 置空，就还是恢复成老名字吧
 }
 
 const deleteScene = () => {
   if (window.confirm('确定要删除场景吗？')) {
-    sceneStore.deleteMap(currentScene.value)
+    sceneStore.deleteMap(currentScene.id)
   }
 }
 </script>

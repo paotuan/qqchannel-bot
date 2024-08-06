@@ -27,12 +27,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useSceneStore } from '../../../../store/scene'
 import { computed } from 'vue'
 import DNumberInput from '../../../../dui/input/DNumberInput.vue'
+import { useCurrentMap } from '../../provide'
 
-const sceneStore = useSceneStore()
-const gridData = computed(() => sceneStore.currentMap!.stage.grid)
+const currentMap = useCurrentMap()
+const gridData = computed(() => currentMap.stage.grid)
 
 const onGapChange = (e: Event) => {
   gridData.value.gap = Number((e.target as HTMLInputElement).value)
