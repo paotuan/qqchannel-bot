@@ -27,7 +27,7 @@ export const getDefaultStageData: () => IStageData = () => ({
   }
 })
 
-// 由视图层去调用，外部通过 key 重置，确保同一个 scene 里面 data 是不可变的
+// 外部切换场景时重置，确保同一个 scene 里面 data 是不可变的
 // 有助于简化响应式传递，方法内部可以做一些性能优化的处理
 export function useSceneMap(data: ISceneMap) {
   const id = computed(() => data.id)

@@ -16,14 +16,12 @@
 <script setup lang="ts">
 import LayerItem from './LayerItem.vue'
 import { ArrowPathRoundedSquareIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
-import { computed } from 'vue'
 import { useSortable } from './useSortable'
-import { useCurrentMapProvider } from '../../provide'
+import { useCurrentMapStage } from '../../provide'
 
 defineEmits<{ (e: 'refresh'): void }>()
 
-const currentMap = useCurrentMapProvider()
-const currentMapData = computed(() => currentMap.stage)
+const currentMapData = useCurrentMapStage()
 
 const createNewLayer = () => currentMapData.value.addLayer()
 

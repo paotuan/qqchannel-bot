@@ -14,7 +14,7 @@ export function useStageItems(data: IStageData) {
   const addItem = (item: IBaseStageItem, parent?: ILayer) => {
     const list = parent?.children ?? items.value
     list.push(item)
-    itemsMap[item.id] = item
+    itemsMap[item.id] = list.at(-1)! // 从 list 里取以确保响应式
   }
 
   const removeItem = (item: IBaseStageItem) => {

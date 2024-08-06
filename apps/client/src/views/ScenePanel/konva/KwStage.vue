@@ -10,7 +10,7 @@ import Konva from 'konva'
 import ws from '../../../api/ws'
 import type { ISceneSendMapImageReq } from '@paotuan/types'
 import { gtagEvent } from '../../../utils'
-import { useCurrentMap } from '../provide'
+import { useCurrentMapStage } from '../provide'
 
 interface Props {
   size: { width: number, height: number }
@@ -23,8 +23,7 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const currentMap = useCurrentMap()
-const currentMapData = computed(() => currentMap.stage)
+const currentMapData = useCurrentMapStage()
 
 const stageConfig = computed(() => ({
   x: currentMapData.value.x,

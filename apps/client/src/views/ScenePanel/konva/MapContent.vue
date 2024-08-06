@@ -24,10 +24,9 @@ import KwStage from './KwStage.vue'
 import KwTransformer from './KwTransformer.vue'
 import KwGrid from './KwGrid.vue'
 import KwComponent from './KwComponent.vue'
-import { useCurrentMap } from '../provide'
+import { useCurrentMapStage } from '../provide'
 
-const currentMap = useCurrentMap()
-const currentMapData = computed(() => currentMap.stage)
+const currentMapData = useCurrentMapStage()
 
 // 初始化场景宽高
 const stageSize = reactive({ width: 0, height: 0 })

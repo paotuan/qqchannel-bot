@@ -2,11 +2,13 @@ import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { cloneDeep, escapeRegExp } from 'lodash'
 import { nanoid } from 'nanoid/non-secure'
-import { getDefaultStageData } from './map'
+import { getDefaultStageData, useSceneMap } from './map'
 import { IRiItem, VERSION_CODE } from '@paotuan/types'
 import { yChannelStoreRef, yGlobalStoreRef } from '../ystore'
-import { isEmptyNumber } from '../../utils'
+import { eventBus, isEmptyNumber } from '../../utils'
 import { useCardStore } from '../card'
+
+type SceneMap = ReturnType<typeof useSceneMap>
 
 export const useSceneStore = defineStore('scene', () => {
   // 地图列表
@@ -15,7 +17,14 @@ export const useSceneStore = defineStore('scene', () => {
   // 当前打开的地图
   const currentMapId = ref<string | null>(null)
   const getCurrentMapData = () => currentMapId.value ? mapMap.value[currentMapId.value] : undefined
-  const hasCurrentMap = computed(() => !!getCurrentMapData())
+
+  // 切换地图，重置当前地图响应式数据
+  const currentMap = ref<SceneMap | null>(null)
+  watch(currentMapId, () => {
+    const mapData = getCurrentMapData()
+    currentMap.value = mapData ? useSceneMap(mapData) : null
+  })
+  const hasCurrentMap = computed(() => !!currentMap.value)
 
   // 新建地图
   const createMap = () => {
@@ -40,8 +49,8 @@ export const useSceneStore = defineStore('scene', () => {
   }
 
   // 添加人物 token 到当前地图中
-  const addCharacterToken = (type: 'actor' | 'npc', id: string) => {
-    // todo eventBus
+  const addCharacterToken = (type: 'actor' | 'npc', userId: string) => {
+    eventBus.emit('client/scene/addCharacter', { type, userId })
   }
 
   // 时间指示器
@@ -129,7 +138,7 @@ export const useSceneStore = defineStore('scene', () => {
   return {
     mapList,
     currentMapId,
-    getCurrentMapData,
+    currentMap,
     hasCurrentMap,
     timeIndicator,
     turn,

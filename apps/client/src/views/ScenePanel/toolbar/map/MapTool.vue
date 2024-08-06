@@ -22,22 +22,22 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, unref } from 'vue'
 import { PhotoIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import MapGenerate from './MapGenerate.vue'
-import { useCurrentMap } from '../../provide'
+import { useCurrentMapStage } from '../../provide'
 
 const realUploadBtn = ref<HTMLInputElement>()
 
 // 背景图片数据
-const currentMap = useCurrentMap()
-const backgroundData = computed(() => currentMap.stage.background)
+const currentMapStage = useCurrentMapStage()
+const backgroundData = computed(() => unref(currentMapStage).background)
 const scale = computed({
   get() {
     return backgroundData.value?.scaleX ?? 0.5 // background 的 scaleX 和 scaleY 是相等的
   },
   set(value) {
-    currentMap.stage.setBackgroundScale(value)
+    unref(currentMapStage).setBackgroundScale(value)
   }
 })
 
@@ -47,7 +47,7 @@ const handleFile = (e: Event) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       const imageUrl = e.target!.result as string
-      currentMap.stage.setBackground(imageUrl, scale.value)
+      unref(currentMapStage).setBackground(imageUrl, scale.value)
       realUploadBtn.value!.value = ''
     }
     reader.readAsDataURL(files![0])
@@ -63,10 +63,10 @@ const uploadBackground = () => {
 }
 
 const clearBackground = () => {
-  currentMap.stage.setBackground(null)
+  unref(currentMapStage).setBackground(null)
 }
 
 const onGenerateMap = (value: string) => {
-  currentMap.stage.setBackground(value)
+  unref(currentMapStage).setBackground(value)
 }
 </script>

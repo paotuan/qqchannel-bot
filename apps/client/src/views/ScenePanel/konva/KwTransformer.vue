@@ -2,13 +2,12 @@
   <KonvaTransformer ref="transformer" @transformend="onTransformEnd" />
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, unref, watch } from 'vue'
 import Konva from 'konva'
-import { useCurrentMap } from '../provide'
+import { useCurrentMapStage } from '../provide'
 
-const currentMap = useCurrentMap()
-const stage = computed(() => currentMap.stage)
-const selectNodeIds = computed(() => currentMap.stage.selectNodeIds)
+const stage = useCurrentMapStage()
+const selectNodeIds = computed(() => unref(stage).selectNodeIds)
 
 const transformer = ref()
 

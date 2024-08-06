@@ -32,15 +32,14 @@ import { useSortable } from './useSortable'
 import type { ILayer } from '../../../../store/scene/map-types'
 import { computed, ref, toRefs } from 'vue'
 import { ChevronRightIcon, ChevronDownIcon, EyeIcon, EyeSlashIcon, ViewfinderCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import { useCurrentMap } from '../../provide'
+import { useCurrentMapStage } from '../../provide'
 
 const props = defineProps<{ item: IBaseStageItem }>()
 const { item } = toRefs(props)
 const isLayer = computed(() => item.value.name === 'layer')
 const layerCollapsed = ref(false)
 
-const currentMap = useCurrentMap()
-const currentMapData = computed(() => currentMap.stage)
+const currentMapData = useCurrentMapStage()
 const sortableRef = useSortable(currentMapData)
 
 const selectSelfOnStage = () => {

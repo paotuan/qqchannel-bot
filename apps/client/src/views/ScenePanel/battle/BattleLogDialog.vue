@@ -25,7 +25,7 @@ const sceneStore = useSceneStore()
 const userStore = useUserStore()
 const cardStore = useCardStore()
 const generateLog = () => {
-  let log = formatDate(sceneStore.timeIndicator) + ' ' + (sceneStore.getCurrentMapData()?.name ?? '')
+  let log = formatDate(sceneStore.timeIndicator) + ' ' + (sceneStore.currentMap?.name ?? '')
   log += `\n战斗轮 第 ${sceneStore.turn} 轮\n成员：\n`
   log += sceneStore.charactersSorted.map(chara => {
     const username = chara.type === 'actor' ? userStore.nickOf(chara.id) : chara.id

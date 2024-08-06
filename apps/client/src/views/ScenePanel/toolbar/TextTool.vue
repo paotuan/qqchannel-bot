@@ -19,10 +19,9 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
 import type { ITextEditConfig, ITextLabel } from '../../../store/scene/map-types'
-import { useCurrentMap } from '../provide'
+import { useCurrentMapStage } from '../provide'
 
-const currentMap = useCurrentMap()
-const currentMapData = computed(() => currentMap.stage)
+const currentMapData = useCurrentMapStage()
 
 const selectedText = computed<ITextLabel | null>(() => {
   if (currentMapData.value.selectNodeIds.length === 1) { // 只考虑选中单个节点的情况

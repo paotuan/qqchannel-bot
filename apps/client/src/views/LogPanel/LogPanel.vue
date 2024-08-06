@@ -67,12 +67,12 @@
 </template>
 <script setup lang="ts">
 import { useLogStore } from '../../store/log'
-import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onActivated, onMounted, ref } from 'vue'
 import { Bars3Icon, XMarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline'
 import Sortable from 'sortablejs'
 import { useUserStore } from '../../store/user'
 import type { ILog } from '@paotuan/types'
-import { eventBus } from '../../utils'
+import { useEventBusListener } from '../../utils'
 import UndoManager from './UndoManager.vue'
 import { useHotkey } from '../../utils/useHotkey'
 
@@ -131,8 +131,7 @@ const scrollToBottomIfNeed = () => {
   }
 }
 
-onMounted(() => eventBus.on('client/log/add', scrollToBottomIfNeed))
-onBeforeUnmount(() => eventBus.off('client/log/add', scrollToBottomIfNeed))
+useEventBusListener('client/log/add', scrollToBottomIfNeed)
 onActivated(scrollToBottomIfNeed)
 
 useHotkey('ctrl+z,command+z', 'LogPanel', () => {

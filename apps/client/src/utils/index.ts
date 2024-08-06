@@ -2,6 +2,7 @@ import { useUIStore } from '../store/ui'
 import { useChannelStore } from '../store/channel'
 import { VERSION_NAME } from '@paotuan/types'
 import mitt from 'mitt'
+import { onBeforeUnmount, onMounted } from 'vue'
 
 export const Toast = {
   success: (msg: string) => useUIStore().toast('success', msg),
@@ -40,8 +41,17 @@ export function openHelpDoc(path: string) {
   window.open('https://paotuan.io' + path)
 }
 
-const eventBus = mitt()
+type Events = {
+  'client/log/add': void,
+  'client/scene/addCharacter': { type: 'actor' | 'npc', userId: string }
+}
+const eventBus = mitt<Events>()
 export { eventBus }
+
+export function useEventBusListener<T extends keyof Events>(eventName: T, listener: (arg: Events[T]) => void) {
+  onMounted(() => eventBus.on(eventName, listener))
+  onBeforeUnmount(() => eventBus.off(eventName, listener))
+}
 
 export function isEmptyNumber(num: number | null | undefined) {
   return num === null || typeof num === 'undefined' || isNaN(num)

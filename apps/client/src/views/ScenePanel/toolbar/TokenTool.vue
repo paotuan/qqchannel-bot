@@ -46,10 +46,9 @@ import { StarIcon, PhotoIcon } from '@heroicons/vue/24/outline'
 import { computed, reactive, ref, watch } from 'vue'
 import { BasicShape, basicShapes } from './utils'
 import type { IPolygonToken, IToken, IWedgeToken, IStarToken } from '../../../store/scene/map-types'
-import { useCurrentMap } from '../provide'
+import { useCurrentMapStage } from '../provide'
 
-const currentMap = useCurrentMap()
-const currentMapData = computed(() => currentMap.stage)
+const currentMapData = useCurrentMapStage()
 
 // 当前选中的 token
 const selectedToken = computed<IToken | null>(() => {
