@@ -23,31 +23,42 @@ const cardStore = useCardStore()
 const haveCardUsers = computed(() => userStore.enabledUserList.filter(u => cardStore.linkedUsers.includes(u.id)))
 // 未关联人物卡用户
 const noCardUsers = computed(() => userStore.enabledUserList.filter(u => !cardStore.linkedUsers.includes(u.id)))
+// 未关联用户的人物卡，可作为 npc 提供给用户选择
+// 但是过滤掉模板，理论上模板是让用户初始化的，而不是直接使用。但如果用户输入的名字就是模板的名字，那我们也不管
+// adapt 为 IUser 作为 Options，借用 isBot 字段和真实用户区分
+const noUserCards = computed<IUser[]>(() =>
+  cardStore.allCards.filter(card => !card.isTemplate && !cardStore.linkedCards.includes(card.name))
+    .map(card => ({ id: card.name, name: card.name, avatar: '', deleted: false, isBot: true }))
+)
 
 // 搜索相关
 const keyword = ref('')
+const keyword2lower = computed(() => keyword.value.toLowerCase())
 const keywordContains = (user: IUser) => {
-  const search = keyword.value.toLowerCase()
+  const search = keyword2lower.value
   return user.name.toLowerCase().includes(search)
 }
-const haveCardUsersAfterSearch = computed(() => haveCardUsers.value.filter(user => keywordContains(user)))
-const noCardUsersAfterSearch = computed(() => noCardUsers.value.filter(user => keywordContains(user)).slice(0, 100)) // 默认展示 100 条
+const haveCardUsersAfterSearch = computed(() => haveCardUsers.value.filter(keywordContains))
+const noCardUsersAfterSearch = computed(() => noCardUsers.value.filter(keywordContains).slice(0, 50)) // 默认展示 50 条
+const noUserCardsAfterSearch = computed(() => noUserCards.value.filter(keywordContains).slice(0, 50))
 
 const options = computed(() => [
   { id: '1', name: '已关联人物卡', children: haveCardUsersAfterSearch.value as IUser[] },
-  { id: '2', name: '未关联人物卡', children: noCardUsersAfterSearch.value as IUser[] }
+  { id: '2', name: '未关联人物卡', children: noCardUsersAfterSearch.value as IUser[] },
+  { id: '3', name: 'NPC', children: noUserCardsAfterSearch.value as IUser[] }
 ])
 
 // 点击选择玩家进入场景
 const sceneStore = useSceneStore()
 const select = (user: IUser) => {
-  const userCard = cardStore.getCardOfUser(user.id)
+  const type = user.isBot ? 'npc' : 'actor'
+  const userCard = type === 'actor' ? cardStore.getCardOfUser(user.id) : cardStore.getCardOfId(user.id)
   // 如果是 coc 人物卡，自动代入敏捷值作为 seq；如果是 dnd 则代入 seq2
   let seq = NaN
   if (userCard?.type === 'coc') {
     seq = userCard.getEntry('敏捷')?.value ?? NaN
   }
-  sceneStore.addCharacter({ type: 'actor', id: user.id, name: user.name, seq, seq2: NaN })
+  sceneStore.addCharacter({ type, id: user.id, name: user.name, seq, seq2: NaN })
   blur()
 }
 
