@@ -25,6 +25,8 @@
     <PreviewCardDialog />
     <!-- 发送战报弹窗 -->
     <BattleLogDialog v-model:visible="battleLogDialogVisible" />
+    <!-- 删除人物弹窗 -->
+    <DeleteCharacterDialog />
   </div>
 </template>
 <script setup lang="ts">
@@ -39,6 +41,7 @@ import BattleLogDialog from './BattleLogDialog.vue'
 import DragResizer from './DragResizer.vue'
 import PanelTabs from './PanelTabs.vue'
 import LayerManage from './LayerManage/LayerManage.vue'
+import DeleteCharacterDialog from './DeleteCharacterDialog.vue'
 
 const sceneStore = useSceneStore()
 const battleLogDialogVisible = ref(false)

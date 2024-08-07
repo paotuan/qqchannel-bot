@@ -20,6 +20,10 @@ export const useCardStore = defineStore('card', () => {
   const linkedCards = computed(() => Object.values(cardLinkMapNew.value))
 
   const of = (cardName: string) => cardDataMap.value[cardName]
+  const ofUser = (userId: string) => {
+    const cardName = cardLinkMapNew.value[userId]
+    return cardName ? of(cardName) : undefined
+  }
 
   // 卡片导入
   // 注：导入和删除还是发送到后端进行处理，因为要与 dicecore 同步
@@ -69,11 +73,8 @@ export const useCardStore = defineStore('card', () => {
 
   // 根据用户 id 反查关联卡片
   const getCardOfUser = (userId: string) => {
-    const cardName = cardLinkMapNew.value[userId]
-    if (!cardName) return undefined
-    const cardData = cardDataMap.value[cardName]
+    const cardData = ofUser(userId)
     if (!cardData) return undefined
-    // todo 后续看 createCard 放哪里?
     return createCard(cardData)
   }
 
@@ -81,7 +82,6 @@ export const useCardStore = defineStore('card', () => {
   const getCardOfId = (cardName: string) => {
     const cardData = of(cardName)
     if (!cardData) return undefined
-    // todo 与 getCardOfUser 保持一致
     return createCard(cardData)
   }
 
@@ -106,6 +106,7 @@ export const useCardStore = defineStore('card', () => {
     linkedUsers,
     linkedCards,
     of,
+    ofUser,
     importCard,
     deleteCard,
     linkedUserOf,

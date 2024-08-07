@@ -43,7 +43,6 @@ export function openHelpDoc(path: string) {
 
 type Events = {
   'client/log/add': void,
-  'client/scene/addCharacter': { type: 'actor' | 'npc', userId: string }
 }
 const eventBus = mitt<Events>()
 export { eventBus }

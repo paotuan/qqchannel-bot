@@ -23,7 +23,7 @@
         <button class="btn btn-xs btn-outline btn-circle" :disabled="!sceneStore.hasCurrentMap" @click.stop="addCharacterToken">
           <MapPinIcon class="size-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">
+        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter" @contextmenu.prevent="showDeleteCharacterDialog">
           <TrashIcon class="size-4" />
         </button>
       </span>
@@ -66,9 +66,13 @@ const selectCard = () => {
 }
 
 const sceneStore = useSceneStore()
-const addCharacterToken = () => sceneStore.addCharacterToken('actor', props.chara.id)
+const addCharacterToken = () => sceneStore.addCharacterToken(props.chara)
 
 const deleteCharacter = () => {
   sceneStore.deleteCharacter(props.chara)
+}
+
+const showDeleteCharacterDialog = () => {
+  sceneStore.currentOnDeleteCharacter = props.chara
 }
 </script>

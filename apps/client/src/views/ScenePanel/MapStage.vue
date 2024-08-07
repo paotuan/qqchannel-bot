@@ -65,7 +65,6 @@ import MapBasicInfo from './MapBasicInfo.vue'
 import MapContent from './konva/MapContent.vue'
 import GridTool from './toolbar/grid/GridTool.vue'
 import { useCurrentMapStage } from './provide'
-import { useEventBusListener } from '../../utils'
 
 const currentMapStage = useCurrentMapStage()
 
@@ -88,12 +87,6 @@ watch(() => unref(currentMapStage).selectNodeIds, ids => {
   }
 })
 // endregion 选择 token
-
-// region 从战斗面板添加人物 token
-useEventBusListener('client/scene/addCharacter', ({ type, userId }) => {
-  unref(currentMapStage).addCharacter(type, userId)
-})
-// endregion
 
 // // region 右键事件
 const contextMenuTokenId = ref<string | null>(null) // 触发右键的 Konva Node

@@ -5,10 +5,15 @@ import { nanoid } from 'nanoid/non-secure'
 import { getDefaultStageData, useSceneMap } from './map'
 import { IRiItem, VERSION_CODE } from '@paotuan/types'
 import { yChannelStoreRef, yGlobalStoreRef } from '../ystore'
-import { eventBus, isEmptyNumber } from '../../utils'
+import { isEmptyNumber } from '../../utils'
 import { useCardStore } from '../card'
 
 type SceneMap = ReturnType<typeof useSceneMap>
+
+interface DeleteCharacterOptions {
+  card?: boolean
+  token?: boolean
+}
 
 export const useSceneStore = defineStore('scene', () => {
   // 地图列表
@@ -49,8 +54,8 @@ export const useSceneStore = defineStore('scene', () => {
   }
 
   // 添加人物 token 到当前地图中
-  const addCharacterToken = (type: 'actor' | 'npc', userId: string) => {
-    eventBus.emit('client/scene/addCharacter', { type, userId })
+  const addCharacterToken = (chara: IRiItem) => {
+    currentMap.value?.stage.addCharacter(chara.type, chara.id)
   }
 
   // 时间指示器
@@ -80,13 +85,24 @@ export const useSceneStore = defineStore('scene', () => {
   }
 
   // 删除人物
-  const deleteCharacter = (chara: IRiItem) => {
-    const index = characters.value.indexOf(chara)
+  const deleteCharacter = (chara: IRiItem, { card = false, token = false } = loadDefaultDeleteCharacterOptions()) => {
+    const { type: charaType, id: charaId} = chara
+    const index = characters.value.findIndex(other => other.type === charaType && other.id === charaId)
     if (index >= 0) {
       characters.value.splice(index, 1)
-      // 删除人物不强制移除 token，可以选中该 token 让用户自己选择是否要删除
-      // 例如想要清空先攻列表重骰的情况不代表想移除 token
-      currentSelectedCharacter.value = chara
+    }
+    // 在这里就取不到 chara.id, chara.type 了，有点奇怪，第一步的时候先解构出来
+    // also delete card?
+    if (card) {
+      const cardStore = useCardStore()
+      const cardData = charaType === 'npc' ? cardStore.of(charaId) : cardStore.ofUser(charaId)
+      if (cardData) {
+        cardStore.deleteCard(cardData.name)
+      }
+    }
+    // also delete token?
+    if (token) {
+      currentMap.value?.stage.removeCharacter(charaType, charaId)
     }
   }
 
@@ -117,12 +133,16 @@ export const useSceneStore = defineStore('scene', () => {
     if (cardData) {
       const dupCardData = cloneDeep(cardData)
       dupCardData.name = dup.id
+      dupCardData.lastModified = Date.now()
       cardStore.importCard(dupCardData, true)
     }
   }
 
   // 当前正在预览人物卡的玩家/npc
   const currentPreviewCardCharacter = ref<IRiItem | null>(null)
+
+  // 当前正在准备删除的玩家/npc
+  const currentOnDeleteCharacter = ref<IRiItem | null>(null)
 
   // 发送地图图片指示器
   const sendMapImageSignal = ref(false)
@@ -148,6 +168,7 @@ export const useSceneStore = defineStore('scene', () => {
     deleteCharacter,
     duplicateNpc,
     currentPreviewCardCharacter,
+    currentOnDeleteCharacter,
     sendMapImageSignal,
     customColumns
   }
@@ -174,5 +195,19 @@ function loadCustomColumns(): { id: string, name: string }[] {
     return data
   } catch (e) {
     return []
+  }
+}
+
+export function saveDefaultDeleteCharacterOptions(data: DeleteCharacterOptions) {
+  localStorage.setItem('scene-deleteCharacterOptions', JSON.stringify(data))
+}
+
+export function loadDefaultDeleteCharacterOptions(): DeleteCharacterOptions {
+  const save = localStorage.getItem('scene-deleteCharacterOptions')
+  if (!save) return {}
+  try {
+    return JSON.parse(save)
+  } catch (e) {
+    return {}
   }
 }

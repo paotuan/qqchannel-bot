@@ -102,7 +102,7 @@ const charaName = computed(() => {
   if (userInfo.value) {
     return userInfo.value!.name
   } else {
-    return charaId.value || '' // npc 直接读，不从 npcInfo 读。因为 npcInfo 现在不保存，但地图保存，会造成重新打开时取不到昵称
+    return charaId.value || ''
   }
 })
 

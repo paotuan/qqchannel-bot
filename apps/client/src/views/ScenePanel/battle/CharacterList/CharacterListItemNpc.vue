@@ -27,7 +27,7 @@
         <button class="btn btn-xs btn-outline btn-circle" @click.stop="sceneStore.duplicateNpc(props.chara)">
           <Square2StackIcon class="size-4" />
         </button>
-        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter">
+        <button class="btn btn-xs btn-outline btn-circle btn-error" @click.stop="deleteCharacter" @contextmenu.prevent="showDeleteCharacterDialog">
           <TrashIcon class="size-4" />
         </button>
       </span>
@@ -46,7 +46,7 @@ const props = defineProps<{ chara: IRiItem }>()
 
 const sceneStore = useSceneStore()
 const showNpcCard = () => (sceneStore.currentPreviewCardCharacter = props.chara)
-const addCharacterToken = () => sceneStore.addCharacterToken('npc', props.chara.id)
+const addCharacterToken = () => sceneStore.addCharacterToken(props.chara)
 // npc 卡片信息（for template
 const cardStore = useCardStore()
 const npcCardnn = computed(() => cardStore.getCardOfId(props.chara.id)!)
@@ -73,5 +73,9 @@ const uploadAvatar = () => {
 
 const deleteCharacter = () => {
   sceneStore.deleteCharacter(props.chara)
+}
+
+const showDeleteCharacterDialog = () => {
+  sceneStore.currentOnDeleteCharacter = props.chara
 }
 </script>

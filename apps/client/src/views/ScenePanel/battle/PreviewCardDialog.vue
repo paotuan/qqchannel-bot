@@ -38,7 +38,7 @@ const currentCardData = computed(() => {
   if (isNpc.value) {
     return cardStore.of(userId)
   } else {
-    return cardStore.getCardOfUser(userId)?.data
+    return cardStore.ofUser(userId)
   }
 })
 const currentCardName = computed(() => currentCardData.value?.name ?? sceneStore.currentPreviewCardCharacter?.id ?? '')
@@ -83,6 +83,8 @@ const onApplyCard = () => {
     card.data.name = currentCardName.value
   }
   // 导入卡片
+  card.data.isTemplate = false
+  card.data.lastModified = Date.now()
   cardStore.importCard(card.data, true)
 }
 </script>
