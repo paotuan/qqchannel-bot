@@ -74,7 +74,7 @@ const onApplyCard = () => {
     card.data.name = currentNpcName.value
   }
   // 导入卡片
-  cardStore.importCard(card.data)
+  cardStore.importCard(card.data, true)
 }
 </script>
 <style scoped>

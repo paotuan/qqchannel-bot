@@ -23,10 +23,11 @@ export const useCardStore = defineStore('card', () => {
 
   // 卡片导入
   // 注：导入和删除还是发送到后端进行处理，因为要与 dicecore 同步
-  const importCard = (card: ICardData) => {
+  const importCard = (card: ICardData, silent = false) => {
     gtagEvent('card/import')
     ws.send<ICardImportReq>({ cmd: 'card/import', data: { card } })
     ws.once('card/import', data => {
+      if (silent) return
       if (data.success) {
         Toast.success('人物卡保存成功！')
       } else {

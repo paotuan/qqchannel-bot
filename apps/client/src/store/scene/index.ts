@@ -117,7 +117,7 @@ export const useSceneStore = defineStore('scene', () => {
     if (cardData) {
       const dupCardData = cloneDeep(cardData)
       dupCardData.name = dup.id
-      cardStore.importCard(dupCardData)
+      cardStore.importCard(dupCardData, true)
     }
   }
 
