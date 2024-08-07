@@ -45,7 +45,7 @@ import { IRiItem } from '@paotuan/types'
 const props = defineProps<{ chara: IRiItem }>()
 
 const sceneStore = useSceneStore()
-const showNpcCard = () => (sceneStore.currentCardNpc = props.chara)
+const showNpcCard = () => (sceneStore.currentPreviewCardCharacter = props.chara)
 const addCharacterToken = () => sceneStore.addCharacterToken('npc', props.chara.id)
 // npc 卡片信息（for template
 const cardStore = useCardStore()

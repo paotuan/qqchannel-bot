@@ -38,7 +38,6 @@ import { DocumentTextIcon, MapPinIcon, TrashIcon } from '@heroicons/vue/24/outli
 import { useCardStore } from '../../../../store/card'
 import CharacterHpBar from './CharacterHpBar.vue'
 import type { IRiItem, IUser } from '@paotuan/types'
-import { useRouter } from 'vue-router'
 
 const props = defineProps<{ chara: IRiItem }>()
 
@@ -60,15 +59,10 @@ const userCard = computed(() => cardStore.getCardOfUser(props.chara.id))
 const hp = computed(() => userCard.value?.HP ?? NaN)
 const maxHp = computed(() => userCard.value?.MAXHP ?? NaN)
 
-// 跳转到人物卡页面
-const router = useRouter()
+// 查看人物卡
 const selectCard = () => {
   if (!userCard.value) return
-  const cardName = userCard.value!.name
-  router.push({
-    path: '/card',
-    query: { selected: cardName }
-  })
+  sceneStore.currentPreviewCardCharacter = props.chara
 }
 
 const sceneStore = useSceneStore()

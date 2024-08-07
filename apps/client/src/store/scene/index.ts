@@ -121,12 +121,8 @@ export const useSceneStore = defineStore('scene', () => {
     }
   }
 
-  // 当前选中展示人物卡的 npc 名字
-  const currentCardNpcName = ref<string | null>(null)
-  const currentCardNpc = computed<IRiItem | null>({
-    get: () => characters.value.find(chara => chara.type === 'npc' && chara.id === currentCardNpcName.value) ?? null,
-    set: (value: IRiItem | null) => (currentCardNpcName.value = value ? value.id : null)
-  })
+  // 当前正在预览人物卡的玩家/npc
+  const currentPreviewCardCharacter = ref<IRiItem | null>(null)
 
   // 发送地图图片指示器
   const sendMapImageSignal = ref(false)
@@ -151,8 +147,7 @@ export const useSceneStore = defineStore('scene', () => {
     addCharacter,
     deleteCharacter,
     duplicateNpc,
-    currentCardNpcName,
-    currentCardNpc,
+    currentPreviewCardCharacter,
     sendMapImageSignal,
     customColumns
   }

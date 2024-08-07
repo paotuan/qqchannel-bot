@@ -21,8 +21,8 @@
       </div>
     </div>
     <LayerManage v-show="tab === 'layer'" />
-    <!-- NPC 编辑弹窗 -->
-    <NpcCardDialog />
+    <!-- 人物卡预览编辑弹窗 -->
+    <PreviewCardDialog />
     <!-- 发送战报弹窗 -->
     <BattleLogDialog v-model:visible="battleLogDialogVisible" />
   </div>
@@ -33,7 +33,7 @@ import TimeIndicator from './TimeIndicator.vue'
 import BattleTurnIndicator from './BattleTurnIndicator.vue'
 import UserSelector from './UserSelector.vue'
 import CharacterList from './CharacterList/CharacterList.vue'
-import NpcCardDialog from './NpcCardDialog.vue'
+import PreviewCardDialog from './PreviewCardDialog.vue'
 import { useSceneStore } from '../../../store/scene'
 import BattleLogDialog from './BattleLogDialog.vue'
 import DragResizer from './DragResizer.vue'

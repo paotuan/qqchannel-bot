@@ -1,12 +1,12 @@
 <template>
   <d-modal
-      :visible="!!sceneStore.currentCardNpc"
-      :title="currentNpcName"
+      :visible="!!sceneStore.currentPreviewCardCharacter"
+      :title="currentCardName"
       modal-class="npc-card-dialog"
-      @update:visible="sceneStore.currentCardNpc = null"
+      @update:visible="sceneStore.currentPreviewCardCharacter = null"
   >
     <div class="flex flex-col" style="height: calc(100vh - 14rem)">
-      <div class="flex-none flex items-center gap-2 mb-4">
+      <div v-if="isNpc" class="flex-none flex items-center gap-2 mb-4">
         <div class="label-text">请选择一个人物卡模板：</div>
         <CardTemplateSelect v-model="selectedTemplate" />
         <button class="btn btn-primary btn-sm" :disabled="!selectedTemplate" @click="onApplyCard">使用此模板初始化！</button>
@@ -28,18 +28,27 @@ import { cloneDeep } from 'lodash'
 import CardDisplay from '../../CardPanel/display/CardDisplay.vue'
 import CardTemplateSelect from './CardTemplateSelect.vue'
 
-// npc 所关联的人物卡
+// 当前查看的人物卡
 const sceneStore = useSceneStore()
 const cardStore = useCardStore()
-const currentNpcName = computed(() => sceneStore.currentCardNpc?.id || '')
-const currentCardData = computed(() => currentNpcName.value ? cardStore.of(currentNpcName.value) : undefined)
+const isNpc = computed(() => sceneStore.currentPreviewCardCharacter?.type === 'npc')
+const currentCardData = computed(() => {
+  const userId = sceneStore.currentPreviewCardCharacter?.id
+  if (!userId) return undefined
+  if (isNpc.value) {
+    return cardStore.of(userId)
+  } else {
+    return cardStore.getCardOfUser(userId)?.data
+  }
+})
+const currentCardName = computed(() => currentCardData.value?.name ?? sceneStore.currentPreviewCardCharacter?.id ?? '')
 
 // 选择人物卡模板
 const selectedTemplate = ref('')
 
 // 应用人物卡模板
 const createEmptyCardByType = (type: CardType) => {
-  const name = currentNpcName.value
+  const name = currentCardName.value
   const cardData = (() => {
     if (type === 'coc') {
       return getCocCardProto(name)
@@ -71,7 +80,7 @@ const onApplyCard = () => {
   } else {
     const originCard = cardStore.of(templateName)
     card = createCard(cloneDeep(originCard))
-    card.data.name = currentNpcName.value
+    card.data.name = currentCardName.value
   }
   // 导入卡片
   cardStore.importCard(card.data, true)
