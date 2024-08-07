@@ -20,15 +20,22 @@ export const useSceneStore = defineStore('scene', () => {
   const mapMap = computed(() => yGlobalStoreRef.value?.scenes ?? {})
   const mapList = computed(() => Object.values(mapMap.value))
   // 当前打开的地图
-  const currentMapId = ref<string | null>(null)
+  const currentMapId = ref<string | null>(mapList.value.at(0)?.id ?? null)
   const getCurrentMapData = () => currentMapId.value ? mapMap.value[currentMapId.value] : undefined
+
+  // 首次拉取到数据，默认选择第一个地图
+  watch(() => mapList.value.length, (len, oldLen) => {
+    if (len > 0 && oldLen === 0) {
+      currentMapId.value = mapList.value[0].id
+    }
+  })
 
   // 切换地图，重置当前地图响应式数据
   const currentMap = ref<SceneMap | null>(null)
   watch(currentMapId, () => {
     const mapData = getCurrentMapData()
     currentMap.value = mapData ? useSceneMap(mapData) : null
-  })
+  }, { immediate: true })
   const hasCurrentMap = computed(() => !!currentMap.value)
 
   // 新建地图

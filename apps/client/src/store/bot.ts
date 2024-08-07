@@ -10,7 +10,8 @@ type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
 // 注意 tab 与 platform 的不同。qq tab 下面可选 qq/qqguild 两个 platform
 // 出于历史兼容原因，qq tab 使用 qqguild 作为枚举
-export type LoginTab = 'qqguild' | 'kook'
+const AvailableLoginTabs = ['qqguild', 'kook'] as const
+export type LoginTab = typeof AvailableLoginTabs[number]
 
 // key 与 LoginTab 保持一致
 type Platform2ConfigMap = {
@@ -113,7 +114,11 @@ function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, tab: LoginTab, 
 }
 
 function loadLocalLoginInfo(): [LoginTab | null, Platform2ConfigMap] {
-  const tab  = localStorage.getItem('login-platform') as LoginTab | null
+  let tab  = localStorage.getItem('login-platform') as LoginTab | null
+  // tab 枚举值容错
+  if (tab && !AvailableLoginTabs.includes(tab)) {
+    tab = null
+  }
   const model: Platform2ConfigMap = (() => {
     try {
       return JSON.parse(localStorage.getItem('login-model') || '{}')

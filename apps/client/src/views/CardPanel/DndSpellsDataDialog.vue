@@ -53,10 +53,13 @@
   </d-modal>
 </template>
 <script setup lang="ts">
-import db from '../../data/dnd_spells.json'
+// import db from '../../data/dnd_spells.json'
 import DModal from '../../dui/modal/DModal.vue'
-import { computed } from 'vue'
+import { computed, shallowRef } from 'vue'
 import DSelect from '../../dui/select/DSelect.vue'
+
+const db = shallowRef<any[]>([])
+import('../../data/dnd_spells.json').then(arr => (db.value = arr.default))
 
 const props = defineProps<{ visible: boolean; keyword: string }>()
 const emit = defineEmits<{
@@ -64,6 +67,6 @@ const emit = defineEmits<{
   (e: 'update:keyword', value: string): void;
 }>()
 
-const options = computed(() => db.map(item => ({ label: item.name, value: item.name })))
-const currentData = computed(() => db.find(item => item.name === props.keyword))
+const options = computed(() => db.value.map(item => ({ label: item.name, value: item.name })))
+const currentData = computed(() => db.value.find(item => item.name === props.keyword))
 </script>
