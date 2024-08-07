@@ -5,6 +5,7 @@ import { useLogStore } from './log'
 import { watch } from 'vue'
 import { gtagEvent } from '../utils'
 import { initYStore } from './ystore'
+import { localStorageGet, localStorageSet } from '../utils/cache'
 
 export const useChannelStore = defineStore('channel', {
   state: () => ({
@@ -66,17 +67,6 @@ export const useChannelStore = defineStore('channel', {
 // 选择频道后，初始化和频道相关的本地存储
 function initChannelRelatedStorage(channelId: string) {
   const logStore = useLogStore()
-  logStore.logs = getLocalStorage<ILog[]>(`log-${channelId}`, [])
-  watch(() => logStore.logs.length, () => localStorage.setItem(`log-${channelId}`, JSON.stringify(logStore.logs)))
-}
-
-function getLocalStorage<T>(key: string, defaultValue: T) {
-  const str = localStorage.getItem(key)
-  if (!str) return defaultValue
-  try {
-    return JSON.parse(str) as T
-  } catch (e) {
-    localStorage.removeItem(key)
-    return defaultValue
-  }
+  logStore.logs = localStorageGet<ILog[]>(`log-${channelId}`, [])
+  watch(() => logStore.logs.length, () => localStorageSet(`log-${channelId}`, JSON.stringify(logStore.logs)))
 }

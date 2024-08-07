@@ -72,6 +72,7 @@ import ChannelCreate from './ChannelCreate.vue'
 import qqLogo from '../../assets/qq.png'
 import { useBotStore } from '../../store/bot'
 import ChannelLabel from './ChannelLabel.vue'
+import { localStorageGet, localStorageSet } from '../../utils/cache'
 
 const channelStore = useChannelStore()
 const channelsGroupByGuild = computed(() => groupBy(channelStore.list || [], channel => channel.guildId))
@@ -104,7 +105,7 @@ const botStore = useBotStore()
 
 // qq 群特殊处理，记录上次使用的群 openId 用于快速进入
 const qqLastGroupTempChannel = computed<IChannel | null>(() => {
-  const openId = localStorage.getItem('qqLastGroupOpenId')
+  const openId = localStorageGet('qqLastGroupOpenId', '')
   return openId ? {
     id: openId,
     name: openId,
@@ -131,7 +132,7 @@ const launch = () => {
   channelStore.listenTo(channel)
   // qq 群特殊处理，记录一下 open id
   if (botStore.platform === 'qq') {
-    localStorage.setItem('qqLastGroupOpenId', channel.id)
+    localStorageSet('qqLastGroupOpenId', channel.id)
   }
 }
 </script>

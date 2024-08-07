@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { localStorageGet, localStorageSet } from '../utils/cache'
 
 export type ToastType = 'success' | 'warning' | 'info' | 'error'
 let toastId = 0
@@ -7,7 +8,7 @@ export const useUIStore = defineStore('ui', {
   state: () => ({
     connectionStatus: true, // 连接状态
     toasts: [] as { id: number, type: ToastType, msg: string }[],
-    theme: localStorage.getItem('theme') || 'light',
+    theme: localStorageGet('theme', 'light'),
     userManageDialogShow: false
   }),
   actions: {
@@ -24,7 +25,7 @@ export const useUIStore = defineStore('ui', {
     setTheme(theme: string) {
       this.theme = theme
       document.documentElement.dataset.theme = theme
-      localStorage.setItem('theme', theme)
+      localStorageSet('theme', theme)
     }
   }
 })

@@ -5,6 +5,7 @@ import { gtagEvent } from '../utils'
 import { computed, ref } from 'vue'
 import md5 from 'md5'
 import { useChannelStore } from './channel'
+import { localStorageGet, localStorageSet } from '../utils/cache'
 
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
@@ -22,7 +23,7 @@ type Platform2ConfigMap = {
 export const useBotStore = defineStore('bot', () => {
   const [_tab, _model] = loadLocalLoginInfo()
 
-  const tab = ref<LoginTab>(_tab ?? 'qqguild')
+  const tab = ref<LoginTab>(_tab)
 
   const formQQ = ref<IBotConfig_QQ>(_model.qqguild ?? {
     platform: 'qqguild',
@@ -108,24 +109,18 @@ export const useBotStore = defineStore('bot', () => {
 })
 
 function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, tab: LoginTab, model: IBotConfig) {
-  localStorage.setItem('login-platform', tab)
+  localStorageSet('login-platform', tab)
   const newData: Platform2ConfigMap = { ...allData, [tab]: model }
-  localStorage.setItem('login-model', JSON.stringify(newData))
+  localStorageSet('login-model', JSON.stringify(newData))
 }
 
-function loadLocalLoginInfo(): [LoginTab | null, Platform2ConfigMap] {
-  let tab  = localStorage.getItem('login-platform') as LoginTab | null
+function loadLocalLoginInfo(): [LoginTab, Platform2ConfigMap] {
+  let tab  = localStorageGet<LoginTab>('login-platform', 'qqguild')
   // tab 枚举值容错
   if (tab && !AvailableLoginTabs.includes(tab)) {
-    tab = null
+    tab = 'qqguild'
   }
-  const model: Platform2ConfigMap = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('login-model') || '{}')
-    } catch (e) {
-      return {}
-    }
-  })()
+  const model = localStorageGet<Platform2ConfigMap>('login-model', {})
 
   return [tab, model]
 }

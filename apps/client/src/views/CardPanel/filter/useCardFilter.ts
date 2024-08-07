@@ -1,4 +1,5 @@
 import { reactive, watch } from 'vue'
+import { localStorageGet, localStorageSet } from '../../../utils/cache'
 
 export type Filter = {
   linkState: 'linked' | 'unlinked' | '',
@@ -36,40 +37,24 @@ export function useCardFilter() {
   // read from localstorage
   const { filterValue, sorterValue } = loadCardFilters()
 
-  const filter = reactive<Filter>(filterValue ?? {
-    linkState: '',
-    cardType: '',
-    keyword: ''
-  })
+  const filter = reactive<Filter>(filterValue)
 
-  const sorter = reactive<Sorter>(sorterValue ?? { prop: '', order: '' })
+  const sorter = reactive<Sorter>(sorterValue)
 
-  watch(filter, () => localStorage.setItem('card-filter', JSON.stringify(filter)), { deep: true })
-  watch(sorter, () => localStorage.setItem('card-sorter', JSON.stringify(sorter)), { deep: true })
+  watch(filter, () => localStorageSet('card-filter', JSON.stringify(filter)), { deep: true })
+  watch(sorter, () => localStorageSet('card-sorter', JSON.stringify(sorter)), { deep: true })
 
   return { filter, sorter }
 }
 
 function loadCardFilters() {
-  const savedFilter = localStorage.getItem('card-filter')
-  const filterValue = (() => {
-    if (!savedFilter) return undefined
-    try {
-      return JSON.parse(savedFilter) as Filter
-    } catch (e) {
-      return undefined
-    }
-  })()
+  const filterValue = localStorageGet<Filter>('card-filter', {
+    linkState: '',
+    cardType: '',
+    keyword: ''
+  })
 
-  const savedSorter = localStorage.getItem('card-sorter')
-  const sorterValue = (() => {
-    if (!savedSorter) return undefined
-    try {
-      return JSON.parse(savedSorter) as Sorter
-    } catch (e) {
-      return undefined
-    }
-  })()
+  const sorterValue = localStorageGet<Sorter>('card-sorter', { prop: '', order: '' })
 
   return { filterValue, sorterValue }
 }

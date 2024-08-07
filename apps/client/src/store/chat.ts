@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import Api2d from '@paotuan/api2d'
+import { localStorageGet, localStorageSet } from '../utils/cache'
 
 interface IMessage {
   id: string
@@ -27,10 +28,10 @@ export const useChatStore = defineStore('chat', () => {
   const history = reactive<IMessage[]>([])
   const chatLoading = ref(false)
   const settings = loadChatSettings()
-  const useOfficialApi = ref(settings?.useOfficialApi ?? false)
-  const apiKey = ref(settings?.apiKey ?? '')
-  const apiProxy = ref(settings?.apiProxy ?? '')
-  const model = ref(settings?.model ?? 'gpt-3.5-turbo')
+  const useOfficialApi = ref(settings.useOfficialApi)
+  const apiKey = ref(settings.apiKey)
+  const apiProxy = ref(settings.apiProxy)
+  const model = ref(settings.model)
   const apiClient = shallowRef(new Api2d())
 
   const _getBodyAndRecord = (content: string) => {
@@ -112,18 +113,17 @@ export const useChatStore = defineStore('chat', () => {
   }))
 
   watch(settingsAsJson, obj => {
-    localStorage.setItem('chat-settings', JSON.stringify(obj))
+    localStorageSet('chat-settings', JSON.stringify(obj))
   })
 
   return { systemPrompt, history, chatLoading, useOfficialApi, apiKey, apiProxy, model, request, clearHistory, clearSingle }
 })
 
-function loadChatSettings(): IChatSetting | undefined {
-  const settings = localStorage.getItem('chat-settings')
-  if (!settings) return undefined
-  try {
-    return JSON.parse(settings) as IChatSetting
-  } catch (e) {
-    return undefined
-  }
+function loadChatSettings() {
+  return localStorageGet<IChatSetting>('chat-settings', {
+    useOfficialApi: false,
+    apiKey: '',
+    apiProxy: '',
+    model: 'gpt-3.5-turbo'
+  })
 }

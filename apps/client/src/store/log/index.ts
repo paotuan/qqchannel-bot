@@ -5,13 +5,14 @@ import { eventBus, gtagEvent } from '../../utils'
 import { useBotStore } from '../bot'
 import type { ILogCommand } from './command'
 import { DeleteAction, DragAction } from './command'
+import { localStorageGet, localStorageSet } from '../../utils/cache'
 
 export const useLogStore = defineStore('log', {
   state: () => ({
     logs: [] as ILog[],
     actionStack: [] as ILogCommand[],
-    filterDiceCommand: getBooleanConfig('config-filterDiceCommand', false), // 是否无视指令消息
-    autoScroll: getBooleanConfig('config-autoScrollLog', true), // 是否自动滚动到 log 底部
+    filterDiceCommand: localStorageGet('config-filterDiceCommand', false), // 是否无视指令消息
+    autoScroll: localStorageGet('config-autoScrollLog', true), // 是否自动滚动到 log 底部
     enableLog: true
   }),
   actions: {
@@ -67,11 +68,11 @@ export const useLogStore = defineStore('log', {
     },
     toggleFilterDiceCommand() {
       this.filterDiceCommand = !this.filterDiceCommand
-      localStorage.setItem('config-filterDiceCommand', String(this.filterDiceCommand))
+      localStorageSet('config-filterDiceCommand', String(this.filterDiceCommand))
     },
     toggleAutoScroll() {
       this.autoScroll = !this.autoScroll
-      localStorage.setItem('config-autoScrollLog', String(this.autoScroll))
+      localStorageSet('config-autoScrollLog', String(this.autoScroll))
     }
   }
 })
@@ -183,9 +184,4 @@ function gtagLogs(logs: ILog[]) {
       gtagEvent('log/botMessage')
     }
   })
-}
-
-function getBooleanConfig(key: string, defaultValue: boolean) {
-  const str = localStorage.getItem(key)
-  return str ? Boolean(str) : defaultValue
 }

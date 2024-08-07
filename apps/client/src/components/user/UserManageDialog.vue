@@ -50,6 +50,7 @@ import type { ILog, IUser } from '@paotuan/types'
 import { Toast } from '../../utils'
 import { useLogStore } from '../../store/log'
 import UserEditItem from './UserEditItem.vue'
+import { localStorageGet } from '../../utils/cache'
 
 const ui = useUIStore()
 const userStore = useUserStore()
@@ -98,7 +99,7 @@ const handleLogAction = () => {
       const key = localStorage.key(i)
       if (key && key.startsWith('log-')) {
         try {
-          const logs = JSON.parse(localStorage.getItem(key)!) as ILog[]
+          const logs = localStorageGet<ILog[]>(key as `log-${string}`, [])
           edited[key] = logs.filter(log => !selectedUserIds.value.includes(log.userId))
         } catch (e) {
           // ignore

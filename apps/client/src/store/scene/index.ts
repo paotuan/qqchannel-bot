@@ -7,6 +7,7 @@ import { IRiItem, VERSION_CODE } from '@paotuan/types'
 import { yChannelStoreRef, yGlobalStoreRef } from '../ystore'
 import { isEmptyNumber } from '../../utils'
 import { useCardStore } from '../card'
+import { localStorageGet, localStorageSet } from '../../utils/cache'
 
 type SceneMap = ReturnType<typeof useSceneMap>
 
@@ -191,30 +192,18 @@ function compareSeq(a: number, b: number) {
 
 function saveCustomColumns(list: { id: string, name: string }[]) {
   const save = JSON.stringify({ version: VERSION_CODE, data: list })
-  localStorage.setItem('scene-customColumns', save)
+  localStorageSet('scene-customColumns', save)
 }
 
 function loadCustomColumns(): { id: string, name: string }[] {
-  const save = localStorage.getItem('scene-customColumns')
-  if (!save) return []
-  try {
-    const { data } = JSON.parse(save)
-    return data
-  } catch (e) {
-    return []
-  }
+  const { data } = localStorageGet('scene-customColumns', { data: [] })
+  return data
 }
 
 export function saveDefaultDeleteCharacterOptions(data: DeleteCharacterOptions) {
-  localStorage.setItem('scene-deleteCharacterOptions', JSON.stringify(data))
+  localStorageSet('scene-deleteCharacterOptions', JSON.stringify(data))
 }
 
-export function loadDefaultDeleteCharacterOptions(): DeleteCharacterOptions {
-  const save = localStorage.getItem('scene-deleteCharacterOptions')
-  if (!save) return {}
-  try {
-    return JSON.parse(save)
-  } catch (e) {
-    return {}
-  }
+export function loadDefaultDeleteCharacterOptions() {
+  return localStorageGet<DeleteCharacterOptions>('scene-deleteCharacterOptions', {})
 }

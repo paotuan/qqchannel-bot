@@ -69,6 +69,11 @@ const exportDb = () => {
     }
   })
 }
+
+const logout = () => {
+  sessionStorage.clear()
+  location.reload()
+}
 </script>
 <template>
   <div class="navbar bg-base-100 shadow-lg">
