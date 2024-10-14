@@ -55,3 +55,9 @@ export function useEventBusListener<T extends keyof Events>(eventName: T, listen
 export function isEmptyNumber(num: number | null | undefined) {
   return num === null || typeof num === 'undefined' || isNaN(num)
 }
+
+export function isFromRefresh() {
+  const [navigationEntry] = performance.getEntriesByType('navigation')
+  // @ts-expect-error https://stackoverflow.com/questions/53613071/determining-navigation-type-from-performancenavigationtiming
+  return navigationEntry?.type === 'reload'
+}

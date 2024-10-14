@@ -2,12 +2,16 @@ import mitt from 'mitt'
 import type { IMessage, Command } from '@paotuan/types'
 import { useUIStore } from '../store/ui'
 import { serverAddr, serverPort } from './endpoint'
+import { useBotStore } from '../store/bot'
 
 const ws = new WebSocket(`ws://${serverAddr}:${serverPort}`)
 const wsEmitter = mitt()
 
 ws.onopen = () => {
   console.log('已连接到服务端')
+  // 时序问题，简单粗暴地把自动登录逻辑放在这里处理
+  const bot = useBotStore()
+  bot.tryAutoLogin()
 }
 
 ws.onmessage = (data) => {

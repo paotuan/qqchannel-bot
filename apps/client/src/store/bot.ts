@@ -1,11 +1,19 @@
-import type { IBotInfo, ILoginReqV2, IBotConfig, IBotConfig_Kook, IBotConfig_QQ, IBotInfoResp } from '@paotuan/types'
+import type {
+  IBotInfo,
+  ILoginReqV2,
+  IBotConfig,
+  IBotConfig_Kook,
+  IBotConfig_QQ,
+  IBotInfoResp,
+  IChannel
+} from '@paotuan/types'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
-import { gtagEvent } from '../utils'
+import { gtagEvent, isFromRefresh } from '../utils'
 import { computed, ref } from 'vue'
 import md5 from 'md5'
 import { useChannelStore } from './channel'
-import { localStorageGet, localStorageSet } from '../utils/cache'
+import { localStorageGet, localStorageSet, sessionStorageGet, sessionStorageSet } from '../utils/cache'
 
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
@@ -75,18 +83,22 @@ export const useBotStore = defineStore('bot', () => {
   const connect = () => {
     const model = formModel.value
     const isValid = validateForm()
-    if (!isValid) return
-    loginState.value = 'LOADING'
-    gtagEvent('bot/login', { platform: model.platform }, false)
-    saveLoginInfo2LocalStorage(_model, tab.value, model)
-    ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
-    ws.once('bot/loginV2', resp => {
-      console.log('login success')
-      onLoginFinish(!!resp.success)
+    if (!isValid) return false
+    return new Promise<boolean>(resolve => {
+      loginState.value = 'LOADING'
+      gtagEvent('bot/login', { platform: model.platform }, false)
+      saveLoginInfo2LocalStorage(_model, tab.value, model)
+      sessionStorageSet('login-step', String(1))
+      ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
+      ws.once('bot/loginV2', resp => {
+        console.log('login success')
+        onLoginFinish(!!resp.success)
+        resolve(!!resp.success)
+      })
+      // 开始监听 channel list
+      const channelStore = useChannelStore()
+      channelStore.waitForServerChannelList()
     })
-    // 开始监听 channel list
-    const channelStore = useChannelStore()
-    channelStore.waitForServerChannelList()
   }
 
   const onLoginFinish = (success: boolean) => {
@@ -105,7 +117,40 @@ export const useBotStore = defineStore('bot', () => {
 
   const info = ref<IBotInfo | null>(null)
 
-  return { tab, platform, formModel, loginState, connect, info }
+  // 自动登录逻辑
+  const isAutoLoginLoading = ref(true)
+  const tryAutoLogin = async () => {
+    // 1. 如果从当前页面刷新，则尝试自动登录
+    // 如果不是刷新操作则不自动登录，因为几乎没有两个页面登录同一个子频道的需求场景
+    if (isFromRefresh()) {
+      isAutoLoginLoading.value = true
+      try {
+        const loginStep = sessionStorageGet<number>('login-step', 0)
+        // 1.1 登录机器人
+        if (loginStep < 1) return // 刷新前未登录
+        if (!(await connect())) return // 没有已保存的登录凭据，或登录失败
+        // 1.2 登录子频道
+        if (loginStep < 2) return // 刷新前未登录子频道
+        const loginChannel = localStorageGet<IChannel | null>('login-channel', null)
+        if (!loginChannel) return // 没有已保存的子频道
+        await useChannelStore().listenTo(loginChannel)
+      } finally {
+        isAutoLoginLoading.value = false
+      }
+      return
+    }
+    // 2. 如果从“我要多开”打开，则尝试自动登录机器人
+    // 目前只有一处地方，直接用 opener 判断了
+    if (window.opener && window.opener !== window) {
+      isAutoLoginLoading.value = true
+      await connect()
+      isAutoLoginLoading.value = false
+      return
+    }
+    isAutoLoginLoading.value = false
+  }
+
+  return { tab, platform, formModel, loginState, connect, info, isAutoLoginLoading, tryAutoLogin }
 })
 
 function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, tab: LoginTab, model: IBotConfig) {

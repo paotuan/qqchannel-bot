@@ -116,11 +116,13 @@ const channelToLaunch = computed(() => {
   return channel
 })
 
-const launch = () => {
+const launch = async () => {
   const channel = channelToLaunch.value
   if (!channel) return
-  channelStore.listenTo(channel)
-  localStorageSet('login-channel', JSON.stringify(channel))
+  const success = await channelStore.listenTo(channel)
+  if (success) {
+    localStorageSet('login-channel', JSON.stringify(channel))
+  }
 }
 </script>
 <style scoped>

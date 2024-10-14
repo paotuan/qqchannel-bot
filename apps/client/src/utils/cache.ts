@@ -22,6 +22,21 @@ export function localStorageSet(key: LocalStorageKeys, value: string) {
 
 export function localStorageGet<T>(key: LocalStorageKeys, defaultValue: T) {
   const item = localStorage.getItem(key)
+  return baseGet(item, defaultValue)
+}
+
+export type SessionStorageKeys = 'login-step' // 0 - 未登录，1 - 已登录机器人，2 - 已选择子频道
+
+export function sessionStorageSet(key: SessionStorageKeys, value: string) {
+  sessionStorage.setItem(key, value)
+}
+
+export function sessionStorageGet<T>(key: SessionStorageKeys, defaultValue: T) {
+  const item = sessionStorage.getItem(key)
+  return baseGet(item, defaultValue)
+}
+
+function baseGet<T>(item: string | null, defaultValue: T) {
   if (!item) return defaultValue
   if (typeof defaultValue === 'string') {
     return item as T

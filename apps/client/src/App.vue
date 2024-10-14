@@ -102,14 +102,16 @@ const logout = () => {
     </div>
   </div>
   <div>
-    <template v-if="bot.loginState !== 'LOGIN'">
-      <login-panel class="mt-40" />
-    </template>
-    <template v-else-if="!channel.selected">
-      <channel-select />
-    </template>
-    <template v-else>
-      <main-layout />
+    <template v-if="!bot.isAutoLoginLoading">
+      <template v-if="bot.loginState !== 'LOGIN'">
+        <login-panel class="mt-40" />
+      </template>
+      <template v-else-if="!channel.selected">
+        <channel-select />
+      </template>
+      <template v-else>
+        <main-layout />
+      </template>
     </template>
   </div>
   <div class="toast toast-start">
