@@ -13,6 +13,7 @@ import { Toast } from './utils'
 import { VERSION_NAME } from '@paotuan/types'
 import AiAssistant from './components/nav/AiAssistant.vue'
 import ws from './api/ws'
+import { LocalStorageKeys } from './utils/cache'
 
 const bot = useBotStore()
 const channel = useChannelStore()
@@ -33,12 +34,12 @@ const toastClass = (type: ToastType) => {
 }
 
 const clearCache = () => {
-  const allKeys = ['login-platform', 'login-model']
+  const allKeys: LocalStorageKeys[] = ['login-platform', 'login-model', 'login-channel']
   const length = localStorage.length
   for (let i = 0; i < length; i++) {
     const key = localStorage.key(i)
     if (key && key.startsWith('log-')) {
-      allKeys.push(key)
+      allKeys.push(key as `log-${string}`)
     }
   }
   allKeys.forEach(key => localStorage.removeItem(key))
@@ -84,6 +85,7 @@ const logout = () => {
           <li><a @click="checkUpdate">版本：{{ VERSION_NAME }}</a></li>
           <li><a @click="clearCache">清除缓存</a></li>
           <li><a @click="exportDb">导出数据</a></li>
+          <li><a @click="logout">退出登录</a></li>
           <li><a href="https://paotuan.io" target="_blank">使用帮助<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
           <li><a href="https://pd.qq.com/s/fjp30g" target="_blank">官方频道<ArrowTopRightOnSquareIcon class="size-4" /></a></li>
           <li><a href="https://afdian.com/a/florastudio" target="_blank">支持我们<ArrowTopRightOnSquareIcon class="size-4" /></a></li>

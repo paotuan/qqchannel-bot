@@ -104,17 +104,7 @@ onMounted(() => {
 const botStore = useBotStore()
 
 // qq 群特殊处理，记录上次使用的群 openId 用于快速进入
-const qqLastGroupTempChannel = computed<IChannel | null>(() => {
-  const openId = localStorageGet('qqLastGroupOpenId', '')
-  return openId ? {
-    id: openId,
-    name: openId,
-    type: 0,
-    guildId: openId,
-    guildName: openId,
-    guildIcon: ''
-  } : null
-})
+const qqLastGroupTempChannel = computed(() => localStorageGet<IChannel | null>('login-channel', null))
 
 const channelToLaunch = computed(() => {
   // 优先使用用户已选的 channel
@@ -130,10 +120,7 @@ const launch = () => {
   const channel = channelToLaunch.value
   if (!channel) return
   channelStore.listenTo(channel)
-  // qq 群特殊处理，记录一下 open id
-  if (botStore.platform === 'qq') {
-    localStorageSet('qqLastGroupOpenId', channel.id)
-  }
+  localStorageSet('login-channel', JSON.stringify(channel))
 }
 </script>
 <style scoped>

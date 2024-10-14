@@ -6,6 +6,7 @@ export type LocalStorageKeys =
   | 'theme' // 主题
   | 'login-platform' // 机器人平台
   | 'login-model' // 机器人凭据
+  | 'login-channel' // 已选子频道
   | `log-${string}` // log
   | 'chat-settings' // ai 设置
   | 'config-filterDiceCommand' // log 面板配置
@@ -14,7 +15,6 @@ export type LocalStorageKeys =
   | 'card-sorter'
   | 'scene-customColumns' // 战斗面板配置
   | 'scene-deleteCharacterOptions'
-  | 'qqLastGroupOpenId' // todo 待废弃
 
 export function localStorageSet(key: LocalStorageKeys, value: string) {
   localStorage.setItem(key, value)
