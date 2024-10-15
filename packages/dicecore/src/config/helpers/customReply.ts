@@ -1,5 +1,6 @@
 import type { ICommand, ICustomReplyConfig, ICustomReplyConfigItem } from '@paotuan/config'
 import Mustache from 'mustache'
+import Element from '@satorijs/element'
 import { CardProvider } from '../../card/card-provider'
 import { parseTemplate } from '../../dice'
 import { at } from '../../dice/utils'
@@ -42,7 +43,20 @@ async function parseMessage(processor: ICustomReplyConfig, matchGroups: Record<s
     }
     const template = await replyFunc(env, matchGroups)
     // 替换 inline rolls
-    return parseTemplate(template, { userId, username, userRole, channelUnionId }, [], 'message_template')
+    let result = parseTemplate(template, { userId, username, userRole, channelUnionId }, [], 'message_template')
+    // 如果是从插件发起的，且包含本地图片，需要把本地图片 baseUrl 修改为插件的路径
+    if (processor.pluginId) {
+      result = Element.transform(result, ({ type, attrs }) => {
+        if (type === 'img') {
+          const url: string = attrs.src || ''
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            attrs.src = `__plugins__/${processor.pluginId}/${url}`
+          }
+        }
+        return true
+      })
+    }
+    return result
   } catch (e: any) {
     console.error('[Config] 自定义回复处理出错', e?.message)
     return undefined

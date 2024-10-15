@@ -41,6 +41,7 @@ export class PluginProvider {
     const allIds = new Set<PluginFullId>()
     ;(['customReply', 'rollDecider', 'aliasRoll', 'customText'] as const).forEach(key => {
       plugin[key]?.forEach(item => {
+        item.pluginId = pluginId
         const fullId: PluginFullId = `${plugin.id}.${item.id}`
         allIds.add(fullId)
         this.itemsMap.set(fullId, item)
@@ -48,6 +49,7 @@ export class PluginProvider {
     })
     ;(['onReceiveCommand', 'beforeParseDiceRoll', 'onCardEntryChange', 'onMessageReaction', 'beforeDiceRoll', 'afterDiceRoll'] as const).forEach(key => {
       plugin.hook?.[key]?.forEach(item => {
+        item.pluginId = pluginId
         const fullId: PluginFullId = `${plugin.id}.${item.id}`
         allIds.add(fullId)
         this.itemsMap.set(fullId, item)

@@ -15,9 +15,10 @@ import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import Mustache from 'mustache'
 import { getChannelUnionId } from '../adapter/utils'
 import { parseTemplate, PluginProvider } from '@paotuan/dicecore'
+import { Element } from '@satorijs/core'
 
-const INTERNAL_PLUGIN_DIR = process.env.NODE_ENV === 'development' ? path.resolve('./src/plugins') : path.resolve(__dirname, './plugins')
-const PLUGIN_DIR = './plugins' // prod 环境外部插件文件夹
+export const INTERNAL_PLUGIN_DIR = process.env.NODE_ENV === 'development' ? path.resolve('./src/plugins') : path.resolve(__dirname, './plugins')
+export const PLUGIN_DIR = './plugins' // prod 环境外部插件文件夹
 
 export class PluginManager {
   private readonly wss: Wss
@@ -64,15 +65,15 @@ export class PluginManager {
       sendMessageToChannel: (env, msg, options = {}) => {
         // 兼容旧接口
         if (typeof options === 'string') options = { msgType: options }
-        return this._pluginSendMessage(env, msg, options)
+        return this._pluginSendMessage(env, msg, options, pluginId)
       },
       sendMessageToUser: (env, msg, options = {}) => {
         // 兼容旧接口
         if (typeof options === 'string') options = { msgType: options }
-        return this._pluginSendMessage(env, msg, options, env.userId)
+        return this._pluginSendMessage(env, msg, options, pluginId, env.userId)
       },
       sendMessage: (env, msg, options = {}) => {
-        return this._pluginSendMessage(env, msg, options)
+        return this._pluginSendMessage(env, msg, options, pluginId)
       },
       getConfig: ({ platform, guildId, channelId }) => {
         const channelUnionId = getChannelUnionId(platform, guildId, channelId)
@@ -92,17 +93,31 @@ export class PluginManager {
     } // todo: getItem/setItem
   }
 
-  private async _pluginSendMessage(env: ICommand<BotContext>['context'], msg: string, options: SendMessageOptions = {}, forceUserId?: string) {
+  private async _pluginSendMessage(env: ICommand<BotContext>['context'], msg: string, options: SendMessageOptions = {}, pluginId: string, forceUserId?: string) {
     const bot = this.wss.bots.find(env.botId)
     if (!bot) return
     const command: ICommand<BotContext> = { command: '', context: env }
     const { msgType = 'text', skipParse = false } = options
-    // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
     if (msgType === 'text') {
-      const content = skipParse ? msg : parseTemplate(msg, env, [], 'message_template')
+      // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
+      let content = skipParse ? msg : parseTemplate(msg, env, [], 'message_template')
+      // 如包含本地图片，需要把本地图片 baseUrl 修改为插件的路径
+      content = Element.transform(content, ({ type, attrs }) => {
+        if (type === 'img') {
+          const url: string = attrs.src || ''
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            attrs.src = `__plugins__/${pluginId}/${url}`
+          }
+        }
+        return true
+      })
       return bot.commandHandler.sendMessage(command, content, forceUserId)
     } else {
-      return bot.commandHandler.sendMessage(command, `<img src="${msg}"/>`, forceUserId)
+      let url = msg
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = `__plugins__/${pluginId}/${url}`
+      }
+      return bot.commandHandler.sendMessage(command, `<img src="${url}"/>`, forceUserId)
     }
   }
 

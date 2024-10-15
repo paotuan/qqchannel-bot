@@ -12,6 +12,7 @@
     "@dice-roller/rpg-dice-roller": "^5.3.2",
     "@paotuan/card": "2.0.0",
     "@paotuan/config": "2.0.0",
+    "@satorijs/element": "^3.1.7",
     "lru-cache": "^7.14.0",
     "mustache": "^4.2.0"
   }

@@ -2,13 +2,17 @@ import { IncomingMessage, ServerResponse } from 'node:http'
 import { extname } from 'node:path'
 import fs from 'fs'
 import { resolveRootDir } from '../utils'
+import { INTERNAL_PLUGIN_DIR, PLUGIN_DIR } from '../service/plugin'
 
 const IMAGE_SERVE_DIR = resolveRootDir('images')
+const PLUGIN_SERVE_DIR = process.env.NODE_ENV === 'development' ? INTERNAL_PLUGIN_DIR : PLUGIN_DIR
 
 // https://github.com/adrian-deniz/nodejs-static-file-server/blob/master/index.js
 export function serveStatic(request: IncomingMessage, response: ServerResponse) {
   console.log('request', request.url) // '/images.png'
-  const filePath = IMAGE_SERVE_DIR + request.url
+  const filePath = request.url?.startsWith('/__plugins__/')
+    ? request.url.replace(/^\/__plugins__/, PLUGIN_SERVE_DIR)
+    : IMAGE_SERVE_DIR + request.url
   const ext = extname(filePath).toLowerCase()
   const contentType = mimeTypes[ext] || 'application/octet-stream'
 

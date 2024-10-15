@@ -4,6 +4,7 @@ export type UserRole = 'admin' | 'manager' | 'user'
 export interface IPluginElementCommonInfo {
   id: string // 短 id
   name: string
+  pluginId?: string // 所属插件 id，在插件注册时自动填充，外部无需关心。embedPlugin 为空
   description?: string
   defaultEnabled?: boolean
 }
