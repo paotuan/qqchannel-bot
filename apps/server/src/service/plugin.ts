@@ -1,6 +1,12 @@
 import type { Wss } from '../app/wss'
 import type { BotContext, ICommand, IPlugin, IPluginElementCommonInfo } from '@paotuan/config'
-import { VERSION_CODE, VERSION_NAME, type IPluginRegisterContext, type IPluginConfigDisplay } from '@paotuan/types'
+import {
+  VERSION_CODE,
+  VERSION_NAME,
+  type IPluginRegisterContext,
+  type IPluginConfigDisplay,
+  type SendMessageOptions
+} from '@paotuan/types'
 import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
@@ -55,54 +61,18 @@ export class PluginManager {
         }
       },
       queryCard: (query) => this.wss.cards.queryCard(query),
-      sendMessageToChannel: ({ platform, channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
-        const bot = this.wss.bots.find(botId)
-        const channel = bot?.guilds.findChannel(channelId, guildId)
-        if (!channel || !bot) throw new Error(`找不到频道，botId=${botId}, guildId=${guildId}, channelId=${channelId}`)
+      sendMessageToChannel: (env, msg, options = {}) => {
         // 兼容旧接口
-        if (typeof options === 'string') {
-          options = { msgType: options }
-        }
-        const { msgType = 'text', skipParse = false } = options
-        // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
-        if (msgType === 'text') {
-          const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-          const content = skipParse ? msg : parseTemplate(msg, { userId, username, userRole, channelUnionId }, [], 'message_template')
-          return channel.sendMessage(content)
-        } else {
-          return channel.sendMessage(`<img src="${msg}"/>`)
-        }
+        if (typeof options === 'string') options = { msgType: options }
+        return this._pluginSendMessage(env, msg, options)
       },
-      sendMessageToUser: ({ platform, channelId, guildId, botId, userId, username, userRole }, msg, options = {}) => {
-        const bot = this.wss.bots.find(botId)
-        const user = bot?.guilds.findUser(userId, guildId)
-        if (!user || !bot) throw new Error(`找不到用户，botId=${botId}, guildId=${guildId}, userId=${userId}`)
+      sendMessageToUser: (env, msg, options = {}) => {
         // 兼容旧接口
-        if (typeof options === 'string') {
-          options = { msgType: options }
-        }
-        const { msgType = 'text', skipParse = false } = options
-        // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
-        if (msgType === 'text') {
-          const channelUnionId = getChannelUnionId(platform, guildId, channelId)
-          const content = skipParse ? msg : parseTemplate(msg, { userId, username, userRole, channelUnionId }, [], 'message_template')
-          return user.sendMessage(content)
-        } else {
-          return user.sendMessage(`<img src="${msg}"/>`)
-        }
+        if (typeof options === 'string') options = { msgType: options }
+        return this._pluginSendMessage(env, msg, options, env.userId)
       },
-      sendMessage: async (env, msg, options = {}) => {
-        const bot = this.wss.bots.find(env.botId)
-        if (!bot) return
-        const command: ICommand<BotContext> = { command: '', context: env }
-        const { msgType = 'text', skipParse = false } = options
-        // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
-        if (msgType === 'text') {
-          const content = skipParse ? msg : parseTemplate(msg, env, [], 'message_template')
-          return bot.commandHandler.sendMessage(command, content)
-        } else {
-          return bot.commandHandler.sendMessage(command, `<img src="${msg}"/>`)
-        }
+      sendMessage: (env, msg, options = {}) => {
+        return this._pluginSendMessage(env, msg, options)
       },
       getConfig: ({ platform, guildId, channelId }) => {
         const channelUnionId = getChannelUnionId(platform, guildId, channelId)
@@ -120,6 +90,20 @@ export class PluginManager {
       _context: wss,
       _ // provide lodash for convenience
     } // todo: getItem/setItem
+  }
+
+  private async _pluginSendMessage(env: ICommand<BotContext>['context'], msg: string, options: SendMessageOptions = {}, forceUserId?: string) {
+    const bot = this.wss.bots.find(env.botId)
+    if (!bot) return
+    const command: ICommand<BotContext> = { command: '', context: env }
+    const { msgType = 'text', skipParse = false } = options
+    // 走一套 parseTemplate, 和自定义回复直接 return 的逻辑一致
+    if (msgType === 'text') {
+      const content = skipParse ? msg : parseTemplate(msg, env, [], 'message_template')
+      return bot.commandHandler.sendMessage(command, content, forceUserId)
+    } else {
+      return bot.commandHandler.sendMessage(command, `<img src="${msg}"/>`, forceUserId)
+    }
   }
 
   // 自带插件释放到 plugins 文件夹下

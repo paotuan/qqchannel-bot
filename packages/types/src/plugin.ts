@@ -7,7 +7,7 @@ export interface ICardQuery {
   isTemplate?: boolean
 }
 
-type SendMessageOptions = {
+export type SendMessageOptions = {
   msgType?: 'text' | 'image'
   skipParse?: boolean
 }
