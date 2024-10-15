@@ -11,8 +11,8 @@
           <template v-else>
             <div class="flex-grow">
               <div class="w-1/2 h-40">
-                <a :href="log.content" target="_blank" rel="noopener noreferrer">
-                  <img :src="log.content" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
+                <a :href="resolveImageUrl(log.content)" target="_blank" rel="noopener noreferrer">
+                  <img :src="resolveImageUrl(log.content)" referrerpolicy="no-referrer" class="max-h-full max-w-full object-contain" />
                 </a>
               </div>
             </div>
@@ -75,6 +75,7 @@ import type { ILog } from '@paotuan/types'
 import { useEventBusListener } from '../../utils'
 import UndoManager from './UndoManager.vue'
 import { useHotkey } from '../../utils/useHotkey'
+import { serverAddr, serverPort } from '../../api/endpoint'
 
 const logStore = useLogStore()
 const userStore = useUserStore()
@@ -137,4 +138,13 @@ onActivated(scrollToBottomIfNeed)
 useHotkey('ctrl+z,command+z', 'LogPanel', () => {
   logStore.undo(1)
 })
+
+// 处理发送本地图片路径问题，用于回显
+const resolveImageUrl = (url: string) => {
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return `http://${serverAddr}:${serverPort}/${url}`
+  } else {
+    return url
+  }
+}
 </script>
