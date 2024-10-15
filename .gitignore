@@ -40,4 +40,5 @@ tsconfig.tsbuildinfo
 /adapters/**/lib
 /packages/**/lib
 /packages/dicecore/src/test/plugins/
+/images/
 /*_bak/

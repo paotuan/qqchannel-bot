@@ -3,9 +3,10 @@ import { createWss } from '@paotuan/syncserver'
 import { Wss } from './wss'
 import { resolveRootDir } from '../utils'
 import { GlobalStore } from '../state'
+import { serveStatic } from './static'
 
 export async function setupServer(port: number) {
-  const httpServer = createServer()
+  const httpServer = createServer(serveStatic)
 
   const persistenceDir = resolveRootDir('db')
   const syncServer = createWss({ persistenceDir })
