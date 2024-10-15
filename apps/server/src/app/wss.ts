@@ -12,6 +12,7 @@ import { ChannelUnionId } from '../adapter/utils'
  * The server is a singleton websocket server
  */
 export class Wss {
+  readonly httpPort: number
   readonly server: WebSocketServer
   private readonly clients: WsClient[] = []
   readonly bots = new BotManager(this)
@@ -19,7 +20,8 @@ export class Wss {
   readonly plugin = new PluginManager(this)
   readonly config = new ConfigManager()
 
-  constructor() {
+  constructor(httpPort: number) {
+    this.httpPort = httpPort
     this.server = new WebSocketServer({ noServer: true })
 
     this.server.on('close', () => {

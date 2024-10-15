@@ -11,7 +11,7 @@ export async function setupServer(port: number) {
   const persistenceDir = resolveRootDir('db')
   const syncServer = createWss({ persistenceDir })
   await GlobalStore.Instance.initGlobalState() // 确保 bizServer 启动前已初始化完全局数据，以简化一些时序判断
-  const bizServer = new Wss().server
+  const bizServer = new Wss(port).server
 
   // https://github.com/websockets/ws?tab=readme-ov-file#multiple-servers-sharing-a-single-https-server
   httpServer.on('upgrade', (request, socket, head) => {

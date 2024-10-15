@@ -14,7 +14,7 @@ import { NickHandler } from '../service/nickHandler'
  */
 export class Bot {
   readonly config: IBotConfig
-  private readonly context = new Context()
+  private readonly context: Context
   readonly api: SatoriApi
   private readonly _fork: ForkScope
   readonly wss: Wss
@@ -30,6 +30,7 @@ export class Bot {
   private readonly listeningChannels = new Map<string, Set<string>>()
 
   constructor(config: IBotConfig, wss: Wss) {
+    this.context = new Context(wss.httpPort)
     this.wss = wss
     this.config = config
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

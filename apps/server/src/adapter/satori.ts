@@ -10,11 +10,11 @@ import {
 } from '@satorijs/core'
 
 export class Context extends SatoriContext {
-  constructor(config: any = {}) {
-    super(config)
+  constructor(httpPort: number) {
+    super()
     try {
       this.provide('http', undefined, true)
-      this.plugin(HTTP, { baseURL: 'http://localhost:4174' })
+      this.plugin(HTTP, { baseURL: `http://localhost:${httpPort}` })
     } catch (e) {
       console.log(e)
     }
