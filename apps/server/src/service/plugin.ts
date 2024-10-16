@@ -89,7 +89,8 @@ export class PluginManager {
         return this.wss.bots.find(parsed.context.botId)?.commandHandler.handleCommand(parsed)
       },
       _context: wss,
-      _ // provide lodash for convenience
+      _, // provide lodash for convenience
+      h: Element // provide Element for convenience
     } // todo: getItem/setItem
   }
 
@@ -277,7 +278,7 @@ const officialPluginsVersions = {
   'io.paotuan.plugin.namegen': 2,
   'io.paotuan.plugin.insane': 3,
   'io.paotuan.plugin.cardgen': 5,
-  'io.paotuan.plugin.draw': 2,
+  'io.paotuan.plugin.draw': 3,
   // 'io.paotuan.plugin.cocrules': 1,
   // 'io.paotuan.plugin.globalflags': 1
   'io.paotuan.plugin.compatible': 1

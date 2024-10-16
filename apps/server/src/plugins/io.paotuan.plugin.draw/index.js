@@ -2,11 +2,11 @@
 module.exports = (context) => {
   const { convertOtherFormatFiles } = require('./convert')
   const { loadDecks, reloadAllDecks, reloadDeck, drawDeck, drawRandomDeck, getAllDeckNames } = require('./deck')
-  const { roll, render, sendMessageToUser } = context
+  const { roll, render, h, sendMessageToUser } = context
   // 1. 从其他格式转换
   convertOtherFormatFiles()
   // 2. 构建牌堆到内存中
-  loadDecks(roll)
+  loadDecks(roll, h)
   // 抽取方法
   const deckProxy = (prop) => {
     let putBack = true // 默认抽取放回
@@ -44,7 +44,7 @@ module.exports = (context) => {
     id: 'io.paotuan.plugin.draw',
     name: '牌堆',
     description: '牌堆插件。使用方法详见 paotuan.io/plugin/draw.html',
-    version: 2,
+    version: 3,
     preference: [
       {
         key: 'hidden',
@@ -96,9 +96,9 @@ module.exports = (context) => {
           // reset
           if (isReset) {
             if (deckName) {
-              reloadDeck(deckName, roll)
+              reloadDeck(deckName, roll, h)
             } else {
-              reloadAllDecks(roll)
+              reloadAllDecks(roll, h)
             }
             return render(pref['resetSuccess'], formatArgs)
           }
