@@ -1,7 +1,8 @@
-import type { IBotConfig, IBotConfig_Kook, IBotConfig_QQ } from '@paotuan/types'
+import type { IBotConfig, IBotConfig_Kook, IBotConfig_QQ, IBotConfig_Satori } from '@paotuan/types'
 import type { Platform } from '@paotuan/config'
 import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
 import kookAdapter, { KookBot } from '@paotuan/adapter-kook'
+import satoriAdapter, { SatoriAdapter } from '@paotuan/adapter-satori'
 
 export type BotId = `${Platform}:${string}`
 export function getBotId(platform: Platform, appid: string): BotId {
@@ -35,6 +36,8 @@ export function adapterPlugin(platform: Platform) {
     return qqAdapter
   case 'kook':
     return kookAdapter
+  case 'satori':
+    return satoriAdapter
   // default:
   //   throw new Error(`Not implement platform: ${platform}`)
   }
@@ -48,6 +51,8 @@ export function adapterConfig(config: IBotConfig) {
     return adapterKook(config)
   case 'qq':
     return adapterQQ(config)
+  case 'satori':
+    return adapterSatori(config)
   // default:
   //   throw new Error(`Not implement platform: ${config.platform}`)
   }
@@ -85,6 +90,13 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
 function adapterKook(config: IBotConfig_Kook): KookBot.Config {
   return {
     protocol: 'ws',
+    token: config.token
+  }
+}
+
+function adapterSatori(config: IBotConfig_Satori): SatoriAdapter.Config {
+  return {
+    endpoint: config.endpoint,
     token: config.token
   }
 }

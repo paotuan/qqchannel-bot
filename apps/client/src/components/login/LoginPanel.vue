@@ -27,6 +27,9 @@
             <template v-else-if="currTab === 'kook'">
               <FormKook />
             </template>
+            <template v-else-if="currTab === 'satori'">
+              <FormSatori />
+            </template>
             <template v-else>疑似发生错误，请尝试清除缓存</template>
             <button class="btn btn-primary w-full mt-4 shadow-lg" @click="bot.connect()">
               <span v-if="bot.loginState === 'LOADING'" class="loading"></span>
@@ -45,6 +48,8 @@ import qqLogo from '../../assets/qq.png'
 import kookLogo from '../../assets/kook.ico'
 import FormKook from './FormKook.vue'
 import { computed } from 'vue'
+import satoriLogo from '../../assets/satori.png'
+import FormSatori from './FormSatori.vue'
 
 const bot = useBotStore()
 const currTab = computed({
@@ -54,5 +59,6 @@ const currTab = computed({
 const platformOptions: { value: LoginTab, icon: string }[] = [
   { value: 'qqguild', icon: qqLogo },
   { value: 'kook', icon: kookLogo },
+  { value: 'satori', icon: satoriLogo }
 ]
 </script>

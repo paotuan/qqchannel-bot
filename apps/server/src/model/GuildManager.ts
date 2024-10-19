@@ -11,7 +11,10 @@ export class GuildManager {
 
   constructor(bot: Bot) {
     this.bot = bot
-    if (bot.platform !== 'qq') {
+  }
+
+  init() {
+    if (this.bot.platform !== 'qq') {
       this.fetchGuilds()
       this.initEventListeners()
     }

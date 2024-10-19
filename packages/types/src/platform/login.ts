@@ -13,4 +13,11 @@ export interface IBotConfig_Kook {
   token: string
 }
 
-export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook
+export interface IBotConfig_Satori {
+  platform: 'satori'
+  appid: string
+  endpoint: string
+  token?: string
+}
+
+export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook | IBotConfig_Satori

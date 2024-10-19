@@ -6,6 +6,7 @@
   "workspaces": [
     "adapters/kook",
     "adapters/qq",
+    "adapters/satori",
     "packages/syncserver",
     "packages/card",
     "packages/config",

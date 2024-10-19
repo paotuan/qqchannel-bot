@@ -4,6 +4,7 @@ import type {
   IBotConfig,
   IBotConfig_Kook,
   IBotConfig_QQ,
+  IBotConfig_Satori,
   IBotInfoResp,
   IChannel
 } from '@paotuan/types'
@@ -19,13 +20,14 @@ type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
 // 注意 tab 与 platform 的不同。qq tab 下面可选 qq/qqguild 两个 platform
 // 出于历史兼容原因，qq tab 使用 qqguild 作为枚举
-const AvailableLoginTabs = ['qqguild', 'kook'] as const
+const AvailableLoginTabs = ['qqguild', 'kook', 'satori'] as const
 export type LoginTab = typeof AvailableLoginTabs[number]
 
 // key 与 LoginTab 保持一致
 type Platform2ConfigMap = {
   qqguild?: IBotConfig_QQ
   kook?: IBotConfig_Kook
+  satori?: IBotConfig_Satori
 }
 
 export const useBotStore = defineStore('bot', () => {
@@ -48,12 +50,21 @@ export const useBotStore = defineStore('bot', () => {
     token: ''
   })
 
+  const formSatori = ref<IBotConfig_Satori>(_model.satori ?? {
+    platform: 'satori',
+    appid: '',
+    endpoint: '',
+    token: ''
+  })
+
   const formModel = computed(() => {
     switch (tab.value) {
     case 'qqguild':
       return formQQ.value
     case 'kook':
       return formKook.value
+    case 'satori':
+      return formSatori.value
     default:
       throw new Error('invalid tab: ' + tab.value)
     }
@@ -72,6 +83,13 @@ export const useBotStore = defineStore('bot', () => {
       // calc uniq appid
       form.appid = md5(form.token)
       return !!form.token
+    }
+    case 'satori':
+    {
+      // calc uniq appid
+      form.appid = md5(form.endpoint)
+      if (!form.token) form.token = undefined
+      return !!form.endpoint
     }
     default:
       return false

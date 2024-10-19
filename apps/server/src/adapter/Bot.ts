@@ -1,4 +1,5 @@
 import type { IBotConfig, IBotInfo, IMessage } from '@paotuan/types'
+import type { Platform } from '@paotuan/config'
 import { Context, Events, ForkScope, SatoriApi } from './satori'
 import { adapterConfig, adapterPlugin, getBotId } from './utils'
 import { isEqual } from 'lodash'
@@ -15,7 +16,8 @@ import { NickHandler } from '../service/nickHandler'
 export class Bot {
   readonly config: IBotConfig
   private readonly context: Context
-  readonly api: SatoriApi
+  private readonly _apiPromise: Promise<SatoriApi>
+  api!: SatoriApi
   private readonly _fork: ForkScope
   readonly wss: Wss
 
@@ -36,7 +38,11 @@ export class Bot {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore wtf
     this._fork = this.context.plugin(adapterPlugin(config.platform), adapterConfig(config))
-    this.api = this.context.bots.find(bot => bot.platform === config.platform)!
+    this._apiPromise = this._ensureBotApi(config.platform)
+    this._apiPromise.then(api => {
+      this.api = api
+      this.guilds.init() // 获取 guild 列表依赖 api 初始化
+    })
 
     // 获取 bot 信息
     this._botInfoPromise = this.fetchBotInfo()
@@ -107,6 +113,29 @@ export class Bot {
     })
   }
 
+  private _ensureBotApi(platform: Platform) {
+    if (platform !== 'satori') {
+      // 非 satori，bot 都是同步创建的，直接返回即可
+      const bot = this.context.bots.find(bot => bot.platform === platform)!
+      return Promise.resolve(bot)
+    } else {
+      // satori bot 是异步创建的，需轮询等待创建完成
+      return new Promise<SatoriApi>(resolve => {
+        const checkBotInited = () => {
+          // 参照 koishi 的实现，排除 sandbox（无法收发消息）取第一个（koishi 实现的 satori bot.platform !== 'satori'，而是根据实际登录的平台而定）
+          // 我们暂不考虑同时登录多个 bot 的情况，对现有架构冲击较大
+          const bot = this.context.bots.find(bot => !bot.platform.startsWith('sandbox:'))
+          if (bot) {
+            resolve(bot)
+          } else {
+            setTimeout(() => checkBotInited(), 1000)
+          }
+        }
+        checkBotInited()
+      })
+    }
+  }
+
   get platform() {
     return this.config.platform
   }
@@ -137,7 +166,8 @@ export class Bot {
 
   private async fetchBotInfo() {
     try {
-      const user = (await this.api.getLogin()).user!
+      const api = await this._apiPromise
+      const user = (await api.getLogin()).user!
       return {
         id: user.id,
         username: (user.name ?? '').replace(/-测试中$/, ''),
