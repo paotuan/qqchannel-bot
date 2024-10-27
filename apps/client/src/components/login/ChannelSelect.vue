@@ -38,9 +38,9 @@
                 <template v-if="showLoadingFailTips">
                   <div>如长时间获取不到频道信息：</div>
                   <ol class="list-decimal pl-4 mb-4">
-                    <li>请检查机器人登录信息是否填写正确。</li>
-                    <li>请检查机器人是否真的已经被添加到了频道中。</li>
-                    <li>可能是第三方接口挂了。可以在频道里发一条消息，频道 ID 就会展示在此处。</li>
+                    <li>请检查机器人是否真的已经被添加到了频道中，且机器人类型、登录信息等配置正确。</li>
+                    <li>可能是接口挂了或不支持。可以在频道里发一条消息，频道 ID 就会展示在此处。</li>
+                    <li>你也可以检查命令行，查看更具体的错误原因。</li>
                   </ol>
                 </template>
               </template>
@@ -73,6 +73,7 @@ import qqLogo from '../../assets/qq.png'
 import { useBotStore } from '../../store/bot'
 import ChannelLabel from './ChannelLabel.vue'
 import { localStorageGet, localStorageSet } from '../../utils/cache'
+import type { Platform } from '@paotuan/config'
 
 const channelStore = useChannelStore()
 const channelsGroupByGuild = computed(() => groupBy(channelStore.list || [], channel => channel.guildId))
@@ -103,8 +104,14 @@ onMounted(() => {
 
 const botStore = useBotStore()
 
-// qq 群特殊处理，记录上次使用的群 openId 用于快速进入
-const qqLastGroupTempChannel = computed(() => localStorageGet<IChannel | null>('login-channel', null))
+// 记录上次使用的子频道信息，用于获取不到频道列表的情况下快速进入
+// 暂时只开放给给 qq 群（明确知道不可能获取到列表）场景使用。其他场景没有想好比较合适的交互
+const qqLastGroupTempChannel = computed(() => {
+  const lastChannel = localStorageGet<IChannel & { platform: Platform } | null>('login-channel', null)
+  if (!lastChannel) return null
+  if (lastChannel.platform !== botStore.platform) return null
+  return lastChannel
+})
 
 const channelToLaunch = computed(() => {
   // 优先使用用户已选的 channel
@@ -121,7 +128,10 @@ const launch = async () => {
   if (!channel) return
   const success = await channelStore.listenTo(channel)
   if (success) {
-    localStorageSet('login-channel', JSON.stringify(channel))
+    localStorageSet('login-channel', JSON.stringify({
+      ...channel,
+      platform: botStore.platform
+    }))
   }
 }
 </script>

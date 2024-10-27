@@ -43,6 +43,7 @@ export function openHelpDoc(path: string) {
 
 type Events = {
   'client/log/add': void,
+  'client/log/change': void
 }
 const eventBus = mitt<Events>()
 export { eventBus }

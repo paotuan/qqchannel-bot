@@ -3,9 +3,10 @@ import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { useLogStore } from './log'
 import { watch } from 'vue'
-import { gtagEvent } from '../utils'
+import { eventBus, gtagEvent } from '../utils'
 import { initYStore } from './ystore'
 import { localStorageGet, localStorageSet, sessionStorageSet } from '../utils/cache'
+import { useBotStore } from './bot'
 
 export const useChannelStore = defineStore('channel', {
   state: () => ({
@@ -31,7 +32,7 @@ export const useChannelStore = defineStore('channel', {
         ws.once('channel/listen', () => {
           this.selectLoading = false
           this.selected = channel.id
-          initChannelRelatedStorage(channel.id)
+          initChannelRelatedStorage(channel.id, channel.guildId)
           initYStore()
           sessionStorageSet('login-step', String(2))
           // 更新 title 和 favicon
@@ -69,8 +70,20 @@ export const useChannelStore = defineStore('channel', {
 })
 
 // 选择频道后，初始化和频道相关的本地存储
-function initChannelRelatedStorage(channelId: string) {
+function initChannelRelatedStorage(channelId: string, guildId: string) {
+  const bot = useBotStore()
+  const channelUnionId = `${bot.platform}_${guildId}_${channelId}`
+  let logs = localStorageGet<ILog[]>(`log-${channelUnionId}`, [])
+  // 历史数据兼容处理
+  if (['qq', 'qqguild', 'kook'].includes(bot.platform) && logs.length === 0) {
+    logs = localStorageGet<ILog[]>(`log-${channelId}`, [])
+    if (logs.length > 0) {
+      localStorage.removeItem(`log-${channelId}`)
+      localStorageSet(`log-${channelUnionId}`, JSON.stringify(logs))
+    }
+  }
   const logStore = useLogStore()
-  logStore.logs = localStorageGet<ILog[]>(`log-${channelId}`, [])
-  watch(() => logStore.logs.length, () => localStorageSet(`log-${channelId}`, JSON.stringify(logStore.logs)))
+  logStore.logs = logs
+  // record logs
+  eventBus.on('client/log/change', () => localStorageSet(`log-${channelUnionId}`, JSON.stringify(logStore.logs)))
 }

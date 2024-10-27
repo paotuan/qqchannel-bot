@@ -25,21 +25,25 @@ export const useLogStore = defineStore('log', {
         }
       }
       eventBus.emit('client/log/add')
+      eventBus.emit('client/log/change')
       gtagLogs(logs)
     },
     removeLog(log: ILog) {
       const action = new DeleteAction(log)
       action.apply(this.logs)
       this.actionStack.push(action)
+      eventBus.emit('client/log/change')
     },
     dragLog(oldIndex: number, newIndex: number) {
       const action = new DragAction(oldIndex, newIndex)
       action.apply(this.logs)
       this.actionStack.push(action)
+      eventBus.emit('client/log/change')
     },
     removeLogByUsers(userIds: string[]) {
       this.logs = this.logs.filter(log => !userIds.includes(log.userId))
       this.actionStack.length = 0
+      eventBus.emit('client/log/change')
     },
     undo(count: number) {
       for (let i = 0; i < count; i++) {
@@ -47,10 +51,12 @@ export const useLogStore = defineStore('log', {
         if (!action) return // stack is empty
         action.undo(this.logs)
       }
+      eventBus.emit('client/log/change')
     },
     clear() {
       this.logs.length = 0
       this.actionStack.length = 0
+      eventBus.emit('client/log/change')
     },
     export(type: number) {
       gtagEvent('log/export', { log_type: ['', 'text', 'html', 'json'][type] })
