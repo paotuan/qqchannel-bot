@@ -4,7 +4,7 @@ import { BasePtDiceRoll } from '../base'
 import { parseDescriptions2, ParseFlags, ParseFlagsAll, TestRequest } from '../utils/parseDescription'
 import { parseTemplate } from '../utils/parseTemplate'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import { removeTrailingOneSpace } from '../utils'
+import { getFirstD20Value, removeTrailingOneSpace } from '../utils'
 
 interface IRollResult {
   roll: DiceRoll
@@ -64,7 +64,7 @@ export class StandardDiceRoll extends BasePtDiceRoll {
           let result: IRollDecideResult | undefined
           if (cardEntry) {
             targetValue = cardEntry.value + (modifiedValue || 0) // 如有调整值，则调整目标值
-            result = this.decide({ baseValue: cardEntry.value, targetValue, roll: roll.total })
+            result = this.decide({ baseValue: cardEntry.value, targetValue, roll: roll.total, firstD20: getFirstD20Value(roll) })
           }
           return { skill, targetValue, cardEntry, result }
         })

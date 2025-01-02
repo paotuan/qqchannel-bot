@@ -2,7 +2,7 @@ import { StandardDiceRoll } from './index'
 import { DndCard, getPropOfSkill } from '@paotuan/card'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
-import { at } from '../utils'
+import { at, getFirstD20Value } from '../utils'
 
 export class DndDiceRoll extends StandardDiceRoll {
 
@@ -49,7 +49,7 @@ export class DndDiceRoll extends StandardDiceRoll {
         let result: IRollDecideResult | undefined = undefined
         const targetValue = dc + (modifiedValue || 0) // 如有 dc 调整值则加上。如没有 dc 即 dc=NaN，结果也是 NaN
         if (!isNaN(dc)) {
-          result = this.decide({ baseValue: dc, targetValue, roll: roll.total })
+          result = this.decide({ baseValue: dc, targetValue, roll: roll.total, firstD20: getFirstD20Value(roll) })
         }
         // 4. 加入结果
         this.rolls.push({ roll, tests: [{ skill, targetValue, cardEntry: entry, result }] }) // 这里传的 entry 目前不重要

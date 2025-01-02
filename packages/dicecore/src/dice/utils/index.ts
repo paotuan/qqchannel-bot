@@ -1,4 +1,5 @@
 import type { CustomTextKeys, SuccessLevel } from '@paotuan/config'
+import { DiceRoll, Results } from '@dice-roller/rpg-dice-roller'
 
 export function convertSuccessLevel2CustomTextKey(level: SuccessLevel): CustomTextKeys {
   switch (level) {
@@ -15,6 +16,17 @@ export function convertSuccessLevel2CustomTextKey(level: SuccessLevel): CustomTe
   case '成功':
     return 'test.success'
   }
+}
+
+// 获取 d20 的值，用于判断 dnd 原值成功/失败
+export function getFirstD20Value(roll: DiceRoll) {
+  if (roll.notation.startsWith('d20')) {
+    const d20Result = roll.rolls[0]
+    if (d20Result instanceof Results.RollResults && d20Result.length === 1) {
+      return d20Result.value
+    }
+  }
+  return undefined
 }
 
 // 用于 roll.start 和后面的内容拼接时，如果单行展示，会拼接一个空格

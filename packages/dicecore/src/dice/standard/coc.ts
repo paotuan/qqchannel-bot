@@ -2,7 +2,7 @@ import { StandardDiceRoll } from './index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import { CocCard, getCocTempEntry, type ICocCardEntry } from '@paotuan/card'
-import { at } from '../utils'
+import { at, getFirstD20Value } from '../utils'
 
 export class CocDiceRoll extends StandardDiceRoll {
   // 标记技能检定列表
@@ -29,7 +29,7 @@ export class CocDiceRoll extends StandardDiceRoll {
           let result: IRollDecideResult | undefined
           if (cardEntry) {
             cardEntry.value += (modifiedValue || 0) // 如有调整值，则调整目标值
-            result = this.decide({ baseValue: cardEntry.baseValue, targetValue: cardEntry.value, roll: roll.total })
+            result = this.decide({ baseValue: cardEntry.baseValue, targetValue: cardEntry.value, roll: roll.total, firstD20: getFirstD20Value(roll) })
             // 非临时值 && 非调整值为正 && 非奖励骰（以 kl1 结尾的指令认为是奖励骰） && 检定成功，记录人物卡技能成长
             if (!cardEntry.isTemp && !((modifiedValue || 0) > 0) && !this.expression.endsWith('kl1') && cardEntry.type === 'skills' && result?.success) {
               this.skills2growth.push(cardEntry.key)

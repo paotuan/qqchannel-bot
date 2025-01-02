@@ -5,6 +5,7 @@ export interface IRollDecideContext {
   baseValue: number
   targetValue: number
   roll: number
+  firstD20?: number // dnd 专用
 }
 
 export interface IRollDecideResult {
