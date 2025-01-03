@@ -19,11 +19,16 @@ export function convertSuccessLevel2CustomTextKey(level: SuccessLevel): CustomTe
 }
 
 // 获取 d20 的值，用于判断 dnd 原值成功/失败
+// 在原版 dnd 规则中，只看到在攻击骰中用来判断重击或 miss
+// 但也有像在博德之门 3 中用作大成功/大失败
+// 因此我们做的通用一点
 export function getFirstD20Value(roll: DiceRoll) {
-  if (roll.notation.startsWith('d20')) {
+  if (roll.notation.match(/^\d*d20$|^\d*d20\D/)) { // 必须是 Xd20 或 Xd20kl1 之类的形式。拒绝 Xd200 这种的
     const d20Result = roll.rolls[0]
-    if (d20Result instanceof Results.RollResults && d20Result.length === 1) {
-      return d20Result.value
+    if (d20Result instanceof Results.RollResults) {
+      // 找到 useInTotal 的值，这样在有奖励/惩罚骰的情况，可以挑出实际使用的值。对于有多个 d20 的情况就默认取使用的第一个好了
+      const targetRoll = d20Result.rolls.find(roll => roll.useInTotal)
+      return targetRoll?.initialValue
     }
   }
   return undefined
