@@ -3,6 +3,7 @@ import { useChannelStore } from '../store/channel'
 import { VERSION_NAME } from '@paotuan/types'
 import mitt from 'mitt'
 import { onBeforeUnmount, onMounted } from 'vue'
+import { cloneDeep } from 'lodash'
 
 export const Toast = {
   success: (msg: string) => useUIStore().toast('success', msg),
@@ -61,4 +62,14 @@ export function isFromRefresh() {
   const [navigationEntry] = performance.getEntriesByType('navigation')
   // @ts-expect-error https://stackoverflow.com/questions/53613071/determining-navigation-type-from-performancenavigationtiming
   return navigationEntry?.type === 'reload'
+}
+
+// 适用于 syncStore 数组的交换方法
+// 由于数组对象已经被 proxy，无法再被 add 进数组，因此需要 clone 一份
+// 又因为从数组删除后，对象就会变为空，故需要提前 clone
+// 由于需要被同步，可以确定数组元素是 plain object
+export function syncStoreArraySwap<T>(arr: T[], oldIndex: number, newIndex: number) {
+  const oldClone = cloneDeep(arr[oldIndex])
+  arr.splice(oldIndex, 1)
+  arr.splice(newIndex, 0, oldClone)
 }

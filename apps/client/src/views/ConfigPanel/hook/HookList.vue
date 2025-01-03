@@ -11,6 +11,7 @@ import { useConfigStore } from '../../../store/config'
 import { computed, onMounted, ref } from 'vue'
 import Sortable from 'sortablejs'
 import HookEditor from './HookEditor.vue'
+import { syncStoreArraySwap } from '../../../utils'
 
 const props = defineProps<{ module: HookModule }>()
 const configStore = useConfigStore()
@@ -25,8 +26,7 @@ onMounted(() => {
     onEnd: (event) => {
       const { newIndex, oldIndex } = event
       // config 存在才会展示此界面
-      const movingLog = configStore.config!.hookIds[props.module].splice(oldIndex!, 1)[0]
-      configStore.config!.hookIds[props.module].splice(newIndex!, 0, movingLog)
+      syncStoreArraySwap(configStore.config!.hookIds[props.module], oldIndex!, newIndex!)
     }
   })
 })

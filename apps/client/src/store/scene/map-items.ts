@@ -1,6 +1,7 @@
 import type { IStageData, IBaseStageItem } from '@paotuan/types'
 import type { ILayer } from './map-types'
 import { computed, reactive } from 'vue'
+import { cloneDeep } from 'lodash'
 
 export function useStageItems(data: IStageData) {
   const items = computed(() => data.items)
@@ -35,8 +36,9 @@ export function useStageItems(data: IStageData) {
     const fromList = from ? (getItem(from) as ILayer)?.children : items.value
     const toList = to ? (getItem(to) as ILayer)?.children : items.value
     if (!fromList || !toList) return // 理论上不可能
-    const [movedItem] = fromList.splice(fromIndex, 1)
-    toList.splice(toIndex, 0, movedItem)
+    const movedItemClone = cloneDeep(fromList[fromIndex])
+    fromList.splice(fromIndex, 1)
+    toList.splice(toIndex, 0, movedItemClone)
   }
 
   // const _inspect = () => {

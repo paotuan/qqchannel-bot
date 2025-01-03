@@ -28,6 +28,7 @@ import { PlusIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
 import ConfigNameEdit from '../ConfigNameEdit.vue'
 import AliasRollEditor from './AliasRollEditor.vue'
+import { syncStoreArraySwap } from '../../../utils'
 
 const configStore = useConfigStore()
 const aliasRollIds = computed(() => configStore.config!.aliasRollIds)
@@ -41,8 +42,7 @@ onMounted(() => {
     onEnd: (event) => {
       const { newIndex, oldIndex } = event
       // config 存在才会展示此界面
-      const movingLog = configStore.config!.aliasRollIds.splice(oldIndex!, 1)[0]
-      configStore.config!.aliasRollIds.splice(newIndex!, 0, movingLog)
+      syncStoreArraySwap(configStore.config!.aliasRollIds, oldIndex!, newIndex!)
     }
   })
 })

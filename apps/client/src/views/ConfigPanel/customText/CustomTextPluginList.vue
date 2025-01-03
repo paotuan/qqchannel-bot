@@ -12,6 +12,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useConfigStore } from '../../../store/config'
 import CustomTextPluginItem from './CustomTextPluginItem.vue'
 import Sortable from 'sortablejs'
+import { syncStoreArraySwap } from '../../../utils'
 
 const configStore = useConfigStore()
 const pluginList = computed(() => configStore.config!.customTextIds)
@@ -24,8 +25,7 @@ onMounted(() => {
     ghostClass: 'bg-base-200',
     onEnd: (event) => {
       const { newIndex, oldIndex } = event
-      const movingLog = configStore.config!.customTextIds.splice(oldIndex!, 1)[0]
-      configStore.config!.customTextIds.splice(newIndex!, 0, movingLog)
+      syncStoreArraySwap(configStore.config!.customTextIds, oldIndex!, newIndex!)
     }
   })
 })

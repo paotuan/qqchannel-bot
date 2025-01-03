@@ -28,6 +28,7 @@ import { PlusIcon } from '@heroicons/vue/24/outline'
 import { useConfigStore } from '../../../store/config'
 import CustomReplyEditor from './CustomReplyEditor.vue'
 import ConfigNameEdit from '../ConfigNameEdit.vue'
+import { syncStoreArraySwap } from '../../../utils'
 
 const configStore = useConfigStore()
 const customReplyIds = computed(() => configStore.config!.customReplyIds)
@@ -41,8 +42,7 @@ onMounted(() => {
     onEnd: (event) => {
       const { newIndex, oldIndex } = event
       // config 存在才会展示此界面
-      const movingLog = configStore.config!.customReplyIds.splice(oldIndex!, 1)[0]
-      configStore.config!.customReplyIds.splice(newIndex!, 0, movingLog)
+      syncStoreArraySwap(configStore.config!.customReplyIds, oldIndex!, newIndex!)
     }
   })
 })

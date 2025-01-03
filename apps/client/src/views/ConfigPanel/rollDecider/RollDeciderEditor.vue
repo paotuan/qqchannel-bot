@@ -53,6 +53,7 @@ import { IPluginItemConfigForDisplay, usePluginStore } from '../../../store/plug
 import type { IRollDeciderConfig } from '@paotuan/config'
 import DNativeSelect from '../../../dui/select/DNativeSelect.vue'
 import Sortable from 'sortablejs'
+import { syncStoreArraySwap } from '../../../utils'
 
 interface Props { id: string, defaultOpen: boolean } // full id
 interface Emits {
@@ -109,8 +110,7 @@ onMounted(() => {
     ghostClass: 'bg-base-200',
     onEnd: (event) => {
       const { newIndex, oldIndex } = event
-      const moving = config.value.rules.splice(oldIndex!, 1)[0]
-      config.value.rules.splice(newIndex!, 0, moving)
+      syncStoreArraySwap(config.value.rules, oldIndex!, newIndex!)
     }
   })
 })
