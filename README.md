@@ -28,10 +28,11 @@
 可以从源码部署，请参考 [Linux 部署](https://paotuan.io/setup/download/linux.html)
 
 ### 本地开发
-require Node >= 14.18
+require Node 18+
 
 ```bash
 yarn install
+yarn run build
 yarn run dev:server
 yarn run dev:client
 ```
