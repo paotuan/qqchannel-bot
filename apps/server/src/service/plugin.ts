@@ -278,7 +278,7 @@ const officialPluginsVersions = {
   'io.paotuan.plugin.namegen': 2,
   'io.paotuan.plugin.insane': 3,
   'io.paotuan.plugin.cardgen': 5,
-  'io.paotuan.plugin.draw': 3,
+  'io.paotuan.plugin.draw': 4,
   // 'io.paotuan.plugin.cocrules': 1,
   // 'io.paotuan.plugin.globalflags': 1
   'io.paotuan.plugin.compatible': 1

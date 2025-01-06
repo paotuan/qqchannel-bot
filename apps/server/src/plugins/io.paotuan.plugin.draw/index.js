@@ -44,7 +44,7 @@ module.exports = (context) => {
     id: 'io.paotuan.plugin.draw',
     name: '牌堆',
     description: '牌堆插件。使用方法详见 paotuan.io/plugin/draw.html',
-    version: 3,
+    version: 4,
     preference: [
       {
         key: 'hidden',

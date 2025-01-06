@@ -105,7 +105,9 @@ function reloadDeck(name, roll, h) {
       }
       return true
     })
-    deckItems.push(...new Array(count).fill(content))
+    // transform 会把 '>' 等特殊字符转义，导致 {{>XX}} 语法失败
+    const unescaped = h.unescape(content)
+    deckItems.push(...new Array(count).fill(unescaped))
   })
   $deck.decks.set(name, deckItems)
 }
