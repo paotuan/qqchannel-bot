@@ -9,6 +9,7 @@ export interface ICardData {
   created: number // 创建时间
   lastModified: number // 用于目前前后端同步判断
   isTemplate: boolean // 是否用作模板
+  templateData: Record<string, string> // 字段路径 -> 骰子表达式值
 }
 
 export interface ICardEntry {

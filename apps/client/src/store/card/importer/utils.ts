@@ -22,6 +22,7 @@ export function getGeneralCardProto(name: string): IGeneralCardData {
     isTemplate: false,
     ext: '',
     skills: { HP: 0, MAXHP: 0 },
-    abilities: []
+    abilities: [],
+    templateData: {}
   }
 }

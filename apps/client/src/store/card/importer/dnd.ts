@@ -64,6 +64,7 @@ export function getDndCardProto(name?: string): IDndCardData {
     equips: [],
     spells: [],
     ext: '',
+    templateData: {},
     meta: {
       spellSlots: {
         1: { value: 0, max: 0 },

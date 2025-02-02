@@ -34,6 +34,7 @@ export function getCocCardProto(name?: string): ICocCardData {
     skills: {},
     abilities: [],
     ext: '',
+    templateData: {},
     meta: {
       skillGrowth: {}
     }

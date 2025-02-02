@@ -50,5 +50,9 @@ export function handleCardUpgrade<T extends ICardData>(card: any) {
     card.created = 0 // 后面赋值
     card.version = 22
   }
+  if (card.version < 46) {
+    card.templateData = {}
+    card.version = 46
+  }
   return card as T
 }
