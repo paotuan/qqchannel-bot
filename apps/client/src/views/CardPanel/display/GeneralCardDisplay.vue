@@ -28,7 +28,7 @@
                   <button class="btn btn-xs btn-ghost font-medium">{{ skill }}</button>
                 </td>
                 <td :key="`value-${j}`" class="flex items-center justify-between group">
-                  <number-input v-model="cardData.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
+                  <card-field-input :path="`skills.${skill}`" class="input input-ghost input-xs text-sm w-14" />
                   <CardMoreAction class="invisible group-hover:visible" :expression="skill" @delete="deleteSkill(skill)" />
                 </td>
               </template>
@@ -67,9 +67,9 @@ import { computed } from 'vue'
 import { useCurrentSelectedCard } from '../utils'
 import type { GeneralCard } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
-import NumberInput from '../NumberInput.vue'
-import TextInput from '../TextInput.vue'
+import TextInput from '../components/TextInput.vue'
 import CardMoreAction from '../CardMoreAction.vue'
+import CardFieldInput from '../components/CardFieldInput.vue'
 
 const generalCard = useCurrentSelectedCard<GeneralCard>()! // 此处可以确保是 general card
 const cardData = computed(() => generalCard.value.data)
@@ -101,6 +101,7 @@ const deleteAbility = (index: number) => {
 // 删除一条 skill
 const deleteSkill = (name: string) => {
   delete cardData.value.skills[name]
+  delete cardData.value.templateData[`skills.${name}`]
   markEdited()
 }
 </script>

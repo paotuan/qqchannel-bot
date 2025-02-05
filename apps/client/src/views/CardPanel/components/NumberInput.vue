@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
-import { useCurrentSelectedCard } from './utils'
+import { useCurrentSelectedCard } from '../utils'
 
 const props = defineProps<{ modelValue: number, allowNegative?: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: number): void }>()

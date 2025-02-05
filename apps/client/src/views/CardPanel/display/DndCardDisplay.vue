@@ -308,8 +308,8 @@ import { XMarkIcon, InformationCircleIcon, ChevronUpIcon, ChevronDownIcon } from
 import { useCurrentSelectedCard } from '../utils'
 import { getSkillsMap, type DndCard, type IDndCardData } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
-import TextInput from '../TextInput.vue'
-import NumberInput from '../NumberInput.vue'
+import TextInput from '../components/TextInput.vue'
+import NumberInput from '../components/NumberInput.vue'
 import DndSpellsDataDialog from '../DndSpellsDataDialog.vue'
 import CardMoreAction from '../CardMoreAction.vue'
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCurrentSelectedCard } from './utils'
+import { useCurrentSelectedCard } from '../utils'
 import { computed } from 'vue'
 
 const props = defineProps<{ modelValue: string }>()

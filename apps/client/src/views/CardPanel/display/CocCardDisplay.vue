@@ -164,8 +164,8 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
-import TextInput from '../TextInput.vue'
-import NumberInput from '../NumberInput.vue'
+import TextInput from '../components/TextInput.vue'
+import NumberInput from '../components/NumberInput.vue'
 import type { CocCard, ICocCardData } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
 import { useCurrentSelectedCard } from '../utils'
