@@ -44,16 +44,16 @@
         </template>
       </ul>
     </template>
-    <template v-if="cardType === 'coc'">
-      <label class="label cursor-pointer justify-start gap-2 mt-2">
-        <input v-model="cocApplyDefaultValue" type="checkbox" class="checkbox checkbox-primary" />
-        <span>对于未录入的 COC 技能，自动补充默认值</span>
-      </label>
-    </template>
     <div class="divider m-0" />
+    <div class="flex gap-2 items-center my-2">
+      <span class="flex-none">基于已有模板补充默认值？</span>
+      <select v-model="useTemplate" class="select select-bordered select-sm w-full max-w-xs">
+        <option v-for="opt in existTemplateOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+      </select>
+    </div>
     <label class="label cursor-pointer justify-start gap-2">
       <input v-model="importAsTemplate" type="checkbox" class="checkbox checkbox-primary" />
-      <span>导入为 NPC / 敌人模板</span>
+      <span>导入为人物卡模板</span>
     </label>
     <template #action>
       <div class="flex items-center gap-4">
@@ -71,7 +71,7 @@
 import { PlusCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref, watch } from 'vue'
 import DModal from '../../dui/modal/DModal.vue'
-import { createCard, CocCard, type CardType, type ICard } from '@paotuan/card'
+import { createCard, CocCard, type CardType, type ICard, DndCard } from '@paotuan/card'
 import { useCardStore } from '../../store/card'
 import * as XLSX from 'xlsx'
 import { getCocCardProto, parseCocXlsx } from '../../store/card/importer/coc'
@@ -86,7 +86,7 @@ const importType = ref<'text' | 'excel'>('text')
 const textareaContent = ref('')
 const xlsxCard = ref<ICard | null>(null)
 const fileChooser = ref<HTMLInputElement>()
-const cocApplyDefaultValue = ref(true)
+const cocApplyDefaultValue = ref(true) // todo
 const importAsTemplate = ref(false)
 
 // 表单合法性校验
@@ -105,6 +105,13 @@ const clearFileInput = () => {
   fileChooser.value && (fileChooser.value.value = '')
 }
 
+// 已有模板选择
+const useTemplate = ref('')
+const existTemplateOptions = computed(() => [
+  { label: '无', value: '' },
+  ...cardStore.templateCardList.filter(template => template.type === cardType.value).map(template => ({ label: template.name, value: template.name })),
+])
+
 // 切换 tab 处理
 watch(cardType, value => {
   // general card 只支持文本导入
@@ -113,6 +120,8 @@ watch(cardType, value => {
   }
   // 切换类型清空 excel
   clearFileInput()
+  // 切换类型重置模板选择 todo 记忆
+  useTemplate.value = ''
 })
 
 // 导入并解析 excel
@@ -125,9 +134,9 @@ const handleFile = (e: Event) => {
       const data = new Uint8Array(e.target!.result as ArrayBuffer)
       const workbook = XLSX.read(data, { type: 'array' })
       if (parseType === 'coc') {
-        xlsxCard.value = parseCocXlsx(workbook)
+        xlsxCard.value = parseCocXlsx(new CocCard(getCocCardProto()), workbook)
       } else if (parseType === 'dnd') {
-        xlsxCard.value = parseDndXlsx(workbook)
+        xlsxCard.value = parseDndXlsx(new DndCard(getDndCardProto()), workbook)
       } else {
         throw new Error('Cannot import xlsx when type=' + parseType)
       }
@@ -166,12 +175,16 @@ const submit = () => {
     card = xlsxCard.value
     card.data.name = cardName.value // name 使用界面上的值，允许和 excel 不同
   }
-  // coc 设置技能默认值
+  // coc 设置技能默认值 todo 干掉
   if (card instanceof CocCard && cocApplyDefaultValue.value) {
     card.applyDefaultValues()
   }
   // 是否是模板导入
   card.data.isTemplate = importAsTemplate.value
+  // 若不是模板，则初始化可能有的字段表达式
+  if (!card.data.isTemplate) {
+    card.initByTemplate()
+  }
   // 清空输入框
   cardName.value = ''
   textareaContent.value = ''

@@ -1,6 +1,7 @@
 import { CocCard, type ICocCardData } from '@paotuan/card'
 import { VERSION_CODE } from '@paotuan/types'
 import XLSX from 'xlsx'
+import { addOrUpdateByName } from './utils'
 
 export function getCocCardProto(name?: string): ICocCardData {
   return {
@@ -55,9 +56,8 @@ function _unifiedKey(key: string) {
   return unifiedKey
 }
 
-export function parseCocXlsx(workbook: XLSX.WorkBook) {
-  const user = getCocCardProto()
-  const setter = new CocCard(user)
+export function parseCocXlsx(setter: CocCard, workbook: XLSX.WorkBook) {
+  const user = setter.data
   // 解析 excel
   const sheet = workbook.Sheets['人物卡']
   const cySheet = workbook.Sheets['简化卡 骰娘导入']
@@ -81,7 +81,7 @@ export function parseCocXlsx(workbook: XLSX.WorkBook) {
       const combatName = sheet['B' + i]?.v || ''
       if (!combatName) continue
       const expression = sheet['W' + i]?.v || ''
-      user.abilities.push({
+      addOrUpdateByName(user.abilities, {
         name: combatName,
         expression: expression.toLowerCase().replaceAll('db', '$db'),
         ext: sheet['M' + i]?.v || ''
@@ -131,7 +131,7 @@ export function parseCocXlsx(workbook: XLSX.WorkBook) {
       const combatName = sheet['B' + i]?.v || ''
       if (!combatName) continue
       const expression = sheet['R' + i]?.v || ''
-      user.abilities.push({
+      addOrUpdateByName(user.abilities, {
         name: combatName,
         expression: expression.toLowerCase().replaceAll('db', '$db'),
         ext: ''

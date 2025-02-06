@@ -49,6 +49,7 @@ export interface ICard<D extends ICardData = ICardData, E extends ICardEntry = I
   getAliases(name: string): string[] // 获取属性/技能名同义词列表（包含自己，统一为大写）
   addCardEntryChangeListener(listener: (e: ICardEntryChangeEvent) => void): void
   removeCardEntryChangeListener(listener?: (e: ICardEntryChangeEvent) => void): void
+  initByTemplate(): void
 }
 
 export interface ICardEntryChangeEvent {

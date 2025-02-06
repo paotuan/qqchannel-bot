@@ -26,3 +26,12 @@ export function getGeneralCardProto(name: string): IGeneralCardData {
     templateData: {}
   }
 }
+
+export function addOrUpdateByName<T extends { name: string }>(arr: T[], elem: T) {
+  const index = arr.findIndex(item => item.name === elem.name)
+  if (index >= 0) {
+    arr.splice(index, 1, elem)
+  } else {
+    arr.push(elem)
+  }
+}

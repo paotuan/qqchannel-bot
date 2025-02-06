@@ -320,6 +320,24 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     return count > 0
   }
 
+  override initByTemplate() {
+    super.initByTemplate()
+    // 填充完初始值后，额外判断一些固有字段
+    if (!this.HP) this.HP = this.MAXHP
+    if (!this.MP) this.MP = this.MAXMP
+    if (!this.SAN) this.SAN = this.data.props.意志
+    // 闪避
+    const shanbiEntry = this.getRawEntry('闪避')
+    if (!shanbiEntry) {
+      this.data.skills['闪避'] = Math.floor(this.data.props.敏捷 / 2)
+    }
+    // 母语
+    const muyuEntry = this.getRawEntry('母语')
+    if (!muyuEntry) {
+      this.data.skills['母语'] = this.data.props.教育
+    }
+  }
+
   /**
    * 如果人物卡未设置一些值，则以默认值填充
    */

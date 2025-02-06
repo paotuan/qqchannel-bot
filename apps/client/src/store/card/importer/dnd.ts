@@ -1,6 +1,7 @@
 import { DndCard, type IDndCardData } from '@paotuan/card'
 import { VERSION_CODE } from '@paotuan/types'
 import XLSX from 'xlsx'
+import { addOrUpdateByName } from './utils'
 
 export function getDndCardProto(name?: string): IDndCardData {
   return {
@@ -85,8 +86,7 @@ export function getDndCardProto(name?: string): IDndCardData {
   }
 }
 
-export function parseDndXlsx(workbook: XLSX.WorkBook) {
-  const setter = new DndCard(getDndCardProto())
+export function parseDndXlsx(setter: DndCard, workbook: XLSX.WorkBook) {
   const sheet_v1 = workbook.Sheets['主要']
   const sheet_v2 = workbook.Sheets['主要情况']
   if (sheet_v1) {
@@ -152,7 +152,7 @@ function parseDnd_variant1(workbook: XLSX.WorkBook, setter: DndCard) {
   // equips
   const armorName = sheet['L39']?.v // 护甲
   if (armorName) {
-    user.equips.push({
+    addOrUpdateByName(user.equips, {
       name: armorName,
       expression: String(sheet['AC39']?.v || ''),
       ext: ''
@@ -162,12 +162,12 @@ function parseDnd_variant1(workbook: XLSX.WorkBook, setter: DndCard) {
   for (let i = 41; i <= 45; i++) {
     const name = sheet['L' + i]?.v
     if (typeof name === 'string' && name) {
-      user.equips.push({
+      addOrUpdateByName(user.equips, {
         name: name + '命中',
         expression: String(sheet['AD' + i]?.v || '').toLowerCase(),
         ext: ''
       })
-      user.equips.push({
+      addOrUpdateByName(user.equips, {
         name,
         expression: String(sheet['AI' + i]?.v || '').toLowerCase(),
         ext: ''
@@ -180,7 +180,7 @@ function parseDnd_variant1(workbook: XLSX.WorkBook, setter: DndCard) {
     for (let i = 66; i <= 80; i++) {
       const name = sheet[nameCol + i]?.v
       if (typeof name === 'string' && name) {
-        user.spells.push({
+        addOrUpdateByName(user.spells, {
           name,
           expression: String(sheet[lvCol + i]?.v || ''),
           ext: ''
@@ -201,7 +201,7 @@ function parseDnd_variant1(workbook: XLSX.WorkBook, setter: DndCard) {
     if (!name) continue
     const lv = Number(sheet['B' + i]?.v) || 0
     const desc = sheet['H' + i]?.v || ''
-    user.jobAbilities.push({ lv, name, desc })
+    addOrUpdateByName(user.jobAbilities, { lv, name, desc })
   }
   // 专长
   for (let i = 109; i <= 117; i++) {
@@ -209,7 +209,7 @@ function parseDnd_variant1(workbook: XLSX.WorkBook, setter: DndCard) {
     if (!name) continue
     const lv = Number(sheet['Y' + i]?.v) || 0
     const desc = sheet['AE' + i]?.v || ''
-    user.specialists.push({ lv, name, desc })
+    addOrUpdateByName(user.specialists, { lv, name, desc })
   }
 }
 
@@ -268,7 +268,7 @@ function parseDnd_variant2(workbook: XLSX.WorkBook, setter: DndCard) {
   // equips
   const armorName = sheet['O23']?.v // 护甲
   if (armorName) {
-    user.equips.push({
+    addOrUpdateByName(user.equips, {
       name: armorName,
       expression: String(sheet['AD23']?.v || ''),
       ext: ''
@@ -279,12 +279,12 @@ function parseDnd_variant2(workbook: XLSX.WorkBook, setter: DndCard) {
     const name = sheet['O' + i]?.v
     if (typeof name === 'string' && name) {
       const aimAdd = sheet['AF' + i]?.v || ''
-      user.equips.push({
+      addOrUpdateByName(user.equips, {
         name: name + '命中',
         expression: aimAdd ? `d20+${aimAdd}` : 'd20',
         ext: ''
       })
-      user.equips.push({
+      addOrUpdateByName(user.equips, {
         name,
         expression: sheet['AI' + i]?.v || '',
         ext: ''
@@ -296,7 +296,7 @@ function parseDnd_variant2(workbook: XLSX.WorkBook, setter: DndCard) {
     const name = sheet['AD' + i]?.v || ''
     const expression = sheet['AM' + i]?.v || ''
     if (typeof name === 'string' && name) {
-      user.spells.push({
+      addOrUpdateByName(user.spells, {
         name,
         expression,
         ext: ''
@@ -316,7 +316,7 @@ function parseDnd_variant2(workbook: XLSX.WorkBook, setter: DndCard) {
     if (!name) continue
     const lv = Number(sheet['AV' + i]?.v) || 0
     const desc = sheet['BB' + i]?.v || ''
-    user.jobAbilities.push({ lv, name, desc })
+    addOrUpdateByName(user.jobAbilities, { lv, name, desc })
   }
   // 专长 15-21
   for (let i = 15; i <= 21; i++) {
@@ -324,6 +324,6 @@ function parseDnd_variant2(workbook: XLSX.WorkBook, setter: DndCard) {
     if (!name) continue
     const lv = Number(sheet['BM' + i]?.v) || 0
     const desc = sheet['BS' + i]?.v || ''
-    user.specialists.push({ lv, name, desc })
+    addOrUpdateByName(user.specialists, { lv, name, desc })
   }
 }

@@ -22,7 +22,7 @@
           </button>
           <user-selector :user-id="cardStore.linkedUserOf(card.name) || null" @select="cardStore.requestLinkUser(card.name, $event?.id)" />
         </div>
-        <h3 class="font-bold mt-4">NPC / 敌人模板：</h3>
+        <h3 class="font-bold mt-4">人物卡模板：</h3>
         <div v-for="card in templateCardList" :key="card.name" class="flex gap-2">
           <button class="btn w-40 justify-start flex-nowrap relative"
                   :class="isCurrentSelected(card.name) ? 'btn-neutral' : 'btn-ghost border border-base-300'"
