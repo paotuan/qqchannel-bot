@@ -64,7 +64,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useCurrentSelectedCard } from '../utils'
+import { safeDelete, useCurrentSelectedCard } from '../utils'
 import type { GeneralCard } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
 import TextInput from '../components/TextInput.vue'
@@ -101,7 +101,7 @@ const deleteAbility = (index: number) => {
 // 删除一条 skill
 const deleteSkill = (name: string) => {
   delete cardData.value.skills[name]
-  delete cardData.value.templateData[`skills.${name}`]
+  safeDelete(cardData.value.templateData, `skills.${name}`)
   markEdited()
 }
 </script>

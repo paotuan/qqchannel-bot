@@ -5,7 +5,7 @@
       <span class="text-sm font-bold">{{ cardData.name }}</span>
       <text-input v-model="cardData.basic.gender" placeholder="性别" class="input input-bordered input-xs w-14"/>
       <span class="inline-flex items-center gap-0.5">
-        <number-input v-model="cardData.basic.AGE" placeholder="年龄" class="input input-bordered input-xs w-14"/>
+        <card-field-input path="basic.AGE" placeholder="年龄" class="input input-bordered input-xs w-14"/>
         <span class="text-sm">岁</span>
       </span>
       <span class="inline-flex items-center gap-0.5">
@@ -29,27 +29,39 @@
             <tbody>
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">体力</button></td>
-              <td><number-input v-model="cocCard.HP" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXHP }}</td>
+              <td>
+                <card-field-input v-if="cardData.isTemplate" path="basic.HP" class="input input-ghost input-xs text-sm w-14" />
+                <number-input v-else v-model="cocCard.HP" class="input input-ghost input-xs text-sm w-14"/>
+                /{{ cocCard.MAXHP }}</td>
               <td></td>
             </tr>
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">理智</button></td>
-              <td><number-input v-model="cocCard.SAN" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXSAN }}</td>
+              <td>
+                <card-field-input v-if="cardData.isTemplate" path="basic.SAN" class="input input-ghost input-xs text-sm w-14"/>
+                <number-input v-else v-model="cocCard.SAN" class="input input-ghost input-xs text-sm w-14"/>
+                /{{ cocCard.MAXSAN }}</td>
               <td class="opacity-60 text-xs">{{ Math.floor(cocCard.SAN / 2) }}/{{ Math.floor(cocCard.SAN / 5) }}</td>
             </tr>
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">克苏鲁神话</button></td>
-              <td><number-input v-model="cocCard.CM" class="input input-ghost input-xs text-sm w-14"/></td>
+              <td>
+                <card-field-input v-if="cardData.isTemplate" path="basic.CM" class="input input-ghost input-xs text-sm w-14"/>
+                <number-input v-else v-model="cocCard.CM" class="input input-ghost input-xs text-sm w-14"/>
+              </td>
               <td class="opacity-60 text-xs">{{ Math.floor(cocCard.CM / 2) }}/{{ Math.floor(cocCard.CM / 5) }}</td>
             </tr>
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">魔法</button></td>
-              <td><number-input v-model="cocCard.MP" class="input input-ghost input-xs text-sm w-14"/>/{{ cocCard.MAXMP }}</td>
+              <td>
+                <card-field-input v-if="cardData.isTemplate" path="basic.MP" class="input input-ghost input-xs text-sm w-14"/>
+                <number-input v-else v-model="cocCard.MP" class="input input-ghost input-xs text-sm w-14"/>
+                /{{ cocCard.MAXMP }}</td>
               <td></td>
             </tr>
             <tr>
               <td><button class="btn btn-xs btn-ghost font-medium">信用评级</button></td>
-              <td><number-input v-model="cardData.basic.信用" class="input input-ghost input-xs text-sm w-14"/></td>
+              <td><card-field-input path="basic.信用" class="input input-ghost input-xs text-sm w-14"/></td>
               <td class="opacity-60 text-xs">{{ Math.floor(cardData.basic.信用 / 2) }}/{{ Math.floor(cardData.basic.信用 / 5) }}</td>
             </tr>
             </tbody>
@@ -70,7 +82,7 @@
             <tbody>
             <tr v-for="prop in propKeyOf(cardData)" :key="prop" class="group">
               <td><button class="btn btn-xs btn-ghost font-medium">{{ prop }}</button></td>
-              <td class="w-1/4"><number-input v-model="cardData.props[prop]" class="input input-ghost input-xs text-sm w-full"/></td>
+              <td class="w-1/4"><card-field-input :path="`props.${prop}`" class="input input-ghost input-xs text-sm w-full"/></td>
               <td class="opacity-60 text-xs">{{ Math.floor(cardData.props[prop] / 2) }}</td>
               <td class="opacity-60 text-xs">{{ Math.floor(cardData.props[prop] / 5) }}</td>
               <td style="padding: 0">
@@ -79,7 +91,7 @@
             </tr>
             <tr class="group">
               <td><button class="btn btn-xs btn-ghost font-medium">幸运</button></td>
-              <td class="w-1/4"><number-input v-model="cardData.basic.LUCK" class="input input-ghost input-xs text-sm w-full"/></td>
+              <td class="w-1/4"><card-field-input path="basic.LUCK" class="input input-ghost input-xs text-sm w-full"/></td>
               <td class="opacity-60 text-xs">{{ Math.floor(cardData.basic.LUCK / 2) }}</td>
               <td class="opacity-60 text-xs">{{ Math.floor(cardData.basic.LUCK / 5) }}</td>
               <td style="padding: 0">
@@ -113,7 +125,7 @@
                 </td>
                 <td :key="`value-${j}`" class="flex items-center justify-between group" :class="{ highlight: !!cardData.meta.skillGrowth[skill] }">
                   <span>
-                    <number-input v-model="cardData.skills[skill]" class="input input-ghost input-xs text-sm w-14"/>
+                    <card-field-input :path="`skills.${skill}`" class="input input-ghost input-xs text-sm w-14"/>
                     <span class="opacity-60 text-xs">{{ Math.floor(cardData.skills[skill] / 2) }}/{{ Math.floor(cardData.skills[skill] / 5) }}</span>
                   </span>
                   <CardMoreAction class="invisible group-hover:visible" :expression="skill" @delete="deleteSkill(skill)" />
@@ -168,8 +180,9 @@ import TextInput from '../components/TextInput.vue'
 import NumberInput from '../components/NumberInput.vue'
 import type { CocCard, ICocCardData } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
-import { useCurrentSelectedCard } from '../utils'
+import { safeDelete, useCurrentSelectedCard } from '../utils'
 import CardMoreAction from '../CardMoreAction.vue'
+import CardFieldInput from '../components/CardFieldInput.vue'
 
 const cocCard = useCurrentSelectedCard<CocCard>()! // 此处可以确保是 coc card
 const cardData = computed(() => cocCard.value.data)
@@ -212,7 +225,8 @@ const deleteAbility = (index: number) => {
 // 删除一条 skill
 const deleteSkill = (name: string) => {
   delete cardData.value.skills[name]
-  delete cardData.value.meta.skillGrowth[name] // 如有成长标记也一起删了
+  safeDelete(cardData.value.meta.skillGrowth, name) // 如有成长标记也一起删了
+  safeDelete(cardData.value.templateData, `skills.${name}`)
   markEdited()
 }
 </script>

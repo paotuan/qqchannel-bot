@@ -5,7 +5,7 @@
       <span class="text-sm font-bold">{{ cardData.name }}</span>
       <text-input v-model="cardData.info.gender" placeholder="性别" class="input input-bordered input-xs w-14"/>
       <span class="inline-flex items-center gap-0.5">
-        <number-input v-model="cardData.info.age" placeholder="年龄" class="input input-bordered input-xs w-14"/>
+        <card-field-input path="info.age" placeholder="年龄" class="input input-bordered input-xs w-14"/>
         <span class="text-sm">岁</span>
       </span>
       <span class="inline-flex items-center gap-0.5">
@@ -38,19 +38,21 @@
             <tbody>
             <tr>
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">EXP</button></td>
-              <td colspan="3"><number-input v-model="cardData.basic.EXP" class="input input-ghost input-xs text-sm w-full"/></td>
+              <td colspan="3"><card-field-input path="basic.EXP" class="input input-ghost input-xs text-sm w-full"/></td>
             </tr>
             <tr>
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">LV</button></td>
-              <td><number-input v-model="cardData.basic.LV" class="input input-ghost input-xs text-sm w-14"/></td>
+              <td><card-field-input path="basic.LV" class="input input-ghost input-xs text-sm w-14"/></td>
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">熟练</button></td>
-              <td><number-input v-model="cardData.basic.熟练" class="input input-ghost input-xs text-sm w-14"/></td>
+              <td><card-field-input path="basic.熟练" class="input input-ghost input-xs text-sm w-14"/></td>
             </tr>
             <tr>
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">HP</button></td>
               <td colspan="3">
-                <number-input v-model="dndCard.HP" class="input input-ghost input-xs text-sm w-20"/>/
-                <number-input v-model="cardData.basic.MAXHP" class="input input-ghost input-xs text-sm w-20"/>
+                <card-field-input v-if="cardData.isTemplate" path="basic.HP" class="input input-ghost input-xs text-sm w-20" />
+                <number-input v-else v-model="dndCard.HP" class="input input-ghost input-xs text-sm w-20"/>
+                /
+                <card-field-input path="basic.MAXHP" class="input input-ghost input-xs text-sm w-20"/>
               </td>
             </tr>
             <tr>
@@ -62,12 +64,12 @@
             </tr>
             <tr>
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">AC</button></td>
-              <td><number-input v-model="cardData.basic.AC" class="input input-ghost input-xs text-sm w-14"/></td>
+              <td><card-field-input path="basic.AC" class="input input-ghost input-xs text-sm w-14"/></td>
             </tr>
             <tr>
               <td class="w-1/4"><button class="btn btn-xs btn-ghost font-medium">先攻</button></td>
               <td colspan="3">
-                <span class="text-xs">临时值</span><number-input v-model="cardData.basic.先攻临时" allow-negative class="input input-ghost input-xs text-sm w-14"/>
+                <span class="text-xs">临时值</span><card-field-input path="basic.先攻临时" allow-negative class="input input-ghost input-xs text-sm w-14"/>
                 <span class="text-xs font-medium opacity-60">总值&nbsp;&nbsp;{{ modifiedValueOf('敏捷') + cardData.basic.先攻临时 }}</span>
               </td>
             </tr>
@@ -89,7 +91,7 @@
             <tbody>
             <tr v-for="prop in propKeys" :key="prop" class="group" :class="{ highlight: !!cardData.meta.experienced[prop] }">
               <td><button class="btn btn-xs btn-ghost font-medium" @click="toggleSkillGrowth(prop)">{{ prop }}</button></td>
-              <td><number-input v-model="cardData.props[prop]" class="input input-ghost input-xs text-sm w-full"/></td>
+              <td><card-field-input :path="`props.${prop}`" class="input input-ghost input-xs text-sm w-full"/></td>
               <td>{{ modifiedValueOf(prop) }}</td>
               <td>{{ savingValueOf(prop) }}</td>
               <td style="padding: 0">
@@ -131,7 +133,7 @@
                 </td>
                 <td class="flex items-center justify-between group" :class="{ highlight: !!cardData.meta.experienced[getSkillCell(i, j).skill] }">
                   <span>
-                    <number-input v-model="cardData.skills[getSkillCell(i, j).skill]" allow-negative class="input input-ghost input-xs text-sm w-14"/>
+                    <card-field-input :path="`skills.${getSkillCell(i, j).skill}`" allow-negative class="input input-ghost input-xs text-sm w-14"/>
                     <span class="opacity-60 text-xs">{{ skillTotalOf(getSkillCell(i, j).skill) }}</span>
                   </span>
                   <CardMoreAction class="invisible group-hover:visible" :expression="getSkillCell(i, j).skill" :deletable="false" />
@@ -158,7 +160,7 @@
                   <template v-if="item">
                     <td :key="`name-${j}`"><button class="btn btn-xs btn-ghost font-medium">{{ item }}</button></td>
                     <td :key="`value-${j}`" class="flex items-center justify-between group">
-                      <number-input v-model="cardData.items[item]" allow-negative class="input input-ghost input-xs text-sm w-20"/>
+                      <card-field-input :path="`items.${item}`" allow-negative class="input input-ghost input-xs text-sm w-20"/>
                       <CardMoreAction class="invisible group-hover:visible" :expression="item" @delete="deleteItem(item)" />
                     </td>
                   </template>
@@ -305,13 +307,14 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { XMarkIcon, InformationCircleIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
-import { useCurrentSelectedCard } from '../utils'
+import { safeDelete, useCurrentSelectedCard } from '../utils'
 import { getSkillsMap, type DndCard, type IDndCardData } from '@paotuan/card'
 import CardToolbar from '../CardToolbar.vue'
 import TextInput from '../components/TextInput.vue'
 import NumberInput from '../components/NumberInput.vue'
 import DndSpellsDataDialog from '../DndSpellsDataDialog.vue'
 import CardMoreAction from '../CardMoreAction.vue'
+import CardFieldInput from '../components/CardFieldInput.vue'
 
 const dndCard = useCurrentSelectedCard<DndCard>()! // 此处可以确保是 dnd card
 const cardData = computed(() => dndCard.value.data)
@@ -346,6 +349,7 @@ const items = computed(() => {
 
 const deleteItem = (name: string) => {
   delete cardData.value.items[name]
+  safeDelete(cardData.value.templateData, `items.${name}`)
   markEdited()
 }
 

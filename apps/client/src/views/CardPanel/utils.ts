@@ -54,3 +54,10 @@ export function useSelectCardHandler() {
     isCurrentSelected
   }
 }
+
+// 避免 proxy 删除不存在属性导致控制台报错
+export function safeDelete(obj: Record<string, any>, key: string) {
+  if (key in obj) {
+    delete obj[key]
+  }
+}
