@@ -20,10 +20,7 @@ import DModal from '../../../dui/modal/DModal.vue'
 import { useSceneStore } from '../../../store/scene'
 import { computed, ref } from 'vue'
 import { useCardStore } from '../../../store/card'
-import { createCard, CocCard, type CardType, type ICard } from '@paotuan/card'
-import { getCocCardProto } from '../../../store/card/importer/coc'
-import { getDndCardProto } from '../../../store/card/importer/dnd'
-import { getGeneralCardProto } from '../../../store/card/importer/utils'
+import { createCard, CardProto } from '@paotuan/card'
 import { cloneDeep } from 'lodash'
 import CardDisplay from '../../CardPanel/display/CardDisplay.vue'
 import CardTemplateSelect from './CardTemplateSelect.vue'
@@ -46,23 +43,23 @@ const currentCardName = computed(() => currentCardData.value?.name ?? sceneStore
 // 选择人物卡模板
 const selectedTemplate = ref('')
 
-// 应用人物卡模板
-const createEmptyCardByType = (type: CardType) => {
-  const name = currentCardName.value
-  const cardData = (() => {
-    if (type === 'coc') {
-      return getCocCardProto(name)
-    } else if (type === 'dnd') {
-      return getDndCardProto(name)
+// 根据人物卡模板创建出新的人物卡
+const getCardProto = (templateName: string) => {
+  const proto = (() => {
+    if (templateName === '__internal_coc_empty') {
+      return CardProto.coc
+    } else if (templateName === '__internal_dnd_empty') {
+      return CardProto.dnd
+    } else if (templateName === '__internal_general_empty') {
+      return CardProto.general
     } else {
-      return getGeneralCardProto(name)
+      return cardStore.of(templateName)
     }
   })()
-  const card = createCard(cardData)
-  if (card instanceof CocCard) {
-    card.applyDefaultValues()
-  }
-  return card
+  if (!proto) return undefined // 理论不可能？
+  const newCardData = cloneDeep(proto)
+  newCardData.created = newCardData.lastModified = Date.now()
+  return newCardData
 }
 
 const onApplyCard = () => {
@@ -70,21 +67,15 @@ const onApplyCard = () => {
   if (!templateName) return
   const twiceConfirm = currentCardData.value ? window.confirm('该 NPC 已有人物卡，重新初始化将覆盖现有的人物卡，是否继续？') : true
   if (!twiceConfirm) return
-  let card: ICard
-  if (templateName === '__internal_coc_empty') {
-    card = createEmptyCardByType('coc')
-  } else if (templateName === '__internal_dnd_empty') {
-    card = createEmptyCardByType('dnd')
-  } else if (templateName === '__internal_general_empty') {
-    card = createEmptyCardByType('general')
-  } else {
-    const originCard = cardStore.of(templateName)
-    card = createCard(cloneDeep(originCard))
-    card.data.name = currentCardName.value
-  }
+  const proto = getCardProto(templateName)
+  if (!proto) return
+  const card = createCard(proto)
   // 导入卡片
+  card.data.name = currentCardName.value
   card.data.isTemplate = false
-  card.data.lastModified = Date.now()
+  // 初始化可能有的字段表达式
+  card.initByTemplate()
+  // 导入之
   cardStore.importCard(card.data, true)
 }
 </script>

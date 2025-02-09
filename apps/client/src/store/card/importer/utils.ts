@@ -1,5 +1,4 @@
-import type { ICard, IGeneralCardData } from '@paotuan/card'
-import { VERSION_CODE } from '@paotuan/types'
+import type { ICard } from '@paotuan/card'
 
 export function addAttributesBatch<T extends ICard>(card: T, rawText: string): T {
   Array.from(rawText.trim().matchAll(/\D+\d+/g)).map(match => match[0]).forEach(entry => {
@@ -10,24 +9,6 @@ export function addAttributesBatch<T extends ICard>(card: T, rawText: string): T
     card.setEntry(name, value)
   })
   return card
-}
-
-/**
- * @deprecated
- */
-export function getGeneralCardProto(name: string): IGeneralCardData {
-  return {
-    type: 'general',
-    version: VERSION_CODE,
-    name: name || '未命名',
-    created: Date.now(),
-    lastModified: Date.now(),
-    isTemplate: false,
-    ext: '',
-    skills: { HP: 0, MAXHP: 0 },
-    abilities: [],
-    templateData: {}
-  }
 }
 
 export function addOrUpdateByName<T extends { name: string }>(arr: T[], elem: T) {

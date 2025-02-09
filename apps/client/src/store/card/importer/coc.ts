@@ -1,49 +1,6 @@
-import { CocCard, type ICocCardData } from '@paotuan/card'
-import { VERSION_CODE } from '@paotuan/types'
+import { CocCard } from '@paotuan/card'
 import XLSX from 'xlsx'
 import { addOrUpdateByName } from './utils'
-
-/**
- * @deprecated
- */
-export function getCocCardProto(name?: string): ICocCardData {
-  return {
-    type: 'coc',
-    version: VERSION_CODE,
-    name: name || '未命名',
-    created: Date.now(),
-    lastModified: Date.now(),
-    isTemplate: false,
-    basic: {
-      job: '学生',
-      AGE: 24,
-      gender: '秀吉',
-      HP: 0,
-      SAN: 0,
-      LUCK: 0,
-      MP: 0,
-      CM: 0,
-      '信用': 0
-    },
-    props: {
-      '力量': 0,
-      '体质': 0,
-      '体型': 0,
-      '敏捷': 0,
-      '外貌': 0,
-      '智力': 0,
-      '意志': 0,
-      '教育': 0
-    },
-    skills: {},
-    abilities: [],
-    ext: '',
-    templateData: {},
-    meta: {
-      skillGrowth: {}
-    }
-  }
-}
 
 function _unifiedKey(key: string) {
   let unifiedKey = key
