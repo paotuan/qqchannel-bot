@@ -4,6 +4,7 @@ import { GeneralCard, IGeneralCardData } from './general'
 import { DndCard, IDndCardData, getSkillsMap, getPropOfSkill, IDndCardAbility, IDndCardEntry } from './dnd'
 import { VERSION_CODE } from './utils/version'
 import { handleCardUpgrade } from './utils/upgrade'
+import { CardProto } from './proto'
 
 function createCard(data: ICardData): ICard {
   switch (data.type) {
@@ -40,5 +41,6 @@ export {
   getPropOfSkill,
   createCard,
   handleCardUpgrade,
-  VERSION_CODE
+  VERSION_CODE,
+  CardProto
 }

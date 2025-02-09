@@ -340,6 +340,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
 
   /**
    * 如果人物卡未设置一些值，则以默认值填充
+   * @deprecated
    */
   applyDefaultValues() {
     // 初始血量等值

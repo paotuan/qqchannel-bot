@@ -12,6 +12,9 @@ export function addAttributesBatch<T extends ICard>(card: T, rawText: string): T
   return card
 }
 
+/**
+ * @deprecated
+ */
 export function getGeneralCardProto(name: string): IGeneralCardData {
   return {
     type: 'general',

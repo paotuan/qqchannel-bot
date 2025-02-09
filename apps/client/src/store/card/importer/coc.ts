@@ -3,6 +3,9 @@ import { VERSION_CODE } from '@paotuan/types'
 import XLSX from 'xlsx'
 import { addOrUpdateByName } from './utils'
 
+/**
+ * @deprecated
+ */
 export function getCocCardProto(name?: string): ICocCardData {
   return {
     type: 'coc',
@@ -140,4 +143,15 @@ export function parseCocXlsx(setter: CocCard, workbook: XLSX.WorkBook) {
   }
 
   return setter
+}
+
+export function parseCocXlsxName(workbook: XLSX.WorkBook): string {
+  const sheet = workbook.Sheets['人物卡']
+  const cySheet = workbook.Sheets['简化卡 骰娘导入']
+  if (!sheet) return ''
+  if (cySheet) {
+    return sheet['E3']?.v || ''
+  } else {
+    return sheet['D3']?.v || ''
+  }
 }

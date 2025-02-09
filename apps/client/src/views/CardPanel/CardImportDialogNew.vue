@@ -71,28 +71,28 @@
 import { PlusCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref, watch } from 'vue'
 import DModal from '../../dui/modal/DModal.vue'
-import { createCard, CocCard, type CardType, type ICard, DndCard } from '@paotuan/card'
+import { createCard, CocCard, type CardType, DndCard, CardProto } from '@paotuan/card'
 import { useCardStore } from '../../store/card'
 import * as XLSX from 'xlsx'
-import { getCocCardProto, parseCocXlsx } from '../../store/card/importer/coc'
+import { parseCocXlsx, parseCocXlsxName } from '../../store/card/importer/coc'
 import { Toast } from '../../utils'
-import { addAttributesBatch, getGeneralCardProto } from '../../store/card/importer/utils'
-import { getDndCardProto, parseDndXlsx } from '../../store/card/importer/dnd'
+import { addAttributesBatch } from '../../store/card/importer/utils'
+import { parseDndXlsx, parseDndXlsxName } from '../../store/card/importer/dnd'
+import { cloneDeep } from 'lodash'
 
 const open = ref(false)
 const cardType = ref<CardType>('coc')
 const cardName = ref('')
 const importType = ref<'text' | 'excel'>('text')
 const textareaContent = ref('')
-const xlsxCard = ref<ICard | null>(null)
+const xlsxWorkbook = ref<XLSX.WorkBook | null>(null)
 const fileChooser = ref<HTMLInputElement>()
-const cocApplyDefaultValue = ref(true) // todo
 const importAsTemplate = ref(false)
 
 // 表单合法性校验
 const canSubmit = computed(() => {
   if (!cardName.value.trim()) return false
-  if (importType.value === 'excel' && !xlsxCard.value) return false
+  if (importType.value === 'excel' && !xlsxWorkbook.value) return false
   return true
 })
 
@@ -101,7 +101,7 @@ const cardStore = useCardStore()
 const nameExist = computed(() => cardStore.existNames.includes(cardName.value))
 
 const clearFileInput = () => {
-  xlsxCard.value = null
+  xlsxWorkbook.value = null
   fileChooser.value && (fileChooser.value.value = '')
 }
 
@@ -133,16 +133,18 @@ const handleFile = (e: Event) => {
     try {
       const data = new Uint8Array(e.target!.result as ArrayBuffer)
       const workbook = XLSX.read(data, { type: 'array' })
-      if (parseType === 'coc') {
-        xlsxCard.value = parseCocXlsx(new CocCard(getCocCardProto()), workbook)
-      } else if (parseType === 'dnd') {
-        xlsxCard.value = parseDndXlsx(new DndCard(getDndCardProto()), workbook)
-      } else {
-        throw new Error('Cannot import xlsx when type=' + parseType)
-      }
+      xlsxWorkbook.value = workbook
       // 自动带入人物卡的名字
       if (!cardName.value) {
-        cardName.value = xlsxCard.value.name
+        cardName.value = (() => {
+          if (parseType === 'coc') {
+            return parseCocXlsxName(workbook)
+          } else if (parseType === 'dnd') {
+            return parseDndXlsxName(workbook)
+          } else {
+            return ''
+          }
+        })()
       }
     } catch (e) {
       console.log(e)
@@ -154,31 +156,26 @@ const handleFile = (e: Event) => {
 
 // 根据类型创建人物卡模板
 const getCardProto = () => {
-  const name = cardName.value.trim()
-  if (cardType.value === 'coc') {
-    return getCocCardProto(name)
-  } else if (cardType.value === 'dnd') {
-    return getDndCardProto(name)
-  } else {
-    return getGeneralCardProto(name)
-  }
+  const template = useTemplate.value
+  const proto = cardStore.of(template) ?? CardProto[cardType.value] // 如有 template，优先根据 template 创建。否则初始化各类型的空白卡
+  const newCardData = cloneDeep(proto)
+  newCardData.created = newCardData.lastModified = Date.now()
+  return newCardData
 }
 
 const submit = () => {
   if (!cardName.value.trim()) return // 必须设置名字
-  let card: ICard
+  const card = createCard(getCardProto())
   if (importType.value === 'text') { // 导入 text
-    card = createCard(getCardProto())
     addAttributesBatch(card, textareaContent.value)
-  } else { // 导入 excel
-    if (!xlsxCard.value) return
-    card = xlsxCard.value
-    card.data.name = cardName.value // name 使用界面上的值，允许和 excel 不同
+  } else if (xlsxWorkbook.value) { // 导入 excel
+    if (card.type === 'coc') {
+      parseCocXlsx(card as CocCard, xlsxWorkbook.value)
+    } else if (card.type === 'dnd') {
+      parseDndXlsx(card as DndCard, xlsxWorkbook.value)
+    }
   }
-  // coc 设置技能默认值 todo 干掉
-  if (card instanceof CocCard && cocApplyDefaultValue.value) {
-    card.applyDefaultValues()
-  }
+  card.data.name = cardName.value.trim() // name 使用界面上的值，允许和 excel 不同
   // 是否是模板导入
   card.data.isTemplate = importAsTemplate.value
   // 若不是模板，则初始化可能有的字段表达式

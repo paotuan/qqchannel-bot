@@ -3,6 +3,9 @@ import { VERSION_CODE } from '@paotuan/types'
 import XLSX from 'xlsx'
 import { addOrUpdateByName } from './utils'
 
+/**
+ * @deprecated
+ */
 export function getDndCardProto(name?: string): IDndCardData {
   return {
     type: 'dnd',
@@ -325,5 +328,17 @@ function parseDnd_variant2(workbook: XLSX.WorkBook, setter: DndCard) {
     const lv = Number(sheet['BM' + i]?.v) || 0
     const desc = sheet['BS' + i]?.v || ''
     addOrUpdateByName(user.specialists, { lv, name, desc })
+  }
+}
+
+export function parseDndXlsxName(workbook: XLSX.WorkBook) {
+  const sheet_v1 = workbook.Sheets['主要']
+  const sheet_v2 = workbook.Sheets['主要情况']
+  if (sheet_v1) {
+    return sheet_v1['D3']?.v || ''
+  } else if (sheet_v2) {
+    return sheet_v2['E3']?.v || ''
+  } else {
+    return ''
   }
 }
