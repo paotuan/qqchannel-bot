@@ -1,6 +1,7 @@
 import type { ICard } from '@paotuan/card'
 import { computed, ComputedRef, inject, provide, ref, watch } from 'vue'
 import { useCardStore } from '../../store/card'
+import { useEventBusListener } from '../../utils'
 
 const SELECTED_CARD = Symbol('SELECTED_CARD')
 
@@ -47,6 +48,9 @@ export function useSelectCardHandler() {
       selectCard(cardStore.allCards[0].name)
     }
   })
+
+  // 外部切换当前已选人物卡
+  useEventBusListener('card/import', selectCard)
 
   return {
     selectedCard,

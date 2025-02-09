@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { ICardDeleteReq, ICardImportReq, IDiceRollReq } from '@paotuan/types'
 import ws from '../../api/ws'
 import { computed, reactive, ref } from 'vue'
-import { gtagEvent, Toast } from '../../utils'
+import { eventBus, gtagEvent, Toast } from '../../utils'
 import { createCard, type ICardData } from '@paotuan/card'
 import { yChannelStoreRef, yGlobalStoreRef } from '../ystore'
 
@@ -34,6 +34,7 @@ export const useCardStore = defineStore('card', () => {
       if (silent) return
       if (data.success) {
         Toast.success('人物卡保存成功！')
+        eventBus.emit('card/import', card.name)
       } else {
         Toast.error('人物卡保存失败！')
       }
