@@ -338,37 +338,6 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     }
   }
 
-  /**
-   * 如果人物卡未设置一些值，则以默认值填充
-   * @deprecated
-   */
-  applyDefaultValues() {
-    // 初始血量等值
-    if (!this.HP) this.HP = this.MAXHP
-    if (!this.MP) this.MP = this.MAXMP
-    if (!this.SAN) this.SAN = this.data.props.意志
-    // 初始技能值
-    Object.entries(DEFAULT_SKILLS).forEach(([key, value]) => {
-      const entry = this.getRawEntry(key)
-      if (!entry) {
-        // this.setEntry(key, value)
-        // 都是 skills 且不存在，直接快速赋值了
-        this.data.skills[key] = value
-      }
-    })
-    // 闪避
-    const shanbiEntry = this.getRawEntry('闪避')
-    if (!shanbiEntry) {
-      this.data.skills['闪避'] = Math.floor(this.data.props.敏捷 / 2)
-    }
-    // 母语
-    const muyuEntry = this.getRawEntry('母语')
-    if (!muyuEntry) {
-      this.data.skills['母语'] = this.data.props.教育
-    }
-    this.data.lastModified = Date.now() // 强制认为有更新吧
-  }
-
   override getEntryDisplay(name: string): string {
     const entry = this.getEntry(name)
     if (entry) {
@@ -489,91 +458,6 @@ export function getCocTempEntry(key: string, tempValue: number): ICocCardEntry {
   const value = calculateTargetValueWithDifficulty(tempValue, difficulty)
   return { input: key, type: 'skills', key: skillWithoutDifficulty, difficulty, value, baseValue: tempValue, isTemp: true, readonly: true }
 }
-
-/**
- * coc 默认技能值表
- */
-const DEFAULT_SKILLS = Object.freeze({
-  '会计': 5,
-  '人类学': 1,
-  '估价': 5,
-  '考古学': 1,
-  '取悦': 15,
-  '攀爬': 20,
-  '计算机': 5,
-  '乔装': 5,
-  '驾驶': 20,
-  '电气维修': 10,
-  '电子学': 1,
-  '话术': 5,
-  '急救': 30,
-  '历史': 5,
-  '恐吓': 15,
-  '跳跃': 20,
-  '法律': 5,
-  '图书馆': 20,
-  '聆听': 20,
-  '锁匠': 1,
-  '机械维修': 10,
-  '医学': 1,
-  '博物': 10,
-  '导航': 10,
-  '神秘学': 5,
-  '克苏鲁': 0,
-  '重型机械': 1,
-  '说服': 10,
-  '精神分析': 1,
-  '心理学': 10,
-  '骑乘': 5,
-  '妙手': 10,
-  '侦查': 25,
-  '潜行': 20,
-  '游泳': 20,
-  '投掷': 20,
-  '追踪': 10,
-  '驯兽': 5,
-  '潜水': 1,
-  '爆破': 1,
-  '读唇': 1,
-  '催眠': 1,
-  '炮术': 1,
-  // 格斗
-  '鞭': 5,
-  '刀剑': 20,
-  '斗殴': 25,
-  '斧': 15,
-  '绞索': 15,
-  '连枷': 10,
-  '链锯': 10,
-  // 射击
-  '步枪': 25,
-  '冲锋枪': 15,
-  '弓': 15,
-  '矛': 20,
-  '火焰喷射器': 10,
-  '机枪': 10,
-  '手枪': 20,
-  '霰弹枪': 25,
-  '重武器': 10,
-  // 艺术与手艺
-  '表演': 5,
-  '美术': 5,
-  '摄影': 5,
-  '伪造文书': 5,
-  // 科学
-  '地质学': 1,
-  '动物学': 1,
-  '化学': 1,
-  '密码学': 1,
-  '气象学': 1,
-  '生物学': 1,
-  '数学': 10,
-  '司法科学': 1,
-  '天文学': 1,
-  '物理学': 1,
-  '药学': 1,
-  '植物学': 1,
-})
 
 function clamp(num: number, min: number, max: number) {
   return Math.min(Math.max(num, min), max)
