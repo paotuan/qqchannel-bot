@@ -13,6 +13,7 @@ export interface ICardQuery {
   name?: string
   type?: CardType[]
   isTemplate?: boolean
+  exact?: boolean // 是否精确查询 name，默认 false
 }
 
 export class CardProvider {
@@ -97,7 +98,13 @@ export class CardProvider {
     }
     if (query.name) {
       const keyword = query.name.toLowerCase()
-      list = list.filter(data => data.name.toLowerCase().includes(keyword))
+      list = list.filter(data => {
+        if (query.exact) {
+          return data.name.toLowerCase() === keyword
+        } else {
+          return data.name.toLowerCase().includes(keyword)
+        }
+      })
     }
     return list
   }
