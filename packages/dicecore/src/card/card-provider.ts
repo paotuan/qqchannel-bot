@@ -3,6 +3,11 @@ import { eventBus } from '../utils/eventBus'
 import { DefaultCardLinker, type ICardLinker } from './card-linker'
 
 type CardId = string
+type RegisterCardHook = (id: CardId, data: ICardData) => ICardData
+type UnregisterCardHook = (id: CardId) => void
+
+const DefaultRegisterCardHook: RegisterCardHook = (id, data) => data
+const DefaultUnregisterCardHook: UnregisterCardHook = () => {}
 
 export interface ICardQuery {
   name?: string
@@ -15,6 +20,8 @@ export class CardProvider {
 
   private readonly cardMap = new Map<CardId, ICard>()
   private _linker?: ICardLinker
+  private _registerCardHook = DefaultRegisterCardHook
+  private _unregisterCardHook = DefaultUnregisterCardHook
 
   private constructor() {
   }
@@ -31,15 +38,26 @@ export class CardProvider {
     this._linker = linker
   }
 
+  setRegisterCardHook(hook: RegisterCardHook | null) {
+    this._registerCardHook = hook || DefaultRegisterCardHook
+  }
+
+  setUnregisterCardHook(hook: UnregisterCardHook) {
+    this._unregisterCardHook = hook || DefaultUnregisterCardHook
+  }
+
   registerCard(id: CardId, card: ICardData) {
     const oldCard = this.cardMap.get(id)
     oldCard?.removeCardEntryChangeListener()
-    const newCard = createCard(card)
+    // 允许通过 hook 替换 data 对象，主要是为了能够让外部传入 syncstore 的响应式对象
+    const newCardData = this._registerCardHook(id, card)
+    const newCard = createCard(newCardData)
     newCard.addCardEntryChangeListener(e => eventBus.emit('card-entry-change', e))
     this.cardMap.set(id, newCard)
   }
 
   unregisterCard(id: CardId) {
+    this._unregisterCardHook(id)
     const oldCard = this.cardMap.get(id)
     if (oldCard) {
       oldCard.removeCardEntryChangeListener()

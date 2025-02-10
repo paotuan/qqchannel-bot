@@ -21,6 +21,13 @@ export class CardManager {
   constructor(wss: Wss) {
     this.wss = wss
     this.initRegisterCards()
+    // set hooks
+    CardProvider.setRegisterCardHook((id, data) => {
+      // 将 data 转变为响应式对象，确保内部变化被监听到
+      this.cardMap[id] = data
+      return this.cardMap[id]
+    })
+    CardProvider.setUnregisterCardHook(id => delete this.cardMap[id])
     // set linker
     CardProvider.setLinker(new YCardLinker())
     // 注册监听器
@@ -38,16 +45,13 @@ export class CardManager {
     const { card } = req
     const cardName = card.name
     console.log('[Card] 保存人物卡', cardName)
-    this.cardMap[cardName] = card
-    // 传入响应式对象，确保内部变化被监听到
-    CardProvider.registerCard(cardName, this.cardMap[cardName])
+    CardProvider.registerCard(cardName, card)
     this.wss.sendToClient(client, { cmd: 'card/import', success: true, data: null })
   }
 
   deleteCard(client: WsClient, req: ICardDeleteReq) {
     const { cardName } = req
     console.log('[Card] 删除人物卡', cardName)
-    delete this.cardMap[cardName]
     CardProvider.unregisterCard(cardName)
   }
 
