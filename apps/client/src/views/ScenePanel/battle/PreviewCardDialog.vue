@@ -20,7 +20,7 @@ import DModal from '../../../dui/modal/DModal.vue'
 import { useSceneStore } from '../../../store/scene'
 import { computed, ref } from 'vue'
 import { useCardStore } from '../../../store/card'
-import { createCard, CardProto } from '@paotuan/card'
+import { createCard, CardProto, ICardData } from '@paotuan/card'
 import { cloneDeep } from 'lodash'
 import CardDisplay from '../../CardPanel/display/CardDisplay.vue'
 import CardTemplateSelect from './CardTemplateSelect.vue'
@@ -45,7 +45,7 @@ const selectedTemplate = ref('')
 
 // 根据人物卡模板创建出新的人物卡
 const getCardProto = (templateName: string) => {
-  const proto = (() => {
+  const proto: ICardData = (() => {
     if (templateName === '__internal_coc_empty') {
       return CardProto.coc
     } else if (templateName === '__internal_dnd_empty') {

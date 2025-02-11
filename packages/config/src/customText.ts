@@ -39,13 +39,16 @@ export type CustomTextKeys =
   | 'roll.sc.extra'
   | 'card.empty'
   | 'card.nopermission'
+  | 'card.exist'
+  | 'card.search'
   | 'roll.st.prompt'
   | 'roll.st.show'
   | 'roll.st.set'
   | 'nn.show'
   | 'nn.link'
   | 'nn.clear'
-  | 'nn.search'
+  | 'pc.new'
+  | 'pc.del'
 
 export interface ICustomTextConfig extends IPluginElementCommonInfo {
   texts: Partial<Record<CustomTextKeys, ICustomTextItem[] | ICustomTextHandler>>

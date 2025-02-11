@@ -16,6 +16,7 @@ import { DndDiceRoll } from '../standard/dnd'
 import { CocDiceRoll } from '../standard/coc'
 import { CardProvider } from '../../card/card-provider'
 import { ConfigProvider } from '../../config/config-provider'
+import { dispatchPc } from '../special/pc/utils'
 
 /**
  * 工厂方法创建骰子实例
@@ -49,6 +50,14 @@ export function createDiceRoll(userCommand: ICommand, opposedRoll?: StandardDice
     // 我寻思 nn 就不用 parseTemplate 了，纯指令不包含掷骰
     return dispatchNn(expression, context, inlineRolls).roll()
   } else {
+    // pc 无需 parse
+    if (specialDiceConfig.pcDice.enabled) {
+      const pcRoll = dispatchPc(expression, context, inlineRolls)
+      if (pcRoll) {
+        return pcRoll.roll()
+      }
+    }
+
     // 普通检定/掷骰
     const roller = (() => {
       const parsedExpression = parseTemplate(expression, context, inlineRolls)

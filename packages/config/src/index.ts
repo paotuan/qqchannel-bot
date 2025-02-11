@@ -35,6 +35,7 @@ export interface ISpecialDiceConfig {
   nnDice: { enabled: boolean, writable: 'all' | 'none' | 'manager', updateNick: 'never' | 'whenEmpty' | 'always' }
   opposeDice: { enabled: boolean }
   inMessageDice: { enabled: boolean }
+  pcDice: { enabled: boolean, writable: 'all' | 'none' | 'manager', template: string }
 }
 
 // 插件开启状态和私有配置

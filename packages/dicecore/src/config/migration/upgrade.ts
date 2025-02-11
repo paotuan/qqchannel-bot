@@ -170,7 +170,7 @@ export function upgradeConfig(config: IChannelConfig) {
     texts['nn.show'] = embedText.texts['nn.show']
     texts['nn.link'] = embedText.texts['nn.link']
     texts['nn.clear'] = embedText.texts['nn.clear']
-    texts['nn.search'] = embedText.texts['nn.search']
+    // texts['nn.search'] = embedText.texts['nn.search']
     config.version = 32 // 1.8.0
   }
   if (config.version < 33) {
@@ -205,6 +205,19 @@ export function upgradeConfig(config: IChannelConfig) {
   if (config.version < 43) {
     config.specialDice.nnDice.updateNick = 'whenEmpty'
     config.version = 43 // 2.0.0-alpha.6
+  }
+  if (config.version < 46) {
+    // 新增 pc 文案
+    const embedText = getEmbedCustomText()
+    const texts = config.embedPlugin.customText![0].texts
+    texts['card.exist'] = embedText.texts['card.exist']
+    texts['card.search'] = embedText.texts['card.search']
+    texts['pc.new'] = embedText.texts['pc.new']
+    texts['pc.del'] = embedText.texts['pc.del']
+    if ((texts as any)['nn.search']) delete (texts as any)['nn.search']
+    // 新增 pc config
+    config.specialDice.pcDice = { enabled: true, writable: 'all', template: 'coc' }
+    config.version = 46 // 2.1.0
   }
   return config as IChannelConfig
 }

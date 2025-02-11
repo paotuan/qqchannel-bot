@@ -158,7 +158,12 @@ const customTextMeta = Object.freeze<ICustomTextMetaGroup[]>([
           { name: '成功', scope: 'coc', section: true }, { name: '大成功', scope: 'coc', section: true }, { name: '极难成功', scope: 'coc', section: true }, { name: '困难成功', scope: 'coc', section: true }, { name: '常规成功', scope: 'coc', section: true }, { name: '常规失败', scope: 'coc', section: true }, { name: '大失败', scope: 'coc', section: true },
           { name: '对方成功', scope: 'coc', section: true }, { name: '对方大成功', scope: 'coc', section: true }, { name: '对方极难成功', scope: 'coc', section: true }, { name: '对方困难成功', scope: 'coc', section: true }, { name: '对方常规成功', scope: 'coc', section: true }, { name: '对方常规失败', scope: 'coc', section: true }, { name: '对方大失败', scope: 'coc', section: true },
         ]
-      },
+      }
+    ]
+  },
+  {
+    name: '人物卡操作',
+    items: [
       {
         key: 'card.empty',
         name: '人物卡-未关联',
@@ -173,11 +178,20 @@ const customTextMeta = Object.freeze<ICustomTextMetaGroup[]>([
         defaultTemplate: '{{用户名}} 没有操作人物卡的权限',
         args: [_.用户名, _.人物卡名, _.at用户]
       },
-    ]
-  },
-  {
-    name: '人物卡操作',
-    items: [
+      {
+        key: 'card.exist',
+        name: '人物卡-已存在',
+        description: '.pc new 铃木翼<br><u>已存在人物卡：铃木翼</u>',
+        defaultTemplate: '已存在人物卡：{{人物卡名}}',
+        args: [_.用户名, _.人物卡名, _.at用户]
+      },
+      {
+        key: 'card.search',
+        name: '人物卡-关键词搜索',
+        description: '.nn 木<br><u>@Maca 请选择想要操作的人物卡：<br>铃木翼a<br>铃木翼b</u>',
+        defaultTemplate: '{{at用户}}请选择想要操作的人物卡：\n{{#人物卡列表}}{{人物卡名}}{{^last}}\n{{/last}}{{/人物卡列表}}\n{{^人物卡列表}}未找到名字包含{{关键词}}的人物卡{{/人物卡列表}}',
+        args: [_.用户名, _.人物卡名, _.at用户, { name: '人物卡列表' }, { name: '关键词' }]
+      },
       {
         key: 'roll.st.prompt',
         name: '人物卡-设置提示',
@@ -200,6 +214,20 @@ const customTextMeta = Object.freeze<ICustomTextMetaGroup[]>([
         args: [_.用户名, _.人物卡名, _.at用户, { name: '条目列表', section: true }, { name: '条目' }, { name: '条目唯一', section: true }, _.last]
       },
       {
+        key: 'pc.new',
+        name: '人物卡-新建',
+        description: '.pc new<br><u>@Maca 已创建并关联人物卡：铃木翼</u>',
+        defaultTemplate: '{{at用户}}已创建并关联人物卡：{{人物卡名}}',
+        args: [_.用户名, _.人物卡名, _.at用户]
+      },
+      {
+        key: 'pc.del',
+        name: '人物卡-删除',
+        description: '.pc del<br><u>@Maca 已删除人物卡：铃木翼</u>',
+        defaultTemplate: '{{at用户}}已删除人物卡：{{人物卡名}}',
+        args: [_.用户名, _.人物卡名, _.at用户]
+      },
+      {
         key: 'nn.show',
         name: '人物卡关联-展示已关联人物卡',
         description: '.nn<br><u>@Maca 当前已关联人物卡：铃木翼</u>',
@@ -219,14 +247,7 @@ const customTextMeta = Object.freeze<ICustomTextMetaGroup[]>([
         description: '.nn clear<br><u>@Maca 已取消关联人物卡</u>',
         defaultTemplate: '{{at用户}}已取消关联人物卡',
         args: [_.用户名, _.人物卡名, _.at用户]
-      },
-      {
-        key: 'nn.search',
-        name: '人物卡关联-关键词搜索',
-        description: '.nn 木<br><u>@Maca 请选择想要关联的人物卡：<br>铃木翼a<br>铃木翼b</u>',
-        defaultTemplate: '{{at用户}}请选择想要关联的人物卡：\n{{#人物卡列表}}{{人物卡名}}{{^last}}\n{{/last}}{{/人物卡列表}}\n{{^人物卡列表}}未找到名字包含{{关键词}}的人物卡{{/人物卡列表}}',
-        args: [_.用户名, _.人物卡名, _.at用户, { name: '人物卡列表' }, { name: '关键词' }]
-      },
+      }
     ]
   },
   {

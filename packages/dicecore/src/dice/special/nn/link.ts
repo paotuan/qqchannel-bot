@@ -37,12 +37,12 @@ export class NnLinkDiceRoll extends BasePtDiceRoll {
     if (!this.hasLinkPermission) {
       return this.t('card.nopermission')
     } else if (this.availableCards.length === 0) {
-      return this.t('nn.search', { 人物卡列表: [], 关键词: this.keyword })
+      return this.t('card.search', { 人物卡列表: [], 关键词: this.keyword, nn: true })
     } else if (this.targetCardName) {
       return this.t('nn.link', { 人物卡名: this.targetCardName, 关键词: this.keyword })
     } else {
       const availableList = this.availableCards.map((card, i) => ({ 人物卡名: card.name, last: i === this.availableCards.length - 1 }))
-      return this.t('nn.search', { 人物卡列表: availableList, 关键词: this.keyword })
+      return this.t('card.search', { 人物卡列表: availableList, 关键词: this.keyword, nn: true })
     }
   }
 
