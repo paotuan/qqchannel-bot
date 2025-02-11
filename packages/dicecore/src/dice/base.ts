@@ -3,7 +3,7 @@ import type { CustomTextKeys, SuccessLevel } from '@paotuan/config'
 import type { ICard } from '@paotuan/card'
 import type { IDiceRollContext } from './utils/parseTemplate'
 import type { IRollDecideContext } from '../config/helpers/decider'
-import { at, convertSuccessLevel2CustomTextKey } from './utils'
+import { at, convertSuccessLevel2CustomTextKey, MockSystemUserId } from './utils'
 import { ConfigProvider } from '../config/config-provider'
 import { CardProvider, ICardQuery } from '../card/card-provider'
 
@@ -70,7 +70,7 @@ export abstract class BasePtDiceRoll {
     return {
       用户名: this.context.username,
       人物卡名: this.selfCard?.name ?? this.context.username,
-      at用户: this.context.userId === 'system' ? this.context.username : at(this.context.userId)
+      at用户: this.context.userId === MockSystemUserId ? this.context.username : at(this.context.userId)
     }
   }
 

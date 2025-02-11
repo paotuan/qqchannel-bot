@@ -49,3 +49,7 @@ export function removeTrailingOneSpace(str: string) {
 // 处理 @ 相关
 export const AtUserPattern = /^<at id="(\d+)"\/>/ ///^<@!(\d+)>/
 export const at = (userId: string) => `<at id="${userId}"/>`
+
+// 用于给无主人物卡代骰时，临时创建一个关联
+export const MockSystemUserId = '__temp_user_id__'
+

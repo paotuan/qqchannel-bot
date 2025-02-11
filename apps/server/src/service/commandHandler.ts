@@ -6,7 +6,8 @@ import {
   dispatchCommand,
   dispatchReaction,
   IDispatchResult, IRiItem, RiProvider,
-  StandardDiceRoll
+  StandardDiceRoll,
+  MockSystemUserId,
 } from '@paotuan/dicecore'
 import type { IDiceRollReq } from '@paotuan/types'
 import type { Bot } from '../adapter/Bot'
@@ -206,7 +207,7 @@ export class CommandHandler {
 }
 
 const MockSystemCardId = '__temp_card_id__'
-const MockSystemUserId = '__temp_user_id__'
+// const MockSystemUserId = '__temp_user_id__'
 
 class YRiState extends AbstractRiState {
   override getRiList(channelUnionId: ChannelUnionId): IRiItem[] {

@@ -1,4 +1,5 @@
 import { BasePtDiceRoll, DiceRollEventListener, DiceRollEventListenerMap } from './base'
+import { MockSystemUserId } from './utils/index'
 import { createDiceRoll } from './utils/create'
 import { parseTemplate } from './utils/parseTemplate'
 import { StandardDiceRoll } from './standard'
@@ -44,5 +45,6 @@ export {
   EnListDiceRoll,
   EnMarkDiceRoll,
   createDiceRoll,
-  parseTemplate
+  parseTemplate,
+  MockSystemUserId
 }

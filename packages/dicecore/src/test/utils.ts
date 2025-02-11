@@ -15,6 +15,7 @@ export function getCocCardProto(): ICocCardData {
     created: Date.now(),
     lastModified: Date.now(),
     isTemplate: false,
+    templateData: {},
     basic: {
       job: '学生',
       AGE: 24,
@@ -62,6 +63,7 @@ export function getDndCardProto(): IDndCardData {
     created: Date.now(),
     lastModified: Date.now(),
     isTemplate: false,
+    templateData: {},
     info: {
       job: '战士',
       gender: '男',
@@ -151,6 +153,7 @@ export function getGeneralCardProto(): IGeneralCardData {
     created: Date.now(),
     lastModified: Date.now(),
     isTemplate: false,
+    templateData: {},
     ext: '',
     skills: {
       '力量': 60,

@@ -2,7 +2,7 @@ import { StandardDiceRoll } from './index'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
 import type { IRollDecideResult } from '../../config/helpers/decider'
 import { CocCard, getCocTempEntry, type ICocCardEntry } from '@paotuan/card'
-import { at, getFirstD20Value } from '../utils'
+import { at, getFirstD20Value, MockSystemUserId } from '../utils'
 
 export class CocDiceRoll extends StandardDiceRoll {
   // 标记技能检定列表
@@ -75,7 +75,7 @@ export class CocDiceRoll extends StandardDiceRoll {
       // 通用参数这里也要提供一下，因为对抗检定有[对方xxx]
       用户名: this.context.username,
       人物卡名: this.selfCard?.name ?? this.context.username,
-      at用户: this.context.userId === 'system' ? this.context.username : at(this.context.userId),
+      at用户: this.context.userId === MockSystemUserId ? this.context.username : at(this.context.userId),
       描述: entry.key,
       掷骰结果: rollResult.roll.total,
       掷骰表达式: rollResult.roll.notation,
