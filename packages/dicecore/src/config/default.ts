@@ -366,6 +366,6 @@ export function getSpecialDiceConfig(): ISpecialDiceConfig {
     nnDice: { enabled: true, writable: 'all', updateNick: 'whenEmpty' },
     opposeDice: { enabled: true },
     inMessageDice: { enabled: true }, // 暂不处理
-    pcDice: { enabled: true, writable: 'all', template: 'coc' },
+    pcDice: { enabled: true, writable: 'all', template: '__internal_coc_empty' },
   }
 }

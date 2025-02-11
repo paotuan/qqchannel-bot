@@ -216,7 +216,7 @@ export function upgradeConfig(config: IChannelConfig) {
     texts['pc.del'] = embedText.texts['pc.del']
     if ((texts as any)['nn.search']) delete (texts as any)['nn.search']
     // 新增 pc config
-    config.specialDice.pcDice = { enabled: true, writable: 'all', template: 'coc' }
+    config.specialDice.pcDice = { enabled: true, writable: 'all', template: '__internal_coc_empty' }
     config.version = 46 // 2.1.0
   }
   return config as IChannelConfig

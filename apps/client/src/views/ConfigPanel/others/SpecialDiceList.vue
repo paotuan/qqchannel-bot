@@ -11,6 +11,23 @@
         <d-native-select v-model="config.stDice.writable" :options="stOptions" select-class="select-bordered select-xs" class="w-24" />
       </span>
     </div>
+    <!-- pc -->
+    <div class="collapse-title flex justify-between py-0">
+      <span class="flex items-center gap-2">
+        <input v-model="config.pcDice.enabled" type="checkbox" class="checkbox checkbox-sm" @click.stop />
+        <span>人物卡创建/删除（pc）</span>
+      </span>
+      <div class="flex flex-col justify-center gap-1">
+        <div class="flex items-center gap-2 text-sm">
+          <span>谁能修改人物卡？</span>
+          <d-native-select v-model="config.pcDice.writable" :options="stOptions" select-class="select-bordered select-xs" class="w-24" />
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="whitespace-pre">默认模版</span>
+          <CardTemplateSelect v-model="config.pcDice.template" class="select-xs" />
+        </div>
+      </div>
+    </div>
     <!-- nn -->
     <div class="collapse-title flex justify-between">
       <span class="flex items-center gap-2">
@@ -67,6 +84,7 @@
 import { useConfigStore } from '../../../store/config'
 import { computed } from 'vue'
 import DNativeSelect from '../../../dui/select/DNativeSelect.vue'
+import CardTemplateSelect from '../../ScenePanel/battle/CardTemplateSelect.vue'
 
 const configStore = useConfigStore()
 const config = computed(() => configStore.config!.specialDice)

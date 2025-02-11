@@ -99,6 +99,8 @@ export const useConfigStore = defineStore('config', () => {
     _config.specialDice.scDice.enabled = mode === 'coc'
     _config.specialDice.enDice.enabled = mode === 'coc'
     _config.specialDice.dsDice.enabled = mode === 'dnd'
+    // 默认 pc 人物卡模版
+    _config.specialDice.pcDice.template = mode === 'coc' ? '__internal_coc_empty' : '__internal_dnd_empty'
   }
 
   return {
