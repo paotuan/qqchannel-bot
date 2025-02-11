@@ -32,34 +32,39 @@ export class PcDelDiceRoll extends BasePtDiceRoll {
     return this.hasPermission(this.config.specialDice.pcDice.writable)
   }
 
-  override get output() {
+  private _output = 'applyToCard should be executed'
+
+  override applyToCard(): ICard[] {
     // 1. 是否有权限
     if (!this.hasPcPermission) {
-      return this.t('card.nopermission')
+      this._output = this.t('card.nopermission')
+      return []
     }
     // 2. 没有指定人物卡，且用户本身也没有关联的人物卡
     if (!this.keyword) {
-      return this.t('card.empty')
+      this._output = this.t('card.empty')
+      return []
     }
     // 3. 指定的人物卡不存在
     if (this.availableCards.length === 0) {
-      return this.t('card.search', { 人物卡列表: [], 关键词: this.keyword, pcDel: true })
+      this._output = this.t('card.search', { 人物卡列表: [], 关键词: this.keyword, pcDel: true })
+      return []
     }
     // 4. 查询到的人物卡有多个
     if (this.availableCards.length > 1) {
       const availableList = this.availableCards.map((card, i) => ({ 人物卡名: card.name, last: i === this.availableCards.length - 1 }))
-      return this.t('card.search', { 人物卡列表: availableList, 关键词: this.keyword, pcDel: true })
+      this._output = this.t('card.search', { 人物卡列表: availableList, 关键词: this.keyword, pcDel: true })
+      return []
     }
     // 5. 删除成功
-    return this.t('pc.del', { 人物卡名: this.availableCards[0].name })
+    const cardName = this.availableCards[0].name
+    CardProvider.INSTANCE.unregisterCard(cardName)
+    // 返回值目前无作用
+    this._output = this.t('pc.del', { 人物卡名: cardName })
+    return []
   }
 
-  override applyToCard(): ICard[] {
-    if (!this.hasPcPermission) return []
-    if (!this.keyword) return []
-    if (this.availableCards.length !== 1) return []
-    CardProvider.INSTANCE.unregisterCard(this.availableCards[0].name)
-    // 返回值目前无作用
-    return []
+  override get output() {
+    return this._output
   }
 }

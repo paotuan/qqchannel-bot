@@ -23,7 +23,7 @@ export class PcCreateDiceRoll extends BasePtDiceRoll {
   private parse() {
     const exp = this.rawExpression.replace(/^pc\s*new/, '').trim()
     const commands = exp.split(/\s+/)
-    if (commands.length === 0) {
+    if (!exp) {
       // 没任何参数，默认取玩家昵称 + 默认模版名
       this.cardName = this.context.username
       this.templateQuery = this.config.specialDice.pcDice.template
@@ -36,6 +36,7 @@ export class PcCreateDiceRoll extends BasePtDiceRoll {
       this.cardName = commands[1]
       this.templateQuery = commands[0]
     }
+    console.log('[Dice] 人物卡创建 原始指令', this.rawExpression, '人物卡名', this.cardName, '模板名', this.templateQuery)
   }
 
   // 查询待使用的人物卡模版
@@ -71,33 +72,34 @@ export class PcCreateDiceRoll extends BasePtDiceRoll {
     return this.queryCard({ name: this.cardName, exact: true }).length > 0
   }
 
-  override get output() {
+  // 由于先执行 applyToCard 后执行 output， applyToCard 执行完后环境变化导致 output 执行不正确
+  // 为确保逻辑统一，直接在 applyToCard 中产生 output
+  // 考虑到 applyToCard 的返回值已经无用，后续可统一重构为返回 output
+  private _output = 'applyToCard should be executed'
+
+  override applyToCard(): ICard[] {
     // 1. 是否有权限
     if (!this.hasPcPermission) {
-      return this.t('card.nopermission')
+      this._output = this.t('card.nopermission')
+      return []
     }
     // 2. 是否已经存在同名的人物卡
     if (this.cardNameDuplicated) {
-      return this.t('card.exist', { 人物卡名: this.cardName })
+      this._output = this.t('card.exist', { 人物卡名: this.cardName })
+      return []
     }
     // 3. 指定的模版不存在
     if (this.availableTemplates.length === 0) {
-      return this.t('card.search', { 人物卡列表: [], 关键词: this.templateQuery, pcNew: true })
+      this._output = this.t('card.search', { 人物卡列表: [], 关键词: this.templateQuery, pcNew: true })
+      return []
     }
     // 4. 查询到的模版有多个，需要指定
     if (this.availableTemplates.length > 1) {
       const availableList = this.availableTemplates.map((card, i) => ({ 人物卡名: card.name, last: i === this.availableTemplates.length - 1 }))
-      return this.t('card.search', { 人物卡列表: availableList, 关键词: this.templateQuery, pcNew: true })
+      this._output = this.t('card.search', { 人物卡列表: availableList, 关键词: this.templateQuery, pcNew: true })
+      return []
     }
-    // 5. 创建并关联成功
-    return this.t('pc.new', { 人物卡名: this.cardName })
-  }
-
-  override applyToCard(): ICard[] {
-    if (!this.hasPcPermission) return []
-    if (this.cardNameDuplicated) return []
-    if (this.availableTemplates.length !== 1) return []
-    // 创建人物卡
+    // 5. 创建并关联人物卡
     const newCard = createCard(cloneDeep(this.availableTemplates[0]))
     newCard.data.name = this.cardName
     newCard.data.created = newCard.data.lastModified = Date.now()
@@ -107,6 +109,11 @@ export class PcCreateDiceRoll extends BasePtDiceRoll {
     // 与当前玩家关联
     this.linkCard(this.cardName, this.context.userId)
     // 返回值目前无作用
+    this._output = this.t('pc.new', { 人物卡名: this.cardName })
     return []
+  }
+
+  override get output() {
+    return this._output
   }
 }
