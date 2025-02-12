@@ -5,6 +5,7 @@ import { computed, reactive, ref } from 'vue'
 import { eventBus, gtagEvent, Toast } from '../../utils'
 import { createCard, type ICardData } from '@paotuan/card'
 import { yChannelStoreRef, yGlobalStoreRef } from '../ystore'
+import { useUserStore } from '../user'
 
 export const useCardStore = defineStore('card', () => {
   const cardDataMap = computed(() => yGlobalStoreRef.value?.cards ?? {})
@@ -88,9 +89,19 @@ export const useCardStore = defineStore('card', () => {
 
   // 主动发起投骰相关
   const manualDiceRollDialogShow = ref(false)
-  const manualDiceRollReq = reactive<Partial<IDiceRollReq>>({ expression: '', cardData: undefined })
-  const manualDiceRoll = (expression: string, cardData: ICardData) => {
-    ws.send<IDiceRollReq>({ cmd: 'dice/roll', data: { expression, cardData } })
+  const manualDiceRollReq = reactive<Partial<IDiceRollReq>>({ expression: '', cardName: undefined })
+  const manualDiceRoll = (expression: string, cardName: string) => {
+    // 查询卡片是否已关联了玩家，若已关联，则以这个玩家的身份代骰
+    const userId = linkedUserOf(cardName) ?? ''
+    const userName = (() => {
+      if (userId) {
+        const userStore = useUserStore()
+        return userStore.nickOf(userId)
+      } else {
+        return ''
+      }
+    })()
+    ws.send<IDiceRollReq>({ cmd: 'dice/roll', data: { expression, cardName, userId, userName } })
     ws.once('dice/roll', data => {
       if (data.success) {
         Toast.success('掷骰成功！')

@@ -87,15 +87,16 @@ export class CommandHandler {
   /**
    * 从网页端手动发起代骰
    */
-  async manualDiceRollFromWeb(wsClient: WsClient, { expression, cardData }: IDiceRollReq) {
+  async manualDiceRollFromWeb(wsClient: WsClient, { expression, cardName, userId, userName }: IDiceRollReq) {
     const { listenToChannelUnionId: channelUnionId, listenToGuildId: guildId, listenToChannelId: channelId } = wsClient
     const config = this.bot.wss.config.getChannelConfig(channelUnionId!)
     const userCommand: ICommand<BotContext> = {
       command: expression,
       context: {
         botId: this.bot.id,
-        userId: MockSystemUserId,
-        username: cardData.name,
+        // 如果 card 已关联了某个玩家，则优先视为为这个玩家代骰。这样在逻辑处理时可根据玩家 userId 获取到 card，与 .d100 @xxx 指令的处理逻辑一致
+        userId: userId || MockSystemUserId,
+        username: userName || cardName,
         userRole: 'admin',
         platform: this.bot.platform,
         guildId,
@@ -104,13 +105,14 @@ export class CommandHandler {
         isDirect: false,
         realUser: {
           userId: config.botOwner ?? MockSystemUserId,
-          username: cardData.name
+          username: cardName
         }
       }
     }
-    // 临时注册一份 card 和 link
-    CardProvider.registerCard(MockSystemCardId, cardData)
-    CardProvider.linkCard(channelUnionId!, MockSystemCardId, MockSystemUserId)
+    // 如果这个 card 未关联玩家，则将它分配到一个虚拟的 user 上，逻辑层利用该虚拟 user 获得人物卡
+    if (!userId) {
+      CardProvider.linkCard(channelUnionId!, cardName, MockSystemUserId)
+    }
     // 处理指令
     const result = await dispatchCommand(userCommand)
     await this.handleDispatchResult(userCommand, result)
@@ -205,9 +207,6 @@ export class CommandHandler {
     }
   }
 }
-
-const MockSystemCardId = '__temp_card_id__'
-// const MockSystemUserId = '__temp_user_id__'
 
 class YRiState extends AbstractRiState {
   override getRiList(channelUnionId: ChannelUnionId): IRiItem[] {

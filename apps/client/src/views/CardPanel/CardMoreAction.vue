@@ -31,13 +31,13 @@ const onDelete = () => {
 const cardStore = useCardStore()
 const onManualDiceRoll = (hidden = false) => {
   const expression = hidden ? `h${props.expression}` : props.expression
-  cardStore.manualDiceRoll(expression, card.value.data)
+  cardStore.manualDiceRoll(expression, card.value.name)
   closeDropdown()
 }
 
 const onEditManualDiceRoll = () => {
   cardStore.manualDiceRollReq.expression = props.expression
-  cardStore.manualDiceRollReq.cardData = card.value.data
+  cardStore.manualDiceRollReq.cardName = card.value.name
   cardStore.manualDiceRollDialogShow = true
   closeDropdown()
 }

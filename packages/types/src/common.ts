@@ -177,6 +177,8 @@ export { IRiItem }
 
 // 手动代骰
 export interface IDiceRollReq {
-  expression: string
-  cardData: ICardData
+  expression: string // 表达式
+  cardName: string // 人物卡名称
+  userId: string // 人物卡关联的用户 id。若人物卡已关联用户，则优先视为以这个用户代骰。理论上 server 也能通过 cardName 查，不过前端查起来比较方便
+  userName: string // 人物卡关联的用户名
 }

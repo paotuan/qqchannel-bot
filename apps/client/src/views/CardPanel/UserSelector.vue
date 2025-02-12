@@ -5,7 +5,7 @@
     </template>
     <template v-else>
       <div class="select select-bordered items-center w-40 gap-2 truncate" @click="editMode = true">
-        <template v-if="!currentUser">未关联玩家</template>
+        <template v-if="!currentUser || currentUser.id === MockSystemUserId">未关联玩家</template>
         <UserItem v-else :user="currentUser" />
       </div>
     </template>
@@ -49,4 +49,7 @@ const select = (user: IUser | null) => {
   keyword.value = ''
   emit('select', user)
 }
+
+// also see @paotuan/dicecore
+const MockSystemUserId = '__temp_user_id__'
 </script>

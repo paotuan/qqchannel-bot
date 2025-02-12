@@ -32,9 +32,9 @@ const addModifier = (content: string, prefix = true) => {
 
 const submit = () => {
   const expression = cardStore.manualDiceRollReq.expression
-  const cardData = cardStore.manualDiceRollReq.cardData
-  if (expression && cardData) {
-    cardStore.manualDiceRoll(expression, cardData)
+  const cardName = cardStore.manualDiceRollReq.cardName
+  if (expression && cardName) {
+    cardStore.manualDiceRoll(expression, cardName)
   }
   cardStore.manualDiceRollDialogShow = false
 }

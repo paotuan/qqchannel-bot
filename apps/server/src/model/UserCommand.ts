@@ -1,7 +1,9 @@
 import { Bot } from '../adapter/Bot'
 import type { ICommand, BotContext, UserRole } from '@paotuan/config'
 import { Session, Element } from '../adapter/satori'
-import { getChannelUnionId } from '../adapter/utils'
+import { ChannelUnionId, getChannelUnionId } from '../adapter/utils'
+import { ICard } from '@paotuan/card'
+import { MockSystemUserId } from '@paotuan/dicecore'
 
 export class UserCommand implements ICommand<BotContext> {
 
@@ -154,29 +156,17 @@ export class UserCommand implements ICommand<BotContext> {
       }
 
       let fullExp = elements.map(elem => elem.toString()).join('').trim()
-      // 支持纯文本 @xx 形式的代骰，可以 @人物卡名 或 @用户昵称。昵称无需打全，但有且只有唯一匹配的时候才生效
-      // 注意目前代骰记录的是 userId，因此 @人物卡名 也只能支持已关联了玩家的人物卡。对于其他人物卡代骰将在后续优化
+      // 支持纯文本 @xx 形式的代骰，可以 @人物卡名 或 @用户昵称。人物卡名或昵称无需打全，但有且只有唯一匹配的时候才生效
       // 同理由于涉及关联关系，在私信中不能应用这段逻辑
       if (!substitute && !session.isDirect) {
         const manualAtIndex = fullExp.lastIndexOf('@')
         if (manualAtIndex >= 0 && manualAtIndex < fullExp.length - 1) {
           const search = fullExp.slice(manualAtIndex + 1).toLowerCase()
           // 先查找人物卡名，毕竟如果要 at 用户，（除了 qq 群）用正常的 at 就可以了
-          const userId = queryUserIdFromCard(search, bot, session)
-          if (userId) {
-            const user = bot.guilds.findUser(userId, session.guildId)
-            const username = user?.name ?? userId
-            substitute = { userId, username }
-          }
+          substitute = querySubstituteFromCard(search, bot, session)
           // 再查找用户名
           if (!substitute) {
-            const users = bot.guilds.queryIUser({ name: search }, session.guildId)
-            const exactUser = users.find(u => u.name === search)
-            if (exactUser) {
-              substitute = { userId: exactUser.id, username: exactUser.name }
-            } else if (users.length === 1) {
-              substitute = { userId: users[0].id, username: users[0].name }
-            }
+            substitute = _findUniqueUser(search, bot, session)
           }
         }
         // 如查找到代骰，消息内容移除代骰部分
@@ -209,28 +199,67 @@ function convertRoleIds(ids: string[] = []): UserRole {
   }
 }
 
-
-function queryUserIdFromCard(search: string, bot: Bot, session: Session) {
+// 根据人物卡名称，构造纯文本形式的代骰
+function querySubstituteFromCard(search: string, bot: Bot, session: Session) {
+  const foundCard = _findUniqueCard(search, bot)
+  if (!foundCard) return undefined
+  // 如果 card 已关联了某个玩家，则优先视为为这个玩家代骰。与非纯文本代骰的逻辑保持一致
   const channelUnionId = getChannelUnionId(bot.platform, session.guildId, session.channelId)
+  const user = _findLinkedUserOfCard(foundCard, bot, session, channelUnionId)
+  if (user) return user
+  // 如果 card 未关联玩家，则将它分配到一个虚拟的 user 上
+  bot.wss.cards.linkCard(channelUnionId, foundCard.name, MockSystemUserId)
+  return { userId: MockSystemUserId, username: foundCard.name }
+}
+
+// 搜索是否有唯一匹配的人物卡
+function _findUniqueCard(search: string, bot: Bot) {
+  const keyword = search // .toLowerCase() 外部已经 toLowerCase
+  const cards = bot.wss.cards.queryCard({ name: keyword, isTemplate: false })
+  if (cards.length === 0) return undefined // 没有对应名字的卡片
+  let foundCard: ICard | undefined
+  if (cards.length === 1) {
+    foundCard = cards[0]
+  } else {
+    // 是否有唯一匹配
+    const exactCard = cards.find(card => card.name.toLowerCase() === keyword)
+    if (exactCard) foundCard = exactCard
+  }
+  return foundCard
+}
+
+// 根据人物卡反查是否有关联的玩家
+function _findLinkedUserOfCard(card: ICard, bot: Bot, session: Session, channelUnionId: ChannelUnionId) {
   // userId -> cardId
   const linkedMap = bot.wss.cards.getLinkMap(channelUnionId)
-  const linedCardIds = Object.values(linkedMap)
-  // 我们需要的只是名字，因此无需调用 queryCard，直接从已关联的人物卡名字中查询
-  const keyword = search // .toLowerCase() 外部已经 toLowerCase
-  const availableNames = linedCardIds.filter(name => name.toLowerCase().includes(keyword))
-  let foundCard: string | undefined
-  const exactCard = availableNames.find(name => name.toLowerCase() === keyword)
-  if (exactCard) {
-    foundCard = exactCard
-  } else if (availableNames.length === 1) {
-    foundCard = availableNames[0]
-  }
-  if (!foundCard) return undefined
-  // 确定了人物卡后，反查人物卡对应的用户
-  for (const userId of Object.keys(linkedMap)) {
-    if (linkedMap[userId] === foundCard) {
-      return userId
+  let userId: string | undefined
+  for (const _userId of Object.keys(linkedMap)) {
+    if (linkedMap[_userId] === card.name) {
+      userId = _userId
+      break
     }
   }
-  return undefined
+  if (!userId) return undefined
+  // 若有关联玩家，查询对应的 username
+  const user = bot.guilds.findUser(userId, session.guildId)
+  const username = user?.name ?? userId
+  return { userId, username }
+}
+
+// 搜索是否有唯一匹配的用户名
+function _findUniqueUser(search: string, bot: Bot, session: Session) {
+  // search 外部已经 toLowerCase
+  const users = bot.guilds.queryIUser({ name: search }, session.guildId)
+  if (users.length === 0) return undefined // 没有对应名字的 user
+  let substitute: { userId: string, username: string } | undefined
+  if (users.length === 1) {
+    substitute = { userId: users[0].id, username: users[0].name }
+  } else {
+    // 是否有唯一匹配. 注：用户昵称可能同名？
+    const exactUsers = users.filter(u => u.name.toLowerCase() === search)
+    if (exactUsers.length === 1) {
+      substitute = { userId: exactUsers[0].id, username: exactUsers[0].name }
+    }
+  }
+  return substitute
 }
