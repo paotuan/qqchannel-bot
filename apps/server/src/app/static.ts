@@ -10,9 +10,10 @@ const PLUGIN_SERVE_DIR = process.env.NODE_ENV === 'development' ? INTERNAL_PLUGI
 // https://github.com/adrian-deniz/nodejs-static-file-server/blob/master/index.js
 export function serveStatic(request: IncomingMessage, response: ServerResponse) {
   console.log('request', request.url) // '/images.png'
-  const filePath = request.url?.startsWith('/__plugins__/')
-    ? request.url.replace(/^\/__plugins__/, PLUGIN_SERVE_DIR)
-    : IMAGE_SERVE_DIR + request.url
+  const requestUrl = decodeURIComponent(request.url ?? '') // 路径中可能存在中文，会被自动 encode
+  const filePath = requestUrl.startsWith('/__plugins__/')
+    ? requestUrl.replace(/^\/__plugins__/, PLUGIN_SERVE_DIR)
+    : IMAGE_SERVE_DIR + requestUrl
   const ext = extname(filePath).toLowerCase()
   const contentType = mimeTypes[ext] || 'application/octet-stream'
 
