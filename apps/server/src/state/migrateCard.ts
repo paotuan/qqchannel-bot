@@ -43,6 +43,9 @@ export function migrateCards(store: YGlobalState) {
 export function upgradeCards(store: YGlobalState) {
   const cardsMap = store.cards
   if (cardsMap) {
+    // 处理旧版网页代骰会注册一份临时卡，导致 cardId 与卡片实际 name 不统一，在 v2 同步机制下导致显示问题
+    // 若存在这种情况，简单粗暴将其删除即可
+    if (cardsMap.__temp_card_id__) delete cardsMap.__temp_card_id__
     Object.values(cardsMap).forEach(card => handleCardUpgrade(card))
   }
 }
