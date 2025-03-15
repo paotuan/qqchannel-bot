@@ -82,6 +82,13 @@ export const useSceneStore = defineStore('scene', () => {
   // 当前选择人物
   const currentSelectedCharacter = ref<IRiItem | undefined>(undefined)
 
+  // 判断是否是当前选择的人物。接入 yStore 后直接判断同一性会有问题
+  const isCurrentSelectedCharacter = (chara: IRiItem) => {
+    const _chara = currentSelectedCharacter.value
+    if (!_chara) return false
+    return chara.type === _chara.type && chara.id === _chara.id
+  }
+
   // 添加人物，如果人物已存在，则改为选中该人物以提示用户
   const addCharacter = (chara: IRiItem) => {
     const existCharacter = characters.value.find(exist => chara.type === exist.type && chara.id === exist.id)
@@ -94,7 +101,7 @@ export const useSceneStore = defineStore('scene', () => {
 
   // 删除人物
   const deleteCharacter = (chara: IRiItem, { card = false, token = false } = loadDefaultDeleteCharacterOptions()) => {
-    const { type: charaType, id: charaId} = chara
+    const { type: charaType, id: charaId } = chara
     const index = characters.value.findIndex(other => other.type === charaType && other.id === charaId)
     if (index >= 0) {
       characters.value.splice(index, 1)
@@ -172,6 +179,7 @@ export const useSceneStore = defineStore('scene', () => {
     addCharacterToken,
     charactersSorted,
     currentSelectedCharacter,
+    isCurrentSelectedCharacter,
     addCharacter,
     deleteCharacter,
     duplicateNpc,

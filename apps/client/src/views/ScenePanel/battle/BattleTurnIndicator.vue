@@ -64,13 +64,12 @@ const nextTurn = () => {
 
 const prevChara = () => {
   if (sceneStore.charactersSorted.length === 0) return
-  const currentChara = sceneStore.currentSelectedCharacter
   // 没选中情况下，默认选最后一个
-  if (!currentChara) {
+  if (!sceneStore.currentSelectedCharacter) {
     sceneStore.currentSelectedCharacter = sceneStore.charactersSorted.at(-1)
     return
   }
-  const index = sceneStore.charactersSorted.indexOf(currentChara)
+  const index = sceneStore.charactersSorted.findIndex(chara => sceneStore.isCurrentSelectedCharacter(chara))
   if (index === 0) {
     if (sceneStore.turn > 1) {
       sceneStore.turn--
@@ -83,13 +82,12 @@ const prevChara = () => {
 
 const nextChara = () => {
   if (sceneStore.charactersSorted.length === 0) return
-  const currentChara = sceneStore.currentSelectedCharacter
   // 没选中情况下，默认选第一个
-  if (!currentChara) {
+  if (!sceneStore.currentSelectedCharacter) {
     sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[0]
     return
   }
-  const index = sceneStore.charactersSorted.indexOf(currentChara)
+  const index = sceneStore.charactersSorted.findIndex(chara => sceneStore.isCurrentSelectedCharacter(chara))
   if (index === sceneStore.charactersSorted.length - 1) {
     sceneStore.turn++
     sceneStore.currentSelectedCharacter = sceneStore.charactersSorted[0]

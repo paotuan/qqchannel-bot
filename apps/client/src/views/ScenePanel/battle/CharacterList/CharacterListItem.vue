@@ -1,7 +1,7 @@
 <template>
   <div
       class="flex py-2 px-4 cursor-pointer"
-      :class="{ 'bg-secondary/50': sceneStore.currentSelectedCharacter === chara }"
+      :class="{ 'bg-secondary/50': sceneStore.isCurrentSelectedCharacter(chara) }"
       @click="sceneStore.currentSelectedCharacter = chara"
   >
     <div class="w-44 flex-none">

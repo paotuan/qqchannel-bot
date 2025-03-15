@@ -33,7 +33,7 @@ const generateLog = () => {
     const userHp = userCard?.HP ?? '?'
     const userMaxHp = userCard?.MAXHP ?? '?'
     const hasSeq = !isEmptyNumber(chara.seq) || !isEmptyNumber(chara.seq2)
-    let line = sceneStore.currentSelectedCharacter === chara ? '▶ ' : '\u3000'
+    let line = sceneStore.isCurrentSelectedCharacter(chara) ? '▶ ' : '\u3000'
     line += `${username} HP${userHp}/${userMaxHp}`
     if (hasSeq) line += ` 先攻${chara.seq || ''}` + (isEmptyNumber(chara.seq2) ? '' : `(${chara.seq2})`)
     return line
