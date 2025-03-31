@@ -20,4 +20,12 @@ export interface IBotConfig_Satori {
   token?: string
 }
 
-export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook | IBotConfig_Satori
+export interface IBotConfig_OneBot {
+  platform: 'onebot'
+  protocol: 'ws'
+  appid: string
+  endpoint: string
+  token?: string
+}
+
+export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook | IBotConfig_Satori | IBotConfig_OneBot

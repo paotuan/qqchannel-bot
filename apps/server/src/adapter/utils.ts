@@ -1,8 +1,9 @@
-import type { IBotConfig, IBotConfig_Kook, IBotConfig_QQ, IBotConfig_Satori } from '@paotuan/types'
+import type { IBotConfig, IBotConfig_Kook, IBotConfig_OneBot, IBotConfig_QQ, IBotConfig_Satori } from '@paotuan/types'
 import type { Platform } from '@paotuan/config'
 import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
 import kookAdapter, { KookBot } from '@paotuan/adapter-kook'
 import satoriAdapter, { SatoriAdapter } from '@paotuan/adapter-satori'
+import onebotAdapter, { OneBotBot } from '@paotuan/adapter-onebot'
 
 export type BotId = `${Platform}:${string}`
 export function getBotId(platform: Platform, appid: string): BotId {
@@ -38,6 +39,8 @@ export function adapterPlugin(platform: Platform) {
     return kookAdapter
   case 'satori':
     return satoriAdapter
+  case 'onebot':
+    return onebotAdapter
   // default:
   //   throw new Error(`Not implement platform: ${platform}`)
   }
@@ -53,7 +56,9 @@ export function adapterConfig(config: IBotConfig) {
     return adapterQQ(config)
   case 'satori':
     return adapterSatori(config)
-  // default:
+  case 'onebot':
+    return adapterOnebot(config)
+    // default:
   //   throw new Error(`Not implement platform: ${config.platform}`)
   }
 }
@@ -99,4 +104,36 @@ function adapterSatori(config: IBotConfig_Satori): SatoriAdapter.Config {
     endpoint: config.endpoint,
     token: config.token
   }
+}
+
+function adapterOnebot(config: IBotConfig_OneBot): OneBotBot.Config {
+  // 不同连接模式所需字段不同
+  switch (config.protocol) {
+  case 'ws':
+    return {
+      protocol: 'ws',
+      selfId: config.appid,
+      endpoint: config.endpoint,
+      token: config.token
+    }
+  default:
+    throw new Error(`Not implement protocol: ${config.protocol}`)
+  }
+  // return {
+  //   // advanced: undefined,
+  //   baseURL: '',
+  //   // endpoint: '',
+  //   // headers: undefined,
+  //   // password: '',
+  //   // responseTimeout: 0,
+  //   // retryInterval: 0,
+  //   // retryLazy: 0,
+  //   // retryTimes: 0,
+  //   // secret: '',
+  //   selfId: '',
+  //   // timeout: 0,
+  //   token: '',
+  //   // path: '',
+  //   protocol: 'ws'
+  // }
 }

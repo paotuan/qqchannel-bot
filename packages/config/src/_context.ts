@@ -1,6 +1,6 @@
 // 和平台有关的配置，暂且先放在这里吧，没有特别好的做法
 
-export type Platform = 'qqguild' | 'kook' | 'qq' | 'satori' // 尽量和 satori 保持一致，便于操作
+export type Platform = 'qqguild' | 'kook' | 'qq' | 'satori' | 'onebot' // 尽量和 satori 保持一致，便于操作
 export type BotId = `${Platform}:${string}`
 
 export interface BotContext {
