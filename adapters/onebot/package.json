@@ -2,7 +2,8 @@
   "name": "@paotuan/adapter-onebot",
   "version": "6.8.0",
   "description": "OneBot Adapter for Koishi",
-  "main": "lib/index.js",
+  "type": "module",
+  "main": "lib/index.cjs",
   "typings": "lib/index.d.ts",
   "files": [
     "lib"

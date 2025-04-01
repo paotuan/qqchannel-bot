@@ -18,6 +18,7 @@ export interface AccountInfo {
   user_id: number
   tiny_id?: string
   nickname: string
+  avatar?: string
 }
 
 export interface QidianAccountInfo {
@@ -72,6 +73,7 @@ export interface Message extends MessageId {
   channel_id?: string
   message: string | CQCode[]
   anonymous?: AnonymousInfo
+  avatar?: string // gsk 兼容，非标字段
 }
 
 export interface AnonymousInfo {
