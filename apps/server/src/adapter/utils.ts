@@ -116,24 +116,30 @@ function adapterOnebot(config: IBotConfig_OneBot): OneBotBot.Config {
       endpoint: config.endpoint,
       token: config.token
     }
+  case 'ws-reverse':
+    return {
+      protocol: 'ws-reverse',
+      selfId: config.appid,
+      path: config.path,
+    }
   default:
     throw new Error(`Not implement protocol: ${config.protocol}`)
   }
   // return {
-  //   // advanced: undefined,
+  //   advanced: undefined,
   //   baseURL: '',
-  //   // endpoint: '',
-  //   // headers: undefined,
-  //   // password: '',
-  //   // responseTimeout: 0,
-  //   // retryInterval: 0,
-  //   // retryLazy: 0,
-  //   // retryTimes: 0,
-  //   // secret: '',
+  //   endpoint: '',
+  //   headers: undefined,
+  //   password: '',
+  //   responseTimeout: 0,
+  //   retryInterval: 0,
+  //   retryLazy: 0,
+  //   retryTimes: 0,
+  //   secret: '',
   //   selfId: '',
-  //   // timeout: 0,
+  //   timeout: 0,
   //   token: '',
-  //   // path: '',
+  //   path: '',
   //   protocol: 'ws'
   // }
 }

@@ -24,11 +24,12 @@ const AvailableLoginTabs = ['qqguild', 'kook', 'satori', 'onebot'] as const
 export type LoginTab = typeof AvailableLoginTabs[number]
 
 // key 与 LoginTab 保持一致
+// 即使是非必填字段，在输入框中也是空字符串，因此使用 Required 包裹，避免声明时遗漏字段以及便于在提交时进行处理
 type Platform2ConfigMap = {
-  qqguild?: IBotConfig_QQ
-  kook?: IBotConfig_Kook
-  satori?: IBotConfig_Satori
-  onebot?: IBotConfig_OneBot
+  qqguild?: Required<IBotConfig_QQ>
+  kook?: Required<IBotConfig_Kook>
+  satori?: Required<IBotConfig_Satori>
+  onebot?: Required<IBotConfig_OneBot>
 }
 
 export const useBotStore = defineStore('bot', () => {
@@ -36,7 +37,7 @@ export const useBotStore = defineStore('bot', () => {
 
   const tab = ref<LoginTab>(_tab)
 
-  const formQQ = ref<IBotConfig_QQ>(_model.qqguild ?? {
+  const formQQ = ref<Required<IBotConfig_QQ>>(_model.qqguild ?? {
     platform: 'qqguild',
     appid: '',
     secret: '',
@@ -45,25 +46,26 @@ export const useBotStore = defineStore('bot', () => {
     type: 'private'
   })
 
-  const formKook = ref<IBotConfig_Kook>(_model.kook ?? {
+  const formKook = ref<Required<IBotConfig_Kook>>(_model.kook ?? {
     platform: 'kook',
     appid: '',
     token: ''
   })
 
-  const formSatori = ref<IBotConfig_Satori>(_model.satori ?? {
+  const formSatori = ref<Required<IBotConfig_Satori>>(_model.satori ?? {
     platform: 'satori',
     appid: '',
     endpoint: '',
     token: ''
   })
 
-  const formOnebot = ref<IBotConfig_OneBot>(_model.onebot ?? {
+  const formOnebot = ref<Required<IBotConfig_OneBot>>(_model.onebot ?? {
     platform: 'onebot',
     protocol: 'ws',
     appid: '',
     endpoint: '',
-    token: ''
+    token: '',
+    path: 'onebot'
   })
 
   const formModel = computed(() => {
@@ -83,31 +85,45 @@ export const useBotStore = defineStore('bot', () => {
 
   const platform = computed(() => formModel.value.platform)
 
-  const validateForm = () => {
+  // 转换数据结构用于提交，返回 falsy 代表校验不通过
+  const validateAndTransformForm = () => {
     const form = formModel.value
     switch (form.platform) {
     case 'qqguild':
     case 'qq':
-      return !!(form.appid && form.secret && form.token)
+      return (form.appid && form.secret && form.token) ? form as IBotConfig_QQ : false
     case 'kook':
     {
       // calc uniq appid
       form.appid = md5(form.token)
-      return !!form.token
+      return form.token ? form as IBotConfig_Kook : false
     }
     case 'satori':
     {
-      // calc uniq appid
-      form.appid = md5(form.endpoint)
-      if (!form.token) form.token = undefined
-      return !!form.endpoint
+      if (!form.endpoint) return false
+      return {
+        ...form,
+        appid: md5(form.endpoint), // calc uniq appid
+        token: form.token || undefined
+      } as IBotConfig_Satori
     }
     case 'onebot':
     {
-      // calc uniq appid
-      form.appid = md5(form.endpoint) // todo 区分反向链接
-      if (!form.token) form.token = undefined
-      return !!form.endpoint
+      if (!form.appid) return false
+      if (form.protocol === 'ws') {
+        if (!form.endpoint) return false
+        return {
+          ...form,
+          token: form.token || undefined
+        } as IBotConfig_OneBot
+      } else if (form.protocol === 'ws-reverse') {
+        if (!form.path) return false
+        return {
+          ...form,
+          path: '/' + form.path,
+        } as IBotConfig_OneBot
+      }
+      return false
     }
     default:
       return false
@@ -118,14 +134,14 @@ export const useBotStore = defineStore('bot', () => {
 
   const connect = () => {
     const model = formModel.value
-    const isValid = validateForm()
-    if (!isValid) return false
+    const req = validateAndTransformForm()
+    if (!req) return false
     return new Promise<boolean>(resolve => {
       loginState.value = 'LOADING'
       gtagEvent('bot/login', { platform: model.platform }, false)
       saveLoginInfo2LocalStorage(_model, tab.value, model)
       sessionStorageSet('login-step', String(1))
-      ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: model })
+      ws.send<ILoginReqV2>({ cmd: 'bot/loginV2', data: req })
       ws.once('bot/loginV2', resp => {
         console.log('login success')
         onLoginFinish(!!resp.success)

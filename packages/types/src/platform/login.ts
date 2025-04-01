@@ -22,10 +22,14 @@ export interface IBotConfig_Satori {
 
 export interface IBotConfig_OneBot {
   platform: 'onebot'
-  protocol: 'ws'
+  protocol: 'ws' | 'ws-reverse'
   appid: string
-  endpoint: string
+  // 仅 ws，服务端地址
+  endpoint?: string
+  // 仅 ws，服务端验证 token
   token?: string
+  // 仅 ws-reverse/http, 监听的路径
+  path?: string
 }
 
 export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook | IBotConfig_Satori | IBotConfig_OneBot
