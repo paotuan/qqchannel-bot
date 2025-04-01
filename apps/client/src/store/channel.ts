@@ -2,7 +2,6 @@ import type { IChannel, ILog, IListenToChannelReq, IChannelListResp } from '@pao
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { useLogStore } from './log'
-import { watch } from 'vue'
 import { eventBus, gtagEvent } from '../utils'
 import { initYStore } from './ystore'
 import { localStorageGet, localStorageSet, sessionStorageSet } from '../utils/cache'

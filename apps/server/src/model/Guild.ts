@@ -29,7 +29,10 @@ export class Guild {
     this.name = name || id
     this.icon = icon || ''
     // qq 群不支持获取列表
-    if (bot.platform !== 'qq') {
+    // onebot 场景，目前 gsk 通过该 api 返回的 channelId 和消息体中的 channelId 不一致
+    //   根据 gsk 文档的描述，这可能是一个协议层面的问题，以至于需要转换 https://www.yuque.com/km57bt/hlhnxg/onvg3d3uf342bwnq
+    //   因此暂时屏蔽此接口调用，以消息体中的值为准
+    if (bot.platform !== 'qq' && bot.platform !== 'onebot') {
       this.fetchChannels()
     }
     // this.fetchUsers()
@@ -150,6 +153,7 @@ export class Guild {
       let nextToken: string | undefined = undefined
       do {
         const { data, next } = await this.bot.api.getChannelList(this.id, nextToken = undefined)
+        console.log('get channel list', data)
         list.push(...data)
         nextToken = next
       } while (nextToken)

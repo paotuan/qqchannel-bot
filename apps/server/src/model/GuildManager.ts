@@ -14,7 +14,9 @@ export class GuildManager {
   }
 
   init() {
-    if (this.bot.platform !== 'qq') {
+    // qq 群场景不支持
+    // onebot 场景，目前 gsk 的实现不支持，且可能存在协议有关的 id 问题（见 Guild#constructor），保险起见暂时屏蔽之
+    if (this.bot.platform !== 'qq' && this.bot.platform !== 'onebot') {
       this.fetchGuilds()
       this.initEventListeners()
     }
@@ -112,6 +114,7 @@ export class GuildManager {
     if (this.bot.platform === 'qq' && !_author.avatar) {
       _author.avatar = `https://q.qlogo.cn/qqapp/${this.bot.appid}/${_author.id}/100`
     }
+    console.log('addOrUpdateUserByMessage', _author, _guild.id)
     this.addOrUpdateUser(_author, _guild.id)
   }
 
@@ -206,6 +209,7 @@ export class GuildManager {
       guildName: guild.name,
       guildIcon: guild.icon
     }))).flat()
+    console.log('notify channels', channels, new Error())
     this.bot.sendToClient<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
   }
 }

@@ -114,26 +114,37 @@ export class Bot {
   }
 
   private _ensureBotApi(platform: Platform) {
-    if (platform !== 'satori') {
-      // 非 satori，bot 都是同步创建的，直接返回即可
-      const bot = this.context.bots.find(bot => bot.platform === platform)!
-      return Promise.resolve(bot)
-    } else {
+    // 等待 bot 创建完成。返回 falsy 代表需继续轮询
+    const tryGetBot = () => {
       // satori bot 是异步创建的，需轮询等待创建完成
-      return new Promise<SatoriApi>(resolve => {
-        const checkBotInited = () => {
-          // 参照 koishi 的实现，排除 sandbox（无法收发消息）取第一个（koishi 实现的 satori bot.platform !== 'satori'，而是根据实际登录的平台而定）
-          // 我们暂不考虑同时登录多个 bot 的情况，对现有架构冲击较大
-          const bot = this.context.bots.find(bot => !bot.platform.startsWith('sandbox:'))
-          if (bot) {
-            resolve(bot)
-          } else {
-            setTimeout(() => checkBotInited(), 1000)
-          }
-        }
-        checkBotInited()
-      })
+      if (platform === 'satori') {
+        // 参照 koishi 的实现，排除 sandbox（无法收发消息）取第一个（koishi 实现的 satori bot.platform !== 'satori'，而是根据实际登录的平台而定）
+        // 我们暂不考虑同时登录多个 bot 的情况，对现有架构冲击较大
+        return this.context.bots.find(bot => !bot.platform.startsWith('sandbox:'))
+      }
+
+      // onebot 适配器，虽然 bot 是同步创建的，但是内部的 api （ws 模式）是收到连接后再异步创建
+      // 因此也轮询等待创建完成，否则首次调用 fetchBotInfo 出错
+      if (platform === 'onebot') {
+        const bot = this.context.bots.find(bot => bot.platform === 'onebot')
+        return bot?.internal?._request ? bot : undefined
+      }
+
+      // 其余的情况，bot 都是同步创建的，直接返回即可
+      return this.context.bots.find(bot => bot.platform === platform)!
     }
+
+    return new Promise<SatoriApi>(resolve => {
+      const checkBotInited = () => {
+        const bot = tryGetBot()
+        if (bot) {
+          resolve(bot)
+        } else {
+          setTimeout(() => checkBotInited(), 1000)
+        }
+      }
+      checkBotInited()
+    })
   }
 
   get platform() {
