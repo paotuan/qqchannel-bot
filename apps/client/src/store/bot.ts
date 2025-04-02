@@ -15,6 +15,7 @@ import { computed, ref } from 'vue'
 import md5 from 'md5'
 import { useChannelStore } from './channel'
 import { localStorageGet, localStorageSet, sessionStorageGet, sessionStorageSet } from '../utils/cache'
+import { merge } from 'lodash'
 
 type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
@@ -37,36 +38,37 @@ export const useBotStore = defineStore('bot', () => {
 
   const tab = ref<LoginTab>(_tab)
 
-  const formQQ = ref<Required<IBotConfig_QQ>>(_model.qqguild ?? {
+  const formQQ = ref<Required<IBotConfig_QQ>>(merge({
     platform: 'qqguild',
     appid: '',
     secret: '',
     token: '',
     sandbox: false,
     type: 'private'
-  })
+  }, _model.qqguild))
 
-  const formKook = ref<Required<IBotConfig_Kook>>(_model.kook ?? {
+  const formKook = ref<Required<IBotConfig_Kook>>(merge({
     platform: 'kook',
     appid: '',
     token: ''
-  })
+  }, _model.kook))
 
-  const formSatori = ref<Required<IBotConfig_Satori>>(_model.satori ?? {
+  const formSatori = ref<Required<IBotConfig_Satori>>(merge({
     platform: 'satori',
     appid: '',
     endpoint: '',
     token: ''
-  })
+  }, _model.satori))
 
-  const formOnebot = ref<Required<IBotConfig_OneBot>>(_model.onebot ?? {
+  const formOnebot = ref<Required<IBotConfig_OneBot>>(merge({
     platform: 'onebot',
     protocol: 'ws',
     appid: '',
     endpoint: '',
     token: '',
-    path: 'onebot'
-  })
+    path: 'onebot',
+    port: 4176
+  }, _model.onebot))
 
   const formModel = computed(() => {
     switch (tab.value) {
@@ -117,7 +119,6 @@ export const useBotStore = defineStore('bot', () => {
           token: form.token || undefined
         } as IBotConfig_OneBot
       } else if (form.protocol === 'ws-reverse') {
-        if (!form.path) return false
         return {
           ...form,
           path: '/' + form.path,

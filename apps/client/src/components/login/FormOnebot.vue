@@ -15,7 +15,7 @@
     <template v-if="model.protocol === 'ws'">
       <div class="form-control w-80">
         <label class="label">
-          <span class="label-text font-bold">Endpoint</span>
+          <span class="label-text font-bold">服务端地址</span>
         </label>
         <input v-model="model.endpoint" type="text" placeholder="Type here" class="input input-bordered w-80" />
       </div>
@@ -29,11 +29,17 @@
     <template v-else-if="model.protocol === 'ws-reverse'">
       <div class="form-control w-80">
         <label class="label">
-          <span class="label-text font-bold">Path</span>
+          <span class="label-text font-bold">监听路径</span>
         </label>
         <label class="input input-bordered w-80 flex items-center gap-2">
           /<input v-model="model.path" type="text" class="grow" />
         </label>
+      </div>
+      <div class="form-control w-80">
+        <label class="label">
+          <span class="label-text font-bold">端口号</span>
+        </label>
+        <d-number-input v-model="model.port" class="input input-bordered w-80" />
       </div>
     </template>
   </div>
@@ -43,9 +49,10 @@ import { useBotStore } from '../../store/bot'
 import { computed } from 'vue'
 import { IBotConfig_OneBot } from '@paotuan/types'
 import DNativeSelect from '../../dui/select/DNativeSelect.vue'
+import DNumberInput from '../../dui/input/DNumberInput.vue'
 
 const bot = useBotStore()
-const model = computed(() => bot.formModel as IBotConfig_OneBot)
+const model = computed(() => bot.formModel as Required<IBotConfig_OneBot>)
 
 const protocolOptions = [
   { label: 'Websocket', value: 'ws'},

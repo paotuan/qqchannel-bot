@@ -28,8 +28,10 @@ export interface IBotConfig_OneBot {
   endpoint?: string
   // 仅 ws，服务端验证 token
   token?: string
-  // 仅 ws-reverse/http, 监听的路径
+  // 仅 ws-reverse, 监听的路径
   path?: string
+  // 仅 ws-reverse，监听的端口
+  port?: number
 }
 
 export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook | IBotConfig_Satori | IBotConfig_OneBot

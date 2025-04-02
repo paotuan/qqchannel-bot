@@ -1,7 +1,7 @@
 import type { IBotConfig, IBotInfo, IMessage } from '@paotuan/types'
 import type { Platform } from '@paotuan/config'
 import { Context, Events, ForkScope, SatoriApi } from './satori'
-import { adapterConfig, adapterPlugin, getBotId } from './utils'
+import { adapterConfig, adapterPlugin, asServerConfig, getBotId } from './utils'
 import { isEqual } from 'lodash'
 import type { Wss } from '../app/wss'
 import { GuildManager } from '../model/GuildManager'
@@ -32,7 +32,7 @@ export class Bot {
   private readonly listeningChannels = new Map<string, Set<string>>()
 
   constructor(config: IBotConfig, wss: Wss) {
-    this.context = new Context(wss.httpPort)
+    this.context = new Context(wss.httpPort, asServerConfig(config))
     this.wss = wss
     this.config = config
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

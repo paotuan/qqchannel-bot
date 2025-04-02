@@ -2,7 +2,7 @@
   <div>
     <div class="form-control w-80">
       <label class="label">
-        <span class="label-text font-bold">Endpoint</span>
+        <span class="label-text font-bold">服务端地址</span>
       </label>
       <input v-model="model.endpoint" type="text" placeholder="Type here" class="input input-bordered w-80" />
     </div>

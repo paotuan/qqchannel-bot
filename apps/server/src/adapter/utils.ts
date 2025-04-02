@@ -125,21 +125,15 @@ function adapterOnebot(config: IBotConfig_OneBot): OneBotBot.Config {
   default:
     throw new Error(`Not implement protocol: ${config.protocol}`)
   }
-  // return {
-  //   advanced: undefined,
-  //   baseURL: '',
-  //   endpoint: '',
-  //   headers: undefined,
-  //   password: '',
-  //   responseTimeout: 0,
-  //   retryInterval: 0,
-  //   retryLazy: 0,
-  //   retryTimes: 0,
-  //   secret: '',
-  //   selfId: '',
-  //   timeout: 0,
-  //   token: '',
-  //   path: '',
-  //   protocol: 'ws'
-  // }
+}
+
+// 是否使用了 webhook/反向 ws 等，需要 bot 作为服务端的配置
+export type BotAsServerConfig = { enabled: true, port: number } | { enabled: false }
+
+export function asServerConfig(config: IBotConfig): BotAsServerConfig {
+  if (config.platform === 'onebot' && config.protocol === 'ws-reverse') {
+    return { enabled: true, port: config.port ?? 4176 }
+  } else {
+    return { enabled: false }
+  }
 }

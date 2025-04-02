@@ -45,15 +45,16 @@
   </div>
 </template>
 <script setup lang="ts">
+import { computed } from 'vue'
 import { LoginTab, useBotStore } from '../../store/bot'
 import FormQQ from './FormQQ.vue'
-import qqLogo from '../../assets/qq.png'
-import kookLogo from '../../assets/kook.ico'
 import FormKook from './FormKook.vue'
-import { computed } from 'vue'
-import satoriLogo from '../../assets/satori.png'
 import FormSatori from './FormSatori.vue'
 import FormOnebot from './FormOnebot.vue'
+import qqLogo from '../../assets/qq.png'
+import kookLogo from '../../assets/kook.png'
+import satoriLogo from '../../assets/satori.png'
+import onebotLogo from '../../assets/onebot.png'
 
 const bot = useBotStore()
 const currTab = computed({
@@ -64,6 +65,6 @@ const platformOptions: { value: LoginTab, icon: string }[] = [
   { value: 'qqguild', icon: qqLogo },
   { value: 'kook', icon: kookLogo },
   { value: 'satori', icon: satoriLogo },
-  { value: 'onebot', icon: '' }
+  { value: 'onebot', icon: onebotLogo }
 ]
 </script>

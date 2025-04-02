@@ -209,7 +209,6 @@ export class GuildManager {
       guildName: guild.name,
       guildIcon: guild.icon
     }))).flat()
-    console.log('notify channels', channels, new Error())
     this.bot.sendToClient<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
   }
 }
