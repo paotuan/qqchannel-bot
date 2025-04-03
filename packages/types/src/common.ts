@@ -4,6 +4,7 @@ import type { IBotConfig } from './platform'
 
 export type Command =
   | 'bot/loginV2' // req/res
+  | 'bot/loginOffline' // req/res
   | 'bot/info'  // req/res
   | 'channel/list' // res
   | 'channel/listen' // req/res

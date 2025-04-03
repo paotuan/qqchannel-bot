@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center">
+  <div class="flex flex-col items-center justify-center">
     <div class="card bg-primary/75 pl-2 shadow-lg overflow-hidden">
       <div class="flex">
         <!-- 左侧平台选择 -->
@@ -41,6 +41,9 @@
           </div>
         </div>
       </div>
+    </div>
+    <div>
+      <button class="btn btn-link" @click="bot.connectOffline()">离线模式</button>
     </div>
   </div>
 </template>

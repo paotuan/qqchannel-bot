@@ -22,6 +22,9 @@ export function dispatch(client: WsClient, server: Wss, request: IMessage<unknow
   case 'bot/loginV2':
     handleLoginV2(client, server, request.data as ILoginReqV2)
     break
+  case 'bot/loginOffline':
+    handleLoginOffline(client)
+    break
   case 'bot/info':
     handleGetBotInfo(client)
     break
@@ -112,6 +115,13 @@ async function handleListenToChannel(client: WsClient, server: Wss, data: IListe
   await GlobalStore.Instance.initGuildAndChannelState(client.platform!, data.guildId, data.channelId)
   // resp
   client.send({ cmd: 'channel/listen', success: true, data: '' })
+}
+
+async function handleLoginOffline(client: WsClient) {
+  console.log('离线模式登录')
+  // 无需创建 bot，只需初始化离线模式的 ystore 供同步即可
+  await GlobalStore.Instance.initGuildAndChannelState('offline', 'offline', 'offline')
+  client.send({ cmd: 'bot/loginOffline', success: true, data: null })
 }
 
 async function handleChannelCreate(client: WsClient, server: Wss, data: IChannelCreateReq) {

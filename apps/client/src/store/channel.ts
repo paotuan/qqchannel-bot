@@ -43,6 +43,24 @@ export const useChannelStore = defineStore('channel', {
         })
       })
     },
+    // 离线模式，mock 一个单独的 channel
+    listenToOffline() {
+      const channel: IChannel = {
+        id: 'offline',
+        name: '离线模式',
+        type: 0,
+        guildId: 'offline',
+        guildName: '',
+        guildIcon: ''
+      }
+      this.ensureChannelExist(channel)
+      this.selected = channel.id
+      initYStore()
+      // 更新 title 和 favicon
+      document.title = channel.name
+      const linkElem = document.querySelector('link[rel=icon]')
+      linkElem && ((linkElem as HTMLLinkElement).href = channel.guildIcon)
+    },
     // 由于 server 目前维持着状态且存在补偿机制，我们还是要让 server 主动推过来
     waitForServerChannelList() {
       ws.on<IChannelListResp>('channel/list', data => {

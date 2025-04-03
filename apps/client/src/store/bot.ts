@@ -85,7 +85,10 @@ export const useBotStore = defineStore('bot', () => {
     }
   })
 
-  const platform = computed(() => formModel.value.platform)
+  // 是否使用离线模式
+  const offlineMode = ref(false)
+
+  const platform = computed(() => offlineMode.value ? 'offline' : formModel.value.platform)
 
   // 转换数据结构用于提交，返回 falsy 代表校验不通过
   const validateAndTransformForm = () => {
@@ -168,6 +171,26 @@ export const useBotStore = defineStore('bot', () => {
     }
   }
 
+  // 离线模式登录
+  // 简化原有的登录流程，只需在我们自己的系统内建立 mock 的 guild 和 channel ystore，无需在 server 实际生成 bot 实例
+  const connectOffline = () => {
+    offlineMode.value = true
+    return new Promise<boolean>(resolve => {
+      loginState.value = 'LOADING'
+      gtagEvent('bot/loginOffline', {}, false)
+      ws.send({ cmd: 'bot/loginOffline', data: null })
+      ws.once('bot/loginOffline', () => {
+        console.log('login offline success')
+        loginState.value = 'LOGIN'
+        info.value = { id: 'offline', username: '离线模式', avatar: '' }
+        // channel 处理
+        const channelStore = useChannelStore()
+        channelStore.listenToOffline()
+        resolve(true)
+      })
+    })
+  }
+
   const info = ref<IBotInfo | null>(null)
 
   // 自动登录逻辑
@@ -203,7 +226,7 @@ export const useBotStore = defineStore('bot', () => {
     isAutoLoginLoading.value = false
   }
 
-  return { tab, platform, formModel, loginState, connect, info, isAutoLoginLoading, tryAutoLogin }
+  return { tab, platform, formModel, loginState, connect, info, isAutoLoginLoading, tryAutoLogin, connectOffline }
 })
 
 function saveLoginInfo2LocalStorage(allData: Platform2ConfigMap, tab: LoginTab, model: IBotConfig) {

@@ -153,7 +153,6 @@ export class Guild {
       let nextToken: string | undefined = undefined
       do {
         const { data, next } = await this.bot.api.getChannelList(this.id, nextToken = undefined)
-        console.log('get channel list', data)
         list.push(...data)
         nextToken = next
       } while (nextToken)
