@@ -1,1 +1,1 @@
-export const VERSION_CODE = 48
+export const VERSION_CODE = 49

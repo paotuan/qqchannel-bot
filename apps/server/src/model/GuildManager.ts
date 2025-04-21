@@ -114,7 +114,6 @@ export class GuildManager {
     if (this.bot.platform === 'qq' && !_author.avatar) {
       _author.avatar = `https://q.qlogo.cn/qqapp/${this.bot.appid}/${_author.id}/100`
     }
-    console.log('addOrUpdateUserByMessage', _author, _guild.id)
     this.addOrUpdateUser(_author, _guild.id)
   }
 

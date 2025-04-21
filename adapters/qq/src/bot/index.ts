@@ -39,7 +39,6 @@ export class QQBot<C extends Context = Context> extends Bot<C, QQBot.Config> {
         },
       })
     }
-    console.log('this.http', this.http)
 
     this.ctx.plugin(QQGuildBot, {
       parent: this,
