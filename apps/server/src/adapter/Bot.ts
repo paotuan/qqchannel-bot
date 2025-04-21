@@ -9,6 +9,7 @@ import { LogManager } from '../service/log'
 import { UserCommand } from '../model/UserCommand'
 import { CommandHandler } from '../service/commandHandler'
 import { NickHandler } from '../service/nickHandler'
+import type { QQBot } from '@paotuan/adapter-qq'
 
 /**
  * A bot connection to a platform
@@ -128,6 +129,15 @@ export class Bot {
       if (platform === 'onebot') {
         const bot = this.context.bots.find(bot => bot.platform === 'onebot')
         return bot?.internal?._request ? bot : undefined
+      }
+
+      // qq/qqguild，虽然 bot 是同步创建的，但是必须等待异步获取 access token 后才可以调用接口
+      // 因此轮询等待 access token，否则首次调用 fetchBotInfo 出错
+      if (platform === 'qq' || platform === 'qqguild') {
+        const bot = this.context.bots.find(bot => bot.platform === platform)
+        const qqbot = platform === 'qq' ? (bot as QQBot) : ((bot as QQBot['guildBot'])?.parent)
+        // @ts-expect-error get internal token
+        return (qqbot as QQBot)?._token ? bot : undefined
       }
 
       // 其余的情况，bot 都是同步创建的，直接返回即可
