@@ -1,6 +1,6 @@
 import mitt from 'mitt'
 import { DiceRoll } from '@dice-roller/rpg-dice-roller'
-import { get, set } from 'lodash'
+import { set } from 'lodash'
 
 export type CardType = 'general' | 'coc' | 'dnd'
 
@@ -129,16 +129,11 @@ export abstract class BaseCard<D extends ICardData, E extends ICardEntry = ICard
   // 根据 template data 填充人物卡字段
   initByTemplate() {
     Object.entries(this.data.templateData).forEach(([key, value]) => {
-      // 如果已经有值，则不填充
-      const existValue = get(this.data, key)
-      // todo 暂且 0 也算没有值，后面再看怎么处理
-      if (!existValue) {
-        try {
-          const total = new DiceRoll(value).total
-          set(this.data, key, total)
-        } catch (e) {
-          // 不合法的表达式，ignore
-        }
+      try {
+        const total = new DiceRoll(value).total
+        set(this.data, key, total)
+      } catch (e) {
+        // 不合法的表达式，ignore
       }
     })
     this.data.templateData = {}

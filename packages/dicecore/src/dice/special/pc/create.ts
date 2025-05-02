@@ -1,5 +1,5 @@
 import { BasePtDiceRoll } from '../../base'
-import { CardProto, createCard, ICard, ICardData } from '@paotuan/card'
+import { CardProto, createCardForImport, ICard, ICardData } from '@paotuan/card'
 import { cloneDeep } from 'lodash'
 import { CardProvider } from '../../../card/card-provider'
 
@@ -100,11 +100,7 @@ export class PcCreateDiceRoll extends BasePtDiceRoll {
       return []
     }
     // 5. 创建并关联人物卡
-    const newCard = createCard(cloneDeep(this.availableTemplates[0]))
-    newCard.data.name = this.cardName
-    newCard.data.created = newCard.data.lastModified = Date.now()
-    newCard.data.isTemplate = false
-    newCard.initByTemplate()
+    const newCard = createCardForImport(cloneDeep(this.availableTemplates[0]), this.cardName, false)
     CardProvider.INSTANCE.registerCard(this.cardName, newCard.data)
     // 与当前玩家关联
     this.linkCard(this.cardName, this.context.userId)

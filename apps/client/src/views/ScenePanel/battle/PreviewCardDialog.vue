@@ -20,7 +20,7 @@ import DModal from '../../../dui/modal/DModal.vue'
 import { useSceneStore } from '../../../store/scene'
 import { computed, ref } from 'vue'
 import { useCardStore } from '../../../store/card'
-import { createCard, CardProto, ICardData } from '@paotuan/card'
+import { CardProto, createCardForImport, ICardData } from '@paotuan/card'
 import { cloneDeep } from 'lodash'
 import CardDisplay from '../../CardPanel/display/CardDisplay.vue'
 import CardTemplateSelect from './CardTemplateSelect.vue'
@@ -57,9 +57,7 @@ const getCardProto = (templateName: string) => {
     }
   })()
   if (!proto) return undefined // 理论不可能？
-  const newCardData = cloneDeep(proto)
-  newCardData.created = newCardData.lastModified = Date.now()
-  return newCardData
+  return cloneDeep(proto)
 }
 
 const onApplyCard = () => {
@@ -69,12 +67,7 @@ const onApplyCard = () => {
   if (!twiceConfirm) return
   const proto = getCardProto(templateName)
   if (!proto) return
-  const card = createCard(proto)
-  // 导入卡片
-  card.data.name = currentCardName.value
-  card.data.isTemplate = false
-  // 初始化可能有的字段表达式
-  card.initByTemplate()
+  const card = createCardForImport(proto, currentCardName.value, false)
   // 导入之
   cardStore.importCard(card.data, true)
 }

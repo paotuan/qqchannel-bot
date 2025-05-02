@@ -320,8 +320,7 @@ export class CocCard extends BaseCard<ICocCardData, ICocCardEntry, ICocCardAbili
     return count > 0
   }
 
-  override initByTemplate() {
-    super.initByTemplate()
+  onCreated() {
     // 填充完初始值后，额外判断一些固有字段
     if (!this.HP) this.HP = this.MAXHP
     if (!this.MP) this.MP = this.MAXMP

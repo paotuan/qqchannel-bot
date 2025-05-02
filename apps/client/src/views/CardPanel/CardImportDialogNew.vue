@@ -68,10 +68,10 @@
   </d-modal>
 </template>
 <script setup lang="ts">
-import { PlusCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
+import { ExclamationCircleIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { computed, ref, watch } from 'vue'
 import DModal from '../../dui/modal/DModal.vue'
-import { createCard, CocCard, type CardType, DndCard, CardProto } from '@paotuan/card'
+import { CardProto, type CardType, CocCard, createCardForImport, DndCard } from '@paotuan/card'
 import { useCardStore } from '../../store/card'
 import * as XLSX from 'xlsx'
 import { parseCocXlsx, parseCocXlsxName } from '../../store/card/importer/coc'
@@ -158,30 +158,22 @@ const handleFile = (e: Event) => {
 const getCardProto = () => {
   const template = useTemplate.value
   const proto = cardStore.of(template) ?? CardProto[cardType.value] // 如有 template，优先根据 template 创建。否则初始化各类型的空白卡
-  const newCardData = cloneDeep(proto)
-  newCardData.created = newCardData.lastModified = Date.now()
-  return newCardData
+  return cloneDeep(proto)
 }
 
 const submit = () => {
   if (!cardName.value.trim()) return // 必须设置名字
-  const card = createCard(getCardProto())
-  if (importType.value === 'text') { // 导入 text
-    addAttributesBatch(card, textareaContent.value)
-  } else if (xlsxWorkbook.value) { // 导入 excel
-    if (card.type === 'coc') {
-      parseCocXlsx(card as CocCard, xlsxWorkbook.value)
-    } else if (card.type === 'dnd') {
-      parseDndXlsx(card as DndCard, xlsxWorkbook.value)
+  const card = createCardForImport(getCardProto(), cardName.value.trim(), importAsTemplate.value, card => {
+    if (importType.value === 'text') { // 导入 text
+      addAttributesBatch(card, textareaContent.value)
+    } else if (xlsxWorkbook.value) { // 导入 excel
+      if (card.type === 'coc') {
+        parseCocXlsx(card as CocCard, xlsxWorkbook.value)
+      } else if (card.type === 'dnd') {
+        parseDndXlsx(card as DndCard, xlsxWorkbook.value)
+      }
     }
-  }
-  card.data.name = cardName.value.trim() // name 使用界面上的值，允许和 excel 不同
-  // 是否是模板导入
-  card.data.isTemplate = importAsTemplate.value
-  // 若不是模板，则初始化可能有的字段表达式
-  if (!card.data.isTemplate) {
-    card.initByTemplate()
-  }
+  })
   // 清空输入框
   cardName.value = ''
   textareaContent.value = ''
