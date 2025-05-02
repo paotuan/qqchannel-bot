@@ -43,7 +43,8 @@ export function getCocCardProto(): ICocCardData {
     ext: '',
     meta: {
       skillGrowth: {}
-    }
+    },
+    templateData: {}
   }
 }
 
@@ -132,7 +133,8 @@ export function getDndCardProto(): IDndCardData {
       }
     },
     jobAbilities: [],
-    specialists: []
+    specialists: [],
+    templateData: {}
   }
 }
 
@@ -149,6 +151,7 @@ export function getGeneralCardProto(): IGeneralCardData {
       '力量': 60,
       '体质': 60,
     },
-    abilities: [{ key: '徒手格斗', value: '1d3+$db' }]
+    abilities: [{ key: '徒手格斗', value: '1d3+$db' }],
+    templateData: {}
   }
 }
