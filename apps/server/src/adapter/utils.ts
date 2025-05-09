@@ -76,6 +76,7 @@ function adapterQQGuild(config: IBotConfig_QQ): QQBot.Config {
       | (type === 'private' ? QQ.Intents.GUILD_MESSAGES : QQ.Intents.PUBLIC_GUILD_MESSAGES)
       | QQ.Intents.GUILD_MESSAGE_REACTIONS
       | QQ.Intents.DIRECT_MESSAGES,
+    protocol: 'websocket',
     retryWhen: [],
     manualAcknowledge: false
   }
@@ -89,6 +90,7 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
     type: config.type ?? 'private',
     sandbox: config.sandbox ?? false,
     intents: QQ.Intents.USER_MESSAGE,
+    protocol: 'websocket',
     retryWhen: [],
     manualAcknowledge: false
   }

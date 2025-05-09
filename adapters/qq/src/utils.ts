@@ -17,7 +17,7 @@ export const decodeChannel = (channel: QQ.Channel): Universal.Channel => ({
         : channel.type === QQ.ChannelType.LIVE ? 10005 as Universal.Channel.Type
           : -1 as Universal.Channel.Type, // not supported
   parentId: channel.parent_id,
-  position: channel.position
+  position: channel.position,
 })
 
 export const decodeUser = (user: QQ.User): Universal.User => ({
@@ -41,8 +41,6 @@ export function decodeGroupMessage(
   payload: Universal.MessageLike = message,
 ) {
   message.id = data.id
-  const date = data.timestamp.slice(0, data.timestamp.indexOf('m=')).trim().replace(/\+(\d{4}) CST/, 'GMT+$1')
-  message.timestamp = new Date(date).valueOf()
   message.elements = []
   if (data.content.length) message.elements.push(h.text(data.content))
   for (const attachment of (data.attachments ?? [])) {
@@ -60,8 +58,14 @@ export function decodeGroupMessage(
   }
   message.content = message.elements.join('')
 
-  message.guild = { id: data.group_id }
-  message.user = { id: data.author.id }
+  if (!payload) return message
+  let date = data.timestamp
+  if (date.includes('m=')) {
+    date = data.timestamp.slice(0, data.timestamp.indexOf('m=')).trim().replace(/\+(\d{4}) CST/, 'GMT+$1')
+  }
+  payload.timestamp = new Date(date).valueOf()
+  payload.guild = data.group_id && { id: data.group_id }
+  payload.user = { id: data.author.id, avatar: `https://q.qlogo.cn/qqapp/${bot.config.id}/${data.author.id}/640` }
   return message
 }
 
@@ -173,22 +177,19 @@ export async function adaptSession<C extends Context = Context>(bot: QQBot<C>, i
     session.type = 'message'
     session.isDirect = false
     decodeGroupMessage(bot, input.d, session.event.message = {}, session.event)
-    session.guildId = session.event.message.guild.id
     session.channelId = session.guildId
-    session.userId = session.event.message.user.id
     session.elements.unshift(h.at(session.selfId))
   } else if (input.t === 'C2C_MESSAGE_CREATE') {
     session.type = 'message'
     session.isDirect = true
     decodeGroupMessage(bot, input.d, session.event.message = {}, session.event)
-    session.userId = input.d.author.id
     session.channelId = session.userId
   } else if (input.t === 'FRIEND_ADD') {
     session.type = 'friend-added'
     session.timestamp = input.d.timestamp
     session.userId = input.d.openid
   } else if (input.t === 'FRIEND_DEL') {
-    session.type = 'friend-added'
+    session.type = 'friend-deleted'
     session.timestamp = input.d.timestamp
     session.userId = input.d.openid
   } else if (input.t === 'GROUP_ADD_ROBOT') {
@@ -217,6 +218,8 @@ export async function adaptSession<C extends Context = Context>(bot: QQBot<C>, i
     }
     session.event.button = {
       id: input.d.data.resolved.button_id,
+      // @ts-ignore
+      data: input.d.data.resolved.button_data,
     }
     // session.messageId = input.d.id // event_id is not supported for sending message
 

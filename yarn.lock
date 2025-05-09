@@ -55,56 +55,65 @@
   resolved "https://registry.npmmirror.com/@colors/colors/-/colors-1.6.0.tgz#ec6cd237440700bc23ca23087f513c75508958b0"
   integrity sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==
 
-"@cordisjs/core@3.16.0":
-  version "3.16.0"
-  resolved "https://registry.npmmirror.com/@cordisjs/core/-/core-3.16.0.tgz#4ea736fc5bac8b7418e31a8a2d682b640ba54a33"
-  integrity sha512-hCGAod/pNacwzgl+zxSuT9ISKW4ndKxuZGa4ZEHN5DKTPQ50Zd59N8xHh1VAZ/GWmuePzBKi3HhoBJQY9roKHA==
+"@cordisjs/core@3.18.1":
+  version "3.18.1"
+  resolved "https://registry.npmmirror.com/@cordisjs/core/-/core-3.18.1.tgz#b0aace6e887e3728074b11340bbad49bb9edaf48"
+  integrity sha512-yRuATOamFxeD1ztE2L3o1SaHuT2zw5DTXijQYxt9azVNeILbvtomfGG6sLZegrynJO9XZbNvXbOlQ7LBJDOlAg==
   dependencies:
     cosmokit "^1.6.2"
 
-"@cordisjs/loader@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.npmmirror.com/@cordisjs/loader/-/loader-0.11.0.tgz#3ea98435d128f92f0f9b955f927110a994a4da1d"
-  integrity sha512-apW7hkHv0oEP2QAVZEKCb7RRf95dt6b2N2zuaXHRhwwFGb9UPklCmOxnGK3yBq5cwaHRhGi+1rzLuz61mRlTNA==
+"@cordisjs/loader@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.npmmirror.com/@cordisjs/loader/-/loader-0.13.1.tgz#5a564825d9102261c51e799e8ace0f68842d6879"
+  integrity sha512-YGw22gT1F/jXT1UeWMjIavt7WHMfEmKve83v4PTg63SW4eC2s89ivsN4RQWi5YWe0LQNNg8LItL66FeEcgQS5w==
   dependencies:
     cosmokit "^1.6.2"
     dotenv "^16.4.5"
     js-yaml "^4.1.0"
 
-"@cordisjs/logger@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.npmmirror.com/@cordisjs/logger/-/logger-0.3.2.tgz#a7318730aec280d449c9186133b8995898f78a99"
-  integrity sha512-8t/n5ImZ2fw5QBt+jLlS2r523yALBxHlUd2XZuwbbn6v3JfiirYxO31Yfdi+7btf98ctYwYGBOArwXxK19o4aw==
-  dependencies:
-    reggol "^1.6.3"
-
-"@cordisjs/plugin-http@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.npmmirror.com/@cordisjs/plugin-http/-/plugin-http-0.5.1.tgz#02233ce51c3ca9515ed0c0beab8a9ce72019802b"
-  integrity sha512-oUzAUEfQJjTbrzJPUnc2uZxdKtq0ej/iPaX6/jBZLM0tp7wPdi62IPZ8vvIG72iswTV4kSka8Edu6uaxIYrZ4Q==
+"@cordisjs/logger@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.npmmirror.com/@cordisjs/logger/-/logger-0.3.3.tgz#610b22143c830fc26176d9bf4c1edf9417062a37"
+  integrity sha512-UcyZRXAL86YLAEEta+fxJM1CcDanJvoIMD9ywCyP2AZJuib68UynENGTFo4mYkeg+8WMXrlA/aNNwENMiLUlXA==
   dependencies:
     cosmokit "^1.6.2"
+    reggol "^1.7.0"
+
+"@cordisjs/plugin-http@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.npmmirror.com/@cordisjs/plugin-http/-/plugin-http-0.6.3.tgz#4074a4a9d4a8c750842497f8430bd8ce58e09d43"
+  integrity sha512-kmw4G1t39ZZzFGpBKUNuTv2aefEUtxa1e4qu4+bTrM5Z8uYHTRzPpyJfkj9zuZwopP/Vz271OUr2UfDN5lrJKQ==
+  dependencies:
+    cosmokit "^1.6.3"
     file-type "^16.5.4"
     mime-db "^1.52.0"
     ws "^8.16.0"
 
-"@cordisjs/plugin-server@^0.2.2":
-  version "0.2.3"
-  resolved "https://registry.npmmirror.com/@cordisjs/plugin-server/-/plugin-server-0.2.3.tgz#72959bad734af5ac8cf3b8a41b5adf6f606b2148"
-  integrity sha512-9JD279c/kLb4KbOUQEPPYQn8vg4Nt4tI5CLsXSTkgjlBo71CQ0wnuBwzrrFiDV6d8YGGwD0IBwKYELKBX8wR9A==
+"@cordisjs/plugin-server@^0.2.5":
+  version "0.2.5"
+  resolved "https://registry.npmmirror.com/@cordisjs/plugin-server/-/plugin-server-0.2.5.tgz#5c71f9fc82a298111e1e67e5cfeac934622271cd"
+  integrity sha512-zlUoSrTrvMFWLixv4tmzH5Yn/rvYtI/Vq/3mBG82IuEHh+0mrG1ixxexBwmiXcNK3/g5wVUGH8FgO4b5JV9dbg==
   dependencies:
     "@koa/router" "^10.1.1"
     "@types/koa" "*"
     "@types/koa__router" "*"
     "@types/ws" "^8.5.10"
-    cosmokit "^1.6.2"
+    cosmokit "^1.6.3"
     koa "^2.15.2"
     koa-body "^6.0.1"
     parseurl "^1.3.3"
-    path-to-regexp "^6.2.1"
-    reggol "^1.6.3"
+    path-to-regexp "^6.3.0"
+    reggol "^1.7.1"
     schemastery "^3.14.6"
     ws "^8.16.0"
+
+"@cordisjs/schema@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.npmmirror.com/@cordisjs/schema/-/schema-0.1.1.tgz#adb1304a1fcd102a33f764806bcf2b3ef8ea394a"
+  integrity sha512-AYTSyEXEASO6uVHqXBHIId+8OGFs0idtFoj3q7qee9J7OGcMjVEUsrsdiP9SnmzTR4ea17esShledUC50fco1g==
+  dependencies:
+    cosmokit "^1.6.2"
+    schemastery "^3.14.6"
 
 "@cordisjs/timer@^0.3.2":
   version "0.3.2"
@@ -493,6 +502,11 @@
   resolved "https://registry.npmmirror.com/@microsoft/fetch-event-source/-/fetch-event-source-2.0.1.tgz#9ceecc94b49fbaa15666e38ae8587f64acce007d"
   integrity sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==
 
+"@noble/ed25519@^2.1.0":
+  version "2.2.3"
+  resolved "https://registry.npmmirror.com/@noble/ed25519/-/ed25519-2.2.3.tgz#e189810490302b076e17895b667a06cbe54339f4"
+  integrity sha512-iHV8eI2mRcUmOx159QNrU8vTpQ/Xm70yJ2cTk3Trc86++02usfqFoNl6x0p3JN81ZDS/1gx6xiK0OwrgqCT43g==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -611,16 +625,17 @@
   resolved "https://registry.npmmirror.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.13.2.tgz#851959c4c1c3c6647aba1f388198c8243aed6917"
   integrity sha512-7h7J2nokcdPePdKykd8wtc8QqqkqxIrUz7MHj6aNr8waBRU//NLDVnNjQnqQO6fqtjrtCdftpbTuOKAyrAQETQ==
 
-"@satorijs/core@4.1.0", "@satorijs/core@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.npmmirror.com/@satorijs/core/-/core-4.1.0.tgz#739dad25d6e15d2a587a0f0c02a8b21b0295d7a2"
-  integrity sha512-ChIAwinn0V2JDUuL7HyezXueGbPei5B8EJ7supLYyePk8viWPtIVL6gMed1PvweQkiWk3+U1Jt8zfviPQrouAA==
+"@satorijs/core@4.5.0", "@satorijs/core@^4.5.0":
+  version "4.5.0"
+  resolved "https://registry.npmmirror.com/@satorijs/core/-/core-4.5.0.tgz#7895e9302a116af8f67a2495dcffa3fff931b18d"
+  integrity sha512-LUfBOdy9ndS/HCCCqICMSeeQ6kbQcYjFXcGXtyMPOf02hKXIxn9W7ySY3esAXmQYSWEs7ApvzUXEma7JXxF4Zg==
   dependencies:
-    "@cordisjs/plugin-http" "^0.5.1"
+    "@cordisjs/plugin-http" "^0.6.3"
     "@satorijs/element" "^3.1.7"
-    "@satorijs/protocol" "^1.4.0"
-    cordis "^3.15.3"
-    cosmokit "^1.6.2"
+    "@satorijs/protocol" "^1.6.0"
+    cordis "^3.18.1"
+    cosmokit "^1.6.3"
+    path-to-regexp "^8.2.0"
 
 "@satorijs/element@^3.1.7":
   version "3.1.7"
@@ -629,13 +644,13 @@
   dependencies:
     cosmokit "^1.6.2"
 
-"@satorijs/protocol@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.npmmirror.com/@satorijs/protocol/-/protocol-1.4.0.tgz#4ebdb22037ac54b402157cdc7d66004829694fc4"
-  integrity sha512-N3AJlaNjVxNuqcSiEYBm8Wpt4RdGycoY/v2RSIbJOkWZX7xUPJx8BPz4/nALssVAuqnLPa0orjXpybGB0pqD0A==
+"@satorijs/protocol@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.npmmirror.com/@satorijs/protocol/-/protocol-1.6.0.tgz#d8cc36f56e1b1bb349bd20bf69f750b1b459d425"
+  integrity sha512-rFhjrrY/hot5Mgk0Y8yOIUkyUyTtIjzCrQdIm+gpDbrfuk+cUZjyALiaKp9a8TctyLKVBIjp3FLY6XDnE9x/6Q==
   dependencies:
     "@satorijs/element" "^3.1.7"
-    cosmokit "^1.6.2"
+    cosmokit "^1.6.3"
 
 "@sinclair/typebox@^0.27.8":
   version "0.27.8"
@@ -1765,27 +1780,27 @@ cookies@~0.9.0:
     depd "~2.0.0"
     keygrip "~1.1.0"
 
-cordis@^3.15.3:
-  version "3.16.0"
-  resolved "https://registry.npmmirror.com/cordis/-/cordis-3.16.0.tgz#6b9d53b274f8dfefe203bc3e37ffc664fb96d27c"
-  integrity sha512-fbbONXLHMQy8nVHk48emMmEvY+M0DEOVVRzQV3hhuvb4Ng6T++HV4z+acBPd71OxAgPHh+P/cXR3/HkfiQsvYQ==
+cordis@^3.18.1:
+  version "3.18.1"
+  resolved "https://registry.npmmirror.com/cordis/-/cordis-3.18.1.tgz#544befb10b4847f7b708b2c6e702cbe58ca8e2df"
+  integrity sha512-9IbthFbFBVJ15WBDNPqHdl59TyEAMNWxF1Dxsdi14625ePQkMX35WvcqgGno0BcXlpXDbUaBZgQ+jfBYT+uuSQ==
   dependencies:
-    "@cordisjs/core" "3.16.0"
-    "@cordisjs/loader" "^0.11.0"
-    "@cordisjs/logger" "^0.3.2"
+    "@cordisjs/core" "3.18.1"
+    "@cordisjs/loader" "^0.13.1"
+    "@cordisjs/logger" "^0.3.3"
+    "@cordisjs/schema" "^0.1.1"
     "@cordisjs/timer" "^0.3.2"
     cac "^6.7.14"
     cosmokit "^1.6.2"
     kleur "^4.1.5"
-    reggol "^1.6.3"
-    schemastery "^3.14.6"
+    reggol "^1.7.0"
 
 core-util-is@~1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.3.tgz#a6042d3634c2b27e9328f837b965fac83808db85"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
 
-cosmokit@^1.5.1, cosmokit@^1.5.2:
+cosmokit@^1.5.2:
   version "1.5.2"
   resolved "https://registry.npmmirror.com/cosmokit/-/cosmokit-1.5.2.tgz#bafc97203534129576449b2a4da9394e0725a39b"
   integrity sha512-l4m/Iz0ZZ4nMaVsCC493suyUgeuAoxnDQI+UKt+vVXO+8zBVcrRKzv8m8q+SkXwxHcWluSMHw1AaZc9U2amabw==
@@ -1794,6 +1809,11 @@ cosmokit@^1.6.2:
   version "1.6.2"
   resolved "https://registry.npmmirror.com/cosmokit/-/cosmokit-1.6.2.tgz#f366fac69fa26d4893ccd9de03be2b0427f8c5c4"
   integrity sha512-KnicClOb834OGjzAxjuH5WFoIxzcQwiDbvwRykgCRxHq103lrW4vpogPs3LBuZDsb2asEax4C70OYFd+JfAmgQ==
+
+cosmokit@^1.6.3:
+  version "1.8.0"
+  resolved "https://registry.npmmirror.com/cosmokit/-/cosmokit-1.8.0.tgz#cfa3de6132b10829a17de36749d19c85b215ebcf"
+  integrity sha512-iTnjvOdRKzmcZGSTamFW/pwlDLNBKkIEjk43Ew40YaxSayogY6OsCV40sSTb2dlvD3stR14bLh04qOoQZzX/0Q==
 
 crc-32@~1.2.0, crc-32@~1.2.1:
   version "1.2.2"
@@ -3683,7 +3703,7 @@ object-hash@^3.0.0:
   resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-3.0.0.tgz#73f97f753e7baffc0e2cc9d6e079079744ac82e9"
   integrity sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==
 
-object-inspect@^1.12.3, object-inspect@^1.13.1:
+object-inspect@^1.13.1:
   version "1.13.1"
   resolved "https://registry.npmmirror.com/object-inspect/-/object-inspect-1.13.1.tgz#b96c6109324ccfef6b12216a956ca4dc2ff94bc2"
   integrity sha512-5qoj1RUiKOMsCCNLV1CBiPYE10sziTsnmNxkAI/rZhiD63CF7IqdFGC/XzjWjpSgLf0LxXX3bDFIh0E18f6UhQ==
@@ -3828,10 +3848,20 @@ path-to-regexp@0.1.7:
   resolved "https://registry.npmmirror.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
   integrity sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==
 
-path-to-regexp@^6.1.0, path-to-regexp@^6.2.1:
+path-to-regexp@^6.1.0:
   version "6.2.2"
   resolved "https://registry.npmmirror.com/path-to-regexp/-/path-to-regexp-6.2.2.tgz#324377a83e5049cbecadc5554d6a63a9a4866b36"
   integrity sha512-GQX3SSMokngb36+whdpRXE+3f9V8UzyAorlYvOGx87ufGHehNTn5lCxrKtLyZ4Yl/wEKnNnr98ZzOwwDZV5ogw==
+
+path-to-regexp@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.npmmirror.com/path-to-regexp/-/path-to-regexp-6.3.0.tgz#2b6a26a337737a8e1416f9272ed0766b1c0389f4"
+  integrity sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==
+
+path-to-regexp@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.npmmirror.com/path-to-regexp/-/path-to-regexp-8.2.0.tgz#73990cc29e57a3ff2a0d914095156df5db79e8b4"
+  integrity sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==
 
 path-type@^4.0.0:
   version "4.0.0"
@@ -4302,13 +4332,13 @@ regenerator-runtime@^0.13.11:
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.11.tgz#f6dca3e7ceec20590d07ada785636a90cdca17f9"
   integrity sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==
 
-reggol@^1.6.3:
-  version "1.6.3"
-  resolved "https://registry.npmmirror.com/reggol/-/reggol-1.6.3.tgz#beee22e3c45f02bc151bbba1675d441a1e4d2f52"
-  integrity sha512-FjrGPK/Lq78oTb42N9DcuYRli95T0Bnqh1eIimLsYu2RhZdTYaLlXlLgQ6f5hpFf5rI35SgtkWX2DjqzvNUhsA==
+reggol@^1.7.0, reggol@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.npmmirror.com/reggol/-/reggol-1.7.1.tgz#c597e273fae4600c32558d00cae931d688f5dce8"
+  integrity sha512-0Vr1vRYDFnsA14BipkHRn3+4FxlZxQJ4VQG2pFE2obSrR68hTHVbbQzS3/ZAHNb6l/+ThaJrc5BPgrYDM3yNyg==
   dependencies:
-    cosmokit "^1.5.1"
-    object-inspect "^1.12.3"
+    cosmokit "^1.6.3"
+    object-inspect "^1.13.1"
     supports-color "^8.1.1"
 
 resolve-from@^4.0.0:

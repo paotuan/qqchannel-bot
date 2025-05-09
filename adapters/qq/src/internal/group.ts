@@ -6,12 +6,15 @@ declare module './internal' {
     sendMessage(channel_id: string, data: QQ.Message.Request): Promise<{
       id: string
       timestamp: string
-    } & {
-      code: number
-      message: string
-      data: any
+      audit_id?: string
+      audit_tips?: string
     }>
-    sendPrivateMessage(openid: string, data: QQ.Message.Request): Promise<any>
+    sendPrivateMessage(openid: string, data: QQ.Message.Request): Promise<{
+      id: string
+      timestamp: string
+      audit_id?: string
+      audit_tips?: string
+    }>
     sendFilePrivate(openid: string, data: QQ.Message.File.Request): Promise<any>
     sendFileGuild(group_openid: string, data: QQ.Message.File.Request): Promise<any>
     acknowledgeInteraction(interaction_id: string, data: {
@@ -43,9 +46,6 @@ GroupInternal.define(false, {
   '/v2/groups/{channel.id}/files': {
     POST: 'sendFileGuild',
   },
-  '/interactions/{interaction.id}': {
-    PUT: 'acknowledgeInteraction',
-  },
   '/gateway': {
     GET: 'getGateway',
   },
@@ -53,3 +53,10 @@ GroupInternal.define(false, {
     GET: 'getGatewayBot',
   },
 })
+
+// fxxk tencent
+GroupInternal.define(false, {
+  '/interactions/{interaction.id}': {
+    PUT: 'acknowledgeInteraction',
+  },
+}, { responseType: 'text' })

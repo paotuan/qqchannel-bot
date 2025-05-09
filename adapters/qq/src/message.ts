@@ -138,8 +138,7 @@ export class QQGuildMessageEncoder<C extends Context = Context> extends MessageE
   }
 
   async resolveFile(attrs: Dict, download = false) {
-    const isLocal = (url: string) => !url.startsWith('http://') && !url.startsWith('https://')
-    if (!download && !isLocal(attrs.src || attrs.url)) {
+    if (!download && !await this.bot.ctx.http.isLocal(attrs.src || attrs.url)) {
       return this.fileUrl = attrs.src || attrs.url
     }
     const { data, filename, type } = await this.bot.ctx.http.file(this.fileUrl || attrs.src || attrs.url, attrs)
@@ -194,6 +193,7 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
   private content: string = ''
   private passiveId: string
   private passiveSeq: number
+  private passiveEventId: string
   private useMarkdown = false
   private rows: QQ.Button[][] = []
   private attachedFile: QQ.Message.File.Response
@@ -203,19 +203,23 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
   async flush() {
     if (!this.content.trim() && !this.rows.flat().length && !this.attachedFile) return
     this.trimButtons()
-    let msg_id: string, msg_seq: number
+    let msg_id: string, msg_seq: number, event_id: string
     if (this.options?.session?.messageId && Date.now() - this.options.session.timestamp < MSG_TIMEOUT) {
       this.options.session['seq'] ||= 0
       msg_id = this.options.session.messageId
       msg_seq = ++this.options.session['seq']
+    } else if (this.options?.session?.qq['id'] && Date.now() - this.options.session.timestamp < MSG_TIMEOUT) {
+      event_id = this.options.session.qq['id']
     }
     if (this.passiveId) msg_id = this.passiveId
     if (this.passiveSeq) msg_seq = this.passiveSeq
+    if (this.passiveEventId) event_id = this.passiveEventId
     const data: QQ.Message.Request = {
       content: this.content,
       msg_type: QQ.Message.Type.TEXT,
       msg_id,
       msg_seq,
+      event_id,
     }
     if (this.attachedFile) {
       if (!data.content.length) data.content = ' '
@@ -241,28 +245,24 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
     session.type = 'send'
     const send = async () => {
       try {
-        if (this.session.isDirect) {
-          const resp = await this.bot.internal.sendPrivateMessage(this.session.channelId, data)
+        const resp = this.session.isDirect
+          ? await this.bot.internal.sendPrivateMessage(this.session.channelId, data)
+          : await this.bot.internal.sendMessage(this.session.channelId, data)
+        if (resp.id && !resp.audit_id) {
           session.messageId = resp.id
           session.timestamp = new Date(resp.timestamp).valueOf()
-        } else {
-          const resp = await this.bot.internal.sendMessage(this.session.channelId, data)
-          if (resp.id) {
-            session.messageId = resp.id
-            session.timestamp = new Date(resp.timestamp).valueOf()
-            session.channelId = this.session.channelId
-            session.guildId = this.session.guildId
+          session.channelId = this.session.channelId
+          session.guildId = this.session.guildId
+          session.app.emit(session, 'send', session)
+          this.results.push(session.event.message)
+        } else if (resp.audit_id && this.bot.config.intents & QQ.Intents.MESSAGE_AUDIT) {
+          try {
+            const auditData: QQ.MessageAudited = await this.audit(resp.audit_id)
+            session.messageId = auditData.message_id
             session.app.emit(session, 'send', session)
             this.results.push(session.event.message)
-          } else if (resp.code === 304023 && this.bot.config.intents & QQ.Intents.MESSAGE_AUDIT) {
-            try {
-              const auditData: QQ.MessageAudited = await this.audit(resp.data.message_audit.audit_id)
-              session.messageId = auditData.message_id
-              session.app.emit(session, 'send', session)
-              this.results.push(session.event.message)
-            } catch (e) {
-              this.bot.logger.error(e)
-            }
+          } catch (e) {
+            this.bot.logger.error(e)
           }
         }
       } catch (e) {
@@ -312,7 +312,8 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
       file_type,
       srv_send_msg: false,
     }
-    const capture = /^data:([\w/-]+);base64,(.*)$/.exec(url)
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+    const capture = /^data:([\w/.+-]+);base64,(.*)$/.exec(url)
     if (capture?.[2]) {
       data.file_data = capture[2]
     } else if (await this.bot.ctx.http.isLocal(url)) {
@@ -323,9 +324,9 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
     let res: QQ.Message.File.Response
     try {
       if (this.session.isDirect) {
-        res = await this.bot.internal.sendFilePrivate(this.options.session.event.message.user.id, data)
+        res = await this.bot.internal.sendFilePrivate(this.options.session.userId, data)
       } else {
-        res = await this.bot.internal.sendFileGuild(this.session.guildId, data)
+        res = await this.bot.internal.sendFileGuild(this.session.channelId, data)
       }
     } catch (e) {
       if (!this.bot.http.isError(e)) throw e
@@ -387,8 +388,9 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
     if (type === 'text') {
       this.content += attrs.content
     } else if (type === 'passive') {
-      this.passiveId = attrs.messageId
-      this.passiveSeq = Number(attrs.seq)
+      if (attrs.messageId) this.passiveId = attrs.messageId
+      if (attrs.seq) this.passiveSeq = Number(attrs.seq)
+      if (attrs.eventId) this.passiveEventId = attrs.eventId
     } else if ((type === 'img' || type === 'image') && (attrs.src || attrs.url)) {
       await this.flush()
       const data = await this.sendFile(type, attrs)
@@ -401,32 +403,42 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
     } else if (type === 'audio' && (attrs.src || attrs.url)) {
       await this.flush()
       const { data } = await this.bot.ctx.http.file(attrs.src || attrs.url, attrs)
-      if (data.slice(0, 7).toString().includes('#!SILK')) {
+      if (new TextDecoder().decode(data.slice(0, 7)).includes('#!SILK')) {
         const onlineFile = await this.sendFile(type, {
           src: `data:audio/amr;base64,` + Buffer.from(data).toString('base64'),
         })
         this.attachedFile = onlineFile
       } else {
-        const silk = this.bot.ctx.get('silk')
-        if (!silk) return this.bot.logger.warn('missing silk service, cannot send non-silk audio')
-        if (silk.isWav(data)) {
-          const result = await silk.encode(data, 0)
+        const ntsilk = this.bot.ctx.get('ntsilk')
+        if (ntsilk) {
+          const result = await ntsilk.encode(data)
           const onlineFile = await this.sendFile(type, {
-            src: `data:audio/amr;base64,` + Buffer.from(result.data).toString('base64'),
+            src: `data:audio/amr;base64,` + result.output.toString('base64'),
           })
           if (onlineFile) this.attachedFile = onlineFile
         } else {
-          if (!this.bot.ctx.get('ffmpeg')) return this.bot.logger.warn('missing ffmpeg service, cannot send non-silk audio except wav')
-          const wavBuf = await this.bot.ctx.get('ffmpeg')
-            .builder()
-            .input(Buffer.from(data))
-            .outputOption('-ar', '24000', '-ac', '1', '-f', 's16le')
-            .run('buffer')
-          const result = await silk.encode(wavBuf, 24000)
-          const onlineFile = await this.sendFile(type, {
-            src: `data:audio/amr;base64,` + Buffer.from(result.data).toString('base64'),
-          })
-          if (onlineFile) this.attachedFile = onlineFile
+          const silk = this.bot.ctx.get('silk')
+          if (!silk) return this.bot.logger.warn('missing ntsilk/silk service, cannot send non-silk audio')
+          const allowSampleRate = [8000, 12000, 16000, 24000, 32000, 44100, 48000]
+          if (silk.isWav(data) && allowSampleRate.includes(silk.getWavFileInfo(data).fmt.sampleRate)) {
+            const result = await silk.encode(data, 0)
+            const onlineFile = await this.sendFile(type, {
+              src: `data:audio/amr;base64,` + Buffer.from(result.data).toString('base64'),
+            })
+            if (onlineFile) this.attachedFile = onlineFile
+          } else {
+            if (!this.bot.ctx.get('ffmpeg')) return this.bot.logger.warn('missing ffmpeg service, cannot send non-silk audio except some wav')
+            const pcmBuf = await this.bot.ctx.get('ffmpeg')
+              .builder()
+              .input(Buffer.from(data))
+              .outputOption('-ar', '24000', '-ac', '1', '-f', 's16le')
+              .run('buffer')
+            const result = await silk.encode(pcmBuf, 24000)
+            const onlineFile = await this.sendFile(type, {
+              src: `data:audio/amr;base64,` + Buffer.from(result.data).toString('base64'),
+            })
+            if (onlineFile) this.attachedFile = onlineFile
+          }
         }
       }
       await this.flush()

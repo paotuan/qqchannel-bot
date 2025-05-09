@@ -19,7 +19,7 @@ export class KookBot<C extends Context = Context, T extends KookBot.Config = Koo
         'Authorization': `Bot ${config.token}`,
       },
     }).extend(config)
-    this.proxyUrls.push('https://www.kookapp.cn/')
+    ctx.satori.proxyUrls.add('https://www.kookapp.cn/')
     this.internal = new Kook.Internal(this.http)
 
     if (config.protocol === 'http') {
@@ -101,7 +101,7 @@ export class KookBot<C extends Context = Context, T extends KookBot.Config = Koo
         : data.type === Universal.Channel.Type.VOICE ? 2
           : 1,
       parent_id: data.parentId,
-      is_category: data.type === Universal.Channel.Type.CATEGORY ? 1 : 0
+      is_category: data.type === Universal.Channel.Type.CATEGORY ? 1 : 0,
     })
     return adaptChannel(channel)
   }

@@ -72,7 +72,7 @@ export class QQGuildBot<C extends Context = Context> extends Bot<C> {
       sub_type: 0,
       private_type: 0,
       speak_permission: 1,
-      private_user_ids: []
+      private_user_ids: [],
     })
     return decodeChannel(channel)
   }
