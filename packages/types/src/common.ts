@@ -56,7 +56,14 @@ export interface IChannel {
   guildIcon: string
 }
 
-export type IChannelListResp = IChannel[]
+export interface IGuild {
+  id: string
+  name: string
+  icon: string
+  channels: IChannel[]
+}
+
+export type IChannelListResp = IGuild[]
 
 export interface IListenToChannelReq {
   channelId: string

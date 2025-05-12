@@ -3,7 +3,7 @@ import type { Bot } from '../adapter/Bot'
 import { Universal } from '../adapter/satori'
 import { Channel } from './Channel'
 import { User } from './User'
-import type { IChannel, IChannelListResp } from '@paotuan/types'
+import type { IChannelListResp, IGuild } from '@paotuan/types'
 
 export class GuildManager {
   private readonly bot: Bot
@@ -200,14 +200,19 @@ export class GuildManager {
   // channel list 更新通知客户端
   notifyChannelListChange() {
     const guilds = Object.values(this.guildsMap)
-    const channels: IChannel[] = guilds.map(guild => guild.allChannels.map(channel => ({
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      guildId: channel.guildId,
-      guildName: guild.name,
-      guildIcon: guild.icon
-    }))).flat()
-    this.bot.sendToClient<IChannelListResp>({ cmd: 'channel/list', success: true, data: channels })
+    const data = guilds.map<IGuild>(guild => ({
+      id: guild.id,
+      name: guild.name,
+      icon: guild.icon,
+      channels: guild.allChannels.map(channel => ({
+        id: channel.id,
+        name: channel.name,
+        type: channel.type,
+        guildId: channel.guildId,
+        guildName: guild.name,
+        guildIcon: guild.icon
+      }))
+    }))
+    this.bot.sendToClient<IChannelListResp>({ cmd: 'channel/list', success: true, data })
   }
 }

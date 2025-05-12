@@ -1,5 +1,5 @@
 <template>
-  <div v-if="channel.selected">
+  <div v-if="channel.selectedChannelId">
     <button class="btn btn-circle btn-primary btn-ghost btn-sm m-1" @click="panelVisible = !panelVisible" @contextmenu.prevent="resetPosition">
       <LightBulbIcon class="size-6 text-yellow-500" />
     </button>

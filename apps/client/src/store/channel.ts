@@ -1,4 +1,4 @@
-import type { IChannel, ILog, IListenToChannelReq, IChannelListResp } from '@paotuan/types'
+import type { IChannel, ILog, IListenToChannelReq, IChannelListResp, IGuild } from '@paotuan/types'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
 import { useLogStore } from './log'
@@ -9,14 +9,21 @@ import { useBotStore } from './bot'
 
 export const useChannelStore = defineStore('channel', {
   state: () => ({
-    // channel 列表
-    list: null as IChannel[] | null,
-    // 用户当前选择的 channelId
-    selected: '',
+    // guilds & channel 列表
+    guildList: null as IGuild[] | null,
+    // 用户当前选择的 guildId & channelId
+    selectedGuildId: '',
+    selectedChannelId: '',
     selectLoading: false
   }),
   getters: {
-    selectedChannel: state => state.list?.find(channel => channel.id === state.selected)
+    selectedChannel: state => {
+      const guilds = state.guildList
+      if (!guilds) return undefined
+      const guild = guilds.find(item => item.id === state.selectedGuildId)
+      if (!guild) return undefined
+      return guild.channels.find(channel => channel.id === state.selectedChannelId)
+    }
   },
   actions: {
     listenTo(channel: IChannel) {
@@ -30,7 +37,8 @@ export const useChannelStore = defineStore('channel', {
         ws.send<IListenToChannelReq>({ cmd: 'channel/listen', data: { channelId: channel.id, guildId: channel.guildId } })
         ws.once('channel/listen', () => {
           this.selectLoading = false
-          this.selected = channel.id
+          this.selectedGuildId = channel.guildId
+          this.selectedChannelId = channel.id
           initChannelRelatedStorage(channel.id, channel.guildId)
           initYStore()
           sessionStorageSet('login-step', String(2))
@@ -54,7 +62,8 @@ export const useChannelStore = defineStore('channel', {
         guildIcon: ''
       }
       this.ensureChannelExist(channel)
-      this.selected = channel.id
+      this.selectedGuildId = channel.guildId
+      this.selectedChannelId = channel.id
       initYStore()
       // 更新 title 和 favicon
       document.title = channel.name
@@ -64,7 +73,7 @@ export const useChannelStore = defineStore('channel', {
     // 由于 server 目前维持着状态且存在补偿机制，我们还是要让 server 主动推过来
     waitForServerChannelList() {
       ws.on<IChannelListResp>('channel/list', data => {
-        this.list = data.data
+        this.guildList = data.data
       })
     },
     stopWaitForServerChannelList() {
@@ -75,12 +84,17 @@ export const useChannelStore = defineStore('channel', {
       // todo 暂无特别必要
     },
     ensureChannelExist(channel: IChannel) {
-      if (!this.list) {
-        this.list = []
+      if (!this.guildList) {
+        this.guildList = []
       }
-      const exist = this.list.find(item => item.id === channel.id && item.guildId === channel.guildId)
+      let existGuild = this.guildList.find(guild => guild.id === channel.guildId)
+      if (!existGuild) {
+        existGuild = { id: channel.guildId, name: channel.guildName, icon: channel.guildIcon, channels: [] }
+        this.guildList.push(existGuild)
+      }
+      const exist = existGuild.channels.find(item => item.id === channel.id)
       if (!exist) {
-        this.list.push(channel)
+        existGuild.channels.push(channel)
       }
     }
   }

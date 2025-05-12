@@ -106,7 +106,7 @@ const logout = () => {
       <template v-if="bot.loginState !== 'LOGIN'">
         <login-panel class="mt-40" />
       </template>
-      <template v-else-if="!channel.selected">
+      <template v-else-if="!channel.selectedChannelId">
         <channel-select />
       </template>
       <template v-else>

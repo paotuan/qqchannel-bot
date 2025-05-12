@@ -1,20 +1,20 @@
 <template>
   <div class="my-40 flex items-center justify-center">
-    <template v-if="channelStore.list">
+    <template v-if="channelStore.guildList">
       <div class="card bg-primary/75 pl-2 shadow-lg overflow-hidden">
         <div class="flex">
           <!-- 左侧频道选择 -->
           <div class="py-2 flex flex-col gap-2">
-            <div v-for="guildId in Object.keys(channelsGroupByGuild)" :key="guildId"
+            <div v-for="guild in channelStore.guildList" :key="guild.id"
                  class="p-1 pr-4 -mr-2 cursor-pointer flex items-center gap-2 rounded-l-lg "
-                 :class="checkedGuildId === guildId ? 'bg-base-100 shadow-md' : 'text-primary-content hover:bg-primary'"
-                 @click="checkedGuildId = guildId">
+                 :class="checkedGuildId === guild.id ? 'bg-base-100 shadow-md' : 'text-primary-content hover:bg-primary'"
+                 @click="checkedGuildId = guild.id">
               <div class="avatar">
                 <div class="w-12 rounded-lg">
-                  <img :src="channelsGroupByGuild[guildId][0].guildIcon || qqLogo" referrerpolicy="no-referrer" />
+                  <img :src="guild.icon || qqLogo" referrerpolicy="no-referrer" :alt="guild.name" />
                 </div>
               </div>
-              <div class="max-w-40 truncate" :title="channelsGroupByGuild[guildId][0].guildName">{{ channelsGroupByGuild[guildId][0].guildName }}</div>
+              <div class="max-w-40 truncate" :title="guild.name">{{ guild.name }}</div>
             </div>
           </div>
           <!-- 右侧 -->
@@ -24,7 +24,7 @@
               <a class="link text-sm inline-flex" @click="openMultiWindow">我要多开<ArrowTopRightOnSquareIcon class="size-4" /></a>
             </div>
             <!-- 子频道空数据展示 -->
-            <div v-if="channelStore.list.length === 0" class="w-96">
+            <div v-if="channelStore.guildList.length === 0" class="w-96">
               <!-- qq 群特殊提示 -->
               <template v-if="botStore.platform === 'qq'">
                 <div class="font-bold my-4">请在群内 @ 机器人，以获取本群的 OpenID</div>
@@ -47,7 +47,7 @@
             </div>
             <!-- 子频道选择 -->
             <div v-else-if="checkedGuildId" class="grid grid-cols-2 gap-2 w-96 bg-base-100 pt-4 pb-12">
-              <ChannelLabel v-for="channel in channelsGroupByGuild[checkedGuildId]" :key="channel.id" :channel="channel"
+              <ChannelLabel v-for="channel in currentChannels" :key="channel.id" :channel="channel"
                             :checked="checkedChannelId === channel.id" @check="checkedChannel = channel" />
               <template v-if="botStore.platform !== 'qq'">
                 <ChannelCreate :guild-id="checkedGuildId" />
@@ -66,7 +66,6 @@
 import { useChannelStore } from '../../store/channel'
 import { computed, onMounted, ref, watch } from 'vue'
 import type { IChannel } from '@paotuan/types'
-import { groupBy } from 'lodash'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import ChannelCreate from './ChannelCreate.vue'
 import qqLogo from '../../assets/qq.png'
@@ -76,17 +75,20 @@ import { localStorageGet, localStorageSet } from '../../utils/cache'
 import type { Platform } from '@paotuan/config'
 
 const channelStore = useChannelStore()
-const channelsGroupByGuild = computed(() => groupBy(channelStore.list || [], channel => channel.guildId))
 
+// 当前选择的 channel
 const checkedChannel = ref<IChannel | null>(null)
 const checkedChannelId = computed(() => checkedChannel.value?.id || null)
-const checkedGuildId = ref<string | null>(null) // 当前选择的 guild id
-watch(channelsGroupByGuild, value => {
+// 当前选择的 guild id
+const checkedGuildId = ref<string | null>(null)
+// 当前选择的 guild id 下的所有 channel
+const currentChannels = computed(() => (channelStore.guildList ?? []).find(guild => guild.id === checkedGuildId.value)?.channels ?? [])
+
+watch(() => channelStore.guildList, value => {
   if (checkedGuildId.value) return
   // 选择第一个返回的 guild
-  const allGuildIds = Object.keys(value)
-  if (allGuildIds.length === 0) return
-  checkedGuildId.value = allGuildIds[0]
+  if (!value || value.length === 0) return
+  checkedGuildId.value = value[0].id
 })
 
 // 切换频道时，清除子频道的选择，避免引起误会
@@ -117,7 +119,7 @@ const channelToLaunch = computed(() => {
   // 优先使用用户已选的 channel
   let channel = checkedChannel.value
   // qq 群特殊处理，可选项为 0 的情况下，可以使用上次已选的 openId
-  if (botStore.platform === 'qq' && !channel && Object.keys(channelsGroupByGuild.value).length === 0) {
+  if (botStore.platform === 'qq' && !channel && (channelStore.guildList ?? []).length === 0) {
     channel = qqLastGroupTempChannel.value
   }
   return channel
