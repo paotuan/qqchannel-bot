@@ -50,7 +50,7 @@
               <ChannelLabel v-for="channel in currentChannels" :key="channel.id" :channel="channel"
                             :checked="checkedChannelId === channel.id" @check="checkedChannel = channel" />
               <template v-if="botStore.platform !== 'qq'">
-                <ChannelCreate :guild-id="checkedGuildId" />
+                <ChannelCreate :guild-id="checkedGuildId" :platform="botStore.platform" />
               </template>
             </div>
             <button class="btn btn-primary w-full -mt-4 shadow-lg" :disabled="!channelToLaunch" @click="launch">

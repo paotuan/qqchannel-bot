@@ -23,7 +23,7 @@ const iconByChannel = (channel: { type: number }) => {
   switch (channel.type) {
   case 10005:
     return VideoCameraIcon
-  case 2:
+  case 3:
     return MicrophoneIcon
   case 0:
   default:
@@ -35,7 +35,7 @@ const colorByChannel = (channel: { type: number }) => {
   switch (channel.type) {
   case 10005:
     return 'text-red-600'
-  case 2:
+  case 3:
     return 'text-purple-600'
   case 0:
   default:

@@ -20,6 +20,8 @@ export class Guild {
   private channelsMap: Record<string, Channel> = {}
   // 用于创建新的文字子频道，所在分组
   private channelGroupId4Create: string | undefined
+  // 用于创建新的文字子频道，待创建的类型
+  private channelType4Create = Universal.Channel.Type.TEXT
   // 按需将 IUser 转化为 User 对象
   private usersCache = new Map<string, User>()
 
@@ -98,8 +100,8 @@ export class Guild {
 
   async createChannel(name: string) {
     try {
-      const resp = await this.bot.api.createChannel(this.id, { type: Universal.Channel.Type.TEXT, name, parentId: this.channelGroupId4Create })
-      this.addChannel({ id: resp.id, name, type: Universal.Channel.Type.TEXT })
+      const resp = await this.bot.api.createChannel(this.id, { type: this.channelType4Create, name, parentId: this.channelGroupId4Create })
+      this.addChannel({ id: resp.id, name, type: this.channelType4Create })
       return true
     } catch (e) {
       console.error('[Guild] 创建子频道失败', e)
@@ -176,6 +178,7 @@ export class Guild {
     const qqTextGroup = categories.find(channel => channel.name === '讨论组') || categories.find(channel => channel.name === '活动')
     if (qqTextGroup) {
       this.channelGroupId4Create = qqTextGroup.id
+      this.channelType4Create = Universal.Channel.Type.TEXT
       return
     }
     // 放到已经有其他文字子频道的分组下面，这样成功概率更高
@@ -185,11 +188,20 @@ export class Guild {
     })
     if (hasTextGroup) {
       this.channelGroupId4Create = hasTextGroup.id
+      this.channelType4Create = Universal.Channel.Type.TEXT
+      return
+    }
+    // 新频道现在没有文字分组，不允许创建文字子频道，退而求其次创建语音子频道
+    const voiceGroup = categories.find(channel => channel.name === '语音房')
+    if (voiceGroup) {
+      this.channelGroupId4Create = voiceGroup.id
+      this.channelType4Create = Universal.Channel.Type.VOICE
       return
     }
     // 都没有找到，默认取第一个
-    console.warn('[Guild] 未找到符合条件的文字子频道分组，QQ 接口可能改动。若创建子频道失败，请联系开发者')
+    console.warn('[Guild] 未找到符合条件的文字/语音子频道分组，QQ 接口可能改动。若创建子频道失败，请联系开发者')
     this.channelGroupId4Create = categories[0]?.id
+    this.channelType4Create = Universal.Channel.Type.TEXT
   }
 }
 

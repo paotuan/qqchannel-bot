@@ -7,6 +7,7 @@
   </label>
   <d-modal v-model:visible="open" title="新建子频道">
     <input v-model="name" type="text" placeholder="请输入子频道名称" class="input input-bordered w-full max-w-xs" />
+    <div v-if="platform === 'qqguild'" class="mt-4 text-base-content/60">受官方限制，若无法创建文字子频道，将为您创建语音子频道。语音子频道中仍然可以文字聊天。</div>
     <template #action>
       <button class="btn" @click="open = false">取消</button>
       <button class="btn btn-primary" :disabled="!name" @click="submit">
@@ -23,7 +24,7 @@ import { ref } from 'vue'
 import ws from '../../api/ws'
 import { gtagEvent, Toast } from '../../utils'
 
-const props = defineProps<{ guildId: string }>()
+const props = defineProps<{ guildId: string, platform: string }>()
 const open = ref(false)
 const name = ref('')
 
