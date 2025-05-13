@@ -76,7 +76,9 @@ function adapterQQGuild(config: IBotConfig_QQ): QQBot.Config {
       | (type === 'private' ? QQ.Intents.GUILD_MESSAGES : QQ.Intents.PUBLIC_GUILD_MESSAGES)
       | QQ.Intents.GUILD_MESSAGE_REACTIONS
       | QQ.Intents.DIRECT_MESSAGES,
-    protocol: 'websocket',
+    endpoint: config.endpoint,
+    protocol: config.protocol,
+    path: config.path!, // webhook 下 path 必定存在
     retryWhen: [],
     manualAcknowledge: false
   }
@@ -90,7 +92,9 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
     type: config.type ?? 'private',
     sandbox: config.sandbox ?? false,
     intents: QQ.Intents.USER_MESSAGE,
-    protocol: 'websocket',
+    endpoint: config.endpoint,
+    protocol: config.protocol,
+    path: config.path!, // webhook 下 path 必定存在
     retryWhen: [],
     manualAcknowledge: false
   }
@@ -137,6 +141,8 @@ export type BotAsServerConfig = { enabled: true, port: number } | { enabled: fal
 export function asServerConfig(config: IBotConfig): BotAsServerConfig {
   if (config.platform === 'onebot' && config.protocol === 'ws-reverse') {
     return { enabled: true, port: config.port ?? 4176 }
+  } else if ((config.platform === 'qq' || config.platform === 'qqguild') && config.protocol === 'webhook') {
+    return { enabled: true, port: config.port ?? 8443 }
   } else {
     return { enabled: false }
   }

@@ -5,6 +5,13 @@ export interface IBotConfig_QQ {
   token: string
   sandbox?: boolean
   type?: 'public' | 'private'
+  // 可用于代理 api
+  endpoint?: string
+  protocol: 'websocket' | 'webhook'
+  // 仅 webhook, 监听的路径
+  path?: string
+  // 仅 webhook，监听的端口
+  port?: number
 }
 
 export interface IBotConfig_Kook {

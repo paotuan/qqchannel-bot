@@ -44,7 +44,11 @@ export const useBotStore = defineStore('bot', () => {
     secret: '',
     token: '',
     sandbox: false,
-    type: 'private'
+    type: 'private',
+    endpoint: '',
+    protocol: 'websocket',
+    path: 'qq',
+    port: 8443
   }, _model.qqguild))
 
   const formKook = ref<Required<IBotConfig_Kook>>(merge({
@@ -95,8 +99,22 @@ export const useBotStore = defineStore('bot', () => {
     const form = formModel.value
     switch (form.platform) {
     case 'qqguild':
-    case 'qq':
-      return (form.appid && form.secret && form.token) ? form as IBotConfig_QQ : false
+    case 'qq': {
+      if (!form.appid || !form.secret || !form.token) return false
+      if (form.protocol === 'websocket') {
+        return {
+          ...form, endpoint: form.endpoint || undefined,
+          path: undefined,
+          port: undefined,
+        } as IBotConfig_QQ
+      } else {
+        return {
+          ...form,
+          endpoint: form.endpoint || undefined,
+          path: '/' + form.path,
+        } as IBotConfig_QQ
+      }
+    }
     case 'kook':
     {
       // calc uniq appid
