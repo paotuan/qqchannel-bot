@@ -40,13 +40,19 @@ export class Channel {
     try {
       // console.time('message')
       const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session: session as Session | undefined })
-      const messageId = res.at(-1)!
+      // 返回的 messageIds 可能为空，代表发送失败，失败原因一般 satori 侧打出
+      const messageId = res.at(-1)
       // console.timeEnd('message')
-      console.log('[Message] 发送成功 ' + content)
-      if (recordLog) {
-        this.sendLogAsync(messageId, content)
+      if (messageId) {
+        console.log('[Message] 发送成功', content)
+        if (recordLog) {
+          this.sendLogAsync(messageId, content)
+        }
+        return { id: messageId, content }
+      } else {
+        console.error('[Message] 发送失败', content)
+        return null
       }
-      return { id: messageId, content }
     } catch (e) {
       console.error('[Message] 发送失败', e)
       return null
@@ -58,12 +64,17 @@ export class Channel {
     const content = `<img src="${imgData}"/>`
     try {
       const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session })
-      const messageId = res.at(-1)!
-      console.log('[Message] 发送本地图片成功')
-      if (recordLog) {
-        this.sendLogAsync(messageId, content)
+      const messageId = res.at(-1)
+      if (messageId) {
+        console.log('[Message] 发送本地图片成功')
+        if (recordLog) {
+          this.sendLogAsync(messageId, content)
+        }
+        return { id: messageId }
+      } else {
+        console.error('[Message] 发送本地图片失败')
+        return null
       }
-      return { id: messageId }
     } catch (e) {
       console.error('[Message] 发送本地图片失败', e)
       return null
