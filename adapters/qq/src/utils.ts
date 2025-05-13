@@ -110,13 +110,14 @@ export async function decodeMessage(
   return message
 }
 
-export function setupReaction(session: Session, data: QQ.MessageReaction) {
+export function setupReaction(session: Session, data: QQ.MessageReaction, eventId: string) {
   session.userId = data.user_id
   session.guildId = data.guild_id
   session.channelId = data.channel_id
   session.content = `${data.emoji.type}:${data.emoji.id}`
   // https://bot.q.qq.com/wiki/develop/api/openapi/reaction/model.html#reactiontargettype
   session.messageId = data.target.id
+  session.qqEventId = eventId
   session.isDirect = false
   return session
 }
@@ -138,11 +139,11 @@ export async function adaptSession<C extends Context = Context>(bot: QQBot<C>, i
     await decodeMessage(bot, input.d, session.event.message = {}, session.event)
   } else if (input.t === 'MESSAGE_REACTION_ADD') {
     if (input.d.target.type !== 'ReactionTargetType_MSG') return
-    setupReaction(session, input.d)
+    setupReaction(session, input.d, input.id)
     session.type = 'reaction-added'
   } else if (input.t === 'MESSAGE_REACTION_REMOVE') {
     if (input.d.target.type !== 'ReactionTargetType_MSG') return
-    setupReaction(session, input.d)
+    setupReaction(session, input.d, input.id)
     session.type = 'reaction-removed'
   } else if (input.t === 'CHANNEL_CREATE' || input.t === 'CHANNEL_UPDATE' || input.t === 'CHANNEL_DELETE') {
     session.type = {

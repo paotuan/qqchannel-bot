@@ -32,6 +32,13 @@ export class QQGuildMessageEncoder<C extends Context = Context> extends MessageE
     }
     if (this.passiveId) msg_id = this.passiveId
 
+    // 如果 session 指定了 qqEventId，则优先使用 qqEventId，并清除 messageId
+    // 用于表情表态场景，messageId 代表源消息，若超过 5min 会发送失败，但使用 eventId 则一定不会发送失败
+    if (!this.passiveEventId && this.options?.session?.qqEventId) {
+      this.passiveEventId = this.options.session.qqEventId
+      msg_id = null
+    }
+
     let r: Partial<QQ.Message.Response>
     this.bot.logger.debug('use form data %s', useFormData)
     try {

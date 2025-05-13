@@ -24,6 +24,8 @@ declare module '@satorijs/core' {
   interface Session {
     qq?: QQ.Payload & GroupInternal
     qqguild?: QQ.Payload & GuildInternal
+    // 记录部分事件可用 eventId 回复被动消息
+    qqEventId?: string
   }
 }
 
