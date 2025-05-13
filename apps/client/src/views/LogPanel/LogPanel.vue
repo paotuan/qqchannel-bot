@@ -141,7 +141,9 @@ useHotkey('ctrl+z,command+z', 'LogPanel', () => {
 
 // 处理发送本地图片路径问题，用于回显
 const resolveImageUrl = (url: string) => {
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+  if (url.startsWith('data:image')) {
+    return url
+  } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
     return `http://${serverAddr}:${serverPort}/${url}`
   } else {
     return url
