@@ -1,7 +1,6 @@
 import { Bot } from '../adapter/Bot'
 import { Session, Universal } from '../adapter/satori'
 import { removeBackspaces } from '../utils'
-import { qqguildV1_sendRawImage } from '../adapter/qqguild-v1'
 
 const ChannelTypeLive_QQ = 10005
 
@@ -58,14 +57,8 @@ export class Channel {
     const session = this.getLastSessionForReply()
     const content = `<img src="${imgData}"/>`
     try {
-      const messageId = await (async () => {
-        if (this.bot.platform === 'qqguild') {
-          return await qqguildV1_sendRawImage(this.bot, this.id, imgData, session?.messageId)
-        } else {
-          const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session })
-          return res.at(-1)!
-        }
-      })()
+      const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session })
+      const messageId = res.at(-1)!
       console.log('[Message] 发送本地图片成功')
       if (recordLog) {
         this.sendLogAsync(messageId, content)

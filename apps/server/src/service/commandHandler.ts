@@ -11,7 +11,6 @@ import {
 } from '@paotuan/dicecore'
 import type { IDiceRollReq } from '@paotuan/types'
 import type { Bot } from '../adapter/Bot'
-import { qqguildV1_getMessageContent } from '../adapter/qqguild-v1'
 import type { WsClient } from '../app/wsclient'
 import type { ChannelUnionId } from '../adapter/utils'
 import { GlobalStore } from '../state'
@@ -28,14 +27,8 @@ export class CommandHandler {
     max: 50,
     fetchMethod: async key => {
       const [channelId, msgId] = key.split('$$$')
-      const content = await (async () => {
-        if (this.bot.platform === 'qqguild') {
-          return await qqguildV1_getMessageContent(this.bot, channelId, msgId)
-        } else {
-          const message = await this.bot.api.getMessage(channelId, msgId)
-          return message.content
-        }
-      })()
+      const message = await this.bot.api.getMessage(channelId, msgId)
+      const content = message.content
       const text = content?.trim()
       return { text, instruction: text ? undefined : null } as IMessageCache // 非文本消息就直接记录为 null 了
     }
