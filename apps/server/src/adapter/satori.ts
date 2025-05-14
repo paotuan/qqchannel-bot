@@ -23,8 +23,8 @@ export class Context extends SatoriContext {
       this.provide('http', undefined, true)
       this.plugin(HTTP, { baseURL: `http://localhost:${httpPort}` })
       if (serverConfig.enabled) {
-        // @ts-expect-error 用于反向 ws 等需要机器人作为服务端的场景
-        this.plugin(Server, { port: serverConfig.port })
+        // 用于反向 ws 等需要机器人作为服务端的场景
+        this.plugin(Server, { host: '0.0.0.0', port: serverConfig.port })
       }
     } catch (e) {
       console.log(e)

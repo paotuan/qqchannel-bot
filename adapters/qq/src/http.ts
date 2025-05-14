@@ -6,6 +6,12 @@ import { adaptSession } from './utils'
 import { IncomingHttpHeaders } from 'node:http'
 import { } from '@cordisjs/plugin-server'
 
+// add node18 polyfill
+// https://github.com/paulmillr/noble-ed25519?tab=readme-ov-file#nodejs-v18-and-older-polyfill-webcrypto
+import { webcrypto } from 'node:crypto'
+// @ts-ignore
+if (!globalThis.crypto) globalThis.crypto = webcrypto
+
 export class HttpServer<C extends Context = Context> extends Adapter<C, QQBot<C>> {
   static inject = ['server']
 
