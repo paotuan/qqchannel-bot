@@ -25,13 +25,11 @@
     "jszip": "^3.10.1",
     "lru-cache": "^7.14.0",
     "mustache": "^4.2.0",
-    "node-fetch": "^2.6.7",
     "winston": "^3.11.0",
     "ws": "^8.17.1"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.2",
-    "@types/node-fetch": "^2.6.2",
     "@types/ws": "^8.5.3",
     "tsx": "^4.7.2"
   }

@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import fetch from 'node-fetch'
 
 // https://www.zhangxinxu.com/wordpress/2021/01/dom-api-html-encode-decode/
 export function unescapeHTML(str: string) {
