@@ -11,7 +11,6 @@ import ThemePicker from './components/nav/ThemePicker.vue'
 import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import { Toast } from './utils'
 import { VERSION_NAME } from '@paotuan/types'
-import AiAssistant from './components/nav/AiAssistant.vue'
 import ws from './api/ws'
 import { LocalStorageKeys } from './utils/cache'
 
@@ -97,7 +96,6 @@ const logout = () => {
     </div>
     <div class="navbar-end">
       <bot-info />
-      <ai-assistant />
       <theme-picker />
     </div>
   </div>
