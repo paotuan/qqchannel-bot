@@ -1,0 +1,47 @@
+{
+  "name": "@paotuan/adapter-discord",
+  "description": "Discord Adapter for Satorijs",
+  "version": "4.5.10",
+  "type": "module",
+  "main": "lib/index.cjs",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build:js": "esbuild src/index.ts --outfile=lib/index.cjs --bundle --sourcemap --sources-content=false --platform=node --external:@satorijs/core --external:./node_modules/* --target=es2022",
+    "build:tsc": "tsc",
+    "build": "yarn run build:js && yarn run build:tsc"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "author": "LittleC <i@ltlec.cn>",
+  "contributors": [
+    "Shigma <shigma10826@gmail.com>",
+    "LittleC <i@ltlec.cn>"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/satorijs/satori.git",
+    "directory": "adapters/discord"
+  },
+  "bugs": {
+    "url": "https://github.com/satorijs/satori/issues"
+  },
+  "homepage": "https://koishi.chat/plugins/adapter/discord.html",
+  "keywords": [
+    "bot",
+    "discord",
+    "chatbot",
+    "satori",
+    "im",
+    "chat"
+  ],
+  "devDependencies": {
+    "@satorijs/core": "^4.5.0",
+    "cordis": "^3.18.1"
+  },
+  "peerDependencies": {
+    "@satorijs/core": "^4.5.0"
+  }
+}

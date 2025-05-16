@@ -14,6 +14,8 @@
     "@paotuan/adapter-kook": "4.6.5",
     "@paotuan/adapter-qq": "4.9.2",
     "@paotuan/adapter-satori": "1.5.0",
+    "@paotuan/adapter-onebot": "6.8.0",
+    "@paotuan/adapter-discord": "4.5.10",
     "@paotuan/card": "2.0.0",
     "@paotuan/config": "2.0.0",
     "@paotuan/dicecore": "2.0.0",
