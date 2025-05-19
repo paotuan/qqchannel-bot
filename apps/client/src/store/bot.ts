@@ -47,6 +47,7 @@ export const useBotStore = defineStore('bot', () => {
     type: 'private',
     endpoint: '',
     protocol: 'websocket',
+    wsProxy: '',
     path: 'qq',
     port: 8443
   }, _model.qqguild))
@@ -103,7 +104,9 @@ export const useBotStore = defineStore('bot', () => {
       if (!form.appid || !form.secret || !form.token) return false
       if (form.protocol === 'websocket') {
         return {
-          ...form, endpoint: form.endpoint || undefined,
+          ...form,
+          endpoint: form.endpoint || undefined,
+          wsProxy: form.wsProxy || undefined,
           path: undefined,
           port: undefined,
         } as IBotConfig_QQ
@@ -111,6 +114,7 @@ export const useBotStore = defineStore('bot', () => {
         return {
           ...form,
           endpoint: form.endpoint || undefined,
+          wsProxy: undefined,
           path: '/' + form.path,
         } as IBotConfig_QQ
       }
