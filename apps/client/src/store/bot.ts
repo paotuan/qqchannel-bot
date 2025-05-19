@@ -6,7 +6,7 @@ import type {
   IBotConfig_QQ,
   IBotConfig_Satori,
   IBotInfoResp,
-  IChannel, IBotConfig_OneBot
+  IChannel, IBotConfig_OneBot, IBotConfig_Discord
 } from '@paotuan/types'
 import { defineStore } from 'pinia'
 import ws from '../api/ws'
@@ -21,7 +21,7 @@ type LoginState = 'NOT_LOGIN' | 'LOADING' | 'LOGIN'
 
 // 注意 tab 与 platform 的不同。qq tab 下面可选 qq/qqguild 两个 platform
 // 出于历史兼容原因，qq tab 使用 qqguild 作为枚举
-const AvailableLoginTabs = ['qqguild', 'kook', 'satori', 'onebot'] as const
+const AvailableLoginTabs = ['qqguild', 'kook', 'discord', 'satori', 'onebot'] as const
 export type LoginTab = typeof AvailableLoginTabs[number]
 
 // key 与 LoginTab 保持一致
@@ -31,6 +31,7 @@ type Platform2ConfigMap = {
   kook?: Required<IBotConfig_Kook>
   satori?: Required<IBotConfig_Satori>
   onebot?: Required<IBotConfig_OneBot>
+  discord?: Required<IBotConfig_Discord>
 }
 
 export const useBotStore = defineStore('bot', () => {
@@ -75,6 +76,13 @@ export const useBotStore = defineStore('bot', () => {
     port: 4176
   }, _model.onebot))
 
+  const formDiscord = ref<Required<IBotConfig_Discord>>(merge({
+    platform: 'discord',
+    appid: '',
+    token: '',
+    endpoint: '',
+  }, _model.discord))
+
   const formModel = computed(() => {
     switch (tab.value) {
     case 'qqguild':
@@ -85,6 +93,8 @@ export const useBotStore = defineStore('bot', () => {
       return formSatori.value
     case 'onebot':
       return formOnebot.value
+    case 'discord':
+      return formDiscord.value
     default:
       throw new Error('invalid tab: ' + tab.value)
     }
@@ -150,6 +160,15 @@ export const useBotStore = defineStore('bot', () => {
         } as IBotConfig_OneBot
       }
       return false
+    }
+    case 'discord':
+    {
+      if (!form.token) return false
+      return {
+        ...form,
+        appid: md5(form.token), // calc uniq appid
+        endpoint: form.endpoint || undefined,
+      } as IBotConfig_Discord
     }
     default:
       return false

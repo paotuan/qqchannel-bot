@@ -1,9 +1,17 @@
-import type { IBotConfig, IBotConfig_Kook, IBotConfig_OneBot, IBotConfig_QQ, IBotConfig_Satori } from '@paotuan/types'
+import type {
+  IBotConfig,
+  IBotConfig_Discord,
+  IBotConfig_Kook,
+  IBotConfig_OneBot,
+  IBotConfig_QQ,
+  IBotConfig_Satori
+} from '@paotuan/types'
 import type { Platform } from '@paotuan/config'
 import qqAdapter, { QQBot, QQ } from '@paotuan/adapter-qq'
 import kookAdapter, { KookBot } from '@paotuan/adapter-kook'
 import satoriAdapter, { SatoriAdapter } from '@paotuan/adapter-satori'
 import onebotAdapter, { OneBotBot } from '@paotuan/adapter-onebot'
+import discordAdapter, { DiscordBot } from '@paotuan/adapter-discord'
 
 export type BotId = `${Platform}:${string}`
 export function getBotId(platform: Platform, appid: string): BotId {
@@ -41,6 +49,8 @@ export function adapterPlugin(platform: Platform) {
     return satoriAdapter
   case 'onebot':
     return onebotAdapter
+  case 'discord':
+    return discordAdapter
   // default:
   //   throw new Error(`Not implement platform: ${platform}`)
   }
@@ -58,7 +68,9 @@ export function adapterConfig(config: IBotConfig) {
     return adapterSatori(config)
   case 'onebot':
     return adapterOnebot(config)
-    // default:
+  case 'discord':
+    return adapterDiscord(config)
+  // default:
   //   throw new Error(`Not implement platform: ${config.platform}`)
   }
 }
@@ -134,6 +146,14 @@ function adapterOnebot(config: IBotConfig_OneBot): OneBotBot.Config {
     }
   default:
     throw new Error(`Not implement protocol: ${config.protocol}`)
+  }
+}
+
+function adapterDiscord(config: IBotConfig_Discord): DiscordBot.Config {
+  return {
+    type: 'bot',
+    token: config.token,
+    endpoint: config.endpoint
   }
 }
 

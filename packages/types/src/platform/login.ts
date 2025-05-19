@@ -22,6 +22,13 @@ export interface IBotConfig_Kook {
   token: string
 }
 
+export interface IBotConfig_Discord {
+  platform: 'discord'
+  appid: string
+  token: string
+  endpoint?: string
+}
+
 export interface IBotConfig_Satori {
   platform: 'satori'
   appid: string
@@ -43,4 +50,4 @@ export interface IBotConfig_OneBot {
   port?: number
 }
 
-export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook | IBotConfig_Satori | IBotConfig_OneBot
+export type IBotConfig = IBotConfig_QQ | IBotConfig_Kook | IBotConfig_Discord | IBotConfig_Satori | IBotConfig_OneBot

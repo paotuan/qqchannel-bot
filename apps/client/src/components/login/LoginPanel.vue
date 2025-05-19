@@ -33,6 +33,9 @@
             <template v-else-if="currTab === 'onebot'">
               <FormOnebot />
             </template>
+            <template v-else-if="currTab === 'discord'">
+              <FormDiscord />
+            </template>
             <template v-else>疑似发生错误，请尝试清除缓存</template>
             <button class="btn btn-primary w-full mt-4 shadow-lg" @click="bot.connect()">
               <span v-if="bot.loginState === 'LOADING'" class="loading"></span>
@@ -54,10 +57,12 @@ import FormQQ from './FormQQ.vue'
 import FormKook from './FormKook.vue'
 import FormSatori from './FormSatori.vue'
 import FormOnebot from './FormOnebot.vue'
+import FormDiscord from './FormDiscord.vue'
 import qqLogo from '../../assets/qq.png'
 import kookLogo from '../../assets/kook.png'
 import satoriLogo from '../../assets/satori.png'
 import onebotLogo from '../../assets/onebot.png'
+import discordLogo from '../../assets/discord.png'
 
 const bot = useBotStore()
 const currTab = computed({
@@ -67,6 +72,7 @@ const currTab = computed({
 const platformOptions: { value: LoginTab, icon: string }[] = [
   { value: 'qqguild', icon: qqLogo },
   { value: 'kook', icon: kookLogo },
+  { value: 'discord', icon: discordLogo },
   { value: 'satori', icon: satoriLogo },
   { value: 'onebot', icon: onebotLogo }
 ]
