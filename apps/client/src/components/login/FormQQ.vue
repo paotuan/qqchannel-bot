@@ -48,19 +48,27 @@
     </div>
     <button class="btn btn-link px-1" @click="advancedSettingsVisible = true">更多设置</button>
     <d-modal v-model:visible="advancedSettingsVisible" title="更多设置">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text font-bold">QQ API 地址</span>
-        </label>
-        <input v-model="model.endpoint" type="text" placeholder="https://api.sgroup.qq.com/" class="input input-bordered w-full" />
-      </div>
+<!--      <div class="form-control">-->
+<!--        <label class="label">-->
+<!--          <span class="label-text font-bold">QQ API 地址</span>-->
+<!--        </label>-->
+<!--        <input v-model="model.endpoint" type="text" placeholder="https://api.sgroup.qq.com/" class="input input-bordered w-full" />-->
+<!--      </div>-->
       <div class="form-control">
         <label class="label">
           <span class="label-text font-bold">连接方式</span>
         </label>
         <d-native-select v-model="model.protocol" :options="protocolOptions" select-class="select-bordered" />
       </div>
-      <template v-if="model.protocol === 'webhook'">
+      <template v-if="model.protocol === 'websocket'">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold">WebSocket 代理地址</span>
+          </label>
+          <input v-model="model.wsProxy" type="text" placeholder="Type here" class="input input-bordered w-full" />
+        </div>
+      </template>
+      <template v-else-if="model.protocol === 'webhook'">
         <div class="form-control">
           <label class="label">
             <span class="label-text font-bold">监听路径</span>
@@ -92,7 +100,7 @@ const model = computed(() => bot.formModel as Required<IBotConfig_QQ>)
 const advancedSettingsVisible = ref(false)
 
 const protocolOptions = [
-  { label: 'Websocket', value: 'websocket' },
+  { label: 'WebSocket', value: 'websocket' },
   { label: 'Webhook', value: 'webhook' },
 ]
 </script>

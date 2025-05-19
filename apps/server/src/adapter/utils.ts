@@ -78,6 +78,7 @@ function adapterQQGuild(config: IBotConfig_QQ): QQBot.Config {
       | QQ.Intents.DIRECT_MESSAGES,
     endpoint: config.endpoint,
     protocol: config.protocol,
+    gatewayUrl: config.wsProxy,
     path: config.path!, // webhook 下 path 必定存在
     retryWhen: [],
     manualAcknowledge: false
@@ -94,6 +95,7 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
     intents: QQ.Intents.USER_MESSAGE,
     endpoint: config.endpoint,
     protocol: config.protocol,
+    gatewayUrl: config.wsProxy,
     path: config.path!, // webhook 下 path 必定存在
     retryWhen: [],
     manualAcknowledge: false

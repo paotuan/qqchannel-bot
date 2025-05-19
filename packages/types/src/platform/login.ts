@@ -6,8 +6,10 @@ export interface IBotConfig_QQ {
   sandbox?: boolean
   type?: 'public' | 'private'
   // 可用于代理 api
-  endpoint?: string
+  endpoint?: string // 暂不开放使用
   protocol: 'websocket' | 'webhook'
+  // 仅 websocket，websocket endpoint
+  wsProxy?: string
   // 仅 webhook, 监听的路径
   path?: string
   // 仅 webhook，监听的端口
