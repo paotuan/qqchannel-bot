@@ -155,6 +155,20 @@ export class DiscordBot<C extends Context = Context> extends Bot<C, DiscordBot.C
     return { data: channels.map(Discord.decodeChannel) }
   }
 
+  async createChannel(guildId: string, data: Partial<Universal.Channel>) {
+    const channel = await this.internal.createGuildChannel(guildId, {
+      name: data.name,
+      type: data.type === Universal.Channel.Type.TEXT ? Discord.Channel.Type.GUILD_TEXT
+        : data.type === Universal.Channel.Type.DIRECT ? Discord.Channel.Type.DM
+          : data.type === Universal.Channel.Type.VOICE ? Discord.Channel.Type.GUILD_VOICE
+            : data.type === Universal.Channel.Type.CATEGORY ? Discord.Channel.Type.GUILD_CATEGORY
+              : Discord.Channel.Type.GUILD_TEXT,
+      parent_id: data.parentId,
+      position: data.position,
+    })
+    return Discord.decodeChannel(channel)
+  }
+
   createReaction(channelId: string, messageId: string, emoji: string) {
     return this.internal.createReaction(channelId, messageId, emoji)
   }

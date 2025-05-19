@@ -135,23 +135,23 @@ export namespace Channel {
       /** channel name (1-100 characters) */
       name: string
       /** the type of channel */
-      type: integer
+      type?: integer
       /** channel topic (0-1024 characters) */
-      topic: string
+      topic?: string
       /** the bitrate (in bits) of the voice channel (voice only) */
-      bitrate: integer
+      bitrate?: integer
       /** the user limit of the voice channel (voice only) */
-      user_limit: integer
+      user_limit?: integer
       /** amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected */
-      rate_limit_per_user: integer
+      rate_limit_per_user?: integer
       /** sorting position of the channel */
-      position: integer
+      position?: integer
       /** the channel's permission overwrites */
-      permission_overwrites: Overwrite[]
+      permission_overwrites?: Overwrite[]
       /** id of the parent category for a channel */
-      parent_id: snowflake
+      parent_id?: snowflake
       /** whether the channel is nsfw */
-      nsfw: boolean
+      nsfw?: boolean
     }
 
     /** https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions-json-params */

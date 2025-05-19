@@ -17,10 +17,10 @@ export const sanitizeCode = (val: string) => val.replace(/(?<=`)(?=`)/g, '\u200b
 export const decodeUser = (user: Discord.User): Universal.User => ({
   id: user.id,
   nick: user.global_name,
-  name: user.username,
+  name: user.global_name,
   userId: user.id,
   avatar: user.avatar && `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`,
-  username: user.username,
+  username: user.global_name,
   discriminator: user.discriminator,
   isBot: user.bot || false,
 })
