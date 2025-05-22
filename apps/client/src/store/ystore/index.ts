@@ -10,7 +10,7 @@ import {
 } from '@paotuan/types'
 import { syncedStore, getYjsDoc } from '@syncedstore/core'
 import { WebsocketProvider } from 'y-websocket'
-import { serverAddr, serverPort } from '../../api/endpoint'
+import { wsEndpoint } from '../../api/endpoint'
 import { shallowRef } from 'vue'
 
 const yGlobalStoreRef = shallowRef<YGlobalState | undefined>()
@@ -59,6 +59,6 @@ export {
 function setupStore<T>(roomname: string, shape: unknown) {
   const store = syncedStore(shape as any) as T
   const doc = getYjsDoc(store)
-  const ws = new WebsocketProvider(`ws://${serverAddr}:${serverPort}`, roomname, doc)
+  const ws = new WebsocketProvider(wsEndpoint, roomname, doc)
   return [store, ws] as const
 }
