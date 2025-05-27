@@ -3,6 +3,7 @@
 export type LocalStorageKeys =
   | 'WS_SERVER_ADDR' // server 地址
   | 'WS_SERVER_PORT' // server 端口
+  | 'WS_SERVER_SSL' // server 是否使用 ssl
   | 'theme' // 主题
   | 'login-platform' // 机器人平台
   | 'login-model' // 机器人凭据

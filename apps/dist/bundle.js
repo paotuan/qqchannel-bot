@@ -23,11 +23,12 @@ server.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, './client/index.html')) // SPA support
 })
 
+const serverSsl = process.env.WS_SERVER_SSL?.toLowerCase() === 'true'
 const serverUrl = process.env.WS_SERVER_ADDR || 'localhost' // 如果通过该文件部署，必然不是前后端分离，server addr 是同一个
 const port = parseInt(process.env.WEB_PORT || '', 10) || 4175
 server.listen(port)
 
-const localhostUrl = `http://${serverUrl}:${port}`
+const localhostUrl = `${serverSsl ? 'https' : 'http'}://${serverUrl}:${port}`
 console.log(chalk.bold(`管理后台已启动，请使用浏览器访问 ${localhostUrl} 登录机器人`))
 ;(async () => {
   try {

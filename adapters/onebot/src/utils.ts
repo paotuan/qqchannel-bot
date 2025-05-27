@@ -9,7 +9,7 @@ export const decodeUser = (user: OneBot.AccountInfo): Universal.User => ({
   id: user.tiny_id || user.user_id.toString(),
   name: user.nickname,
   userId: user.tiny_id || user.user_id.toString(),
-  avatar: user.avatar ?? (user.user_id ? `http://q.qlogo.cn/headimg_dl?dst_uin=${user.user_id}&spec=640` : undefined),
+  avatar: user.avatar ?? (user.user_id ? `https://q.qlogo.cn/headimg_dl?dst_uin=${user.user_id}&spec=640` : undefined),
   username: user.nickname,
 })
 

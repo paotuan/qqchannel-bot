@@ -17,7 +17,7 @@ export class OneBotBot<C extends Context, T extends OneBotBot.Config = OneBotBot
     super(ctx, config, 'onebot')
     this.selfId = config.selfId
     this.internal = new OneBot.Internal(this)
-    this.user.avatar = `http://q.qlogo.cn/headimg_dl?dst_uin=${config.selfId}&spec=640`
+    this.user.avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${config.selfId}&spec=640`
 
     if (config.protocol === 'http') {
       ctx.plugin(HttpServer, this)

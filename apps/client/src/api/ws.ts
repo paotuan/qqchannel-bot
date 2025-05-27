@@ -1,10 +1,11 @@
 import mitt from 'mitt'
 import type { IMessage, Command } from '@paotuan/types'
 import { useUIStore } from '../store/ui'
-import { serverAddr, serverPort } from './endpoint'
+import { wsEndpoint } from './endpoint'
 import { useBotStore } from '../store/bot'
 
-const ws = new WebSocket(`ws://${serverAddr}:${serverPort}`)
+console.log('连接服务端……', wsEndpoint)
+const ws = new WebSocket(wsEndpoint)
 const wsEmitter = mitt()
 
 ws.onopen = () => {

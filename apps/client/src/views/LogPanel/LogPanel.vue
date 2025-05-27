@@ -75,7 +75,7 @@ import type { ILog } from '@paotuan/types'
 import { useEventBusListener } from '../../utils'
 import UndoManager from './UndoManager.vue'
 import { useHotkey } from '../../utils/useHotkey'
-import { serverAddr, serverPort } from '../../api/endpoint'
+import { httpEndpoint } from '../../api/endpoint'
 
 const logStore = useLogStore()
 const userStore = useUserStore()
@@ -144,7 +144,7 @@ const resolveImageUrl = (url: string) => {
   if (url.startsWith('data:image')) {
     return url
   } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    return `http://${serverAddr}:${serverPort}/${url}`
+    return `${httpEndpoint}/${url}`
   } else {
     return url
   }
