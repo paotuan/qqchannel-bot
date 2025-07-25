@@ -30,7 +30,7 @@
       </label>
       <div class="mt-2 ml-8">
         <input ref="fileChooser" type="file" class="file-input file-input-bordered file-input-primary w-full"
-               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" :disabled="importType !== 'excel'" @change="handleFile" />
+               :accept="EXCEL_MIMETYPES" :disabled="importType !== 'excel'" @change="handleFile" />
       </div>
       <div class="mt-2 ml-8">当前支持的人物卡模版：</div>
       <ul class="ml-8 list-disc list-inside">
@@ -39,7 +39,7 @@
           <li>COC7 CY22.3Plus <a class="link" href="https://congyu.lanzoui.com/b00nb3n2d" target="_blank">点击下载</a> (密码：29mb)</li>
         </template>
         <template v-else-if="cardType === 'dnd'">
-          <li>5E半自动人物卡1.0.2（SAS）-by喵拜 <a class="link" href="https://www.xn--rss892n.top:8080/externalLinksController/chain/5E%E5%8D%8A%E8%87%AA%E5%8A%A8%E4%BA%BA%E7%89%A9%E5%8D%A11.0.2%EF%BC%88SAS%EF%BC%89-by%E5%96%B5%E6%8B%9C.xlsx?ckey=eq%2BqZcNqTnnyQDtOpi6%2FHtEjFyGdQGdCbBnzbMtN6WD6ixhekJSxK9Wlh%2FtK6Nq%2B" target="_blank">点击下载</a></li>
+          <li>5E半自动人物卡1.0.2（SAS）-by喵拜 <a class="link" href="https://florastudio.lanzoub.com/iimuy31tlqja" target="_blank">点击下载</a>(密码：bsn9)</li>
           <li>DND5E 半自动人物卡 太易&熊妈妈版 v1.81δ <a class="link" href="https://pocketbear.lanzouy.com/b013kunkd" target="_blank">点击下载</a> (密码：tybr)</li>
         </template>
       </ul>
@@ -183,4 +183,15 @@ const submit = () => {
   cardStore.importCard(card.data)
   open.value = false
 }
+
+// https://stackoverflow.com/questions/4212861/what-is-a-correct-mime-type-for-docx-pptx-etc
+const EXCEL_MIMETYPES = [
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+  'application/vnd.ms-excel.sheet.macroEnabled.12',
+  'application/vnd.ms-excel.template.macroEnabled.12',
+  'application/vnd.ms-excel.addin.macroEnabled.12',
+  'application/vnd.ms-excel.sheet.binary.macroEnabled.12'
+].join(',')
 </script>
