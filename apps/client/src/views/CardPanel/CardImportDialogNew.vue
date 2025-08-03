@@ -192,6 +192,8 @@ const EXCEL_MIMETYPES = [
   'application/vnd.ms-excel.sheet.macroEnabled.12',
   'application/vnd.ms-excel.template.macroEnabled.12',
   'application/vnd.ms-excel.addin.macroEnabled.12',
-  'application/vnd.ms-excel.sheet.binary.macroEnabled.12'
+  'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+  // windows 似乎识别不了 macroEnabled.12，需显式指定扩展名
+  '.xlsm'
 ].join(',')
 </script>

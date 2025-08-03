@@ -27,7 +27,6 @@ function createCard(data: ICardData): ICard {
 // - pc 指令导入
 function createCardForImport<T extends ICard = ICard>(data: ICardData, name: string, isTemplate: boolean, customizer?: (card: T) => void): T {
   const card = createCard(data) as T
-  card.data.name = name
   card.data.created = card.data.lastModified = Date.now()
   // 是否导入为人物卡模板
   card.data.isTemplate = isTemplate
@@ -41,6 +40,10 @@ function createCardForImport<T extends ICard = ICard>(data: ICardData, name: str
   // coc 填充一些初始值
   if (card instanceof CocCard) {
     card.onCreated()
+  }
+  // 如果外部传入 name，则覆盖人物卡原有的 name
+  if (name) {
+    card.data.name = name
   }
   return card
 }
