@@ -3,7 +3,7 @@
   "version": "6.8.0",
   "description": "OneBot Adapter for Koishi",
   "type": "module",
-  "main": "lib/index.cjs",
+  "main": "lib/index.mjs",
   "typings": "lib/index.d.ts",
   "files": [
     "lib"
@@ -31,7 +31,7 @@
     "chat"
   ],
   "scripts": {
-    "build:js": "esbuild src/index.ts --outfile=lib/index.cjs --bundle --sourcemap --sources-content=false --platform=node --external:@satorijs/core --external:./node_modules/* --target=es2022",
+    "build:js": "esbuild src/index.ts --outfile=lib/index.mjs --format=esm --bundle --sourcemap --sources-content=false --platform=node --external:@satorijs/core --external:./node_modules/* --target=es2022",
     "build:tsc": "tsc",
     "build": "yarn run build:js && yarn run build:tsc"
   },

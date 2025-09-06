@@ -61,7 +61,7 @@ export async function detectPublicIP() {
       return
     }
   }
-  console.error('获取公网 IP 失败，请检查您的网络连接')
+  console.error('获取公网 IP 失败（若网络本身正常，则不影响正常使用）')
 }
 
 // 获取某个文件夹名称基于 root 的路径
