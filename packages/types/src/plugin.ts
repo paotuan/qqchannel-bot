@@ -40,6 +40,7 @@ export interface IPluginRegisterContext {
   getPreference: (context: { platform: Platform, guildId: string, channelId: string }) => Record<string, string>
   dispatchUserCommand: (context: ICommand<BotContext>) => Promise<void>
   _: any // lodash
+  XLSX: any // xlsx
   h: any // Element
   _context: any // 逃生通道，通常不要使用
 }

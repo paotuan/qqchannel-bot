@@ -16,6 +16,7 @@ import Mustache from 'mustache'
 import { getChannelUnionId } from '../adapter/utils'
 import { parseTemplate, PluginProvider } from '@paotuan/dicecore'
 import { Element } from '@satorijs/core'
+import XLSX from 'xlsx'
 
 export const INTERNAL_PLUGIN_DIR = process.env.NODE_ENV === 'development' ? path.resolve('./src/plugins') : path.resolve(__dirname, './plugins')
 export const PLUGIN_DIR = './plugins' // prod 环境外部插件文件夹
@@ -90,6 +91,7 @@ export class PluginManager {
       },
       _context: wss,
       _, // provide lodash for convenience
+      XLSX, // provide XLSX for convenience
       h: Element // provide Element for convenience
     } // todo: getItem/setItem
   }
