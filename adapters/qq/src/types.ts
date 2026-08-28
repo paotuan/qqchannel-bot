@@ -52,6 +52,11 @@ export enum Intents {
    */
   AUDIO_OR_LIVE_CHANNEL_MEMBER = 1 << 19,
   /**
+   * - GROUP_MEMBER_ADD 成员进群
+   * - GROUP_MEMBER_REMOVE 成员退群
+   */
+  GROUP_MEMBERS = 1 << 24,
+  /**
    * - C2C_MESSAGE_CREATE 用户在单聊发送消息给机器人
    * - GROUP_AT_MESSAGE_CREATE 用户在群聊 @ 机器人发送消息
    */
@@ -168,7 +173,11 @@ export interface GatewayEvents {
   AUDIO_OR_LIVE_CHANNEL_MEMBER_EXIT: Partial<Channel>
   C2C_MESSAGE_CREATE: UserMessage
   GROUP_AT_MESSAGE_CREATE: UserMessage
+  GROUP_MESSAGE_CREATE: UserMessage
   INTERACTION_CREATE: Interaction
+  GROUP_MEMBER_ADD: MemberWithGroup
+  GROUP_MEMBER_REMOVE: MemberWithGroup
+  GROUP_JOIN_REQUEST: GroupJoinRequest
   GROUP_ADD_ROBOT: GroupEvent
   GROUP_DEL_ROBOT: GroupEvent
   GROUP_MSG_REJECT: GroupEvent
@@ -343,6 +352,7 @@ export namespace Message {
     ARK = 3,
     EMBED = 4,
     MEDIA = 7,
+    QUOTE = 103,
   }
   export interface Ark {
     /** ark 模板 id（需要先申请） */
@@ -389,6 +399,8 @@ export namespace Message {
     params?: MarkdownParam[]
     /** 原生 markdown 内容，与 template_id 和 params 参数互斥，参数都传值将报错。 */
     content?: string
+    /** 开启后，当图片资源转存失败时，将中断消息发送并返回失败。 */
+    force_verify_image_resource?: boolean
   }
   export interface MarkdownParam {
     /** markdown 模版 key */
@@ -414,6 +426,39 @@ export namespace Message {
     msg_id?: string
     event_id?: string
     markdown?: Markdown
+  }
+  export namespace Stream {
+    export enum InputMode {
+      REPLACE = 'replace',
+    }
+    export enum InputState {
+      NOT_STREAM = 0,
+      GENERATING = 1,
+      DONE = 10,
+    }
+    export enum ContentType {
+      MARKDOWN = 'markdown',
+    }
+    export interface Request {
+      /** 输入模式 */
+      input_mode?: InputMode
+      /** 输入状态 */
+      input_state: InputState
+      /** 内容类型 */
+      content_type: ContentType
+      /** markdown 内容 */
+      content_raw: string
+      /** 事件 ID */
+      event_id: string
+      /** 原始消息 ID */
+      msg_id: string
+      /** 流式消息 ID，首次发送后返回，后续分片需携带 */
+      stream_msg_id?: string
+      /** 递增序号 */
+      msg_seq: number
+      /** 同一条流式会话内的发送索引，从 0 开始，每次发送前递增；新流式会话重新从 0 开始 */
+      index: number
+    }
   }
   export interface Request {
     /** 文本内容 */
@@ -462,19 +507,77 @@ export namespace Message {
       AUDIO = 3,
       FILE = 4
     }
-    export interface Request {
+
+    export type Request = {
       file_type: Type
       url?: string
       srv_send_msg: boolean
-      file_data?: unknown
+      file_name?: string
+      file_data?: string
+    } | {
+      upload_id: string
+      srv_send_msg: boolean
     }
 
     export interface Response {
       file_uuid: string
       file_info: string
       ttl: number
+      id: string
     }
 
+    export interface UploadPrepareRequest {
+      file_type: Type
+      file_name: string
+      file_size: number
+      md5: string
+      sha1: string
+      md5_10m?: string
+    }
+
+    export interface UploadPrepareResponse {
+      upload_id: string
+      block_size: string
+      parts: {
+        index: number
+        presigned_url: string
+        block_size: number
+      }[]
+      upload_config: {
+        concurrency: number
+        retry_timeout: number
+        retry_delay: number
+      }
+    }
+
+    export interface UploadPartFinishRequest {
+      upload_id: string
+      part_index: number
+      block_size: number
+      md5: string
+    }
+
+    export interface CompleteUploadRequest {
+      upload_id: string
+    }
+  }
+
+  // https://github.com/tencent-connect/openclaw-qqbot/blob/3eee78922ed0b19af5c4c55f1dfe7d1c848e31f5/src/types.ts#L243-L255
+  export interface MsgElement {
+    author?: {
+      username?: string
+      bot?: boolean
+    }
+    /** 消息索引标识 */
+    msg_idx?: string
+    /** 消息类型 */
+    message_type?: Message.Type
+    /** 文本内容 */
+    content?: string
+    /** 附件列表 */
+    attachments?: Attachment[]
+    /** 嵌套消息元素（引用消息场景下可能存在） */
+    msg_elements?: MsgElement[]
   }
 }
 
@@ -872,12 +975,10 @@ export interface APIPermissionDemand {
 export interface Options {
   id: string
   secret: string
-  token: string
   type: 'public' | 'private'
   /** 是否开启沙箱模式 */
   sandbox?: boolean
   endpoint?: string
-  authType?: 'bot' | 'bearer'
   /** 重连次数 */
   retryTimes?: number
   /** 重连时间间隔，单位 ms */
@@ -1228,11 +1329,34 @@ export interface UserMessage {
   id: string
   author: {
     id: string
+    member_openid: string
+    member_role?: 'owner' | 'admin' | 'member'
+    username?: string
+    union_openid: string
+    bot?: boolean
   }
   content: string
   timestamp: string
   group_id: string
-  attachments?: Attachment[] // not listed in document?
+  group_openid?: string
+  attachments?: Attachment[]
+  message_scene?: {
+    source: string
+    ext?: string[]
+  }
+  mentions?: (
+    {
+      scope: 'single'
+      is_you: boolean
+    } & this['author']
+    | {
+      scope: 'all'
+      is_you: boolean
+    }
+  )[]
+  message_type: Message.Type
+  /** 消息元素列表，引用消息时 [0] 为被引用的原始消息 */
+  msg_elements?: Message.MsgElement[]
 }
 
 export enum ChatType {
@@ -1273,10 +1397,110 @@ export interface Interaction {
   version: 1
 }
 
+export interface GroupInfo {
+  group_openid: string
+  group_name: string
+  group_finger_memo: string
+  group_class_text: string
+  group_tags: string[]
+  group_member_num: number
+}
+
+export interface GroupBotState {
+  member_openid: string
+  joined_at: string
+  allow_proactive_msg: boolean
+  recv_msg_setting: 'all' | 'only_mention' | 'mention_and_context'
+  member_role: 'owner' | 'admin' | 'member'
+}
+
+export interface GroupMember {
+  member_openid: string
+  username: string
+  member_role: 'owner' | 'admin' | 'member'
+  bot: boolean
+  joined_at: string
+  union_openid: string
+}
+
 export interface GroupEvent {
   timestamp: number
   group_openid: string
   op_member_openid: string
+}
+
+export interface MemberWithGroup {
+  timestamp: number
+  group_openid: string
+  member_openid: string
+}
+
+export interface GroupJoinRequest {
+  apply_at: string
+  apply_source: 'self_apply' | 'invited'
+  group_openid: string
+  join_request_id: string
+  member_openid: string
+  invited_by?: string
+  username: string
+  verify_info?: {
+    method: 'verify_message' | 'admin_review_qa'
+    verify_message?: string
+    review_qa_list?: {
+      question: string
+      answer: string
+    }[]
+  }
+  auto_approved?: {
+    strategy_id: string
+  }
+
+  // API额外返回的字段
+  risk_tips?: string
+  union_openid?: string
+  bot?: boolean
+}
+
+export interface ApprovalJoinRequestRequest {
+  op: 'approve' | 'decline'
+  join_request_id?: string
+  reject_reason?: string
+  add_to_member_blacklist?: boolean
+}
+
+export interface RestrictChatSetting {
+  global_rule: {
+    mode: 'none' | 'always' | 'schedule'
+    schedule_rules: {
+      task_id: string
+      start_at: string
+      end_at: string
+      enabled: boolean
+    }[]
+    recurring_rules: {
+      task_id: string
+      weekdays: number[]
+      start_time: string
+      end_time: string
+      enabled: boolean
+    }[]
+  }
+  members: {
+    member_openid: string
+    mute_expire_at: string
+    username: string
+    union_openid: string
+  }[]
+}
+
+interface MemberMuteState {
+  op: 'add' | 'update' | 'del'
+  member_openid: string
+  mute_expire_at?: string
+}
+
+export interface UpdateRestrictChatSettingRequest {
+  members: MemberMuteState[]
 }
 
 export interface UserEvent {

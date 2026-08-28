@@ -58,13 +58,28 @@ export class BaseBot<C extends Context = Context, T extends BaseBot.Config = Bas
     if (direction !== 'before') throw new Error('Unsupported direction.')
     // include `before` message
     let list: OneBot.Message[]
-    if (before) {
-      const msg = await this.internal.getMsg(before)
-      if (msg?.message_seq) {
-        list = (await this.internal.getGroupMsgHistory(Number(channelId), msg.message_seq)).messages
+
+    // 私聊频道以 "private:" 开头，使用 get_friend_msg_history
+    if (channelId.startsWith('private:')) {
+      const userId = channelId.slice('private:'.length)
+      if (before) {
+        const msg = await this.internal.getMsg(before)
+        if (msg?.message_seq) {
+          list = (await this.internal.getFriendMsgHistory(userId, msg.message_seq))
+        }
+      } else {
+        list = (await this.internal.getFriendMsgHistory(userId))
       }
     } else {
-      list = (await this.internal.getGroupMsgHistory(Number(channelId))).messages
+      // 群聊频道使用 get_group_msg_history
+      if (before) {
+        const msg = await this.internal.getMsg(before)
+        if (msg?.message_seq) {
+          list = (await this.internal.getGroupMsgHistory(Number(channelId), msg.message_seq)).messages
+        }
+      } else {
+        list = (await this.internal.getGroupMsgHistory(Number(channelId))).messages
+      }
     }
 
     // 从旧到新

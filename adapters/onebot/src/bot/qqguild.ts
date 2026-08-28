@@ -11,14 +11,14 @@ export namespace QQGuildBot {
 }
 
 export class QQGuildBot<C extends Context> extends BaseBot<C> {
-  declare parent: OneBotBot<Context>
+  declare parent: OneBotBot<C>
   hidden = true
 
   constructor(ctx: C, config: QQGuildBot.Config) {
     super(ctx, config, 'qqguild')
     this.platform = 'qqguild'
     this.selfId = config.profile.tiny_id
-    this.parent = config.parent
+    this.parent = config.parent as never
     this.internal = config.parent.internal
     this.user.name = config.profile.nickname
     this.user.avatar = config.profile.avatar_url

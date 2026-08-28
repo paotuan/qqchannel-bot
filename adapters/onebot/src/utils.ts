@@ -1,4 +1,4 @@
-import { h, hyphenate, omit, Universal } from '@satorijs/core'
+import { Context, h, hyphenate, omit, Universal } from '@satorijs/core'
 import * as qface from 'qface'
 import { BaseBot, CQCode } from './bot'
 import * as OneBot from './types'
@@ -9,14 +9,14 @@ export const decodeUser = (user: OneBot.AccountInfo): Universal.User => ({
   id: user.tiny_id || user.user_id.toString(),
   name: user.nickname,
   userId: user.tiny_id || user.user_id.toString(),
-  avatar: user.avatar ?? (user.user_id ? `https://q.qlogo.cn/headimg_dl?dst_uin=${user.user_id}&spec=640` : undefined),
+  avatar: user.avatar ?? (user.user_id ? `http://q.qlogo.cn/headimg_dl?dst_uin=${user.user_id}&spec=640` : undefined),
   username: user.nickname,
 })
 
 export const decodeGuildMember = (user: OneBot.SenderInfo): Universal.GuildMember => ({
   user: decodeUser(user),
   nick: user.card,
-  roles: [user.role],
+  roles: user.role ? [{ id: user.role }] : [],
 })
 
 export const adaptQQGuildMemberInfo = (user: OneBot.GuildMemberInfo): Universal.GuildMember => ({
@@ -26,7 +26,7 @@ export const adaptQQGuildMemberInfo = (user: OneBot.GuildMemberInfo): Universal.
     isBot: user.role_name === '机器人',
   },
   name: user.nickname,
-  roles: user.role_name ? [user.role_name] : [],
+  roles: user.role_name ? [{ id: user.role_name }] : [],
 })
 
 export const adaptQQGuildMemberProfile = (user: OneBot.GuildMemberProfile): Universal.GuildMember => ({
@@ -36,11 +36,11 @@ export const adaptQQGuildMemberProfile = (user: OneBot.GuildMemberProfile): Univ
     isBot: user.roles?.some(r => r.role_name === '机器人'),
   },
   name: user.nickname,
-  roles: user.roles?.map(r => r.role_name) || [],
+  roles: user.roles?.map(r => ({ id: r.role_name })) || [],
 })
 
-export async function adaptMessage(
-  bot: BaseBot,
+export async function adaptMessage<C extends Context>(
+  bot: BaseBot<C>,
   data: OneBot.Message,
   message: Universal.Message = {},
   payload: Universal.MessageLike = message,
@@ -167,7 +167,7 @@ export const adaptChannel = (info: OneBot.GroupInfo | OneBot.ChannelInfo): Unive
   }
 }
 
-export async function dispatchSession(bot: BaseBot, data: OneBot.Payload) {
+export async function dispatchSession<C extends Context>(bot: BaseBot<C>, data: OneBot.Payload) {
   if (data.self_tiny_id) {
     // don't dispatch any guild message without guild initialization
     bot = bot['guildBot']
@@ -180,7 +180,7 @@ export async function dispatchSession(bot: BaseBot, data: OneBot.Payload) {
   bot.dispatch(session)
 }
 
-export async function adaptSession(bot: BaseBot, data: OneBot.Payload) {
+export async function adaptSession<C extends Context>(bot: BaseBot<C>, data: OneBot.Payload) {
   const session = bot.session()
   session.selfId = data.self_tiny_id ? data.self_tiny_id : '' + data.self_id
   session.type = data.post_type
@@ -194,6 +194,16 @@ export async function adaptSession(bot: BaseBot, data: OneBot.Payload) {
     session.subtype = data.message_type === 'guild' ? 'group' : data.message_type
     session.isDirect = data.message_type === 'private'
     session.subsubtype = data.message_type
+    if (data.sender?.user_id) session.userId = '' + data.sender.user_id
+    if (data.message_type === 'private') {
+      session.channelId = 'private:' + data.sender.user_id
+      if (data.sub_type === 'group' && data.target_id) {
+        session.guildId = '' + data.target_id
+      }
+    } else if (data.message_type === 'group') {
+      session.channelId = '' + data.group_id
+      session.guildId = '' + data.group_id
+    }
     return session
   }
 

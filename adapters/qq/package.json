@@ -1,7 +1,7 @@
 {
   "name": "@paotuan/adapter-qq",
   "description": "QQ Adapter for Satorijs",
-  "version": "4.9.2",
+  "version": "4.14.0",
   "type": "module",
   "main": "lib/index.mjs",
   "typings": "lib/index.d.ts",
@@ -37,10 +37,10 @@
   ],
   "devDependencies": {
     "@noble/ed25519": "^2.1.0",
-    "@satorijs/core": "^4.5.0",
+    "@satorijs/core": "^4.6.0",
     "cordis": "^3.18.1"
   },
   "dependencies": {
-    "@satorijs/core": "^4.5.0"
+    "@satorijs/core": "^4.6.0"
   }
 }

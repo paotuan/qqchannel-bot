@@ -406,9 +406,17 @@ export interface File {
   url: string
 }
 
+export interface GroupSignedInfo {
+  user_id: number
+  nick: string
+  time: number
+  rank: number
+}
+
 type id = string | number
 
 export interface Internal {
+  sendMsg(user_id: id, group_id: id, message: string | readonly CQCode[], auto_escape?: boolean): Promise<number>
   sendPrivateMsg(user_id: id, message: string | readonly CQCode[], auto_escape?: boolean): Promise<number>
   sendPrivateMsgAsync(user_id: id, message: string | readonly CQCode[], auto_escape?: boolean): Promise<void>
   sendGroupMsg(group_id: id, message: string | readonly CQCode[], auto_escape?: boolean): Promise<number>
@@ -434,6 +442,7 @@ export interface Internal {
   getWordSlices(content: string): Promise<string[]>
   ocrImage(image: string): Promise<OcrResult>
   getGroupMsgHistory(group_id: id, message_seq?: number): Promise<{ messages: Message[] }>
+  getFriendMsgHistory(user_id: id, message_seq?: number, count?: number, reverseOrder?: boolean): Promise<Message[]>
   deleteFriend(user_id: id): Promise<void>
   deleteFriendAsync(user_id: id): Promise<void>
   deleteUnidirectionalFriend(user_id: id): Promise<void>
@@ -529,6 +538,9 @@ export interface Internal {
   moveGroupFile(group_id: id, file_id: string, parent_directory: string, target_directory: string): Promise<void>
   deleteGroupFileFolder(group_id: id, folder_id: string): Promise<void>
   renameGroupFileFolder(group_id: id, folder_id: string, new_folder_name: string): Promise<void>
+
+  setMsgEmojiLike(message_id: id, emoji_id: id, set?: boolean): Promise<void>
+  getGroupSignedList(group_id: id): Promise<GroupSignedInfo[]>
 }
 
 export class TimeoutError extends Error {
@@ -623,6 +635,7 @@ export class Internal {
 }
 
 // messages
+Internal.defineExtract('send_msg', 'message_id', 'user_id', 'group_id', 'message', 'auto_escape')
 Internal.defineExtract('send_private_msg', 'message_id', 'user_id', 'message', 'auto_escape')
 Internal.defineExtract('send_group_msg', 'message_id', 'group_id', 'message', 'auto_escape')
 Internal.defineExtract('send_group_forward_msg', 'message_id', 'group_id', 'messages')
@@ -639,6 +652,7 @@ Internal.define('ocr_image', 'image')
 Internal.defineExtract('get_forward_msg', 'messages', 'message_id')
 Internal.defineExtract('.get_word_slices', 'slices', 'content')
 Internal.define('get_group_msg_history', 'group_id', 'message_seq')
+Internal.defineExtract('get_friend_msg_history', 'messages', 'user_id', 'message_seq', 'count', 'reverseOrder')
 Internal.define('set_friend_add_request', 'flag', 'approve', 'remark')
 Internal.define('set_group_add_request', 'flag', 'sub_type', 'approve', 'reason')
 Internal.defineExtract('_get_model_show', 'variants', 'model')
@@ -691,6 +705,7 @@ Internal.defineExtract('get_group_file_url', 'url', 'group_id', 'file_id', 'busi
 Internal.defineExtract('download_file', 'file', 'url', 'headers', 'thread_count')
 Internal.defineExtract('get_online_clients', 'clients', 'no_cache')
 Internal.defineExtract('check_url_safely', 'level', 'url')
+Internal.define('get_group_signed_list', 'group_id')
 
 Internal.defineExtract('get_cookies', 'cookies', 'domain')
 Internal.defineExtract('get_csrf_token', 'token')
@@ -722,3 +737,6 @@ Internal.define('move_group_file', 'group_id', 'file_id', 'parent_directory', 't
 // Internal.define('create_group_file_folder', 'group_id', 'name', 'parent_id')
 Internal.define('delete_group_file_folder', 'group_id', 'folder_id')
 Internal.define('rename_group_file_folder', 'group_id', 'folder_id', 'new_folder_name')
+
+// reaction
+Internal.define('set_msg_emoji_like', 'message_id', 'emoji_id', 'set')

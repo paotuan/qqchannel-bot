@@ -3,17 +3,18 @@ import { QQBot } from './bot'
 import { Opcode, Payload } from './types'
 import { adaptSession, decodeUser } from './utils'
 
-export class WsClient<C extends Context = Context> extends Adapter.WsClient<C, QQBot<C>> {
+export class WsClient<C extends Context = Context> extends Adapter.WsClient<C, QQBot<C, QQBot.Config & WsClient.Options>> {
   _sessionId = ''
   _s: number = null
   _ping: NodeJS.Timeout
+  _acked = true
 
   async prepare() {
-    if (this.bot.config.authType === 'bearer') await this.bot.getAccessToken()
+    await this.bot.getAccessToken()
     try {
       const url = this.bot.config.gatewayUrl
         ? this.bot.config.gatewayUrl
-        : (await this.bot.internal.getGateway()).url.replace('api.sgroup.qq.com', new URL(this.bot.config.endpoint).host)
+        : (await this.bot.internal.getGateway()).url.replace('api.bot.qq.com', new URL(this.bot.config.endpoint).host)
       this.bot.logger.debug('url: %s', url)
       return this.bot.http.ws(url)
     } catch (error) {
@@ -25,10 +26,15 @@ export class WsClient<C extends Context = Context> extends Adapter.WsClient<C, Q
   }
 
   heartbeat() {
+    if (!this._acked) {
+      this.bot.logger.warn('zombied connection')
+      return this.socket.close()
+    }
     this.socket.send(JSON.stringify({
       op: Opcode.HEARTBEAT,
       s: this._s,
     }))
+    this._acked = false
   }
 
   async accept() {
@@ -36,9 +42,7 @@ export class WsClient<C extends Context = Context> extends Adapter.WsClient<C, Q
       const parsed: Payload = JSON.parse(data.toString())
       this.bot.logger.debug('websocket receives %o', parsed)
       if (parsed.op === Opcode.HELLO) {
-        const token = this.bot.config.authType === 'bearer'
-          ? `QQBot ${await this.bot.getAccessToken()}`
-          : `Bot ${this.bot.config.id}.${this.bot.config.token}`
+        const token = `QQBot ${await this.bot.getAccessToken()}`
         if (this._sessionId) {
           this.socket.send(JSON.stringify({
             op: Opcode.RESUME,
@@ -59,6 +63,8 @@ export class WsClient<C extends Context = Context> extends Adapter.WsClient<C, Q
           }))
         }
         this._ping = setInterval(() => this.heartbeat(), parsed.d.heartbeat_interval)
+      } else if (parsed.op === Opcode.HEARTBEAT_ACK) {
+        this._acked = true
       } else if (parsed.op === Opcode.INVALID_SESSION) {
         this._sessionId = ''
         this._s = null
@@ -106,11 +112,13 @@ export class WsClient<C extends Context = Context> extends Adapter.WsClient<C, Q
 export namespace WsClient {
   export interface Options extends Adapter.WsClientConfig {
     protocol?: 'websocket'
+    gatewayUrl?: string
   }
 
   export const Options: Schema<Options> = Schema.intersect([
     Schema.object({
       protocol: Schema.const('websocket').required(false),
+      gatewayUrl: Schema.string().role('link').description('覆写 WebSocket 地址。'),
     }),
     Adapter.WsClientConfig,
   ])

@@ -13,6 +13,8 @@
     "strictBindCallApply": true,
     "outDir": "lib",
     "rootDir": "src",
+    "strict": true,
+    "noImplicitAny": false,
   },
   "include": [
     "src",

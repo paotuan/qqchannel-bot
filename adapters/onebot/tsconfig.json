@@ -11,6 +11,8 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strictBindCallApply": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
     "outDir": "lib",
     "rootDir": "src"
   },

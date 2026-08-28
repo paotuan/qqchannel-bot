@@ -2,6 +2,7 @@ import { Adapter, Context, HTTP, Schema } from '@satorijs/core'
 import {} from '@cordisjs/plugin-server'
 import { OneBotBot } from './bot'
 import { dispatchSession } from './utils'
+import * as OneBot from './types'
 import { createHmac } from 'crypto'
 
 export class HttpServer<C extends Context = Context> extends Adapter<C, OneBotBot<C>> {
@@ -37,7 +38,7 @@ export class HttpServer<C extends Context = Context> extends Adapter<C, OneBotBo
         if (!signature) return ctx.status = 401
 
         // invalid signature
-        const sig = createHmac('sha1', secret).update(ctx.request.body[Symbol.for('unparsedBody')]).digest('hex')
+        const sig = createHmac('sha1', secret).update(JSON.stringify(ctx.body)).digest('hex')
         if (signature !== `sha1=${sig}`) return ctx.status = 403
       }
 
@@ -45,8 +46,10 @@ export class HttpServer<C extends Context = Context> extends Adapter<C, OneBotBo
       const bot = this.bots.find(bot => bot.selfId === selfId)
       if (!bot) return ctx.status = 403
 
-      bot.logger.debug('[receive] %o', ctx.request.body)
-      dispatchSession(bot, ctx.request.body)
+      bot.logger.debug('[receive] %o', ctx.body)
+      dispatchSession(bot, ctx.body as OneBot.Payload)
+
+      ctx.status = 204
     })
   }
 }

@@ -89,22 +89,22 @@
     mime-db "^1.52.0"
     ws "^8.16.0"
 
-"@cordisjs/plugin-server@^0.2.5":
-  version "0.2.5"
-  resolved "https://registry.npmmirror.com/@cordisjs/plugin-server/-/plugin-server-0.2.5.tgz#5c71f9fc82a298111e1e67e5cfeac934622271cd"
-  integrity sha512-zlUoSrTrvMFWLixv4tmzH5Yn/rvYtI/Vq/3mBG82IuEHh+0mrG1ixxexBwmiXcNK3/g5wVUGH8FgO4b5JV9dbg==
+"@cordisjs/plugin-server@^0.2.9":
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/@cordisjs/plugin-server/-/plugin-server-0.2.9.tgz#f6d9c869ea27e15ea56381929861d979d777ad72"
+  integrity sha512-XMr9r3A4tvig6G51PbMIau+cKm2AIHypNc0gn6MykM4HSI3YHMozrlOw0zhuMDuUEWRSx7bGQVFUNrJRmDtAgQ==
   dependencies:
     "@koa/router" "^10.1.1"
-    "@types/koa" "*"
-    "@types/koa__router" "*"
+    "@types/koa" "^2"
+    "@types/koa__router" "^8"
     "@types/ws" "^8.5.10"
-    cosmokit "^1.6.3"
+    cosmokit "^1.8.1"
     koa "^2.15.2"
     koa-body "^6.0.1"
     parseurl "^1.3.3"
     path-to-regexp "^6.3.0"
     reggol "^1.7.1"
-    schemastery "^3.14.6"
+    schemastery "^3.17.2"
     ws "^8.16.0"
 
 "@cordisjs/schema@^0.1.1":
@@ -608,37 +608,42 @@
   resolved "https://registry.npmmirror.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.13.2.tgz#851959c4c1c3c6647aba1f388198c8243aed6917"
   integrity sha512-7h7J2nokcdPePdKykd8wtc8QqqkqxIrUz7MHj6aNr8waBRU//NLDVnNjQnqQO6fqtjrtCdftpbTuOKAyrAQETQ==
 
-"@satorijs/core@4.5.0", "@satorijs/core@^4.5.0":
-  version "4.5.0"
-  resolved "https://registry.npmmirror.com/@satorijs/core/-/core-4.5.0.tgz#7895e9302a116af8f67a2495dcffa3fff931b18d"
-  integrity sha512-LUfBOdy9ndS/HCCCqICMSeeQ6kbQcYjFXcGXtyMPOf02hKXIxn9W7ySY3esAXmQYSWEs7ApvzUXEma7JXxF4Zg==
+"@satorijs/core@4.6.0", "@satorijs/core@^4.6.0":
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@satorijs/core/-/core-4.6.0.tgz#8094978312d240dcc064cdcc8e16b926c4665051"
+  integrity sha512-qckF668QfV3ifGLlyvmfyrghD7kTotgEbo3BBQsaOa4QTccBbvUhIayy2GgBQh1/scEkRuhTFlOgIdmCX8i2DQ==
   dependencies:
     "@cordisjs/plugin-http" "^0.6.3"
-    "@satorijs/element" "^3.1.7"
-    "@satorijs/protocol" "^1.6.0"
+    "@satorijs/element" "^3.2.0"
+    "@satorijs/protocol" "^1.7.0"
     cordis "^3.18.1"
-    cosmokit "^1.6.3"
+    cosmokit "^1.8.1"
     path-to-regexp "^8.2.0"
 
-"@satorijs/element@^3.1.7":
-  version "3.1.7"
-  resolved "https://registry.npmmirror.com/@satorijs/element/-/element-3.1.7.tgz#0b7428d38741d8af57aaa003b34687a1d0e2491a"
-  integrity sha512-ZP8tRVuOGNRlIBXKn40przG4FAouTaMt8O3UZ9j0eueS4y7IWxCL08W6BBsPq+0sExeYtGYyBRNt4L9gBx0Q4A==
+"@satorijs/element@^3.1.7", "@satorijs/element@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@satorijs/element/-/element-3.2.0.tgz#9f81afce95c8d0cd9d77bf8a11ca88018c049259"
+  integrity sha512-33qcYGDmNNjG2zIDpOfMgUsxPK1EqAkiyz4O78X4G96P8RixBH14KeCyxl8ufEqDUQahGz1BIO3jk+TKpfw8jA==
   dependencies:
-    cosmokit "^1.6.2"
+    cosmokit "^1.8.1"
 
-"@satorijs/protocol@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.npmmirror.com/@satorijs/protocol/-/protocol-1.6.0.tgz#d8cc36f56e1b1bb349bd20bf69f750b1b459d425"
-  integrity sha512-rFhjrrY/hot5Mgk0Y8yOIUkyUyTtIjzCrQdIm+gpDbrfuk+cUZjyALiaKp9a8TctyLKVBIjp3FLY6XDnE9x/6Q==
+"@satorijs/protocol@^1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@satorijs/protocol/-/protocol-1.7.0.tgz#0eb0936a8fca10d4ddd96d4618a601f1afe1b87c"
+  integrity sha512-ODSBVzdn7s9tw3XGFGYZ1MnjbA1jctwSleJTsyk/lAjyNziOFKNP5nIBAcw0r547dvXBweZNudnCqod6Ts+hqw==
   dependencies:
-    "@satorijs/element" "^3.1.7"
-    cosmokit "^1.6.3"
+    "@satorijs/element" "^3.2.0"
+    cosmokit "^1.8.1"
 
 "@sinclair/typebox@^0.27.8":
   version "0.27.8"
   resolved "https://registry.npmmirror.com/@sinclair/typebox/-/typebox-0.27.8.tgz#6667fac16c436b5434a387a34dedb013198f6e6e"
   integrity sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==
+
+"@standard-schema/spec@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@standard-schema/spec/-/spec-1.1.0.tgz#a79b55dbaf8604812f52d140b2c9ab41bc150bb8"
+  integrity sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==
 
 "@syncedstore/core@^0.6.0":
   version "0.6.0"
@@ -805,10 +810,24 @@
     "@types/koa-compose" "*"
     "@types/node" "*"
 
-"@types/koa__router@*":
-  version "12.0.4"
-  resolved "https://registry.npmmirror.com/@types/koa__router/-/koa__router-12.0.4.tgz#a1f9afec9dc7e7d9fa1252d1938c44b403e19a28"
-  integrity sha512-Y7YBbSmfXZpa/m5UGGzb7XadJIRBRnwNY9cdAojZGp65Cpe5MAP3mOZE7e3bImt8dfKS4UFcR16SLH8L/z7PBw==
+"@types/koa@^2":
+  version "2.15.2"
+  resolved "https://registry.yarnpkg.com/@types/koa/-/koa-2.15.2.tgz#cc570a70170713b1ab6b93384cabf4943a25678b"
+  integrity sha512-CB+iyjjh1uS5N6/CKwXvw0qA7USMS2WVc4Tjf660yCjhdvqzNr8gdFcIawB41zGGptOQ+d1fnpaQWIIUXYxR3w==
+  dependencies:
+    "@types/accepts" "*"
+    "@types/content-disposition" "*"
+    "@types/cookies" "*"
+    "@types/http-assert" "*"
+    "@types/http-errors" "*"
+    "@types/keygrip" "*"
+    "@types/koa-compose" "*"
+    "@types/node" "*"
+
+"@types/koa__router@^8":
+  version "8.0.11"
+  resolved "https://registry.yarnpkg.com/@types/koa__router/-/koa__router-8.0.11.tgz#d7b37e6db934fc072ea1baa2ab92bc8ac4564f3e"
+  integrity sha512-WXgKWpBsbS14kzmzD9LeFapOIa678h7zvUHxDwXwSx4ETKXhXLVUAToX6jZ/U7EihM7qwyD9W/BZvB0MRu7MTQ==
   dependencies:
     "@types/koa" "*"
 
@@ -1720,20 +1739,10 @@ core-util-is@~1.0.0:
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.3.tgz#a6042d3634c2b27e9328f837b965fac83808db85"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
 
-cosmokit@^1.5.2:
-  version "1.5.2"
-  resolved "https://registry.npmmirror.com/cosmokit/-/cosmokit-1.5.2.tgz#bafc97203534129576449b2a4da9394e0725a39b"
-  integrity sha512-l4m/Iz0ZZ4nMaVsCC493suyUgeuAoxnDQI+UKt+vVXO+8zBVcrRKzv8m8q+SkXwxHcWluSMHw1AaZc9U2amabw==
-
-cosmokit@^1.6.2:
-  version "1.6.2"
-  resolved "https://registry.npmmirror.com/cosmokit/-/cosmokit-1.6.2.tgz#f366fac69fa26d4893ccd9de03be2b0427f8c5c4"
-  integrity sha512-KnicClOb834OGjzAxjuH5WFoIxzcQwiDbvwRykgCRxHq103lrW4vpogPs3LBuZDsb2asEax4C70OYFd+JfAmgQ==
-
-cosmokit@^1.6.3:
-  version "1.8.0"
-  resolved "https://registry.npmmirror.com/cosmokit/-/cosmokit-1.8.0.tgz#cfa3de6132b10829a17de36749d19c85b215ebcf"
-  integrity sha512-iTnjvOdRKzmcZGSTamFW/pwlDLNBKkIEjk43Ew40YaxSayogY6OsCV40sSTb2dlvD3stR14bLh04qOoQZzX/0Q==
+cosmokit@^1.5.2, cosmokit@^1.6.2, cosmokit@^1.6.3, cosmokit@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/cosmokit/-/cosmokit-1.8.1.tgz#df8252c4d2c918f4f2a125c2e223565e3353827a"
+  integrity sha512-PDBv4l90xZKrUsZ0vtoycgZpO/j4iFsqJXrAxsyBDsnQRI7ZMJXIjgDJsKNjd5L8jnVnnlrDCdhkFbTncgCVjQ==
 
 crc-32@~1.2.0, crc-32@~1.2.1:
   version "1.2.2"
@@ -4279,12 +4288,13 @@ safe-stable-stringify@^2.3.1:
   resolved "https://registry.npmmirror.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-schemastery@^3.14.6:
-  version "3.14.6"
-  resolved "https://registry.npmmirror.com/schemastery/-/schemastery-3.14.6.tgz#6b018bcdf73cb68f8bb5d3a8b50f8d6eb8ac3469"
-  integrity sha512-0iaHXS6B1xSXf0AgDdYgebHTk88/9pxtplCMcMRTX6BLf1QuJQAcsaoCPdf3XUG/2Nc+0QRJQpn9T3XOp/NJCw==
+schemastery@^3.14.6, schemastery@^3.17.2:
+  version "3.18.0"
+  resolved "https://registry.yarnpkg.com/schemastery/-/schemastery-3.18.0.tgz#ebece734439991e65063db3eb875b82ce8ea2229"
+  integrity sha512-Jw2uxjoyyqc/yeurmChUEc/jbi8GsrdXV/KmqRUDZXJAXAmrJiPsz8vKa17l/VckyzljHZ9oGaul443CQiXxtA==
   dependencies:
-    cosmokit "^1.6.2"
+    "@standard-schema/spec" "^1.1.0"
+    cosmokit "^1.8.1"
 
 seedrandom@^3.0.5:
   version "3.0.5"
