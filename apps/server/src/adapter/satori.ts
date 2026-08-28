@@ -47,10 +47,25 @@ export type ValidSession = Omit<Session, 'guildId' | 'channelId' | 'userId'>
   & Required<Pick<Session, 'guildId' | 'channelId' | 'userId'>>
 
 export function validSession(session: Session): ValidSession | undefined {
-  const requiredKeys = ['guildId', 'channelId', 'userId'] as const
-  for (const key of requiredKeys) {
-    if (typeof session[key] === 'undefined') {
-      console.warn(`[Session] invalid session, missing ${key}`)
+  if (typeof session.userId === 'undefined') {
+    console.warn('[Session] invalid session, missing userId')
+    return undefined
+  }
+
+  if (typeof session.guildId === 'undefined') {
+    if (session.isDirect) {
+      session.guildId = ''
+    } else {
+      console.warn('[Session] invalid session, missing guildId')
+      return undefined
+    }
+  }
+
+  if (typeof session.channelId === 'undefined') {
+    if (session.isDirect) {
+      session.channelId = ''
+    } else {
+      console.warn('[Session] invalid session, missing channelId')
       return undefined
     }
   }
