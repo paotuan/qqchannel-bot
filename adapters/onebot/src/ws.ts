@@ -88,7 +88,7 @@ export namespace WsServer {
 let counter = 0
 const listeners: Record<number, (response: Response) => void> = {}
 
-export function accept<C extends Context>(socket: Universal.WebSocket, bot: OneBotBot<C, OneBotBot.BaseConfig & SharedConfig>) {
+export function accept<C extends Context>(socket: Universal.WebSocket, bot: OneBotBot<C, OneBotBot.Config & SharedConfig>) {
   socket.addEventListener('message', (event) => {
     let parsed: any
     const data = event.data.toString()
