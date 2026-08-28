@@ -1,19 +1,19 @@
 import { Bot } from '../adapter/Bot'
 import type { ICommand, BotContext, UserRole } from '@paotuan/config'
-import { Session, Element } from '../adapter/satori'
+import { Element, ValidSession } from '../adapter/satori'
 import { ChannelUnionId, getChannelUnionId } from '../adapter/utils'
 import { ICard } from '@paotuan/card'
 import { MockSystemUserId } from '@paotuan/dicecore'
 
 export class UserCommand implements ICommand<BotContext> {
 
-  readonly session: Session
+  readonly session: ValidSession
   command: string
   private readonly substitute: BotContext['realUser'] | undefined
   private readonly bot: Bot
   [key: string | number | symbol]: unknown
 
-  private constructor(bot: Bot, session: Session, command: string, substitute: BotContext['realUser'] | undefined) {
+  private constructor(bot: Bot, session: ValidSession, command: string, substitute: BotContext['realUser'] | undefined) {
     this.session = session
     this.command = command
     this.substitute = substitute
@@ -108,9 +108,10 @@ export class UserCommand implements ICommand<BotContext> {
   //   return newCommand
   // }
 
-  static fromMessage(bot: Bot, session: Session) {
+  static fromMessage(bot: Bot, session: ValidSession) {
     try {
       // 无视非文本消息
+      if (!session.elements) throw new Error()
       const elements = Element.transform(session.elements, ({ type, attrs }) => {
         if (type === 'at') {
           return true
@@ -181,18 +182,20 @@ export class UserCommand implements ICommand<BotContext> {
     }
   }
 
-  static fromReaction(bot: Bot, session: Session) {
+  static fromReaction(bot: Bot, session: ValidSession) {
     return new UserCommand(bot, session, '', undefined)
   }
 }
 
 // 用户权限 id 适配
-// https://bot.q.qq.com/wiki/develop/nodesdk/model/role.html#DefaultRoleIDs
+// qq 频道使用数字：https://bot.q.qq.com/wiki/develop/nodesdk/model/role.html#DefaultRoleIDs
+// qq 群使用字符串：https://bot.q.qq.com/wiki/develop/api-v2/autogen/event/group_message_create.html#schema-user
 // todo kook 场景
-function convertRoleIds(ids: string[] = []): UserRole {
-  if (ids.includes('4')) {
+function convertRoleIds(roles: { id: string }[] = []): UserRole {
+  const ids = roles.map(role => role.id)
+  if (ids.includes('4') || ids.includes('owner')) {
     return 'admin'
-  } else if (ids.includes('2') || ids.includes('5')) {
+  } else if (ids.includes('2') || ids.includes('5') || ids.includes('admin')) {
     return 'manager'
   } else {
     return 'user'
@@ -200,7 +203,7 @@ function convertRoleIds(ids: string[] = []): UserRole {
 }
 
 // 根据人物卡名称，构造纯文本形式的代骰
-function querySubstituteFromCard(search: string, bot: Bot, session: Session) {
+function querySubstituteFromCard(search: string, bot: Bot, session: ValidSession) {
   const foundCard = _findUniqueCard(search, bot)
   if (!foundCard) return undefined
   // 如果 card 已关联了某个玩家，则优先视为为这个玩家代骰。与非纯文本代骰的逻辑保持一致
@@ -229,7 +232,7 @@ function _findUniqueCard(search: string, bot: Bot) {
 }
 
 // 根据人物卡反查是否有关联的玩家
-function _findLinkedUserOfCard(card: ICard, bot: Bot, session: Session, channelUnionId: ChannelUnionId) {
+function _findLinkedUserOfCard(card: ICard, bot: Bot, session: ValidSession, channelUnionId: ChannelUnionId) {
   // userId -> cardId
   const linkedMap = bot.wss.cards.getLinkMap(channelUnionId)
   let userId: string | undefined
@@ -247,7 +250,7 @@ function _findLinkedUserOfCard(card: ICard, bot: Bot, session: Session, channelU
 }
 
 // 搜索是否有唯一匹配的用户名
-function _findUniqueUser(search: string, bot: Bot, session: Session) {
+function _findUniqueUser(search: string, bot: Bot, session: ValidSession) {
   // search 外部已经 toLowerCase
   const users = bot.guilds.queryIUser({ name: search }, session.guildId)
   if (users.length === 0) return undefined // 没有对应名字的 user

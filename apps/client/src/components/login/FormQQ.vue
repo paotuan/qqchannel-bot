@@ -8,12 +8,6 @@
     </div>
     <div class="form-control w-80">
       <label class="label">
-        <span class="label-text font-bold">Token（机器人令牌）</span>
-      </label>
-      <input v-model="model.token" type="password" placeholder="Type here" class="input input-bordered w-80" />
-    </div>
-    <div class="form-control w-80">
-      <label class="label">
         <span class="label-text font-bold">AppSecret（机器人密钥）</span>
       </label>
       <input v-model="model.secret" type="password" placeholder="Type here" class="input input-bordered w-80" />

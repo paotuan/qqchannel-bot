@@ -1,6 +1,6 @@
 import { Guild, IUserQuery } from './Guild'
 import type { Bot } from '../adapter/Bot'
-import { Universal } from '../adapter/satori'
+import { Universal, validSession } from '../adapter/satori'
 import { Channel } from './Channel'
 import { User } from './User'
 import type { IChannelListResp, IGuild } from '@paotuan/types'
@@ -192,9 +192,21 @@ export class GuildManager {
   private initEventListeners() {
     // todo guild 和 channel 变动事件，satori 不全，而且使用场景少，暂不处理。目前也可以通过发消息进行更新
     // 监听成员变动事件
-    this.bot.on('guild-member-added', session => this.addOrUpdateUser(session.author, session.guildId))
-    this.bot.on('guild-member-updated', session => this.addOrUpdateUser(session.author, session.guildId))
-    this.bot.on('guild-member-removed', session => this.deleteUser(session.userId, session.guildId))
+    this.bot.on('guild-member-added', _session => {
+      const session = validSession(_session)
+      if (!session) return
+      this.addOrUpdateUser(session.author, session.guildId)
+    })
+    this.bot.on('guild-member-updated', _session => {
+      const session = validSession(_session)
+      if (!session) return
+      this.addOrUpdateUser(session.author, session.guildId)
+    })
+    this.bot.on('guild-member-removed', _session => {
+      const session = validSession(_session)
+      if (!session) return
+      this.deleteUser(session.userId, session.guildId)
+    })
   }
 
   // channel list 更新通知客户端

@@ -41,3 +41,19 @@ export {
   Session,
   Element
 }
+
+// satorijs/core 新版本将这些字段标记为可选，需要额外做个过滤，确保这些字段真实存在
+export type ValidSession = Omit<Session, 'guildId' | 'channelId' | 'userId'>
+  & Required<Pick<Session, 'guildId' | 'channelId' | 'userId'>>
+
+export function validSession(session: Session): ValidSession | undefined {
+  const requiredKeys = ['guildId', 'channelId', 'userId'] as const
+  for (const key of requiredKeys) {
+    if (typeof session[key] === 'undefined') {
+      console.warn(`[Session] invalid session, missing ${key}`)
+      return undefined
+    }
+  }
+
+  return session as ValidSession
+}

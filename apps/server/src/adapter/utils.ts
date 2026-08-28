@@ -75,12 +75,18 @@ export function adapterConfig(config: IBotConfig) {
   }
 }
 
+// ws 连接公共配置, see node_modules/@satorijs/core/lib/index.mjs
+const _commonWsClientConfig = Object.freeze({
+  retryTimes: 6,
+  retryInterval: 5 * 1e3,
+  retryLazy: 1e3 * 60
+})
+
 function adapterQQGuild(config: IBotConfig_QQ): QQBot.Config {
   const type = config.type ?? 'private'
   return {
     id: config.appid,
     secret: config.secret,
-    token: config.token,
     type,
     sandbox: config.sandbox ?? false,
     intents: QQ.Intents.GUILDS
@@ -93,7 +99,10 @@ function adapterQQGuild(config: IBotConfig_QQ): QQBot.Config {
     gatewayUrl: config.wsProxy,
     path: config.path!, // webhook 下 path 必定存在
     retryWhen: [],
-    manualAcknowledge: false
+    manualAcknowledge: false,
+    uploadThreshold: 3 * 1000 * 1000,
+    markdownVerifyImage: false,
+    ..._commonWsClientConfig
   }
 }
 
@@ -101,7 +110,6 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
   return {
     id: config.appid,
     secret: config.secret,
-    token: config.token,
     type: config.type ?? 'private',
     sandbox: config.sandbox ?? false,
     intents: QQ.Intents.USER_MESSAGE,
@@ -110,21 +118,26 @@ function adapterQQ(config: IBotConfig_QQ): QQBot.Config {
     gatewayUrl: config.wsProxy,
     path: config.path!, // webhook 下 path 必定存在
     retryWhen: [],
-    manualAcknowledge: false
+    manualAcknowledge: false,
+    uploadThreshold: 3 * 1000 * 1000,
+    markdownVerifyImage: false,
+    ..._commonWsClientConfig
   }
 }
 
 function adapterKook(config: IBotConfig_Kook): KookBot.Config {
   return {
     protocol: 'ws',
-    token: config.token
+    token: config.token,
+    ..._commonWsClientConfig
   }
 }
 
 function adapterSatori(config: IBotConfig_Satori): SatoriAdapter.Config {
   return {
     endpoint: config.endpoint,
-    token: config.token
+    token: config.token,
+    ..._commonWsClientConfig
   }
 }
 
@@ -136,7 +149,8 @@ function adapterOnebot(config: IBotConfig_OneBot): OneBotBot.Config {
       protocol: 'ws',
       selfId: config.appid,
       endpoint: config.endpoint,
-      token: config.token
+      token: config.token,
+      ..._commonWsClientConfig
     }
   case 'ws-reverse':
     return {
@@ -153,7 +167,8 @@ function adapterDiscord(config: IBotConfig_Discord): DiscordBot.Config {
   return {
     type: 'bot',
     token: config.token,
-    endpoint: config.endpoint
+    endpoint: config.endpoint,
+    ..._commonWsClientConfig
   }
 }
 

@@ -111,7 +111,7 @@ export const useBotStore = defineStore('bot', () => {
     switch (form.platform) {
     case 'qqguild':
     case 'qq': {
-      if (!form.appid || !form.secret || !form.token) return false
+      if (!form.appid || !form.secret) return false
       if (form.protocol === 'websocket') {
         return {
           ...form,

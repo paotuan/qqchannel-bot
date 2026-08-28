@@ -2,7 +2,6 @@ export interface IBotConfig_QQ {
   platform: 'qqguild' | 'qq'
   appid: string
   secret: string
-  token: string
   sandbox?: boolean
   type?: 'public' | 'private'
   // 可用于代理 api

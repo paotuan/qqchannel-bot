@@ -1,7 +1,7 @@
 import type { BotContext, ICommand } from '@paotuan/config'
 import type { ILogPushResp, ILog } from '@paotuan/types'
 import { Bot } from '../adapter/Bot'
-import { Session, Element } from '../adapter/satori'
+import { Element, ValidSession } from '../adapter/satori'
 import { getChannelUnionId } from '../adapter/utils'
 import { LogBackground } from './logBackground'
 
@@ -19,7 +19,8 @@ export class LogManager {
     return this.bot.platform
   }
 
-  onReceivedMessage(session: Session) {
+  onReceivedMessage(session: ValidSession) {
+    if (!session.elements || !session.messageId) return
     this.convertElementsToLogs(session.elements, session.messageId, session.userId, session.author.name ?? session.userId, String(session.timestamp), session.channelId, session.guildId)
   }
 

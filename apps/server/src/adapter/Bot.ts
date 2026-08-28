@@ -1,6 +1,6 @@
 import type { IBotConfig, IBotInfo, IMessage } from '@paotuan/types'
 import type { Platform } from '@paotuan/config'
-import { Context, Events, ForkScope, SatoriApi } from './satori'
+import { Context, Events, ForkScope, SatoriApi, validSession } from './satori'
 import { adapterConfig, adapterPlugin, asServerConfig, getBotId } from './utils'
 import { isEqual } from 'lodash'
 import type { Wss } from '../app/wss'
@@ -60,7 +60,9 @@ export class Bot {
     this.commandHandler = new CommandHandler(this)
 
     // 初始化串行监听器
-    this.on('message', async session => {
+    this.on('message', async _session => {
+      const session = validSession(_session)
+      if (!session) return
       // 部分平台 如 kook 机器人可以收到自己的信息，此时对它们进行一个过滤
       if (session.userId === this.botInfo?.id) return
       // 区分私信场景
@@ -106,7 +108,9 @@ export class Bot {
       }
     })
 
-    this.on('reaction-added', async session => {
+    this.on('reaction-added', async _session => {
+      const session = validSession(_session)
+      if (!session) return
       if (this.isListening(session.channelId, session.guildId)) {
         const userCommand = UserCommand.fromReaction(this, session)
         await this.commandHandler.handleReaction(userCommand)
@@ -121,7 +125,7 @@ export class Bot {
       if (platform === 'satori') {
         // 参照 koishi 的实现，排除 sandbox（无法收发消息）取第一个（koishi 实现的 satori bot.platform !== 'satori'，而是根据实际登录的平台而定）
         // 我们暂不考虑同时登录多个 bot 的情况，对现有架构冲击较大
-        return this.context.bots.find(bot => !bot.platform.startsWith('sandbox:'))
+        return this.context.bots.find(bot => bot.platform && !bot.platform.startsWith('sandbox:'))
       }
 
       // onebot 适配器，虽然 bot 是同步创建的，但是内部的 api （ws 模式）是收到连接后再异步创建
