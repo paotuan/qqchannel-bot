@@ -11,7 +11,6 @@ export class Channel {
   name: string
   type: Universal.Channel.Type
 
-  lastSession?: Session // 子频道最新一条消息
   private readonly bot: Bot
 
   constructor(bot: Bot, id: string, guildId: string, name: string | undefined, type: Universal.Channel.Type) {
@@ -27,10 +26,6 @@ export class Channel {
     // 防止参数错误
     if (!(session instanceof Session)) {
       session = undefined
-    }
-    // 如没有指定发某条被动消息，则尝试尽量发被动
-    if (!session) {
-      session = this.getLastSessionForReply()
     }
     // 如果发送文字消息，则对文字消息做 trim。因为 qq 除 android 端都会自动 trim，为了保证结果在各个平台展示的一致性，此处先统一做 trim
     // 同时人肉对 \b 做下处理，支持退格，以应对自定义回复拼接时用户需要自定义的极端情况
@@ -60,10 +55,9 @@ export class Channel {
   }
 
   async sendRawImageMessage(imgData: string, recordLog = true) {
-    const session = this.getLastSessionForReply()
     const content = `<img src="${imgData}"/>`
     try {
-      const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session })
+      const res = await this.bot.api.sendMessage(this.id, content, this.guildId)
       const messageId = res.at(-1)
       if (messageId) {
         console.log('[Message] 发送本地图片成功')
@@ -85,20 +79,6 @@ export class Channel {
   private async sendLogAsync(msgId: string, content: string) {
     if (content) {
       this.bot.logs.onPushMessage(this.guildId, this.id, msgId, content)
-    }
-  }
-
-  // 获取可用于回复的被动消息 id
-  private getLastSessionForReply() {
-    const lastMsgTime = this.lastSession?.timestamp ? new Date(this.lastSession.timestamp).getTime() : 0
-    const currentTime = new Date().getTime()
-    // 判断有没有超过被动消息有效期
-    if (currentTime - lastMsgTime <= 5 * 60 * 1000 - 2000) {
-      console.log('[Message] 命中被动消息缓存')
-      return this.lastSession
-    } else {
-      this.lastSession = undefined
-      return undefined
     }
   }
 }

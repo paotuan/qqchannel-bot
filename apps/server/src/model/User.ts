@@ -7,7 +7,6 @@ export class User implements IUser {
 
   readonly guildId: string
 
-  lastSession?: Session // 私信最新一条消息
   private readonly _bot: Bot
 
   // 如果是 temp，代表 plain object
@@ -58,19 +57,11 @@ export class User implements IUser {
       session = undefined
     }
     const platform = this._bot.platform
-    if (platform === 'qqguild') {
-      // 如没有指定发某条被动消息，则尝试尽量发被动
-      if (!session) {
-        session = this.getLastSessionForReply()
-      }
-    } else if (platform === 'qq') {
+    if (platform === 'qq') {
       // qq 群场景，私信需要被动，但不能用群的消息 id，因此 session 非私信（暗骰）场景需要丢弃
       if (!(session instanceof Session && session.isDirect)) {
-        session = this.getLastSessionForReply()
-        // satori bug, qq 私信不传 session 判断 direct 出错
-        if (!session) {
-          session = this._bot.api.session({ channel: { id: this.id, type: Universal.Channel.Type.DIRECT } })
-        }
+        // satori bug, qq 私信不传 session 判断 direct 出错，必须指定 type 为 direct
+        session = this._bot.api.session({ channel: { id: this.id, type: Universal.Channel.Type.DIRECT } })
       }
     } else {
       // kook 的实现，从 channel 发私信会导致 channelId 优先于私信 chat_code, 导致消息被发送到 channel 中
@@ -91,20 +82,6 @@ export class User implements IUser {
     } catch (e) {
       console.error('[Message] 私信消息发送失败', e)
       return null
-    }
-  }
-
-  // 获取可用于回复的被动消息 id
-  private getLastSessionForReply() {
-    const lastMsgTime = this.lastSession?.timestamp ? new Date(this.lastSession.timestamp).getTime() : 0
-    const currentTime = new Date().getTime()
-    // 判断有没有超过被动消息有效期
-    if (currentTime - lastMsgTime <= 5 * 60 * 1000 - 2000) {
-      console.log('[Message] 命中被动消息缓存')
-      return this.lastSession
-    } else {
-      this.lastSession = undefined
-      return undefined
     }
   }
 

@@ -78,30 +78,12 @@ export class Bot {
           // 记录 log
           this.logs.onReceivedMessage(session)
 
-          if (this.platform === 'qqguild' || this.platform === 'qq') {
-            // 最近一条消息缓存到 channel 对象中
-            const channel = this.guilds.findChannel(session.channelId, session.guildId)
-            channel && (channel.lastSession = session)
-          }
-
           // 统一对消息进行 parse，判断是否是需要处理的指令
           const userCommand = UserCommand.fromMessage(this, session)
           if (!userCommand) return
           await this.commandHandler.handleCommand(userCommand)
         }
       } else {
-        if (this.platform === 'qqguild') {
-          // 最近一条消息缓存到 user 对象中
-          const srcGuildId = session.guildId.split('_')[0]
-          const user = this.guilds.findUser(session.userId, srcGuildId)
-          user.lastSession = session
-        } else if (this.platform === 'qq') {
-          // qq 私聊需要 session，但私聊不与 guild 挂钩，且用户 openId 在同一个机器人下唯一
-          // 因此根据 openId 找一下这个 user 并缓存 session，供后续暗骰等场景使用
-          const users = this.guilds.findUserInAllGuilds(session.userId)
-          users.forEach(user => (user.lastSession = session))
-        }
-
         const userCommand = UserCommand.fromMessage(this, session)
         if (!userCommand) return
         await this.commandHandler.handleCommand(userCommand)
