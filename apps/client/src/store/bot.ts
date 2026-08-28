@@ -40,7 +40,7 @@ export const useBotStore = defineStore('bot', () => {
   const tab = ref<LoginTab>(_tab)
 
   const formQQ = ref<Required<IBotConfig_QQ>>(merge({
-    platform: 'qqguild',
+    platform: 'qq',
     appid: '',
     secret: '',
     token: '',
@@ -115,6 +115,7 @@ export const useBotStore = defineStore('bot', () => {
       if (form.protocol === 'websocket') {
         return {
           ...form,
+          sandbox: false, // 不再暴露沙箱环境设置，固定为 false
           endpoint: form.endpoint || undefined,
           wsProxy: form.wsProxy || undefined,
           path: undefined,

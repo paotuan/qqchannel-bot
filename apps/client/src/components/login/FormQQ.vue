@@ -15,31 +15,31 @@
     <div class="flex gap-8 mt-2">
       <div class="form-control">
         <label class="label cursor-pointer">
-          <span class="label-text mr-2">QQ 频道</span>
-          <input type="radio" class="radio" :checked="model.platform === 'qqguild'" @click="model.platform = 'qqguild'" />
-        </label>
-      </div>
-      <div class="form-control">
-        <label class="label cursor-pointer">
           <span class="label-text mr-2">QQ 群</span>
           <input type="radio" class="radio" :checked="model.platform === 'qq'" @click="model.platform = 'qq'" />
         </label>
       </div>
-    </div>
-    <div class="flex gap-8 mt-2">
       <div class="form-control">
         <label class="label cursor-pointer">
-          <span class="label-text mr-2">正式环境</span>
-          <input type="radio" class="radio" :checked="!model.sandbox" @click="model.sandbox = false" />
-        </label>
-      </div>
-      <div class="form-control">
-        <label class="label cursor-pointer">
-          <span class="label-text mr-2">沙箱环境</span>
-          <input type="radio" class="radio" :checked="model.sandbox" @click="model.sandbox = true" />
+          <span class="label-text mr-2">QQ 频道</span>
+          <input type="radio" class="radio" :checked="model.platform === 'qqguild'" @click="model.platform = 'qqguild'" />
         </label>
       </div>
     </div>
+<!--    <div class="flex gap-8 mt-2">-->
+<!--      <div class="form-control">-->
+<!--        <label class="label cursor-pointer">-->
+<!--          <span class="label-text mr-2">正式环境</span>-->
+<!--          <input type="radio" class="radio" :checked="!model.sandbox" @click="model.sandbox = false" />-->
+<!--        </label>-->
+<!--      </div>-->
+<!--      <div class="form-control">-->
+<!--        <label class="label cursor-pointer">-->
+<!--          <span class="label-text mr-2">沙箱环境</span>-->
+<!--          <input type="radio" class="radio" :checked="model.sandbox" @click="model.sandbox = true" />-->
+<!--        </label>-->
+<!--      </div>-->
+<!--    </div>-->
     <button class="btn btn-link px-1" @click="advancedSettingsVisible = true">更多设置</button>
     <d-modal v-model:visible="advancedSettingsVisible" title="更多设置">
 <!--      <div class="form-control">-->
