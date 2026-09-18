@@ -55,10 +55,10 @@ export class CommandHandler {
           return [true, payload]
         }
         // .nick 特殊指令处理
-        const [handled2, payload2] = this.bot.nickHandler.handleManualSetNickCommand(c as ICommand<BotContext>)
-        if (handled2) {
-          return [true, payload2]
-        }
+        // const [handled2, payload2] = this.bot.nickHandler.handleManualSetNickCommand(c as ICommand<BotContext>)
+        // if (handled2) {
+        //   return [true, payload2]
+        // }
         return [false, undefined]
       },
     })

@@ -10,9 +10,9 @@
         </div>
       </div>
       <div class="flex-1 truncate">{{ user.name }}</div>
-      <button class="btn btn-circle btn-ghost btn-xs" @click.stop="toEdit">
-        <PencilSquareIcon class="size-4 flex-none" />
-      </button>
+<!--      <button class="btn btn-circle btn-ghost btn-xs" @click.stop="toEdit">-->
+<!--        <PencilSquareIcon class="size-4 flex-none" />-->
+<!--      </button>-->
     </a>
   </template>
 </template>

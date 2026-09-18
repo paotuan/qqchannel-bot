@@ -27,7 +27,7 @@
             <div v-if="channelStore.guildList.length === 0" class="w-96">
               <!-- qq 群特殊提示 -->
               <template v-if="botStore.platform === 'qq'">
-                <div class="font-bold my-4">请在群内 @ 机器人，以获取本群的 OpenID</div>
+                <div class="font-bold my-4">请在群内发送一条消息，以获取本群的 OpenID</div>
                 <div v-if="qqLastGroupTempChannel" class="mb-8">
                   <div class="mb-2">上次使用：</div>
                   <ChannelLabel :channel="qqLastGroupTempChannel" :checked="true" />
