@@ -1,9 +1,7 @@
 <template>
   <div v-if="bot.info" class="flex items-center gap-2 mr-2">
     <div class="max-w-60 line-clamp-2 break-all">{{ bot.info.username }}
-      <template v-if="channel.selectedChannel">
-        @{{ channel.selectedChannel.guildName }}-{{ channel.selectedChannel.name }}
-      </template>
+      <template v-if="channel.selectedChannel">@{{ guildOrChannelName }}</template>
     </div>
     <div class="tooltip tooltip-left" :class="tooltipBg" :data-tip="statusText">
       <div class="avatar indicator">
@@ -24,6 +22,16 @@ import { computed } from 'vue'
 const bot = useBotStore()
 const channel = useChannelStore()
 const ui = useUIStore()
+
+const guildOrChannelName = computed(() => {
+  const guildName = channel.selectedChannel?.guildName
+  const channelName = channel.selectedChannel?.name
+  if (guildName === channelName) {
+    return guildName
+  } else {
+    return `${guildName}-${channelName}`
+  }
+})
 
 const alertType = computed(() => {
   if (!channel.selectedChannel) {

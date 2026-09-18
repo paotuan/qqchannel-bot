@@ -87,6 +87,25 @@ export class GuildManager {
       // 现在 satori 类型适配不全。如果能收到消息说明总归是 valid 的类型，兜底按文字子频道处理也没什么问题
       const type = Channel.VALID_TYPES.includes(_channel.type) ? _channel.type : Universal.Channel.Type.TEXT
       guild.addChannel({ id: channelId, name: _channel.name ?? channelId, type })
+      // 额外获取 qq 群名称
+      this.fillQQGroupNameIfNeed(_guild, _channel)
+    }
+  }
+
+  // qq 群消息不会携带群名字，需要调额外接口获取名字
+  private fillQQGroupNameIfNeed(_guild: Universal.Guild, _channel: Universal.Channel) {
+    if (this.bot.platform === 'qq' && (!_guild.name || !_channel.name)) {
+      this.bot.api.getGuild(_guild.id).then(guildResp => {
+        const name = guildResp.name
+        console.log('[GuildManager]获取 QQ 群名称：', name)
+        if (name) {
+          const guild = this.guildsMap[_guild.id]
+          const channel = guild?.findChannel(_channel.id)
+          guild && (guild.name = name)
+          channel && (channel.name = name)
+          this.notifyChannelListChange()
+        }
+      })
     }
   }
 
