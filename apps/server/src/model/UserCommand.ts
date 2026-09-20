@@ -76,6 +76,16 @@ export class UserCommand implements ICommand<BotContext> {
     return session.channelId
   }
 
+  private get replyMsgId() {
+    const session = this.session
+    // qq 群目前无法拿到引用消息的原始 msgId，只能拿到消息内容，因此拿消息内容作为唯一标识
+    if (this.platform === 'qq') {
+      return session.event.message?.quote?.elements?.[0]?.attrs?.content
+    } else {
+      return session.event.message?.quote?.id
+    }
+  }
+
   get context(): ICommand<BotContext>['context'] {
     const session = this.session
     const substitute = this.substitute
@@ -93,7 +103,7 @@ export class UserCommand implements ICommand<BotContext> {
       // 使用 ICommand 接口时便可通过是否含有 channelUnionId 区分是否为私信场景
       // 如果后续有对私信场景做比较重的处理，可以再考虑设计私信场景 id 的组装方式
       channelUnionId: session.isDirect ? '' : getChannelUnionId(this.platform, this.guildId, this.channelId),
-      replyMsgId: session.event.message?.quote?.id,
+      replyMsgId: this.replyMsgId,
       isDirect: session.isDirect,
       realUser
     }

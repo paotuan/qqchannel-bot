@@ -142,7 +142,10 @@ export class CommandHandler {
           const replyMsg = await this.sendMessage(userCommand, roll.output)
           // 如果是可供对抗的投骰，记录下缓存
           if (replyMsg && roll instanceof StandardDiceRoll && roll.eligibleForOpposedRoll) {
-            this.opposedRollCache.set(replyMsg.id, roll)
+            // qq 群引用消息时无法拿到原始消息 id，此处只能拿消息内容作为索引，见 UserCommand#replyMsgId
+            // 风险是两条内容完全相同的消息，后一条会覆盖前一条，但概率小，发生了也没办法
+            const replyMsgId = userCommand.context.platform === 'qq' ? replyMsg.content : replyMsg.id
+            this.opposedRollCache.set(replyMsgId, roll)
           }
         }
         msgSent = true
