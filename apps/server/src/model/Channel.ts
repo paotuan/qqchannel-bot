@@ -32,6 +32,13 @@ export class Channel {
     if (content) {
       content = removeBackspaces(content.trim())
     }
+
+    // qq 群，必须通过 markdown 才能实现 at
+    // content 如果放在 qq:markdown 内部，可正常发送，但 log 解析时会把内容丢弃，所以把 content 拼在后面发送
+    if (this.bot.platform === 'qq' && content.includes('<at id=')) {
+      content = `<qq:markdown></qq:markdown>${content}`
+    }
+
     try {
       // console.time('message')
       const res = await this.bot.api.sendMessage(this.id, content, this.guildId, { session: session as Session | undefined })

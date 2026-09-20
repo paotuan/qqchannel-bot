@@ -487,6 +487,8 @@ export class QQMessageEncoder<C extends Context = Context> extends MessageEncode
     if (type === 'text') {
       this.content += this.useMarkdown && !this.inMarkdown
         ? escapeMarkdown(attrs.content) : attrs.content
+    } else if (type === 'at' && attrs.id) {
+      this.content += `<qqbot-at-user id="${h.escape(attrs.id)}" />`
     } else if (type === 'passive') {
       if (attrs.messageId) this.passiveId = attrs.messageId
       if (attrs.seq) this.passiveSeq = Number(attrs.seq)
